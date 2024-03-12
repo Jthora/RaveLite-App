@@ -68,6 +68,11 @@ You've successfully run and modified your React Native App. :partying_face:
 
 If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
 
+```bash
+# For fixing problems
+npx react-native doctor
+```
+
 # Learn More
 
 To learn more about React Native, take a look at the following resources:
