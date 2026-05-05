@@ -1,22 +1,28 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {ScreenScaffold} from '../components/ScreenScaffold';
+import {ELEMENTS} from '../theme/elements';
+import {loadPlan} from '../domain/reminders/repository';
+import {nextFireForElement} from '../domain/reminders/nextFire';
+import {ElementSubPages} from './shared/ElementSubPages';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-  },
-});
+interface Props {
+  subTab: string;
+  onSubTabChange: (slug: string) => void;
+}
 
-const FireScreen: React.FC = () => {
+const FireScreen: React.FC<Props> = ({subTab, onSubTabChange}) => {
+  const next = nextFireForElement(loadPlan(), 'fire');
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Fire Screen</Text>
-    </View>
+    <ScreenScaffold
+      element={ELEMENTS.fire}
+      nextFireTs={next?.ts}
+      everyMinutes={next?.everyMinutes}>
+      <ElementSubPages
+        element={ELEMENTS.fire}
+        subTab={subTab}
+        onSubTabChange={onSubTabChange}
+      />
+    </ScreenScaffold>
   );
 };
 

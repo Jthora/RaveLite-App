@@ -1,6 +1,19 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required on Android 13+ to display notifications. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Allows phone-style vibration patterns for reminders. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Slice 5 — Notifee foreground service.
+         FOREGROUND_SERVICE itself is brought in by Notifee's own
+         manifest, but on API 34+ we must opt into a *type*. We use
+         `specialUse` because the ambient always-on screen does not
+         match dataSync/health/location/etc. The `health` type would
+         require sensor/health runtime permissions we don't use and
+         crashes on Android 14 devices (e.g. Redmi A3) at FGS start. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
       android:name=".MainApplication"
@@ -21,5 +34,17 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+
+      <!-- API 34+ requires a foregroundServiceType on the FGS. We
+           override Notifee's bundled <service> declaration to add it. -->
+      <service
+        android:name="app.notifee.core.ForegroundService"
+        android:foregroundServiceType="specialUse"
+        android:exported="false"
+        tools:replace="android:exported">
+        <property
+          android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+          android:value="ambient_always_on_training_screen" />
+      </service>
     </application>
 </manifest>

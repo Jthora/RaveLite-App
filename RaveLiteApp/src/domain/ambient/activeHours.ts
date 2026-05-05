@@ -1,0 +1,166 @@
+import {store} from '../../storage';
+import {KEYS} from '../../storage/keys';
+import {ActiveHours, DEFAULT_ACTIVE_HOURS} from './types';
+
+/**
+ * Active-hours predicate + storage helpers.
+ *
+ * Pure logic for: "given this `ActiveHours` config and this instant,
+ * is the surface allowed to actively page the operator right now?"
+ *
+ * See `docs/always-on-screen/initial-development/01-requirements/active-hours.md`.
+ */
+
+const HHMM_RE = /^(\d{2}):(\d{2})$/;
+
+/** Parse "HH:MM" into minutes-since-midnight. Throws if malformed. */
+function parseHHMM(value: string): number {
+  const m = HHMM_RE.exec(value);
+  if (!m) {
+    throw new Error(`Invalid HH:MM string: ${value}`);
+  }
+  const hours = Number(m[1]);
+  const minutes = Number(m[2]);
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+    throw new Error(`Out-of-range HH:MM: ${value}`);
+  }
+  return hours * 60 + minutes;
+}
+
+/**
+ * Convert a `Date` to "minutes since local midnight" using the host
+ * timezone. The active-hours config is operator-local by definition.
+ */
+function localMinutesOfDay(d: Date): number {
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+/**
+ * 0 = Monday ... 6 = Sunday. Aligns with `ActiveHours.daysMask` bit
+ * order (bit 0 = Monday).
+ */
+function localDayOfWeekMonFirst(d: Date): number {
+  // JS getDay(): 0 = Sunday ... 6 = Saturday. Shift to Mon-first.
+  const sundayFirst = d.getDay();
+  return (sundayFirst + 6) % 7;
+}
+
+/** Whether the day-of-week of `d` is enabled in the mask. */
+function dayEnabled(d: Date, daysMask: number): boolean {
+  const dow = localDayOfWeekMonFirst(d);
+  return (daysMask & (1 << dow)) !== 0;
+}
+
+/**
+ * Whether `now` falls inside the operator's active-hours window.
+ *
+ * Handles three cases:
+ * - Forward window (start < end), e.g. 09:00–23:00 — same calendar day.
+ * - Wrapped window (start > end), e.g. 22:00–02:00 — spans midnight.
+ *   The `daysMask` is checked against the *start* of the window, not
+ *   the moment `now` sits in. Practically: a wrapped window enabled
+ *   for Monday includes Mon-22:00 through Tue-02:00.
+ * - Identity window (start == end) — degenerate; always inactive.
+ *
+ * Returns `false` if the day-of-week is masked off.
+ */
+export function withinActiveHours(now: Date, config: ActiveHours): boolean {
+  if (config.daysMask === 0) {
+    return false;
+  }
+  const startMin = parseHHMM(config.start);
+  const endMin = parseHHMM(config.end);
+  const nowMin = localMinutesOfDay(now);
+
+  if (startMin === endMin) {
+    return false;
+  }
+
+  if (startMin < endMin) {
+    // Forward window — single calendar day.
+    return dayEnabled(now, config.daysMask)
+      && nowMin >= startMin
+      && nowMin < endMin;
+  }
+
+  // Wrapped window — spans midnight. We're inside if either:
+  //   (a) now is at-or-after start, on a day enabled by the mask, OR
+  //   (b) now is before end, on a day whose *previous* day is enabled.
+  if (nowMin >= startMin) {
+    return dayEnabled(now, config.daysMask);
+  }
+  if (nowMin < endMin) {
+    const yesterday = new Date(now.getTime());
+    yesterday.setDate(yesterday.getDate() - 1);
+    return dayEnabled(yesterday, config.daysMask);
+  }
+  return false;
+}
+
+/** Read the operator's active-hours config; default if unset/invalid. */
+export function getActiveHours(): ActiveHours {
+  const raw = store.getString(KEYS.activeHours);
+  if (!raw) {
+    return DEFAULT_ACTIVE_HOURS;
+  }
+  try {
+    const parsed = JSON.parse(raw) as ActiveHours;
+    // Validate the shape; on any failure, fall back to default.
+    parseHHMM(parsed.start);
+    parseHHMM(parsed.end);
+    if (typeof parsed.daysMask !== 'number') {
+      return DEFAULT_ACTIVE_HOURS;
+    }
+    return parsed;
+  } catch {
+    return DEFAULT_ACTIVE_HOURS;
+  }
+}
+
+/** Persist the operator's active-hours config. Validates before write. */
+export function setActiveHours(next: ActiveHours): void {
+  parseHHMM(next.start);
+  parseHHMM(next.end);
+  if (typeof next.daysMask !== 'number') {
+    throw new Error('daysMask must be a number');
+  }
+  store.set(KEYS.activeHours, JSON.stringify(next));
+}
+
+/**
+ * Whether the operator currently has a manual pause in effect.
+ * Auto-clears expired pauses as a side effect.
+ */
+export function isManuallyPaused(now: Date = new Date()): boolean {
+  const raw = store.getString(KEYS.manualPauseUntil);
+  if (!raw) {
+    return false;
+  }
+  const until = Number(raw);
+  if (!Number.isFinite(until)) {
+    store.delete(KEYS.manualPauseUntil);
+    return false;
+  }
+  if (until <= now.getTime()) {
+    store.delete(KEYS.manualPauseUntil);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * High-level decision: is the surface allowed to page right now?
+ * Returns the suppression reason if not, or `null` if it may page.
+ */
+export function pagingAllowedAt(
+  now: Date = new Date(),
+  config: ActiveHours = getActiveHours(),
+): null | 'outside-active-hours' | 'manual-pause' {
+  if (isManuallyPaused(now)) {
+    return 'manual-pause';
+  }
+  if (!withinActiveHours(now, config)) {
+    return 'outside-active-hours';
+  }
+  return null;
+}

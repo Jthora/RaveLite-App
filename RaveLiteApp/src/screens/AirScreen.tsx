@@ -1,22 +1,28 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {ScreenScaffold} from '../components/ScreenScaffold';
+import {ELEMENTS} from '../theme/elements';
+import {loadPlan} from '../domain/reminders/repository';
+import {nextFireForElement} from '../domain/reminders/nextFire';
+import {ElementSubPages} from './shared/ElementSubPages';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-  },
-});
+interface Props {
+  subTab: string;
+  onSubTabChange: (slug: string) => void;
+}
 
-const AirScreen: React.FC = () => {
+const AirScreen: React.FC<Props> = ({subTab, onSubTabChange}) => {
+  const next = nextFireForElement(loadPlan(), 'air');
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Air Screen</Text>
-    </View>
+    <ScreenScaffold
+      element={ELEMENTS.air}
+      nextFireTs={next?.ts}
+      everyMinutes={next?.everyMinutes}>
+      <ElementSubPages
+        element={ELEMENTS.air}
+        subTab={subTab}
+        onSubTabChange={onSubTabChange}
+      />
+    </ScreenScaffold>
   );
 };
 

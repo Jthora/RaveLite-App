@@ -1,6 +1,44 @@
 # RaveLite
 
-RaveLite is a mobile app built using React Native for both iOS and Android platforms. It serves as a rave tool for analog communication and cool visualizations, enhancing the overall experience for partygoers.
+RaveLite is an Android mobile app built using React Native. It is a personal training + rave-companion tool — fitness reminders, posture-correction drills, flow-arts practice, and music attunement, organized around the five classical elements. iOS support is deferred; the `ios/` folder is preserved but not currently built.
+
+> **Target devices:** Samsung Galaxy A7 Tablet, Redmi A3 phone (Android only).
+
+## Why RaveLite exists
+
+RaveLite is **not** a fitness app, a habit tracker, or a notification
+scheduler. Those are surface mechanics. The intent is older and more
+specific:
+
+> **A ritual companion for the raver as urban shaman — a five-element
+> altar that lives in the pocket and reclaims a desk-broken body for
+> ecstatic practice.**
+
+Three working principles follow from that, and every design decision in
+this repo should be checked against them:
+
+1. **The body is the instrument.** Posture correction (UCS, APT,
+   chronic abdominal gripping), PFT preparation, and staff/sword flow
+   arts are in service of being a sharper somatic instrument for raving,
+   music, and presence. Fitness is means, not end. Ecstatic embodiment
+   is the end.
+2. **The five elements are a felt vocabulary, not a theme skin.**
+   Upper-body openness lives in **Air**. Pelvic rooting lives in
+   **Earth**. Releasing chronic gripping lives in **Water**. Capacity
+   and output live in **Fire**. **Heart** conducts. Naming the work in
+   element-language teaches the body to *know* what it is doing before
+   the mind reads the screen.
+3. **Reminders are invocations, not nags.** A pulse every 30 minutes
+   that says "Air" is a temporal anchor calling the body back into
+   practice — closer to a temple bell or a metronome than to a Slack
+   ping. Vibration patterns are *element-specific*: the body learns to
+   recognize the call without looking.
+
+When in doubt: choose the option that feels more like a rite and less
+like a productivity tool. Choose felt-sense (color, glyph, haptic)
+before text. Choose continuous presence (foreground keep-awake, ambient
+pulse) over transactional taps. Choose ceremonial language ("ignite",
+"root", "flow", "seal") over generic verbs ("done", "complete", "log").
 
 ## Overview
 
@@ -19,9 +57,10 @@ RaveLite is designed to complement the rave experience by offering features for 
 To install RaveLite on your device, follow these steps:
 
 1. Clone this repository to your local machine.
-2. Navigate to the project directory.
-3. Run `npm install` to install dependencies.
-4. Run `react-native run-android` or `react-native run-ios` to launch the app on your device or emulator.
+2. `cd RaveLiteApp`
+3. Run `yarn install` (or `npm install`) to install dependencies.
+4. Connect an Android device (USB debugging enabled) or start an emulator.
+5. Run `yarn android` to build and install the app.
 
 ## Usage
 
@@ -29,6 +68,41 @@ To install RaveLite on your device, follow these steps:
 2. Explore the different features and tools available.
 3. Use analog communication methods and enjoy the visualizations synced with the music.
 4. Have fun and enhance your rave experience with RaveLite!
+
+## Notifications (Phase A — live)
+
+Real on-device notifications are implemented via [`@notifee/react-native`](https://notifee.app).
+What works today:
+
+- **Test Pulse** (Heart screen) fires a real notification with the
+  element-themed vibration pattern and accent color.
+- Channels are auto-created per element with versioned IDs
+  (`elem.<element>.v1`). Channel settings are immutable on Android, so
+  a future tweak to a vibration pattern bumps the suffix to `v2` to
+  avoid OS conflicts.
+- Permission (Android 13+ `POST_NOTIFICATIONS`) is requested in context
+  on first Heart-screen visit, not at cold start.
+- A foreground event bridge runs at app boot so notifications actually
+  buzz/light while RaveLite is the active app.
+
+What's stubbed (Phase B):
+
+- **Apply Plan** currently only logs. The full rolling 24h pre-schedule
+  built from `expandPlanToFires()` (already unit-tested in
+  `src/domain/reminders/__tests__/expandPlan.test.ts`) plus a
+  `BOOT_COMPLETED` re-expansion is the next milestone.
+
+OEM caveat: stock Android (Galaxy Tab A7) is friendly. MIUI/HyperOS on
+the Redmi A3 will require Autostart permission to be granted manually
+in system settings; battery-optimization-exemption alone is not
+sufficient. Phase C will add a guided flow.
+
+## Keep-screen-on
+
+While RaveLite is foregrounded the screen stays on (`FLAG_KEEP_SCREEN_ON`
+is set in [`MainActivity.kt`](RaveLiteApp/android/app/src/main/java/com/raveliteapp/MainActivity.kt)).
+Backgrounding the app restores normal sleep behavior, so battery cost
+is bounded to active training sessions.
 
 ## Contributing
 
