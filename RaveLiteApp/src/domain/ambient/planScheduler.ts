@@ -20,6 +20,9 @@
  *   - Skips fires whose ts is more than `graceMs` in the past — those
  *     are already lost; the journal will eventually classify them as
  *     past-absorbed.
+ *   - Cancels queued pulses the plan no longer produces, so a removed or
+ *     retimed window stops chiming. A pulse already waiting behind an
+ *     active one (past grace) is left to play out.
  *   - GC's enqueued IDs whose ts is older than `now - retainMs` so the
  *     set doesn't grow unbounded across an all-day session.
  */
@@ -28,7 +31,11 @@ import {expandPlanToFires, type FireSpec} from '../reminders/expandPlan';
 import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import {loadPlan, subscribePlan} from '../reminders/repository';
 import type {Plan} from '../reminders/types';
-import {enqueue as runtimeEnqueue} from './pulseRuntime';
+import {
+  cancelQueued,
+  enqueue as runtimeEnqueue,
+  queuedPulses,
+} from './pulseRuntime';
 
 /** Default rolling horizon — 24h ahead. */
 export const DEFAULT_HORIZON_MS = 24 * 60 * 60_000;
@@ -51,6 +58,8 @@ export interface ReconcileInput {
   /** Pulse ids that already fired today — never re-enqueued, so an app
    *  restart inside the grace window can't chime the same pulse twice. */
   firedIds?: ReadonlySet<string>;
+  /** Plan pulse ids waiting in the runtime queue (not active). */
+  queuedPlanIds?: ReadonlySet<string>;
   horizonMs?: number;
   graceMs?: number;
   retainMs?: number;
@@ -59,6 +68,8 @@ export interface ReconcileInput {
 export interface ReconcileResult {
   /** Fires to hand to `pulseRuntime.enqueue`. Already filtered + tagged. */
   toEnqueue: FireSpec[];
+  /** Queued plan pulses the plan no longer produces — cancel them. */
+  toCancel: string[];
   /** Updated id set after this reconcile cycle. */
   nextEnqueued: Set<string>;
 }
@@ -75,12 +86,14 @@ export function reconcilePlan(input: ReconcileInput): ReconcileResult {
     plan,
     alreadyEnqueued,
     firedIds = new Set<string>(),
+    queuedPlanIds = new Set<string>(),
     horizonMs = DEFAULT_HORIZON_MS,
     graceMs = DEFAULT_GRACE_MS,
     retainMs = DEFAULT_RETAIN_MS,
   } = input;
 
   const fires = expandPlanToFires(plan, now - graceMs, now + horizonMs);
+  const expandedIds = new Set(fires.map(planPulseId));
   const toEnqueue: FireSpec[] = [];
   const nextEnqueued = new Set<string>();
 
@@ -91,6 +104,19 @@ export function reconcilePlan(input: ReconcileInput): ReconcileResult {
     if (ts === null || ts >= now - retainMs) {
       nextEnqueued.add(id);
     }
+  }
+
+  // Queued pulses the plan no longer produces (window removed or
+  // retimed). Ones already past grace are waiting behind an active pulse
+  // and were legitimately due, so they stay.
+  const toCancel: string[] = [];
+  for (const id of queuedPlanIds) {
+    const ts = parsePlanIdTs(id);
+    if (ts === null || ts < now - graceMs || expandedIds.has(id)) {
+      continue;
+    }
+    toCancel.push(id);
+    nextEnqueued.delete(id);
   }
 
   for (const fire of fires) {
@@ -105,7 +131,7 @@ export function reconcilePlan(input: ReconcileInput): ReconcileResult {
     nextEnqueued.add(id);
   }
 
-  return {toEnqueue, nextEnqueued};
+  return {toEnqueue, toCancel, nextEnqueued};
 }
 
 function parsePlanIdTs(id: string): number | null {
@@ -131,13 +157,22 @@ let planUnsub: (() => void) | null = null;
  */
 export function reconcileNow(now: number = Date.now()): void {
   const plan = loadPlan();
-  const {toEnqueue, nextEnqueued} = reconcilePlan({
+  const queuedPlanIds = new Set(
+    queuedPulses()
+      .map(p => p.id)
+      .filter(id => id.startsWith('plan:')),
+  );
+  const {toEnqueue, toCancel, nextEnqueued} = reconcilePlan({
     now,
     plan,
     alreadyEnqueued: enqueuedIds,
     firedIds: firedPulseIds(entriesForDay(new Date(now))),
+    queuedPlanIds,
   });
   enqueuedIds = nextEnqueued;
+  if (toCancel.length > 0) {
+    cancelQueued(toCancel);
+  }
   for (const fire of toEnqueue) {
     const window = plan.windows.find(w => w.id === fire.windowId);
     const slot = window?.slots[fire.slotIndex];

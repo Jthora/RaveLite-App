@@ -178,7 +178,7 @@ function NowPanel({element, onOpenLibrary}: NowProps) {
         WHAT IS A PULSE?
       </Text>
       <Text style={styles.helpBody}>
-        A pulse is a one-tap drill cued by your wrist or this screen. Tap{' '}
+        A pulse is a one-tap drill cued by a chime or this screen. Tap{' '}
         <Text style={[styles.helpAccent, {color: element.color}]}>
           {element.verbDone}
         </Text>{' '}
@@ -616,8 +616,11 @@ function fmtTime(ms: number): string {
   return `${hh}:${mm}`;
 }
 
-function sourceLabel(s: 'manual' | 'notification' | 'auto'): string {
-  if (s === 'notification') {return 'pulse';}
+function sourceLabel(
+  s: 'manual' | 'notification' | 'auto' | 'always-on',
+): string {
+  if (s === 'always-on') {return 'chime';}
+  if (s === 'notification') {return 'notification';}
   if (s === 'auto') {return 'circuit';}
   return 'manual';
 }

@@ -181,6 +181,11 @@ export function tick(
       continue;
     }
     p.state = 'active';
+    // A pulse that waited behind another gets its full answer window from
+    // the moment it actually chimes; otherwise it could chime and be
+    // ignored a second later. `fireAt` stays put: backup-chime
+    // cancellation keys off it.
+    p.expiresAt = Math.max(p.expiresAt, now + (p.expiresAt - p.fireAt));
     writes.push({
       kind: 'reminder.fired',
       at: now,

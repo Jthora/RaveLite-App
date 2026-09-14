@@ -173,3 +173,56 @@ describe('reconcilePlan — restart safety', () => {
     expect(toEnqueue).toHaveLength(3);
   });
 });
+
+describe('reconcilePlan — plan edits', () => {
+  it('cancels queued pulses from a window the plan no longer has', () => {
+    const now = nineAm();
+    const gone = 'plan:removed:0:' + (now + 20 * 60_000);
+    const kept = 'plan:w1:0:' + (now + 15 * 60_000);
+    const {toCancel, nextEnqueued} = reconcilePlan({
+      now,
+      plan: makePlan(),
+      alreadyEnqueued: new Set([gone, kept]),
+      queuedPlanIds: new Set([gone, kept]),
+      horizonMs: 60 * 60_000,
+    });
+    expect(toCancel).toEqual([gone]);
+    expect(nextEnqueued.has(gone)).toBe(false);
+    expect(nextEnqueued.has(kept)).toBe(true);
+  });
+
+  it('replaces the old pulses when a slot is retimed', () => {
+    const now = nineAm();
+    const old = [15, 30, 45].map(m => 'plan:w1:0:' + (now + m * 60_000));
+    const base = makePlan();
+    const retimed: Plan = {
+      ...base,
+      windows: [
+        {...base.windows[0], slots: [{element: 'air', everyMinutes: 20}]},
+      ],
+    };
+    const {toCancel, toEnqueue} = reconcilePlan({
+      now,
+      plan: retimed,
+      alreadyEnqueued: new Set(old),
+      queuedPlanIds: new Set(old),
+      horizonMs: 60 * 60_000,
+    });
+    expect([...toCancel].sort()).toEqual([...old].sort());
+    const minutes = toEnqueue.map(f => new Date(f.ts).getMinutes());
+    expect(minutes).toEqual([0, 20, 40]);
+  });
+
+  it('leaves a pulse already waiting past grace alone', () => {
+    const now = nineAm() + 30 * 60_000;
+    const waiting = 'plan:removed:0:' + (now - 5 * 60_000);
+    const {toCancel} = reconcilePlan({
+      now,
+      plan: makePlan(),
+      alreadyEnqueued: new Set([waiting]),
+      queuedPlanIds: new Set([waiting]),
+      horizonMs: 60 * 60_000,
+    });
+    expect(toCancel).toEqual([]);
+  });
+});

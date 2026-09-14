@@ -41,7 +41,6 @@ import {DEFAULT_SUB_SLUG, SUB_TABS_BY_ELEMENT} from './subTabRegistry';
 
 import {ELEMENTS, ELEMENT_ORDER, type ElementId} from '../theme/elements';
 import {palette} from '../theme';
-import {pulseHaptic} from '../lib/elementHaptics';
 import {store} from '../storage';
 import {KEYS} from '../storage/keys';
 
@@ -151,15 +150,10 @@ export function ElementShell(): React.JSX.Element {
     }).start();
   }, [transitionKey, fade]);
 
+  // The entered screen's ScreenScaffold plays the "enter" haptic; firing
+  // it here too buzzed twice on every element switch.
   const setActiveElement = useCallback((next: ElementId) => {
-    setActiveElementState(prev => {
-      if (prev !== next) {
-        // Soft "enter" haptic on element switch — body recognises the
-        // signature before the eyes catch up.
-        pulseHaptic(next, 'enter');
-      }
-      return next;
-    });
+    setActiveElementState(next);
   }, []);
 
   const setSubTab = useCallback(

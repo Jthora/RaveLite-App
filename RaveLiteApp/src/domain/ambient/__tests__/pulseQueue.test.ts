@@ -219,6 +219,24 @@ describe('tick — window expiry → reminder.ignored', () => {
     expect(r.state.pulses).toHaveLength(1);
     expect(r.state.pulses[0]).toMatchObject({id: 'b', state: 'active'});
   });
+
+  it('gives a pulse that waited behind another its full answer window', () => {
+    let r = enqueue(emptyQueue(), samplePulse({id: 'a', fireAt: T0}));
+    r = tick(r.state, T0, ALWAYS_PAGE); // a active
+    r = enqueue(r.state, samplePulse({id: 'b', fireAt: T0 + 1000}));
+    const promotedAt = T0 + DEFAULT_ACTIVE_WINDOW_MS + 1;
+    r = tick(r.state, promotedAt, ALWAYS_PAGE); // a ignored, b active
+    expect(r.state.pulses[0]).toMatchObject({
+      id: 'b',
+      state: 'active',
+      fireAt: T0 + 1000,
+      expiresAt: promotedAt + DEFAULT_ACTIVE_WINDOW_MS,
+    });
+    // A second later b is still answerable instead of ignored.
+    r = tick(r.state, promotedAt + 1000, ALWAYS_PAGE);
+    expect(r.writes).toEqual([]);
+    expect(r.state.pulses[0]).toMatchObject({id: 'b', state: 'active'});
+  });
 });
 
 describe('resolve', () => {

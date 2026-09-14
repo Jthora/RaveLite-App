@@ -439,11 +439,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
+    overflow: 'hidden',
   },
+  /** Rows share the height the active card leaves over and clip to their
+      slot. As flex shares with a floor they overflowed into the card. */
   rowSlot: {
     flex: 1,
-    minHeight: 36,
+    minHeight: 0,
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   rowSlotPast: {
     flex: 0.7,
@@ -453,8 +457,11 @@ const styles = StyleSheet.create({
     flex: 0.85,
     opacity: 0.95,
   },
+  /** The active card takes its natural height. */
   rowSlotNow: {
-    flex: 2.5,
+    flex: 0,
+    flexShrink: 0,
+    overflow: 'visible',
   },
   rowSlotExpanded: {
     flex: 1.4,
