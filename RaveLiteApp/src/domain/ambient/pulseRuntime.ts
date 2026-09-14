@@ -18,9 +18,9 @@
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {append} from '../journal/journal';
 import type {CompletionEntry} from '../journal/types';
-import {formatSetAmount} from '../program/progress';
-import {ELEMENTS, type ElementId} from '../../theme/elements';
+import type {ElementId} from '../../theme/elements';
 import {
+  cancelBackupChime,
   cancelPulseNotification,
   notifeeScheduler,
   type NotificationActionId,
@@ -36,6 +36,7 @@ import {
   type QueueState,
 } from './pulseQueue';
 import {pagingAllowedAt} from './activeHours';
+import {pulsePayload} from './pulsePayload';
 import {chooseCueRoute, cueSettingsFor} from './cueVolume';
 import {getInterruptionFilter, playCue} from '../../native/raveLiteDevice';
 import type {ReminderPayload} from '../reminders/types';
@@ -155,27 +156,16 @@ function commit(writes: ReturnType<typeof queueTick>['writes']): void {
       continue;
     }
     const element = w.element as ElementId;
-    const el = ELEMENTS[element];
-    const pulse = state.pulses.find(p => p.id === w.pulseId);
-    const drill = drillFor(w);
-    const rx = pulse?.prescription;
-    const cue = drill?.cues?.[0];
+    const rx = state.pulses.find(p => p.id === w.pulseId)?.prescription;
     // Fire-and-forget; failure must not abort the queue advance.
-    chime({
-      element,
-      color: el.color,
-      title: rx
-        ? `${rx.label} · ${formatSetAmount(rx.amount, rx.unit)}`
-        : drill?.name ?? `${el.name} pulse`,
-      body: rx
-        ? `Set ${rx.setIndex} of ${rx.sets}${cue ? ` · ${cue}` : ''}`
-        : cue ?? `Time for ${el.name}.`,
-      exerciseId: drill?.id ?? 'unknown',
-      pulseId: w.pulseId,
-      data: rx
-        ? {trackId: rx.trackId, amount: String(rx.amount), unit: rx.unit}
-        : undefined,
-    }).catch(err =>
+    chime(
+      pulsePayload({
+        pulseId: w.pulseId,
+        element,
+        exerciseId: w.exerciseId,
+        prescription: rx,
+      }),
+    ).catch(err =>
       // eslint-disable-next-line no-console
       console.warn('[pulseRuntime] chime failed', err),
     );
@@ -252,8 +242,40 @@ export function deferQueued(id: string, byMs: number): void {
   notify();
 }
 
+/** Queued (not yet active) pulses — the backup scheduler mirrors their times. */
+export function queuedPulses(): ReadonlyArray<Pulse> {
+  return state.pulses.filter(p => p.state === 'queued');
+}
+
+/** `id@fireAt` of due pulses whose OS backup chime was already cancelled. */
+const backupsDisarmed = new Set<string>();
+
+/**
+ * The live runtime owns a chime from the moment it comes due — promoted,
+ * suppressed, or waiting behind an active pulse — so cancel its OS backup
+ * then, once per fire time (a snoozed pulse gets a fresh cancel when its
+ * new time comes due).
+ */
+function disarmDueBackups(now: number): void {
+  const live = new Set<string>();
+  for (const pulse of state.pulses) {
+    const key = `${pulse.id}@${pulse.fireAt}`;
+    live.add(key);
+    if (pulse.fireAt <= now && !backupsDisarmed.has(key)) {
+      backupsDisarmed.add(key);
+      cancelBackupChime(pulse.id).catch(() => {});
+    }
+  }
+  for (const key of backupsDisarmed) {
+    if (!live.has(key)) {
+      backupsDisarmed.delete(key);
+    }
+  }
+}
+
 /** Drive the reducer one step at the given epoch ms. */
 export function tickNow(now: number = Date.now()): void {
+  disarmDueBackups(now);
   const result = queueTick(state, now, t =>
     pagingAllowedAt(new Date(t)),
   );
@@ -361,6 +383,7 @@ export const __test = {
     state = emptyQueue();
     listeners.clear();
     firedListeners.clear();
+    backupsDisarmed.clear();
     stopPulseRuntime();
   },
   getState: () => state,

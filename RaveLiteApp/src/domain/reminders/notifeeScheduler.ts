@@ -1,7 +1,9 @@
 import notifee, {
+  AlarmType,
   AndroidImportance,
   AndroidVisibility,
   EventType,
+  TriggerType,
   type Event,
   type Notification,
 } from '@notifee/react-native';
@@ -217,9 +219,93 @@ export function startNotifeeForegroundBridge(
   });
 }
 
-/** Dismiss a pulse's notification once it's been answered in-app. */
+/**
+ * Dismiss a pulse's notification once it's been answered. Notifee's
+ * cancelNotification also removes a pending OS trigger with the same id,
+ * so this clears the pulse's backup chime too.
+ */
 export async function cancelPulseNotification(pulseId: string): Promise<void> {
   await notifee.cancelNotification(pulseId);
+}
+
+/** data flags on OS-scheduled chimes. Only `backup` ones are reconciled. */
+const BACKUP_FLAG = 'backup';
+const SNOOZE_FLAG = 'snooze';
+/** An OS chime nobody answers clears itself after the answer window. */
+const OS_CHIME_TIMEOUT_MS = 8 * 60_000;
+
+/**
+ * Schedule an OS-level chime for a pulse at `triggerAt`.
+ *
+ *  - `backup`: held for an upcoming chime in case the app is killed;
+ *    listed and reconciled by the backup scheduler.
+ *  - `snooze`: a +5 pressed while the app wasn't running; left alone.
+ *
+ * It reuses the pulse id as notification id (so cancel and Done / +5 /
+ * Skip work unchanged) and posts on the sounding channel, because if it
+ * fires RaveLite's own cue player isn't running. `onlyAlertOnce` keeps it
+ * silent if the live notification for the same pulse is still showing.
+ */
+export async function scheduleBackupChime(
+  payload: ReminderPayload,
+  triggerAt: number,
+  opts: {exact: boolean; kind: 'backup' | 'snooze'},
+): Promise<void> {
+  await ensureChannels();
+  const base = buildPulseNotification(payload, {quiet: false});
+  await notifee.createTriggerNotification(
+    {
+      ...base,
+      data: {
+        ...base.data,
+        [opts.kind === 'backup' ? BACKUP_FLAG : SNOOZE_FLAG]: '1',
+      },
+      android: {
+        ...base.android,
+        onlyAlertOnce: true,
+        timeoutAfter: OS_CHIME_TIMEOUT_MS,
+      },
+    },
+    {
+      type: TriggerType.TIMESTAMP,
+      timestamp: triggerAt,
+      alarmManager: {
+        type: opts.exact
+          ? AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE
+          : AlarmType.SET_AND_ALLOW_WHILE_IDLE,
+      },
+    },
+  );
+}
+
+/** Backup chimes the OS currently holds: pulse id → trigger time. */
+export async function listBackupChimes(): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  for (const {notification, trigger} of await notifee.getTriggerNotifications()) {
+    if (
+      notification.id &&
+      notification.data?.[BACKUP_FLAG] === '1' &&
+      trigger.type === TriggerType.TIMESTAMP
+    ) {
+      out.set(notification.id, trigger.timestamp);
+    }
+  }
+  return out;
+}
+
+export async function cancelBackupChime(pulseId: string): Promise<void> {
+  await notifee.cancelTriggerNotification(pulseId);
+}
+
+/** Exact alarms usable: granted, or not needed on this Android version. */
+export async function exactAlarmsAllowed(): Promise<boolean> {
+  try {
+    const settings = await notifee.getNotificationSettings();
+    // AndroidNotificationSetting: 0 = DISABLED, 1 = ENABLED, -1 = NOT_SUPPORTED.
+    return settings.android?.alarm !== 0;
+  } catch {
+    return false;
+  }
 }
 
 /**

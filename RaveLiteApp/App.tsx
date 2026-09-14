@@ -28,6 +28,7 @@ import {handleNotificationAction} from './src/domain/ambient/notificationActions
 import {startPulseRuntime} from './src/domain/ambient/pulseRuntime';
 import {startPlanScheduler} from './src/domain/ambient/planScheduler';
 import {startSetScheduler} from './src/domain/ambient/setScheduler';
+import {startBackupScheduler} from './src/domain/ambient/backupScheduler';
 import {ElementShell} from './src/shell/ElementShell';
 import {NightVeil} from './src/components/alive/NightVeil';
 
@@ -69,10 +70,12 @@ function App(): React.JSX.Element {
         setHydrated(true);
         // Reminders pipeline: now that persisted state is available,
         // start the runtime, both producers (Plan cadence + Daily Sets),
-        // and the background service that keeps them alive. Idempotent.
+        // OS backup chimes for a killed process, and the background
+        // service that keeps them alive. Idempotent.
         startPulseRuntime();
         startPlanScheduler();
         startSetScheduler();
+        startBackupScheduler();
         startAmbientLifecycle();
       }
     })();
