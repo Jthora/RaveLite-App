@@ -1,4 +1,4 @@
-import {firedPulseIds} from '../journal/journal';
+import {handledPulseIds} from '../journal/journal';
 import type {JournalEntry} from '../journal/types';
 import {SETS_WINDOW_ID, type SetUnit, type TrackId} from './types';
 
@@ -43,7 +43,7 @@ export function doneByTrack(
   return out;
 }
 
-/** Pulse ids of set chimes that have already fired in these entries. */
+/** Set chime ids that already fired, or were skipped ahead of time. */
 export function firedSetIds(entries: readonly JournalEntry[]): Set<string> {
-  return firedPulseIds(entries, SETS_WINDOW_ID);
+  return handledPulseIds(entries, SETS_WINDOW_ID);
 }

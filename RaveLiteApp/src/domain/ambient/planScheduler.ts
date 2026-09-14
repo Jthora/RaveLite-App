@@ -28,7 +28,7 @@
  *   - GC's enqueued IDs whose ts is older than `now - retainMs` so the
  *     set doesn't grow unbounded across an all-day session.
  */
-import {entriesForDay, firedPulseIds} from '../journal/journal';
+import {entriesForDay, handledPulseIds} from '../journal/journal';
 import {
   expandPlanToFires,
   planPulseId,
@@ -176,7 +176,7 @@ export function reconcileNow(now: number = Date.now()): void {
     now,
     plan,
     alreadyEnqueued: enqueuedIds,
-    firedIds: firedPulseIds(entriesForDay(new Date(now))),
+    firedIds: handledPulseIds(entriesForDay(new Date(now))),
     queuedPlanIds,
     skipIds: absorbedWaterCalls(now),
   });

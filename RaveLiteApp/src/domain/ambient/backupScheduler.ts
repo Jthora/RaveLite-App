@@ -8,7 +8,7 @@
  * changes. Runs are serialized: a request during a run queues one
  * follow-up run.
  */
-import {entriesForDay, firedPulseIds} from '../journal/journal';
+import {entriesForDay, handledPulseIds} from '../journal/journal';
 import {subscribeProgram} from '../program/repository';
 import {expandPlanToFires, planPulseId} from '../reminders/expandPlan';
 import {
@@ -107,7 +107,7 @@ async function run(now: number): Promise<void> {
   const {create, cancel} = planBackups({
     now,
     candidates: backupCandidates(now),
-    firedIds: firedPulseIds(entriesForDay(new Date(now))),
+    firedIds: handledPulseIds(entriesForDay(new Date(now))),
     activeHours: getActiveHours(),
     pauseUntil: readPauseUntil(),
     existing,

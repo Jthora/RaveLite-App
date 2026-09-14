@@ -100,3 +100,22 @@ export function firedPulseIds(
   }
   return out;
 }
+
+/**
+ * Pulse ids already dealt with: fired, or skipped ahead of time from
+ * Today. Schedulers use this so a restart never re-queues either. Skips
+ * carry no window id; pulse ids are unique across producers, so every
+ * skip is included whatever `windowId` is.
+ */
+export function handledPulseIds(
+  entries: readonly JournalEntry[],
+  windowId?: string,
+): Set<string> {
+  const out = firedPulseIds(entries, windowId);
+  for (const e of entries) {
+    if (e.kind === 'reminder.skipped') {
+      out.add(e.pulseId);
+    }
+  }
+  return out;
+}
