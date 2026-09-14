@@ -11,6 +11,7 @@ import {formatHM} from '../ambient/format';
 import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {AmountRow, type DoneAdjust} from './ChimeCard';
+import {EYE_BREAK_SECONDS} from '../../domain/activity/record';
 import {EXERCISE_LIBRARY} from '../../domain/exercises/library';
 import type {SetPrescription, TrackId} from '../../domain/program/types';
 import type {DayRow} from '../../domain/today/dayList';
@@ -106,6 +107,11 @@ export function LateLogSheet({row, prescription: rx, onDone, onClose}: Props) {
               ) : null}
               {rx?.water ? (
                 <Text style={styles.extra}>+ a glass of water</Text>
+              ) : null}
+              {rx?.water || drill?.targets.includes('Hydration') ? (
+                <Text style={styles.extra}>
+                  then {EYE_BREAK_SECONDS} s · eyes on something far away
+                </Text>
               ) : null}
 
               <Text style={styles.note}>

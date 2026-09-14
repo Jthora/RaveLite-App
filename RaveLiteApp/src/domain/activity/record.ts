@@ -1,3 +1,4 @@
+import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {Exercise} from '../exercises/types';
 import {append} from '../journal/journal';
 import type {CompletionEntry} from '../journal/types';
@@ -13,6 +14,18 @@ import {TRACKS} from '../program/tracks';
 
 /** The drill a glass of water is logged as. */
 export const WATER_GLASS_EXERCISE_ID = 'water.sip';
+
+/** The eye break that rides along with every chimed glass. */
+export const EYE_BREAK_EXERCISE_ID = 'air.eye-break';
+export const EYE_BREAK_SECONDS = 20;
+
+/** A water call's drill: answering its chime also means an eye break. */
+export function isWaterCallDrill(exerciseId: string | undefined): boolean {
+  const drill = exerciseId
+    ? EXERCISE_LIBRARY.find(ex => ex.id === exerciseId)
+    : undefined;
+  return drill?.targets.includes('Hydration') ?? false;
+}
 
 /**
  * Log a drill tapped by hand. When the drill is an enabled Daily Sets

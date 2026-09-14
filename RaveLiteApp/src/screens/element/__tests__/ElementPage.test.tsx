@@ -69,7 +69,7 @@ it('Swap offers a different drill; Done logs it and the stats follow', () => {
   });
   expect(activityForDay()).toHaveLength(1);
   expect(byTestId(tree, 'element-stats').props.children).toBe(
-    '1 today · 1 this week · 1-day streak',
+    '2/20 today · 2 this week · 1-day streak',
   );
   act(() => tree.unmount());
 });

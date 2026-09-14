@@ -70,13 +70,13 @@ describe('groupIntoRounds', () => {
     },
   );
 
-  it('turns week 1 Monday into nine rounds of two or three moves', () => {
-    expect(totalSets(monday)).toBe(24);
+  it('turns week 1 Monday into nine rounds of three or four moves', () => {
+    expect(totalSets(monday)).toBe(35);
     const rounds = groupIntoRounds(monday);
     expect(rounds).toHaveLength(TARGET_ROUNDS);
     for (const r of rounds) {
-      expect(r.moves.length).toBeGreaterThanOrEqual(2);
-      expect(r.moves.length).toBeLessThanOrEqual(3);
+      expect(r.moves.length).toBeGreaterThanOrEqual(3);
+      expect(r.moves.length).toBeLessThanOrEqual(4);
     }
   });
 
@@ -226,15 +226,20 @@ describe('doneFields', () => {
 });
 
 describe('smart partners', () => {
+  // Fire and Earth tracks only, so every element but those two is free.
+  const strength = monday.filter(
+    p => p.element === 'fire' || p.element === 'earth',
+  );
+
   it('lean toward the element with the least work this week', () => {
-    const rounds = groupIntoRounds(monday, {
+    const rounds = groupIntoRounds(strength, {
       balance: {fire: 30, earth: 30, air: 12, water: 0, heart: 12},
     });
     expect(rounds[0].partner?.element).toBe('water');
   });
 
   it('spread across the neglected elements through the day', () => {
-    const rounds = groupIntoRounds(monday, {
+    const rounds = groupIntoRounds(strength, {
       balance: {fire: 30, earth: 30, air: 0, water: 0, heart: 0},
     });
     const tally: Record<string, number> = {air: 0, water: 0, heart: 0};
@@ -248,7 +253,7 @@ describe('smart partners', () => {
   });
 
   it('never end a round with an element already in it', () => {
-    const rounds = groupIntoRounds(monday, {
+    const rounds = groupIntoRounds(strength, {
       balance: {fire: 0, earth: 0, air: 50, water: 50, heart: 50},
     });
     for (const r of rounds) {

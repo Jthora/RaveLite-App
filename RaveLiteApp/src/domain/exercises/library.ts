@@ -25,6 +25,22 @@ import {Exercise} from './types';
 export const EXERCISE_LIBRARY: Exercise[] = [
   // ─── AIR — Breath & Posture ────────────────────────────────────────────
   {
+    id: 'air.eye-break',
+    element: 'air',
+    name: 'Eye Break',
+    purpose:
+      'Rests the eyes from the screen. Rides along with every water call.',
+    dose: '20 sec',
+    cues: [
+      'Look at something at least 6 m (20 ft) away',
+      'Let the eyes go soft; blink slowly a few times',
+      'Shoulders down, one easy breath out',
+    ],
+    targets: ['NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 20,
+  },
+  {
     id: 'air.chin-tuck',
     element: 'air',
     name: 'Chin Tuck',
@@ -1413,16 +1429,18 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     id: 'heart.evening-review',
     element: 'heart',
     name: 'Evening Review',
-    purpose: 'Close the loop. What landed, what was skipped, what tomorrow.',
-    dose: '3 min',
+    purpose:
+      'Close the loop: sit still first, then name what landed, what was skipped, what tomorrow.',
+    dose: '5 min (3 min still sit, then the review)',
     cues: [
-      'Three sentences, spoken or written',
+      'Sit for three minutes first: breath low, eyes soft, nothing to fix',
+      'Then three sentences, spoken or written',
       'No self-flagellation — observation only',
       "Choose tomorrow's leading element before sleep",
     ],
     targets: ['Presence'],
     venues: ['desk', 'standing'],
-    approxSeconds: 180,
+    approxSeconds: 300,
   },
   {
     id: 'heart.pulse-check',

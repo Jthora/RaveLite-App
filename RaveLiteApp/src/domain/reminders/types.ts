@@ -19,6 +19,8 @@ export interface CadenceSlot {
   maxSeconds?: number;
   /** Optional: required tags (e.g. ['NoFloor'] for desk hours). */
   requiredTags?: Exercise['targets'];
+  /** Optional: this exact drill every time (e.g. the Evening Review). */
+  exerciseId?: string;
 }
 
 /** A named period of the day with its own cadence rules. */

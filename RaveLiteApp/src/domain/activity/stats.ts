@@ -22,6 +22,17 @@ export function countsByElement(
   return out;
 }
 
+/** Effort points per element (see `POINTS` in activity.ts). */
+export function pointsByElement(
+  items: readonly ActivityItem[],
+): Record<ElementId, number> {
+  const out = emptyElementCounts();
+  for (const item of items) {
+    out[item.element] += item.points;
+  }
+  return out;
+}
+
 /** Glasses of water: water calls, the +1 counter, and ride-along glasses. */
 export function hydrationGlasses(items: readonly ActivityItem[]): number {
   return items.filter(i => i.hydration).length;
@@ -73,6 +84,24 @@ export function countsByElementByDay(
   n: number,
   now: Date = new Date(),
 ): Record<ElementId, number[]> {
+  return tallyByElementByDay(items, n, now, () => 1);
+}
+
+/** Pure: per-element effort points for the last `n` days, oldest → newest. */
+export function pointsByElementByDay(
+  items: readonly ActivityItem[],
+  n: number,
+  now: Date = new Date(),
+): Record<ElementId, number[]> {
+  return tallyByElementByDay(items, n, now, item => item.points);
+}
+
+function tallyByElementByDay(
+  items: readonly ActivityItem[],
+  n: number,
+  now: Date,
+  valueOf: (item: ActivityItem) => number,
+): Record<ElementId, number[]> {
   const from = windowStart(n, now);
   const out = {} as Record<ElementId, number[]>;
   for (const id of Object.keys(emptyElementCounts()) as ElementId[]) {
@@ -81,7 +110,7 @@ export function countsByElementByDay(
   for (const item of items) {
     const idx = dayIndex(item.at, from);
     if (idx >= 0 && idx < n) {
-      out[item.element][idx]++;
+      out[item.element][idx] += valueOf(item);
     }
   }
   return out;

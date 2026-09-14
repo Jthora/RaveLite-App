@@ -12,13 +12,15 @@ import type {ElementId} from '../../theme/elements';
 import {getMetric, loadEntries} from '../training/repository';
 import type {MetricKind, TrainingLogEntry} from '../training/types';
 import {activityInRange, buildActivity, type ActivityItem} from './activity';
+import {DAILY_PAR} from './par';
 
 const MS_PER_DAY = 86_400_000;
 
 export interface RibbonDay {
   /** Local midnight. */
   dayStart: number;
-  count: number;
+  /** Effort points that day. */
+  points: number;
   /** A Train entry was logged that day. */
   hasTrain: boolean;
   isToday: boolean;
@@ -47,7 +49,7 @@ export function buildDayRibbon({
     d.setDate(d.getDate() - back);
     out.push({
       dayStart: d.getTime(),
-      count: 0,
+      points: 0,
       hasTrain: false,
       isToday: back === 0,
     });
@@ -59,13 +61,13 @@ export function buildDayRibbon({
     if (!day) {
       continue;
     }
-    day.count++;
+    day.points += item.points;
     day.hasTrain = day.hasTrain || item.source === 'train';
   }
   return out;
 }
 
-/** "3 today · 12 this week · 4-day streak"; the week is the last 7 days. */
+/** "14/20 today · 62 this week · 4-day streak": effort points against par; the week is the last 7 days. */
 export function elementStatLine({
   today,
   week,
@@ -75,7 +77,7 @@ export function elementStatLine({
   week: number;
   streak: number;
 }): string {
-  const parts = [`${today} today`, `${week} this week`];
+  const parts = [`${today}/${DAILY_PAR} today`, `${week} this week`];
   if (streak > 0) {
     parts.push(`${streak}-day streak`);
   }

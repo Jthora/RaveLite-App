@@ -53,13 +53,16 @@ Top to bottom, one scroll:
    own −/+, its partner drill and any glass of water, a draining answer
    window, and **Done / +5 / Skip**. Otherwise the next chime with **+5**
    and **Skip it**.
-3. **Balance strip** — today's count per element, and seven dots for the
-   last seven days (lit when that element had anything). Tap to open the
-   element. Partner drills and glasses count toward their own elements.
+3. **Balance strip** — today's points per element with a bar filling
+   toward par (20), and seven dots for the last seven days: solid on days
+   the element made par, faint on days it got something. Tap to open the
+   element. Partner drills, glasses and eye breaks count toward their own
+   elements.
 4. **Drink** — glasses of water today out of 8, with **+1**.
 5. **Daily Sets meters** — sets done, then one small meter per track in its
    element's color. Tap for the Daily Sets sheet.
-6. **Today · N-day streak** and the day's list — one row per record from
+6. **Today · N-day streak** (plus **· Harmony** once all five are at
+   par) and the day's list — one row per record from
    every source (chimes and rounds, drill taps, circuit legs, Train log
    entries, max tests) and the day's chimes as active, upcoming, skipped or
    missed. Missed and skipped rows are dimmed, never red, never counted.
@@ -93,14 +96,14 @@ row and Test chime button, and the Daily Sets explainer paragraph.
 
 One scroll:
 
-1. **Header** — the element's name, "3 today · 12 this week · 4-day
-   streak", the best result of the last 30 days (a run's 3-mile-equivalent
+1. **Header** — the element's name, "14/20 today · 62 this week · 4-day
+   streak" in points, the best result of the last 30 days (a run's 3-mile-equivalent
    grade, otherwise the most-logged kind's best), and **+ Log**.
 2. **Try this now** — name and dose, with the why and the cues folded
    under How. **Done** logs it (a Daily Sets track's current rung counts as
    a set), **↻ Swap** offers the next best, **Library** opens the rest.
-3. **Day ribbon** — the last 14 days as bars, today on the right, a dot on
-   days with a Train entry. The whole ribbon is one touch target: a tap
+3. **Day ribbon** — the last 14 days as bars of points over a faint par
+   line, today on the right, a dot on days with a Train entry. The whole ribbon is one touch target: a tap
    picks the day under the finger. The day label opens a calendar for
    older days.
 4. **That day's log** from every source. Train entries open for edit.
@@ -145,27 +148,64 @@ Below the element sits the move: what the operator is actually doing.
   every count, streak, meter and scheduler agrees at once; a round's sets
   return and later rounds regrow.
 
+## Points (`src/domain/activity/par.ts`)
+
+Every thing done is worth effort points to its element, so balance is
+reachable: counting completions gave a perfect Monday Fire 15 · Earth 14 ·
+Water 13 · Core 5 · Air 2.
+
+| Thing done | Points |
+|---|---|
+| A glass of water, an eye break | 1 |
+| A set, a partner, a short drill | 2 |
+| A check-in (morning intent, fuel check) | 3 |
+| A max test | 5 |
+| A longer drill or a timed Train session (runs, timed custom kinds) | a point a minute, up to 30 |
+
+- **Par** is 20 a day per element. Over par counts half up to 40
+  (`scoredPoints`, for XP later); a day with all five at par is
+  **Harmony**.
+- **Air** gets two Daily Sets tracks every day: **Posture** (chin tucks →
+  wall angels → brick halos) and **Breath** (physiological sighs →
+  coherence → box breathing). Every chimed glass (a round's, or a water
+  call answered) comes with a 20 s **eye break**; the Drink +1 counter
+  doesn't.
+- **Water** gets **Mobility** every day (hamstring floss → deep squat hold
+  → front split progression), and the morning session's Water slot is
+  always a few minutes of staff flow (Flow + Coordination, at most 10 min).
+- **Core** gets a **Morning Intent** check-in at 05:05, and the Evening
+  Review always chimes as itself (a slot can name its drill with
+  `exerciseId`); it now opens with a three-minute still sit.
+- **Check.** Answering every chime for eight days from Monday 14 September
+  put every element at par every day except Sunday's Earth (18: most
+  strength tracks rest, and rounds holding an Earth move can't end on an
+  Earth partner; one Earth drill makes it up). Week 1 Monday: Fire 29 ·
+  Air 26 · Earth 26 · Water 28 · Core 26.
+
 ## Chimes (`src/domain/program/rounds.ts`, `src/domain/ambient/setScheduler.ts`)
 
 - **Rounds.** A day's Daily Sets are grouped into rounds — a few different
   moves back to back (at most five, no track twice), about nine rounds a
   day. As weeks ramp a round grows a move instead of the day growing
-  chimes. Moves alternate fire and earth and keep grip-heavy row, pull and
-  hang apart.
+  chimes. Moves alternate elements (push, posture, row, squat, mobility,
+  pull, crunch, leg-ups, hang, plank, side, breath) and keep grip-heavy
+  row, pull and hang apart.
 - **Partners.** Each round ends with a 20–30 s drill from another element,
   chosen from the lead move's list in `tracks.ts` (chest opener after
   push-ups, hip opener after squats, a breath after trunk work).
-- **Smart partners.** The partner leans toward the element with the least
-  work over the seven days before today, among those not already in the
-  round: the lead move's own partner when one fits, else a short drill from
-  `PARTNER_POOL`. Each partner placed counts toward the next pick, so a day
-  spreads them across the neglected elements. Past days only, so partners
-  hold steady all day.
+- **Smart partners.** The partner goes to the element with the lightest
+  day, among those not already in the round: the lead move's own partner
+  when one fits, else a short drill from `PARTNER_POOL`. "Lightest" is in
+  points: what today's plan chimes and rounds will give each element, less
+  how far it averaged under par over the past seven days, plus 2 for each
+  partner already placed. An element that made par every day isn't pulled,
+  so partners don't swing from one element to another day to day. Worked
+  out once a day, so partners hold steady all day.
 - **Water rides along.** A plan water call within 20 minutes of a round
   becomes that round's glass; the plan scheduler and OS backups skip it.
-- **Budget.** Rounds, the remaining water calls, two fuel checks, the
-  evening review and the morning session come to about twenty on a
-  default weekday. `chimeBudget.test.ts` keeps week 1 and week 3 ≤ 24.
+- **Budget.** Rounds, the remaining water calls, the morning intent, two
+  fuel checks, the evening review and the morning session come to about
+  twenty-two on a default weekday. `chimeBudget.test.ts` keeps week 1 and week 3 ≤ 24.
 - **Done everywhere.** Buttons and notifications say "Done".
 
 ## My day
@@ -197,6 +237,10 @@ the screen and foreground service at once.
   untouched default plan moves to the morning: water calls every 2 h from
   05:30, and the evening Backyard Session becomes a 05:45–07:00 Morning
   Session (run and flow). Anything the operator changed stays.
+- **v5.** An untouched v4 default plan gains the 05:05 Morning Intent, the
+  Evening Review pinned to its own drill, and staff flow in the morning
+  session. The Posture, Breath and Mobility tracks need no migration: a
+  stored program fills in tracks it doesn't know.
 
 ## Verification
 

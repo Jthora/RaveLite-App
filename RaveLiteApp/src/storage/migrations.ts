@@ -41,6 +41,9 @@ export function runMigrations(now: number = Date.now()): void {
   if (from < 4) {
     moveDayToMorning();
   }
+  if (from < 5) {
+    addCoreCheckIns();
+  }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
 }
@@ -190,6 +193,76 @@ function moveDayToMorning(): void {
 
   const rawPlan = store.getString(KEYS.planCurrent);
   if (rawPlan !== undefined && isPlan(rawPlan, V3_DEFAULT_PLAN)) {
+    store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
+  }
+}
+
+/** The default plan as it stood in v4, before the Core check-ins. */
+export const V4_DEFAULT_PLAN: Plan = {
+  id: 'default',
+  name: 'Operator Baseline',
+  windows: [
+    {
+      id: 'hydration',
+      label: 'Water Calls',
+      startTime: '05:30',
+      endTime: '20:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {
+          element: 'water',
+          everyMinutes: 120,
+          maxSeconds: 60,
+          requiredTags: ['Hydration'],
+        },
+      ],
+    },
+    {
+      id: 'backyard-session',
+      label: 'Morning Session',
+      startTime: '05:45',
+      endTime: '07:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'fire', everyMinutes: 45, requiredTags: ['Conditioning']},
+        {element: 'water', everyMinutes: 40, requiredTags: ['Flow']},
+      ],
+    },
+    {
+      id: 'fuel-lunch',
+      label: 'Fuel Check — Lunch',
+      startTime: '11:55',
+      endTime: '11:56',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'fuel-dinner',
+      label: 'Fuel Check — Dinner',
+      startTime: '19:05',
+      endTime: '19:06',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'evening-close',
+      label: 'Evening Review',
+      startTime: '21:30',
+      endTime: '21:31',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, maxSeconds: 200}],
+    },
+  ],
+};
+
+/**
+ * v5 — Core gets its check-ins: a Morning Intent at 05:05, and the Evening
+ * Review always chimes as itself (it used to pick any Heart drill). Only an
+ * untouched default plan moves.
+ */
+function addCoreCheckIns(): void {
+  const rawPlan = store.getString(KEYS.planCurrent);
+  if (rawPlan !== undefined && isPlan(rawPlan, V4_DEFAULT_PLAN)) {
     store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
   }
 }

@@ -6,12 +6,13 @@ import {
   subscribeActivity,
 } from '../domain/activity/activity';
 import {
-  countsByElement,
-  countsByElementByDay,
   hydrationGlasses,
+  pointsByElement,
+  pointsByElementByDay,
   streakDays,
   windowStart,
 } from '../domain/activity/stats';
+import {isHarmony} from '../domain/activity/par';
 import {
   getActiveHours,
   readPauseUntil,
@@ -53,11 +54,14 @@ export interface TodayModel {
   /** The next upcoming chime. */
   next?: DayRow;
   rows: DayRow[];
-  counts: Record<ElementId, number>;
+  /** Effort points per element today. */
+  points: Record<ElementId, number>;
+  /** Every element reached par today. */
+  harmony: boolean;
   glasses: number;
   sets: SetsSummary;
-  /** Per element, the last 7 days (today last): anything done that day. */
-  week: Record<ElementId, boolean[]>;
+  /** Per element, effort points for each of the last 7 days (today last). */
+  week: Record<ElementId, number[]>;
   /** Days in a row, ending today, with anything done. */
   streak: number;
 }
@@ -153,6 +157,7 @@ export function buildTodayModel(
   });
 
   const done = doneByTrack(journal);
+  const points = pointsByElement(activity);
   const pauseUntil = readPauseUntil();
   return {
     now,
@@ -162,7 +167,8 @@ export function buildTodayModel(
     active: summary,
     next: rows.find(r => r.status === 'upcoming'),
     rows,
-    counts: countsByElement(activity),
+    points,
+    harmony: isHarmony(points),
     glasses: hydrationGlasses(activity),
     sets: summarizeSets(sets.prescriptions, done),
   };
@@ -173,15 +179,11 @@ export function buildTodayHistory(
   now: number,
 ): Pick<TodayModel, 'week' | 'streak'> {
   const date = new Date(now);
-  const counts = countsByElementByDay(
+  const week = pointsByElementByDay(
     activityInRange(windowStart(7, date), date),
     7,
     date,
   );
-  const week = {} as Record<ElementId, boolean[]>;
-  for (const id of Object.keys(counts) as ElementId[]) {
-    week[id] = counts[id].map(n => n > 0);
-  }
   return {week, streak: streakDays(date)};
 }
 

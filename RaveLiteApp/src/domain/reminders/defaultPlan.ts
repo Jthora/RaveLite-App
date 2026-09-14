@@ -21,13 +21,18 @@ import {Plan} from './types';
  *   Morning session (daily 05:45-07:00) — the run and flow work that needs
  *   fresh legs and cool air, before the desk day:
  *     Fire every 45 min  — easy run, strides, conditioning
- *     Water every 40 min — beat-step, staff flow
+ *     Water every 40 min — a few minutes of staff flow
+ *
+ *   Every water call also asks for a 20 s eye break (Air).
+ *
+ *   Morning intent (05:05 daily):
+ *     Heart 1× — name the day's leading element before anything else
  *
  *   Fuel checks (11:55 and 19:05 daily):
  *     Heart 1× — hand-portion plate check before lunch and dinner
  *
  *   Evening (21:30):
- *     Heart 1× — Evening Review
+ *     Heart 1× — Evening Review: a still sit, then the review
  *
  * Everything sits inside the default My day (05:00-22:00); a weekday comes
  * to roughly twenty chimes.
@@ -59,6 +64,16 @@ export const DEFAULT_PLAN: Plan = {
       ],
     },
     {
+      id: 'morning-intent',
+      label: 'Morning Intent',
+      startTime: '05:05',
+      endTime: '05:06',
+      daysOfWeek: ALL_DAYS,
+      slots: [
+        {element: 'heart', everyMinutes: 1, exerciseId: 'heart.morning-intent'},
+      ],
+    },
+    {
       // Id kept from the evening "Backyard Session" so migrations and
       // stored pulse ids line up.
       id: 'backyard-session',
@@ -68,7 +83,12 @@ export const DEFAULT_PLAN: Plan = {
       daysOfWeek: ALL_DAYS,
       slots: [
         {element: 'fire', everyMinutes: 45, requiredTags: ['Conditioning']},
-        {element: 'water', everyMinutes: 40, requiredTags: ['Flow']},
+        {
+          element: 'water',
+          everyMinutes: 40,
+          maxSeconds: 600,
+          requiredTags: ['Flow', 'Coordination'],
+        },
       ],
     },
     {
@@ -93,7 +113,9 @@ export const DEFAULT_PLAN: Plan = {
       startTime: '21:30',
       endTime: '21:31',
       daysOfWeek: ALL_DAYS,
-      slots: [{element: 'heart', everyMinutes: 1, maxSeconds: 200}],
+      slots: [
+        {element: 'heart', everyMinutes: 1, exerciseId: 'heart.evening-review'},
+      ],
     },
   ],
 };

@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
 import type {RibbonDay} from '../../domain/activity/elementDay';
+import {DAILY_PAR} from '../../domain/activity/par';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -31,7 +32,9 @@ function spoken(day: RibbonDay): string {
  */
 export function DayRibbon({days, selected, color, onSelect}: Props) {
   const [width, setWidth] = useState(0);
-  const most = Math.max(1, ...days.map(d => d.count));
+  // Bars share one scale that always reaches par, so the par line stays put.
+  const most = Math.max(DAILY_PAR, ...days.map(d => d.points));
+  const parHeight = 6 + Math.round((DAILY_PAR / most) * (BAR_MAX - 6));
   const selectedIndex = days.findIndex(d => d.dayStart === selected);
 
   const pickAt = (x: number) => {
@@ -61,7 +64,7 @@ export function DayRibbon({days, selected, color, onSelect}: Props) {
       accessibilityLabel={`Last ${days.length} days`}
       accessibilityValue={{
         text: current
-          ? `${spoken(current)}, ${current.count} done`
+          ? `${spoken(current)}, ${current.points} points`
           : 'an earlier day',
       }}
       accessibilityActions={[{name: 'increment'}, {name: 'decrement'}]}
@@ -74,12 +77,13 @@ export function DayRibbon({days, selected, color, onSelect}: Props) {
         {days.map((d, i) => {
           const on = i === selectedIndex;
           const height =
-            d.count === 0
+            d.points === 0
               ? 2
-              : 6 + Math.round((d.count / most) * (BAR_MAX - 6));
+              : 6 + Math.round((d.points / most) * (BAR_MAX - 6));
           return (
             <View key={d.dayStart} style={[styles.col, on && styles.colOn]}>
               <View style={styles.slot}>
+                <View style={[styles.par, {bottom: parHeight - 1}]} />
                 {d.hasTrain ? (
                   <View style={[styles.trainDot, {backgroundColor: color}]} />
                 ) : null}
@@ -88,8 +92,8 @@ export function DayRibbon({days, selected, color, onSelect}: Props) {
                     styles.bar,
                     {
                       height,
-                      backgroundColor: d.count > 0 ? color : palette.border,
-                      opacity: on || d.isToday || d.count === 0 ? 1 : 0.6,
+                      backgroundColor: d.points > 0 ? color : palette.border,
+                      opacity: on || d.isToday || d.points === 0 ? 1 : 0.6,
                     },
                   ]}
                 />
@@ -130,6 +134,13 @@ const styles = StyleSheet.create({
     height: BAR_MAX + 8,
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  par: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: palette.textMuted,
   },
   trainDot: {
     width: 4,

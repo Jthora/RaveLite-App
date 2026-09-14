@@ -6,6 +6,10 @@ import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {useAliveBreath} from '../../hooks/useAlive';
 import {steppedBreath} from '../../lib/aliveMath';
+import {
+  EYE_BREAK_SECONDS,
+  isWaterCallDrill,
+} from '../../domain/activity/record';
 import type {ActivePulseSummary} from '../../domain/ambient/types';
 import {
   moveForExercise,
@@ -173,6 +177,11 @@ function ActiveCard({
         </Text>
       ) : null}
       {rx?.water ? <Text style={styles.extra}>+ a glass of water</Text> : null}
+      {rx?.water || isWaterCallDrill(active.drillId) ? (
+        <Text style={styles.extra}>
+          then {EYE_BREAK_SECONDS} s · eyes on something far away
+        </Text>
+      ) : null}
 
       <View style={styles.meter}>
         <View

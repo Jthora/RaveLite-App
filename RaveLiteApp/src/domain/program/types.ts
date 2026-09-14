@@ -24,7 +24,10 @@ export type TrackId =
   | 'crunch'
   | 'side'
   | 'plank'
-  | 'hang';
+  | 'hang'
+  | 'posture'
+  | 'breath'
+  | 'mobility';
 
 export type SetUnit = 'reps' | 'seconds';
 

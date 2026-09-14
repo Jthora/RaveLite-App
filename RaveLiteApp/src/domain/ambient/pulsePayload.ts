@@ -1,3 +1,4 @@
+import {EYE_BREAK_SECONDS} from '../activity/record';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {CompletionEntry} from '../journal/types';
 import {formatSetAmount} from '../program/progress';
@@ -36,7 +37,11 @@ export function pulsePayload(input: {
     element: input.element,
     color: el.color,
     title: rx ? prescriptionTitle(rx) : drill?.name ?? `${el.name} pulse`,
-    body: rx ? prescriptionBody(rx, cue) : cue ?? `Time for ${el.name}.`,
+    body: rx
+      ? prescriptionBody(rx, cue)
+      : drill?.targets.includes('Hydration')
+      ? `${cue ?? 'Drink a glass'} · then ${EYE_BREAK_SECONDS} s eyes far away`
+      : cue ?? `Time for ${el.name}.`,
     exerciseId: drill?.id ?? 'unknown',
     pulseId: input.pulseId,
     data: rx ? prescriptionData(rx) : undefined,
@@ -67,7 +72,7 @@ function prescriptionBody(rx: SetPrescription, cue?: string): string {
     parts.push(`then ${rx.partner.seconds} s ${rx.partner.label}`);
   }
   if (rx.water) {
-    parts.push('drink a glass of water');
+    parts.push('drink a glass of water, then rest your eyes');
   }
   return parts.length > 0 ? parts.join(' · ') : 'Back to back, crisp reps.';
 }

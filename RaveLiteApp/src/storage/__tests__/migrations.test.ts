@@ -2,7 +2,7 @@ import {DEFAULT_PLAN} from '../../domain/reminders/defaultPlan';
 import type {Plan} from '../../domain/reminders/types';
 import {store} from '../index';
 import {CURRENT_SCHEMA_VERSION, KEYS} from '../keys';
-import {V3_DEFAULT_PLAN, runMigrations} from '../migrations';
+import {V3_DEFAULT_PLAN, V4_DEFAULT_PLAN, runMigrations} from '../migrations';
 import {DEFAULT_ACTIVE_HOURS} from '../../domain/ambient/types';
 
 const NOW = 1_700_000_000_000;
@@ -136,5 +136,17 @@ describe('v4', () => {
     runMigrations(NOW);
     expect(json(KEYS.activeHours)).toEqual(hours);
     expect(json(KEYS.planCurrent)).toEqual(plan);
+  });
+});
+
+describe('v5', () => {
+  it('gives an untouched v4 plan the Core check-ins', () => {
+    store.set(KEYS.schemaVersion, 4);
+    store.set(KEYS.planCurrent, JSON.stringify(V4_DEFAULT_PLAN));
+    runMigrations(NOW);
+    expect(json(KEYS.planCurrent)).toEqual(DEFAULT_PLAN);
+    expect(
+      json(KEYS.planCurrent).windows.map((w: {id: string}) => w.id),
+    ).toContain('morning-intent');
   });
 });

@@ -41,7 +41,7 @@ it('logs a missed chime at its own time, so Today shows it done', () => {
   expect(rows.map(r => [r.status, r.at])).toEqual([['done', NINE_TWENTY]]);
 });
 
-it("credits a late round's moves as adjusted, its partner and its glass", () => {
+it("credits a late round's moves as adjusted, its partner, its glass and eye break", () => {
   const prescription: SetPrescription = {
     trackId: 'push',
     label: 'Push-ups',
@@ -97,5 +97,5 @@ it("credits a late round's moves as adjusted, its partner and its glass", () => 
     activityForDay()
       .map(item => item.element)
       .sort(),
-  ).toEqual(['air', 'earth', 'fire', 'water']);
+  ).toEqual(['air', 'air', 'earth', 'fire', 'water']);
 });

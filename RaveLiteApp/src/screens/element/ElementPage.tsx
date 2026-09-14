@@ -95,8 +95,8 @@ export function ElementPage({element}: Props) {
         scheduled: [],
       }),
       stats: elementStatLine({
-        today: ribbon[ribbon.length - 1].count,
-        week: ribbon.slice(-7).reduce((sum, d) => sum + d.count, 0),
+        today: ribbon[ribbon.length - 1].points,
+        week: ribbon.slice(-7).reduce((sum, d) => sum + d.points, 0),
         streak: streakDays(now, element.id),
       }),
       best: bestResultLine(

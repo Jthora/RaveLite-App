@@ -207,7 +207,9 @@ describe('round chimes', () => {
       prescription: round,
     });
     expect(payload.title).toBe('Round 3/9 · Push-ups 5 + Dead hang 15s');
-    expect(payload.body).toMatch(/^then 30 s .+ · drink a glass of water$/);
+    expect(payload.body).toMatch(
+      /^then 30 s .+ · drink a glass of water, then rest your eyes$/,
+    );
     expect(prescriptionFromData(payload.data!)).toMatchObject({
       roundIndex: 3,
       rounds: 9,

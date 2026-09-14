@@ -25,7 +25,9 @@ export const VIBRATION_PATTERNS: Record<ElementId, number[]> = {
 /** Pick a drill from the library that fits a slot's constraints. */
 export function pickDrillForSlot(slot: CadenceSlot): Exercise | undefined {
   const candidates = candidatesForSlot(slot);
-  if (candidates.length === 0) {return undefined;}
+  if (candidates.length === 0) {
+    return undefined;
+  }
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
@@ -41,7 +43,9 @@ export function pickDrillForSlotSeeded(
   seed: string,
 ): Exercise | undefined {
   const candidates = candidatesForSlot(slot);
-  if (candidates.length === 0) {return undefined;}
+  if (candidates.length === 0) {
+    return undefined;
+  }
   // FNV-1a 32-bit — cheap, stable, non-cryptographic.
   let h = 0x811c9dc5;
   for (let i = 0; i < seed.length; i++) {
@@ -53,12 +57,22 @@ export function pickDrillForSlotSeeded(
 }
 
 function candidatesForSlot(slot: CadenceSlot): Exercise[] {
+  if (slot.exerciseId) {
+    const drill = EXERCISE_LIBRARY.find(ex => ex.id === slot.exerciseId);
+    return drill ? [drill] : [];
+  }
   return EXERCISE_LIBRARY.filter(ex => {
-    if (ex.element !== slot.element) {return false;}
-    if (slot.maxSeconds && ex.approxSeconds > slot.maxSeconds) {return false;}
+    if (ex.element !== slot.element) {
+      return false;
+    }
+    if (slot.maxSeconds && ex.approxSeconds > slot.maxSeconds) {
+      return false;
+    }
     if (slot.requiredTags && slot.requiredTags.length > 0) {
       const hasAll = slot.requiredTags.every(t => ex.targets.includes(t));
-      if (!hasAll) {return false;}
+      if (!hasAll) {
+        return false;
+      }
     }
     return true;
   });
@@ -105,15 +119,12 @@ export interface ReminderScheduler {
  */
 export const stubScheduler: ReminderScheduler = {
   async applyPlan(plan) {
-    // eslint-disable-next-line no-console
     console.log('[stubScheduler] applyPlan', plan.name, plan.windows.length);
   },
   async clear() {
-    // eslint-disable-next-line no-console
     console.log('[stubScheduler] clear');
   },
   async fireNow(payload) {
-    // eslint-disable-next-line no-console
     console.log('[stubScheduler] fireNow', payload.title, payload.body);
   },
 };

@@ -48,6 +48,7 @@ export type MoveId = (typeof MOVE_IDS)[number];
 
 const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   // Air
+  'air.eye-break': 'presence',
   'air.chin-tuck': 'posture',
   'air.wall-angels': 'posture',
   'air.crocodile-breathing': 'breath',
@@ -186,6 +187,9 @@ const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {
   side: 'sideplank',
   plank: 'plank',
   hang: 'hang',
+  posture: 'posture',
+  breath: 'breath',
+  mobility: 'hipopener',
 };
 
 export function moveForExercise(id: string | undefined): MoveId | undefined {

@@ -1,3 +1,4 @@
+import {POINTS} from '../activity/par';
 import type {ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {TRACKS} from './tracks';
@@ -24,8 +25,8 @@ import type {
  *     for more than MAX_MOVES_PER_ROUND moves; otherwise TARGET_ROUNDS.
  *   - Each track's sets spread evenly across the rounds, and rounds fill
  *     evenly.
- *   - Moves run push, row, squat, pull, crunch, leg-ups, hang, plank,
- *     side, so fire and earth alternate; grip-heavy row, pull and hang
+ *   - Moves run push, posture, row, squat, mobility, pull, crunch, leg-ups,
+ *     hang, plank, side and breath last, so elements alternate; grip-heavy row, pull and hang
  *     are kept in separate rounds when there's room.
  *
  * Smart partners: given the week's work per element, each round's partner
@@ -42,14 +43,17 @@ export const MAX_MOVES_PER_ROUND = 5;
 /** Move order inside a round. */
 const ROUND_ORDER: readonly TrackId[] = [
   'push',
+  'posture',
   'row',
   'squat',
+  'mobility',
   'pull',
   'crunch',
   'legs-up',
   'hang',
   'plank',
   'side',
+  'breath',
 ];
 const GRIP: ReadonlySet<TrackId> = new Set<TrackId>(['row', 'pull', 'hang']);
 
@@ -90,7 +94,7 @@ const BALANCE_ORDER: readonly ElementId[] = [
   'fire',
 ];
 
-/** Things done per element, e.g. over the last week. */
+/** Points per element that smart partners balance against (lowest wins). */
 export type ElementBalance = Readonly<Partial<Record<ElementId, number>>>;
 
 export interface Round {
@@ -227,10 +231,16 @@ export function groupIntoRounds(
 
   // Number each track's sets in the order the rounds come.
   const seen = new Map<TrackId, number>();
-  // Partners placed so far count toward the next pick.
+  // Partners lean toward the lightest element: the balance passed in, plus
+  // what today's own moves give, plus each partner placed so far.
   const running: Partial<Record<ElementId, number>> | undefined = opts.balance
     ? {...opts.balance}
     : undefined;
+  if (running) {
+    for (const m of slots.flat()) {
+      running[m.element] = (running[m.element] ?? 0) + POINTS.set;
+    }
+  }
   return slots
     .filter(moves => moves.length > 0)
     .map((moves, i) => {
@@ -248,7 +258,8 @@ export function groupIntoRounds(
         ordered.map(m => m.element),
       );
       if (running && partner) {
-        running[partner.element] = (running[partner.element] ?? 0) + 1;
+        running[partner.element] =
+          (running[partner.element] ?? 0) + POINTS.drill;
       }
       return {index: i + 1, moves: ordered, partner};
     });

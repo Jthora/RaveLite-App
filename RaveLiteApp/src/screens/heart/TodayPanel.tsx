@@ -218,7 +218,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           onSkipNext={onSkipNext}
         />
         <BalanceStrip
-          counts={model.counts}
+          points={model.points}
           week={model.week}
           onElementPress={onElementPress}
         />
@@ -227,7 +227,9 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
 
         <View style={styles.sectionRow}>
           <Text testID="today-header" style={styles.section}>
-            {model.streak > 0 ? `Today · ${model.streak}-day streak` : 'Today'}
+            {(model.streak > 0
+              ? `Today · ${model.streak}-day streak`
+              : 'Today') + (model.harmony ? ' · Harmony' : '')}
           </Text>
           {missed.length >= 2 ? (
             <Tap

@@ -11,6 +11,7 @@ const item = (
   element: 'fire',
   source: 'manual',
   label: 'Drill',
+  points: 2,
   ref: {store: 'journal', id: over.id},
   ...over,
 });
@@ -30,26 +31,26 @@ describe('buildDayRibbon', () => {
     expect(ribbon).toHaveLength(14);
     expect(ribbon[0].dayStart).toBe(new Date(2026, 8, 1).getTime());
     expect(ribbon[13]).toMatchObject({
-      count: 1,
+      points: 2,
       hasTrain: false,
       isToday: true,
     });
     expect(ribbon[11]).toMatchObject({
-      count: 2,
+      points: 4,
       hasTrain: true,
       isToday: false,
     });
-    expect(ribbon.reduce((sum, d) => sum + d.count, 0)).toBe(3);
+    expect(ribbon.reduce((sum, d) => sum + d.points, 0)).toBe(6);
   });
 });
 
 describe('elementStatLine', () => {
   it('reads today, the week and a streak when there is one', () => {
     expect(elementStatLine({today: 3, week: 12, streak: 4})).toBe(
-      '3 today · 12 this week · 4-day streak',
+      '3/20 today · 12 this week · 4-day streak',
     );
     expect(elementStatLine({today: 0, week: 2, streak: 0})).toBe(
-      '0 today · 2 this week',
+      '0/20 today · 2 this week',
     );
   });
 });

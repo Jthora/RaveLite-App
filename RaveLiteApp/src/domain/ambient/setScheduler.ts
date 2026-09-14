@@ -14,8 +14,13 @@
  *      whose contents changed, and cancel rounds no longer needed.
  */
 import type {ElementId} from '../../theme/elements';
-import {activityInRange} from '../activity/activity';
-import {countsByElement} from '../activity/stats';
+import {activityInRange, chimePoints} from '../activity/activity';
+import {averageShortfall} from '../activity/par';
+import {
+  emptyElementCounts,
+  pointsByElementByDay,
+  windowStart,
+} from '../activity/stats';
 import {entriesForDay, subscribeJournal} from '../journal/journal';
 import {
   expandPlanToFires,
@@ -23,6 +28,7 @@ import {
   type FireSpec,
 } from '../reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../reminders/repository';
+import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import type {Plan} from '../reminders/types';
 import {doneByTrack, firedSetIds} from '../program/progress';
 import {
@@ -39,7 +45,11 @@ import {
   type SetPrescription,
 } from '../program/types';
 import {localDayKey} from '../training/grading';
-import {getActiveHours, subscribeActiveHours} from './activeHours';
+import {
+  getActiveHours,
+  subscribeActiveHours,
+  withinActiveHours,
+} from './activeHours';
 import {
   cancelQueued,
   enqueue,
@@ -75,25 +85,58 @@ function isWaterCall(plan: Plan, fire: FireSpec): boolean {
   return slot?.requiredTags?.includes('Hydration') ?? false;
 }
 
-let balanceCache: {day: string; counts: Record<ElementId, number>} | undefined;
+let balanceCache: {day: string; balance: Record<ElementId, number>} | undefined;
 
 /**
- * Things done per element over the seven days before today, for smart
- * partners. Past days only, so a round's partner holds steady all day and
- * its chime is never re-queued for a partner change.
+ * Where today's partners lean, in points per element: what today's plan
+ * chimes will give each element, less how far it fell short of par on
+ * average over the seven days before today. Rounds add their own moves on
+ * top. An element that made par every day isn't pulled, so partners don't
+ * swing from one element to another day to day.
+ *
+ * Worked out once a day, so a round's partner holds steady and its chime
+ * is never re-queued for a partner change.
  */
-function partnerBalance(date: Date): Record<ElementId, number> {
+function partnerBalance(
+  date: Date,
+  plan: Plan,
+  planFires: readonly FireSpec[],
+  myDay: ReturnType<typeof getActiveHours>,
+): Record<ElementId, number> {
   const day = localDayKey(date.getTime());
   if (balanceCache?.day !== day) {
-    const from = new Date(date);
-    from.setHours(0, 0, 0, 0);
-    from.setDate(from.getDate() - 7);
-    const to = new Date(date);
-    to.setHours(0, 0, 0, 0);
-    to.setDate(to.getDate() - 1);
-    balanceCache = {day, counts: countsByElement(activityInRange(from, to))};
+    const yesterday = new Date(date);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(23, 59, 59, 999);
+    const shortfall = averageShortfall(
+      pointsByElementByDay(
+        activityInRange(windowStart(7, yesterday), yesterday),
+        7,
+        yesterday,
+      ),
+    );
+    const balance = emptyElementCounts();
+    for (const fire of planFires) {
+      if (!withinActiveHours(new Date(fire.ts), myDay)) {
+        continue;
+      }
+      const slot = plan.windows.find(w => w.id === fire.windowId)?.slots[
+        fire.slotIndex
+      ];
+      const drill = slot
+        ? pickDrillForSlotSeeded(slot, planPulseId(fire))
+        : undefined;
+      const points = drill ? chimePoints(drill) : {};
+      for (const id of Object.keys(points) as ElementId[]) {
+        balance[id] += points[id] ?? 0;
+      }
+    }
+    for (const id of Object.keys(balance) as ElementId[]) {
+      balance[id] -= shortfall[id];
+    }
+    balanceCache = {day, balance};
   }
-  return balanceCache.counts;
+  return balanceCache.balance;
 }
 
 /** Today's rounds, computed from current storage. Safe to call from UI. */
@@ -115,7 +158,9 @@ export function setsToday(now: number = Date.now()): SetsToday {
     dayStart: myDay.start,
     dayEnd: myDay.end,
     endMarginMs: ROUND_END_MARGIN_MS,
-    rounds: groupIntoRounds(prescriptions, {balance: partnerBalance(date)}),
+    rounds: groupIntoRounds(prescriptions, {
+      balance: partnerBalance(date, plan, planFires, myDay),
+    }),
     blockedTs: planFires.map(f => f.ts),
   });
   const entries = entriesForDay(date);

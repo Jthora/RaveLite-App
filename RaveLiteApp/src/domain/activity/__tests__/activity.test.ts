@@ -79,7 +79,7 @@ describe('Train log entries', () => {
 });
 
 describe('Daily Sets rounds', () => {
-  it('expand into moves, the partner and the glass, each on its element', () => {
+  it('expand into moves, the partner, the glass and its eye break, each on its element', () => {
     round();
     const items = activityForDay();
     expect(items.map(i => [i.element, i.label])).toEqual([
@@ -87,12 +87,13 @@ describe('Daily Sets rounds', () => {
       ['earth', trackName('squat')],
       ['air', expect.any(String)],
       ['water', 'Glass of water'],
+      ['air', 'Eye break'],
     ]);
     expect(items.every(i => i.source === 'chime')).toBe(true);
     expect(countsByElement(items)).toEqual({
       fire: 1,
       earth: 1,
-      air: 1,
+      air: 2,
       water: 1,
       heart: 0,
     });

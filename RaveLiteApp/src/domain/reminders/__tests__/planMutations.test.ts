@@ -17,7 +17,7 @@ describe('planMutations', () => {
     const w = makeWindow({label: 'Test', startTime: '12:00', endTime: '13:00'});
     const next = addWindow(DEFAULT_PLAN, w);
     expect(next.windows).toHaveLength(DEFAULT_PLAN.windows.length + 1);
-    expect(DEFAULT_PLAN.windows).toHaveLength(5);
+    expect(DEFAULT_PLAN.windows).toHaveLength(6);
     expect(next.windows[next.windows.length - 1].label).toBe('Test');
   });
 
@@ -73,9 +73,9 @@ describe('planMutations', () => {
   });
 
   it('plansEqual treats structurally equal plans as equal', () => {
-    expect(plansEqual(DEFAULT_PLAN, JSON.parse(JSON.stringify(DEFAULT_PLAN)))).toBe(
-      true,
-    );
+    expect(
+      plansEqual(DEFAULT_PLAN, JSON.parse(JSON.stringify(DEFAULT_PLAN))),
+    ).toBe(true);
   });
 
   it('plansEqual flags any change as dirty', () => {
