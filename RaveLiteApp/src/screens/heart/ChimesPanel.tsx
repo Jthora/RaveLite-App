@@ -76,10 +76,10 @@ export function ChimesPanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>▸  CHIMES</Text>
+      <Text style={[styles.eyebrow, {color: accent}]}>▸ CHIMES</Text>
       <Text style={styles.body}>
-        Cues play on the alarm channel, so they sound through silent mode and
-        Do Not Disturb during active hours. Alarm volume is the ceiling.
+        Cues play on the alarm channel, so they sound through silent mode and Do
+        Not Disturb during active hours. Alarm volume is the ceiling.
       </Text>
 
       {!hasDeviceModule() ? (
@@ -241,14 +241,16 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.xs,
   },
+  // Five steps share the row evenly so they never wrap on a 360 dp screen.
   pills: {
     flex: 1,
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: spacing.xs,
   },
   pill: {
-    minWidth: 44,
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 0,
     alignItems: 'center',
   },
   pillIdle: {
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   testBtn: {
-    width: 64,
+    width: 56,
     paddingVertical: spacing.xs,
     paddingHorizontal: 0,
     borderRadius: radius.pill,
