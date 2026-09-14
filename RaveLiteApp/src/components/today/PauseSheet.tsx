@@ -9,8 +9,11 @@ import {
 } from 'react-native';
 
 import type {PauseDurationKey} from '../../domain/ambient/pause';
+import type {ActiveHours} from '../../domain/ambient/types';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+
+const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 interface Props {
   visible: boolean;
@@ -18,6 +21,9 @@ interface Props {
   paused: boolean;
   onSelect: (key: PauseDurationKey) => void;
   onClose: () => void;
+  /** When set with `onEditMyDay`, the sheet leads with My day. */
+  myDay?: ActiveHours;
+  onEditMyDay?: () => void;
 }
 
 const OPTIONS: {key: PauseDurationKey; label: string; sub: string}[] = [
@@ -26,8 +32,21 @@ const OPTIONS: {key: PauseDurationKey; label: string; sub: string}[] = [
   {key: 'tonight', label: 'until tomorrow', sub: 'wakes at 06:00'},
 ];
 
-/** Bottom sheet for pausing chimes, or resuming them. */
-export function PauseSheet({visible, paused, onSelect, onClose}: Props) {
+function daysLabel(mask: number): string {
+  return mask === 0b1111111
+    ? 'every day'
+    : DAY_LETTERS.filter((_, i) => (mask & (1 << i)) !== 0).join(' ');
+}
+
+/** Bottom sheet for My day and pausing chimes, or resuming them. */
+export function PauseSheet({
+  visible,
+  paused,
+  onSelect,
+  onClose,
+  myDay,
+  onEditMyDay,
+}: Props) {
   return (
     <Modal
       visible={visible}
@@ -38,7 +57,29 @@ export function PauseSheet({visible, paused, onSelect, onClose}: Props) {
         <View style={styles.backdrop}>
           <TouchableWithoutFeedback>
             <View style={styles.sheet}>
-              <Text style={styles.title}>PAUSE CHIMES</Text>
+              {myDay && onEditMyDay ? (
+                <>
+                  <Text style={styles.title}>MY DAY</Text>
+                  <Pressable
+                    style={({pressed}) => [
+                      styles.row,
+                      pressed && styles.pressed,
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit My day"
+                    onPress={onEditMyDay}>
+                    <Text style={styles.rowLabel}>
+                      {myDay.start}–{myDay.end} · {daysLabel(myDay.daysMask)}
+                    </Text>
+                    <Text style={styles.rowSub}>
+                      chimes ring inside it · tap to edit
+                    </Text>
+                  </Pressable>
+                </>
+              ) : null}
+              <Text style={[styles.title, myDay && styles.titleAfter]}>
+                PAUSE CHIMES
+              </Text>
               {OPTIONS.map(opt => (
                 <Pressable
                   key={opt.key}
@@ -91,6 +132,9 @@ const styles = StyleSheet.create({
     color: palette.textDim,
     letterSpacing: 1.6,
     marginBottom: spacing.sm,
+  },
+  titleAfter: {
+    marginTop: spacing.md,
   },
   row: {
     minHeight: 56,

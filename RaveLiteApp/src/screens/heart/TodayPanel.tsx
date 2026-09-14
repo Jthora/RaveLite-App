@@ -1,13 +1,14 @@
 /**
- * TodayPanel — Heart › Today, the home screen.
+ * TodayPanel — Heart, the home screen, on one page.
  *
- * One scroll, top to bottom: live status and My day; the chime to answer
- * (or the next one); today's balance across the elements; water; Daily
- * Sets at a glance; and the whole day's list from every source. Logging a
- * session and practice live at the bottom, out of the way.
+ * Top to bottom: live status with My day, the clock and Settings; the chime
+ * to answer (or the next one); today's balance with the week behind it;
+ * water; Daily Sets meters; and the whole day's list from every source.
+ * Settings, Daily Sets in full, logging a session and practice open as
+ * sheets, so the page itself stays a glance.
  */
-import React, {useCallback, useState} from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {AppState, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../../components/Tap';
 import {BalanceStrip} from '../../components/today/BalanceStrip';
@@ -15,12 +16,16 @@ import {ChimeCard, type DoneAdjust} from '../../components/today/ChimeCard';
 import {DayList} from '../../components/today/DayList';
 import {MyDaySheet} from '../../components/today/MyDaySheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
-import {SetsSummaryLine} from '../../components/today/SetsSummaryLine';
+import {SetsMeters} from '../../components/today/SetsMeters';
 import {StatusLine} from '../../components/today/StatusLine';
 import {WaterCounter} from '../../components/today/WaterCounter';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {logWaterGlass} from '../../domain/activity/record';
 import {setActiveHours} from '../../domain/ambient/activeHours';
+import {
+  gatherHealthInputs,
+  summarizeHealth,
+} from '../../domain/ambient/healthChecks';
 import {setPause} from '../../domain/ambient/pause';
 import {
   cancelQueued,
@@ -31,29 +36,69 @@ import {
 } from '../../domain/ambient/pulseRuntime';
 import type {CircuitLeg} from '../../domain/circuit/circuit';
 import {append} from '../../domain/journal/journal';
+import type {DayRow} from '../../domain/today/dayList';
+import {loadEntries} from '../../domain/training/repository';
+import type {TrainingLogEntry} from '../../domain/training/types';
 import {useTodayModel} from '../../hooks/useTodayModel';
 import {ElementProvider} from '../../theme/elementContext';
 import {ELEMENTS, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {DailySetsSheet} from './DailySetsSheet';
+import {SettingsSheet} from './SettingsSheet';
 
 /** +5 on the next chime pushes it back by this much. */
 const PLUS_FIVE_MS = 5 * 60_000;
 
 interface Props {
-  onOpenProgress: () => void;
+  permission: 'unknown' | 'granted' | 'denied';
   onElementPress: (id: ElementId) => void;
   onEngageLegs: (legs: CircuitLeg[]) => void;
 }
 
-export function TodayPanel({
-  onOpenProgress,
-  onElementPress,
-  onEngageLegs,
-}: Props) {
+/**
+ * How many Stay alive checks warn, re-read when the app comes back to the
+ * front (after a trip to system settings) or on demand.
+ */
+function useHealthWarnings(): [number, () => void] {
+  const [warnings, setWarnings] = useState(0);
+  const [asked, setAsked] = useState(0);
+  const recheck = useCallback(() => setAsked(n => n + 1), []);
+
+  useEffect(() => {
+    let live = true;
+    gatherHealthInputs()
+      .then(inputs => {
+        if (live) {
+          setWarnings(summarizeHealth(inputs).warnings);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [asked]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        recheck();
+      }
+    });
+    return () => sub.remove();
+  }, [recheck]);
+
+  return [warnings, recheck];
+}
+
+export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const model = useTodayModel();
+  const [warnings, recheckHealth] = useHealthWarnings();
   const [myDayOpen, setMyDayOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
   const [practiceOpen, setPracticeOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [setsOpen, setSetsOpen] = useState(false);
   const next = model.next;
 
   // Sealing writes the completion; the sets scheduler trims later rounds
@@ -73,6 +118,14 @@ export function TodayPanel({
     cancelQueued([next.id]);
     append({kind: 'reminder.skipped', pulseId: next.id, respondedAfterMs: 0});
   }, [next]);
+  // A Train entry in the day list opens for edit; others aren't pressable.
+  const onRowPress = useCallback((row: DayRow) => {
+    const id = row.ref?.store === 'train' ? row.ref.id : undefined;
+    const entry = id ? loadEntries().find(e => e.id === id) : undefined;
+    if (entry) {
+      setEditing(entry);
+    }
+  }, []);
 
   const accent = ELEMENTS.heart.accent;
 
@@ -88,6 +141,8 @@ export function TodayPanel({
           pauseUntil={model.pauseUntil}
           onEditMyDay={() => setMyDayOpen(true)}
           onPause={key => setPause(key)}
+          onOpenSettings={() => setSettingsOpen(true)}
+          settingsAlert={permission === 'denied' || warnings > 0}
         />
         <ChimeCard
           now={model.now}
@@ -99,12 +154,18 @@ export function TodayPanel({
           onDeferNext={onDeferNext}
           onSkipNext={onSkipNext}
         />
-        <BalanceStrip counts={model.counts} onElementPress={onElementPress} />
+        <BalanceStrip
+          counts={model.counts}
+          week={model.week}
+          onElementPress={onElementPress}
+        />
         <WaterCounter glasses={model.glasses} onAdd={() => logWaterGlass()} />
-        <SetsSummaryLine sets={model.sets} onPress={onOpenProgress} />
+        <SetsMeters sets={model.sets} onPress={() => setSetsOpen(true)} />
 
-        <Text style={styles.section}>Today</Text>
-        <DayList rows={model.rows} />
+        <Text testID="today-header" style={styles.section}>
+          {model.streak > 0 ? `Today · ${model.streak}-day streak` : 'Today'}
+        </Text>
+        <DayList rows={model.rows} onRowPress={onRowPress} />
 
         <View style={styles.links}>
           <Tap
@@ -136,7 +197,14 @@ export function TodayPanel({
             setMyDayOpen(false);
           }}
         />
-        <TrainingLogSheet visible={logOpen} onClose={() => setLogOpen(false)} />
+        <TrainingLogSheet
+          visible={logOpen || editing !== undefined}
+          editing={editing}
+          onClose={() => {
+            setLogOpen(false);
+            setEditing(undefined);
+          }}
+        />
         <PracticeSheet
           visible={practiceOpen}
           onClose={() => setPracticeOpen(false)}
@@ -145,6 +213,15 @@ export function TodayPanel({
             onEngageLegs(legs);
           }}
         />
+        <SettingsSheet
+          visible={settingsOpen}
+          permission={permission}
+          onClose={() => {
+            setSettingsOpen(false);
+            recheckHealth();
+          }}
+        />
+        <DailySetsSheet visible={setsOpen} onClose={() => setSetsOpen(false)} />
       </ScrollView>
     </ElementProvider>
   );

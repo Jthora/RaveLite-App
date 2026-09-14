@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React from 'react';
+import {Modal, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {CardGrid} from '../CardGrid';
@@ -9,9 +9,7 @@ import type {CircuitLeg} from '../../domain/circuit/circuit';
 import {exercisesFor} from '../../domain/exercises/library';
 import {CircuitsPanel} from '../../screens/heart/CircuitsPanel';
 import {ELEMENTS} from '../../theme/elements';
-import {palette, radius, spacing, type as t} from '../../theme';
-
-type PracticeTab = 'circuits' | 'drills';
+import {palette, spacing, type as t} from '../../theme';
 
 interface Props {
   visible: boolean;
@@ -20,11 +18,10 @@ interface Props {
 }
 
 /**
- * Practice on demand, off the home screen: the Pentagram and saved
- * circuits, and the Heart drill library.
+ * Practice on demand, off the home screen, in one scroll: the Pentagram
+ * and saved circuits, then the Heart drill library.
  */
 export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
-  const [tab, setTab] = useState<PracticeTab>('circuits');
   const accent = ELEMENTS.heart.accent;
 
   return (
@@ -40,36 +37,19 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
             <Text style={styles.closeText}>Close</Text>
           </Tap>
         </View>
-        <View style={styles.tabs}>
-          {(['circuits', 'drills'] as const).map(key => {
-            const on = tab === key;
-            return (
-              <Tap
-                key={key}
-                variant="plain"
-                color={accent}
-                onPress={() => setTab(key)}
-                accessibilityRole="tab"
-                accessibilityState={{selected: on}}
-                style={[styles.tab, on && {borderColor: accent}]}>
-                <Text style={[styles.tabText, on && {color: accent}]}>
-                  {key === 'circuits' ? 'Circuits' : 'Heart drills'}
-                </Text>
-              </Tap>
-            );
-          })}
-        </View>
-        {tab === 'circuits' ? (
-          <CircuitsPanel onEngageLegs={onEngageLegs} />
-        ) : (
-          <ScrollView contentContainerStyle={styles.drills}>
-            <CardGrid>
-              {exercisesFor('heart').map(ex => (
-                <ExerciseRow key={ex.id} exercise={ex} />
-              ))}
-            </CardGrid>
-          </ScrollView>
-        )}
+        <CircuitsPanel
+          onEngageLegs={onEngageLegs}
+          footer={
+            <View style={styles.drills}>
+              <Text style={styles.sectionLabel}>HEART DRILLS</Text>
+              <CardGrid>
+                {exercisesFor('heart').map(ex => (
+                  <ExerciseRow key={ex.id} exercise={ex} />
+                ))}
+              </CardGrid>
+            </View>
+          }
+        />
       </SafeAreaView>
     </Modal>
   );
@@ -100,27 +80,13 @@ const styles = StyleSheet.create({
     ...t.subtitle,
     color: palette.textDim,
   },
-  tabs: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  tab: {
-    flex: 1,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: palette.border,
-  },
-  tabText: {
-    ...t.subtitle,
-    color: palette.textDim,
-  },
   drills: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
+    marginTop: spacing.xl,
+    gap: spacing.sm,
+  },
+  sectionLabel: {
+    ...t.caption,
+    color: palette.textDim,
+    letterSpacing: 1.4,
   },
 });

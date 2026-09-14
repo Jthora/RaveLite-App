@@ -10,27 +10,18 @@
  * Fire, Air, Earth and Water: Drills (a drill to try now and the library),
  * Train (sessions typed in by hand), History (everything done, by day).
  */
-import {
-  Dumbbell,
-  History,
-  ListChecks,
-  Settings,
-  Sun,
-  TrendingUp,
-} from 'lucide-react-native';
+import {Dumbbell, History, ListChecks, Sun} from 'lucide-react-native';
 
 import type {ElementId} from '../theme/elements';
 import type {SubTab} from '../components/SubTabStrip';
 
 // ---- Heart sub-tabs -------------------------------------------------------
 
-export const HEART_SLUGS = ['today', 'progress', 'setup'] as const;
+export const HEART_SLUGS = ['today'] as const;
 export type HeartSubSlug = (typeof HEART_SLUGS)[number];
 
 const HEART_SUB_TABS: ReadonlyArray<SubTab<HeartSubSlug>> = [
   {slug: 'today', label: 'Today', Icon: Sun},
-  {slug: 'progress', label: 'Progress', Icon: TrendingUp},
-  {slug: 'setup', label: 'Setup', Icon: Settings},
 ];
 
 export function isHeartSlug(slug: string): slug is HeartSubSlug {

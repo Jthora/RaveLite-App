@@ -1,7 +1,17 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {activityForDay, subscribeActivity} from '../domain/activity/activity';
-import {countsByElement, hydrationGlasses} from '../domain/activity/stats';
+import {
+  activityForDay,
+  activityInRange,
+  subscribeActivity,
+} from '../domain/activity/activity';
+import {
+  countsByElement,
+  countsByElementByDay,
+  hydrationGlasses,
+  streakDays,
+  windowStart,
+} from '../domain/activity/stats';
 import {
   getActiveHours,
   readPauseUntil,
@@ -29,6 +39,7 @@ import {
   type DayRow,
   type ScheduledChime,
 } from '../domain/today/dayList';
+import {localDayKey} from '../domain/training/grading';
 import {ELEMENTS, type ElementId} from '../theme/elements';
 
 export interface TodayModel {
@@ -44,6 +55,10 @@ export interface TodayModel {
   counts: Record<ElementId, number>;
   glasses: number;
   sets: SetsSummary;
+  /** Per element, the last 7 days (today last): anything done that day. */
+  week: Record<ElementId, boolean[]>;
+  /** Days in a row, ending today, with anything done. */
+  streak: number;
 }
 
 /** How often the day is re-read when nothing has changed. */
@@ -68,7 +83,9 @@ function roundChime(fire: SetFire): ScheduledChime {
 }
 
 /** Everything Today shows, read from storage and the chime runtime. */
-export function buildTodayModel(now: number): TodayModel {
+export function buildTodayModel(
+  now: number,
+): Omit<TodayModel, 'week' | 'streak'> {
   const date = new Date(now);
   const journal = entriesForDay(date);
   const activity = activityForDay(date);
@@ -143,6 +160,23 @@ export function buildTodayModel(now: number): TodayModel {
   };
 }
 
+/** The week's dots and the streak: they only change with activity or the date. */
+export function buildTodayHistory(
+  now: number,
+): Pick<TodayModel, 'week' | 'streak'> {
+  const date = new Date(now);
+  const counts = countsByElementByDay(
+    activityInRange(windowStart(7, date), date),
+    7,
+    date,
+  );
+  const week = {} as Record<ElementId, boolean[]>;
+  for (const id of Object.keys(counts) as ElementId[]) {
+    week[id] = counts[id].map(n => n > 0);
+  }
+  return {week, streak: streakDays(date)};
+}
+
 /**
  * Today's model, kept live: rebuilt whenever the chime runtime, activity,
  * program, plan or My day changes (and every 30 s), with a one-second
@@ -151,6 +185,7 @@ export function buildTodayModel(now: number): TodayModel {
 export function useTodayModel(): TodayModel {
   const [version, setVersion] = useState(0);
   const [now, setNow] = useState(() => Date.now());
+  const [activityVersion, setActivityVersion] = useState(0);
   const refresh = useCallback(() => {
     setVersion(v => v + 1);
     setNow(Date.now());
@@ -159,7 +194,10 @@ export function useTodayModel(): TodayModel {
   useEffect(() => {
     const unsubscribes = [
       subscribeRuntime(refresh),
-      subscribeActivity(refresh),
+      subscribeActivity(() => {
+        setActivityVersion(v => v + 1);
+        refresh();
+      }),
       subscribeProgram(refresh),
       subscribePlan(refresh),
       subscribeActiveHours(refresh),
@@ -174,6 +212,13 @@ export function useTodayModel(): TodayModel {
   // `version` is the rebuild trigger; the build reads storage directly.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const model = useMemo(() => buildTodayModel(Date.now()), [version]);
+  // The streak walks back day by day, so it is kept off the 30 s refresh.
+  const day = localDayKey(now);
+  const history = useMemo(
+    () => buildTodayHistory(Date.now()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activityVersion, day],
+  );
 
   const sounding = model.active !== undefined;
   useEffect(() => {
@@ -184,5 +229,5 @@ export function useTodayModel(): TodayModel {
     return () => clearInterval(timer);
   }, [sounding]);
 
-  return {...model, now};
+  return {...model, ...history, now};
 }

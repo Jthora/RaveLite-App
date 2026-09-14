@@ -80,8 +80,8 @@ export function DayList({
             onPress={() => onRowPress(row)}
             accessibilityRole="button"
             accessibilityLabel={`Edit ${row.label}`}
-            style={[styles.row, styles.rowEditable]}>
-            {body}
+            style={styles.rowTap}>
+            <View style={styles.rowInner}>{body}</View>
           </Tap>
         ) : (
           <View key={row.id} style={[styles.row, quiet && styles.quiet]}>
@@ -109,8 +109,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: palette.border,
   },
-  rowEditable: {
+  // Tap wraps its children in one view, so the row layout sits inside it.
+  rowTap: {
     minHeight: 48,
+    justifyContent: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: palette.border,
+  },
+  rowInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   quiet: {
     opacity: 0.5,

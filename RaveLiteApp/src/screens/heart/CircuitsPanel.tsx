@@ -1,5 +1,5 @@
 /**
- * CircuitsPanel — Heart > Circuits tab body.
+ * CircuitsPanel — circuits in Today's Practice sheet.
  *
  * Layer 1: Pentagram launcher card (built-in) + saved custom circuits
  *          list + "+ New circuit" action.
@@ -33,9 +33,11 @@ import {palette, radius, spacing, type as t} from '../../theme';
 interface Props {
   /** HeartScreen owns the CircuitChamber; this fires it with given legs. */
   onEngageLegs: (legs: CircuitLeg[]) => void;
+  /** Shown after the circuits, in the same scroll (hidden while editing). */
+  footer?: React.ReactNode;
 }
 
-export function CircuitsPanel({onEngageLegs}: Props) {
+export function CircuitsPanel({onEngageLegs, footer}: Props) {
   const [list, setList] = useState<CustomCircuit[]>(() => listCircuits());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
@@ -63,7 +65,9 @@ export function CircuitsPanel({onEngageLegs}: Props) {
   );
 
   const onCircuitDelete = useCallback(() => {
-    if (!editingId) {return;}
+    if (!editingId) {
+      return;
+    }
     deleteCircuit(editingId);
     refresh();
     setEditingId(null);
@@ -83,7 +87,9 @@ export function CircuitsPanel({onEngageLegs}: Props) {
 
   const onCircuitEngage = useCallback(
     (draft: CustomCircuit) => {
-      if (draft.legs.length === 0) {return;}
+      if (draft.legs.length === 0) {
+        return;
+      }
       // Persist any unsaved changes first so a crashed run doesn't
       // lose the user's edits.
       saveCircuit(draft);
@@ -116,9 +122,7 @@ export function CircuitsPanel({onEngageLegs}: Props) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
-        <Text style={[styles.eyebrow, {color: accentDim}]}>
-          ▸  CIRCUITS
-        </Text>
+        <Text style={[styles.eyebrow, {color: accentDim}]}>▸ CIRCUITS</Text>
         <Text style={styles.subtitle}>
           The signature pentagram, plus your own sequences.
         </Text>
@@ -126,19 +130,17 @@ export function CircuitsPanel({onEngageLegs}: Props) {
 
       {/* Built-in pentagram card */}
       <View style={[styles.card, {borderColor: accent}]}>
-        <Text style={[styles.cardEyebrow, {color: accentDim}]}>
-          ▸  BUILT-IN
-        </Text>
+        <Text style={[styles.cardEyebrow, {color: accentDim}]}>▸ BUILT-IN</Text>
         <Text style={styles.cardTitle}>The Pentagram</Text>
         <Text style={styles.cardMeta}>
-          Air → Fire → Earth → Water → Heart  ·  ~3 minutes
+          Air → Fire → Earth → Water → Heart · ~3 minutes
         </Text>
         <Tap
           variant="solid"
           color={accent}
           onPress={() => onEngageLegs(buildCircuit())}
           style={styles.engageBtn}>
-          <Text style={styles.engageText}>Engage  ⟶</Text>
+          <Text style={styles.engageText}>Engage ⟶</Text>
         </Tap>
       </View>
 
@@ -165,8 +167,11 @@ export function CircuitsPanel({onEngageLegs}: Props) {
         color={accentDim}
         onPress={onNewCircuit}
         style={styles.newBtn}>
-        <Text style={[styles.newBtnText, {color: accentDim}]}>+ New circuit</Text>
+        <Text style={[styles.newBtnText, {color: accentDim}]}>
+          + New circuit
+        </Text>
       </Tap>
+      {footer}
     </ScrollView>
   );
 }

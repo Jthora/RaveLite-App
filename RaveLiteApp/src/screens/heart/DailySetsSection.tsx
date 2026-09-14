@@ -1,5 +1,5 @@
 /**
- * DailySetsSection — the Daily Sets part of Heart › Progress.
+ * DailySetsSection — the body of the Daily Sets sheet.
  *
  * Today's sets per track, and the controls that drive the ramp:
  *   - per-track progress (amount done / quota, sets done, next round)
@@ -8,7 +8,7 @@
  *   - level up to the next variation once the set size graduates
  *   - track on/off
  *
- * Renders as a plain section; the Progress panel owns the scroll. Rounds
+ * Renders as a plain section; the sheet owns the scroll. Rounds
  * spread across My day. All writes go through the program repository or
  * the journal; the sets scheduler picks them up.
  */
@@ -118,16 +118,6 @@ export function DailySetsSection() {
         </Text>
         <Text style={styles.subtitle}>
           {setsDone} of {setsTotal} sets · My day {myDay.start}–{myDay.end}
-        </Text>
-      </View>
-
-      <View style={styles.ruleCard}>
-        <Text style={styles.ruleText}>
-          Each chime is a round: a few crisp sets back to back at about half
-          your max, then a short stretch. Stop two reps before it gets ugly.{' '}
-          {phase === 'deload'
-            ? 'Deload week: fewer sets — test your maxes while fresh.'
-            : 'Sets climb weekly; a new max test is what grows each set.'}
         </Text>
       </View>
 
@@ -425,17 +415,6 @@ const styles = StyleSheet.create({
   subtitle: {
     ...t.subtitle,
     color: palette.textDim,
-  },
-  ruleCard: {
-    backgroundColor: palette.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  ruleText: {
-    ...t.body,
-    color: palette.textDim,
-    lineHeight: 21,
   },
   emptyText: {
     ...t.body,

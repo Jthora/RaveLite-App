@@ -4,6 +4,8 @@ import {afterEach, beforeEach, expect, it, jest} from '@jest/globals';
 
 import {store} from '../../../storage';
 import * as runtime from '../../../domain/ambient/pulseRuntime';
+import {DailySetsSheet} from '../DailySetsSheet';
+import {SettingsSheet} from '../SettingsSheet';
 import {TodayPanel} from '../TodayPanel';
 
 // Monday 14 Sep 2026, 10:00 — inside My day, so a chime can sound.
@@ -25,7 +27,7 @@ function renderToday() {
   act(() => {
     tree = renderer.create(
       <TodayPanel
-        onOpenProgress={() => {}}
+        permission="granted"
         onElementPress={() => {}}
         onEngageLegs={() => {}}
       />,
@@ -40,15 +42,19 @@ const byTestId = (tree: renderer.ReactTestRenderer, id: string) =>
 it('shows today with an empty water count', () => {
   const tree = renderToday();
   expect(byTestId(tree, 'water-count').props.children).toEqual([0, '/', 8]);
+  expect(byTestId(tree, 'today-header').props.children).toBe('Today');
   act(() => tree.unmount());
 });
 
-it('+1 logs a glass and the count follows', () => {
+it('+1 logs a glass; the count and the streak follow', () => {
   const tree = renderToday();
   act(() => {
     byTestId(tree, 'water-add').props.onPress();
   });
   expect(byTestId(tree, 'water-count').props.children).toEqual([1, '/', 8]);
+  expect(byTestId(tree, 'today-header').props.children).toBe(
+    'Today · 1-day streak',
+  );
   act(() => tree.unmount());
 });
 
@@ -62,5 +68,20 @@ it('Done answers the chime that is sounding', () => {
     byTestId(tree, 'chime-done').props.onPress();
   });
   expect(runtime.getActivePulseSummary()).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('the gear opens Settings and the meters open Daily Sets', () => {
+  const tree = renderToday();
+  expect(tree.root.findByType(SettingsSheet).props.visible).toBe(false);
+  expect(tree.root.findByType(DailySetsSheet).props.visible).toBe(false);
+  act(() => {
+    byTestId(tree, 'settings-open').props.onPress();
+  });
+  expect(tree.root.findByType(SettingsSheet).props.visible).toBe(true);
+  act(() => {
+    byTestId(tree, 'sets-open').props.onPress();
+  });
+  expect(tree.root.findByType(DailySetsSheet).props.visible).toBe(true);
   act(() => tree.unmount());
 });
