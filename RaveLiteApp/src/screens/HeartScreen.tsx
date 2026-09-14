@@ -13,6 +13,7 @@ import {AlwaysOnPanel} from './heart/AlwaysOnPanel';
 import {ThemePanel} from './heart/ThemePanel';
 import {SetsPanel} from './heart/SetsPanel';
 import {ChimesPanel} from './heart/ChimesPanel';
+import {StayAlivePanel} from './heart/StayAlivePanel';
 import type {CircuitLeg} from '../domain/circuit/circuit';
 import {ELEMENTS} from '../theme/elements';
 import {exercisesFor} from '../domain/exercises/library';
@@ -334,6 +335,7 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp, onElementC
               <Text style={styles.btnText}>Apply Plan</Text>
             </Tap>
           </View>
+          <StayAlivePanel />
           <ChimesPanel />
           <ThemePanel />
         </ScrollView>

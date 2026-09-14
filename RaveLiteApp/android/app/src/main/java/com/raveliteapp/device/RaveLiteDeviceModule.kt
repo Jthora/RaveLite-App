@@ -9,6 +9,7 @@ import android.media.SoundPool
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.WindowManager
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -25,6 +26,8 @@ import com.raveliteapp.R
  *    the length of the cue.
  *  - Alarm volume and the current DND interruption filter, for the Chimes
  *    settings and the "Respect Do Not Disturb" toggle.
+ *  - Window backlight override for night mode: the screen stays on
+ *    (FLAG_KEEP_SCREEN_ON) but barely lit outside active hours.
  *
  * Old-architecture module (newArchEnabled=false), registered manually in
  * MainApplication via [RaveLiteDevicePackage].
@@ -120,6 +123,28 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     val notifications =
         reactContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     promise.resolve(notifications.currentInterruptionFilter)
+  }
+
+  /**
+   * Override this activity window's backlight: [level] 0–1, or any negative
+   * value to hand brightness back to the system. Resolves false when there
+   * is no foreground activity to apply it to.
+   */
+  @ReactMethod
+  fun setWindowBrightness(level: Double, promise: Promise) {
+    val activity = currentActivity
+    if (activity == null) {
+      promise.resolve(false)
+      return
+    }
+    activity.runOnUiThread {
+      val attrs = activity.window.attributes
+      attrs.screenBrightness =
+          if (level < 0) WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+          else level.coerceIn(0.01, 1.0).toFloat()
+      activity.window.attributes = attrs
+      promise.resolve(true)
+    }
   }
 
   private fun requestFocus() {

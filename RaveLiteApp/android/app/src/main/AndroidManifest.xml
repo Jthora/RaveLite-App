@@ -14,6 +14,10 @@
          require sensor/health runtime permissions we don't use and
          crashes on Android 14 devices (e.g. Redmi A3) at FGS start. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Backup chimes: exact alarms so a chime still fires if the process is
+         killed. RaveLite is sideloaded, where USE_EXACT_ALARM is granted at
+         install. If it ever ships on Google Play this needs policy review. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
       android:name=".MainApplication"

@@ -29,6 +29,7 @@ import {startPulseRuntime} from './src/domain/ambient/pulseRuntime';
 import {startPlanScheduler} from './src/domain/ambient/planScheduler';
 import {startSetScheduler} from './src/domain/ambient/setScheduler';
 import {ElementShell} from './src/shell/ElementShell';
+import {NightVeil} from './src/components/alive/NightVeil';
 
 // Hook Notifee's foreground events once at boot so notifications actually
 // present while RaveLite is the active app (the common case for a training
@@ -91,7 +92,10 @@ function App(): React.JSX.Element {
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" backgroundColor={palette.bg} />
         {hydrated ? (
-          <ElementShell key={themeEpoch} />
+          <>
+            <ElementShell key={themeEpoch} />
+            <NightVeil />
+          </>
         ) : (
           <View style={styles.root} />
         )}

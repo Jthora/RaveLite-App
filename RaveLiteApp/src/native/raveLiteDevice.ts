@@ -16,6 +16,7 @@ interface RaveLiteDeviceNative {
   playCue(element: string, volume: number): Promise<boolean>;
   getAlarmVolume(): Promise<{current: number; max: number}>;
   getInterruptionFilter(): Promise<number>;
+  setWindowBrightness(level: number): Promise<boolean>;
 }
 
 const native: RaveLiteDeviceNative | undefined =
@@ -54,6 +55,21 @@ export async function getAlarmVolume(): Promise<{
     return await native.getAlarmVolume();
   } catch {
     return null;
+  }
+}
+
+/**
+ * Override the window backlight (0–1), or pass a negative value to hand
+ * brightness back to the system. Resolves true only if it was applied.
+ */
+export async function setWindowBrightness(level: number): Promise<boolean> {
+  if (!native) {
+    return false;
+  }
+  try {
+    return await native.setWindowBrightness(level);
+  } catch {
+    return false;
   }
 }
 

@@ -45,6 +45,7 @@ jest.mock('@notifee/react-native', () => ({
     getPowerManagerInfo: jest.fn().mockResolvedValue({activity: null}),
     openPowerManagerSettings: jest.fn().mockResolvedValue(undefined),
     openAlarmPermissionSettings: jest.fn().mockResolvedValue(undefined),
+    openNotificationSettings: jest.fn().mockResolvedValue(undefined),
   },
   AndroidImportance: {LOW: 1, DEFAULT: 3, HIGH: 4},
   AndroidVisibility: {SECRET: -1, PRIVATE: 0, PUBLIC: 1},
