@@ -14,13 +14,16 @@ import {Tap} from '../../components/Tap';
 import {BalanceStrip} from '../../components/today/BalanceStrip';
 import {ChimeCard, type DoneAdjust} from '../../components/today/ChimeCard';
 import {DayList} from '../../components/today/DayList';
+import {CatchUpSheet} from '../../components/today/CatchUpSheet';
 import {LateLogSheet} from '../../components/today/LateLogSheet';
+import {LoggedSheet} from '../../components/today/LoggedSheet';
 import {MyDaySheet} from '../../components/today/MyDaySheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
 import {SetsMeters} from '../../components/today/SetsMeters';
 import {StatusLine} from '../../components/today/StatusLine';
 import {WaterCounter} from '../../components/today/WaterCounter';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
+import {takeBack} from '../../domain/activity/corrections';
 import {logWaterGlass} from '../../domain/activity/record';
 import {setActiveHours} from '../../domain/ambient/activeHours';
 import {
@@ -38,7 +41,7 @@ import {
 } from '../../domain/ambient/pulseRuntime';
 import {setsToday} from '../../domain/ambient/setScheduler';
 import type {CircuitLeg} from '../../domain/circuit/circuit';
-import {append} from '../../domain/journal/journal';
+import {append, entriesForDay} from '../../domain/journal/journal';
 import type {DayRow} from '../../domain/today/dayList';
 import {loadEntries} from '../../domain/training/repository';
 import type {TrainingLogEntry} from '../../domain/training/types';
@@ -104,6 +107,9 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [setsOpen, setSetsOpen] = useState(false);
   /** A missed or skipped chime being logged after the fact. */
   const [late, setLate] = useState<DayRow | undefined>();
+  /** A logged row being kept or removed. */
+  const [logged, setLogged] = useState<DayRow | undefined>();
+  const [catchUpOpen, setCatchUpOpen] = useState(false);
   const next = model.next;
 
   // Sealing writes the completion; the sets scheduler trims later rounds
@@ -123,11 +129,15 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
     cancelQueued([next.id]);
     append({kind: 'reminder.skipped', pulseId: next.id, respondedAfterMs: 0});
   }, [next]);
-  // A Train entry opens for edit; a missed or skipped chime opens to be
-  // logged. Nothing else in the list is pressable.
+  // A Train entry opens for edit, a missed or skipped chime opens to be
+  // logged, and anything else logged opens to keep or remove.
   const onRowPress = useCallback((row: DayRow) => {
     if (row.status === 'missed' || row.status === 'skipped') {
       setLate(row);
+      return;
+    }
+    if (row.status === 'done' && row.ref?.store === 'journal') {
+      setLogged(row);
       return;
     }
     const id = row.ref?.store === 'train' ? row.ref.id : undefined;
@@ -145,6 +155,40 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         : undefined,
     [late],
   );
+
+  const missed = useMemo(
+    () => model.rows.filter(row => row.status === 'missed'),
+    [model.rows],
+  );
+
+  const removeLogged = useCallback(() => {
+    const ref = logged?.ref;
+    if (logged && ref?.store === 'journal') {
+      const entry = entriesForDay(new Date(logged.at)).find(
+        e => e.id === ref.id,
+      );
+      if (entry?.kind === 'completion') {
+        takeBack(entry, {announce: true});
+      }
+    }
+    setLogged(undefined);
+  }, [logged]);
+
+  // Each ticked chime logs at its own time; rounds as prescribed.
+  const catchUp = useCallback((rows: DayRow[]) => {
+    const fires = setsToday(Date.now()).fires;
+    for (const row of rows) {
+      const fire = fires.find(f => f.id === row.id);
+      logMissedChime({
+        pulseId: row.id,
+        at: row.at,
+        element: fire?.element ?? row.element,
+        exerciseId: fire?.exerciseId ?? row.exerciseId,
+        prescription: fire?.prescription,
+      });
+    }
+    setCatchUpOpen(false);
+  }, []);
 
   const accent = ELEMENTS.heart.accent;
 
@@ -181,9 +225,25 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         <WaterCounter glasses={model.glasses} onAdd={() => logWaterGlass()} />
         <SetsMeters sets={model.sets} onPress={() => setSetsOpen(true)} />
 
-        <Text testID="today-header" style={styles.section}>
-          {model.streak > 0 ? `Today · ${model.streak}-day streak` : 'Today'}
-        </Text>
+        <View style={styles.sectionRow}>
+          <Text testID="today-header" style={styles.section}>
+            {model.streak > 0 ? `Today · ${model.streak}-day streak` : 'Today'}
+          </Text>
+          {missed.length >= 2 ? (
+            <Tap
+              testID="catch-up-open"
+              variant="plain"
+              color={accent}
+              onPress={() => setCatchUpOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`Catch up on ${missed.length} missed chimes`}
+              style={styles.catchUp}>
+              <Text style={[styles.catchUpText, {color: accent}]}>
+                Catch up {missed.length} ›
+              </Text>
+            </Tap>
+          ) : null}
+        </View>
         <DayList rows={model.rows} onRowPress={onRowPress} />
 
         <View style={styles.links}>
@@ -241,6 +301,17 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           }}
         />
         <DailySetsSheet visible={setsOpen} onClose={() => setSetsOpen(false)} />
+        <CatchUpSheet
+          visible={catchUpOpen}
+          rows={missed}
+          onLog={catchUp}
+          onClose={() => setCatchUpOpen(false)}
+        />
+        <LoggedSheet
+          row={logged}
+          onRemove={removeLogged}
+          onClose={() => setLogged(undefined)}
+        />
         <LateLogSheet
           row={late}
           prescription={lateRound?.prescription}
@@ -275,12 +346,29 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
     gap: spacing.md,
   },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+    minHeight: 44,
+  },
   section: {
     ...t.caption,
     color: palette.textDim,
     letterSpacing: 1.4,
     textTransform: 'uppercase',
-    marginTop: spacing.sm,
+  },
+  catchUp: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.pill,
+  },
+  catchUpText: {
+    ...t.caption,
+    fontWeight: '700',
+    letterSpacing: 0.8,
   },
   links: {
     flexDirection: 'row',

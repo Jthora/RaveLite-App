@@ -18,8 +18,8 @@ const MARK: Record<DayRowStatus, string> = {
 
 interface Props {
   rows: readonly DayRow[];
-  /** When set, Train entries open to edit and missed or skipped chimes
-   *  open to be logged. */
+  /** When set, Train entries open to edit, missed or skipped chimes open
+   *  to be logged, and other logged rows open to keep or remove. */
   onRowPress?: (row: DayRow) => void;
   /** Shown when there are no rows. */
   emptyText?: string;
@@ -44,8 +44,14 @@ export function DayList({
         const quiet = row.status === 'skipped' || row.status === 'missed';
         const lit = row.status === 'done' || row.status === 'active';
         const late = row.status === 'missed' || row.status === 'skipped';
+        const train = row.ref?.store === 'train';
+        // Logged completions open to keep or remove; max tests don't.
+        const removable =
+          row.status === 'done' &&
+          row.ref?.store === 'journal' &&
+          row.source !== 'test';
         const editable =
-          onRowPress !== undefined && (row.ref?.store === 'train' || late);
+          onRowPress !== undefined && (train || late || removable);
         const body = (
           <>
             <Text style={styles.time}>{formatHM(row.at)}</Text>
@@ -78,7 +84,9 @@ export function DayList({
                 </Text>
               ) : null}
             </View>
-            {editable ? <Text style={styles.chevron}>›</Text> : null}
+            {editable && (train || late) ? (
+              <Text style={styles.chevron}>›</Text>
+            ) : null}
           </>
         );
         return editable ? (
@@ -89,7 +97,13 @@ export function DayList({
             color={el.color}
             onPress={() => onRowPress(row)}
             accessibilityRole="button"
-            accessibilityLabel={`${late ? 'Log' : 'Edit'} ${row.label}`}
+            accessibilityLabel={
+              late
+                ? `Log ${row.label}`
+                : train
+                ? `Edit ${row.label}`
+                : `Keep or remove ${row.label}`
+            }
             style={[styles.rowTap, quiet && styles.quiet]}>
             <View style={styles.rowInner}>{body}</View>
           </Tap>

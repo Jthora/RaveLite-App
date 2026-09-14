@@ -67,7 +67,9 @@ Top to bottom, one scroll:
    sheet (a round's moves with −/+, or the drill's dose): Done records it at
    the chime's own time, as a manual completion carrying the chime's pulse
    id, so the row turns done and a round counts toward Daily Sets
-   (`src/domain/ambient/lateDone.ts`).
+   (`src/domain/ambient/lateDone.ts`). Other logged rows open to keep or
+   remove. With two or more missed chimes the header offers **Catch up N**:
+   a tick-list that logs each ticked chime at its own time.
 7. **+ Log a session** (Train log sheet) and **Practice** (circuits, then
    Heart drills, in one scroll).
 
@@ -129,6 +131,20 @@ Below the element sits the move: what the operator is actually doing.
 - The water counter reads **Drink** with a glass, so drinking water isn't
   confused with the Water element's count in the balance strip.
 
+## Corrections (`src/domain/activity/corrections.ts`)
+
+- **Undo bar.** Every completion logged while the app is open — a Done, a
+  drill tap, +1 water, a late or caught-up log — shows "Logged … · Undo" at
+  the bottom of the page for 8 seconds.
+- **Remove.** A logged row in Today's list or an element's day log opens a
+  sheet with Remove; the undo bar then offers to put it back. Max tests
+  aren't removable (it wouldn't undo the new set size); Train entries are
+  edited or deleted in their own sheet.
+- **Voids, not deletes.** Taking something back appends an `entry.voided`
+  record in the entry's own day. `entriesForDay` skips voided entries, so
+  every count, streak, meter and scheduler agrees at once; a round's sets
+  return and later rounds regrow.
+
 ## Chimes (`src/domain/program/rounds.ts`, `src/domain/ambient/setScheduler.ts`)
 
 - **Rounds.** A day's Daily Sets are grouped into rounds — a few different
@@ -139,6 +155,12 @@ Below the element sits the move: what the operator is actually doing.
 - **Partners.** Each round ends with a 20–30 s drill from another element,
   chosen from the lead move's list in `tracks.ts` (chest opener after
   push-ups, hip opener after squats, a breath after trunk work).
+- **Smart partners.** The partner leans toward the element with the least
+  work over the seven days before today, among those not already in the
+  round: the lead move's own partner when one fits, else a short drill from
+  `PARTNER_POOL`. Each partner placed counts toward the next pick, so a day
+  spreads them across the neglected elements. Past days only, so partners
+  hold steady all day.
 - **Water rides along.** A plan water call within 20 minutes of a round
   becomes that round's glass; the plan scheduler and OS backups skip it.
 - **Budget.** Rounds, the remaining water calls, two fuel checks, the

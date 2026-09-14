@@ -30,6 +30,8 @@ export type EntryKind =
   | 'journal.absence'
   /** Daily Sets: the operator tested a new max on a track. */
   | 'program.test'
+  /** A logged entry was taken back (Undo, or Remove from a day list). */
+  | 'entry.voided'
   /** A music attunement event — beat, BPM lock, song change. Future. */
   | 'music.event'
   /** A free-form session note — start/end of a training block. */
@@ -179,6 +181,18 @@ export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
   ? Omit<T, K>
   : never;
 
+/**
+ * A logged entry taken back. The entry stays in the log and readers skip
+ * it. Stored in the voided entry's own day (`at` is that entry's time), so
+ * a day read always sees both.
+ */
+export interface EntryVoidedEntry extends BaseEntry {
+  kind: 'entry.voided';
+  entryId: string;
+  /** When it was taken back. */
+  voidedAt: number;
+}
+
 export type JournalEntry =
   | CompletionEntry
   | ReminderFiredEntry
@@ -189,4 +203,5 @@ export type JournalEntry =
   | MusicEventEntry
   | SessionStartEntry
   | SessionEndEntry
-  | ProgramTestEntry;
+  | ProgramTestEntry
+  | EntryVoidedEntry;

@@ -23,6 +23,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {ElementRail} from './ElementRail';
 import {useOrientation} from './useOrientation';
+import {UndoBar} from '../components/UndoBar';
 
 import type {ElementId} from '../theme/elements';
 import {palette} from '../theme';
@@ -77,6 +78,7 @@ export function ElementShell(): React.JSX.Element {
   const screen = (
     <Animated.View style={[styles.content, {opacity: fade}]}>
       <Screen onElementChange={setActiveElement} />
+      <UndoBar />
     </Animated.View>
   );
 

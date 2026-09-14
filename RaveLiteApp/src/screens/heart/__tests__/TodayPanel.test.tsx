@@ -2,7 +2,9 @@ import React from 'react';
 import renderer, {act, type ReactTestInstance} from 'react-test-renderer';
 import {afterEach, beforeEach, expect, it, jest} from '@jest/globals';
 
+import {CatchUpSheet} from '../../../components/today/CatchUpSheet';
 import {LateLogSheet} from '../../../components/today/LateLogSheet';
+import {LoggedSheet} from '../../../components/today/LoggedSheet';
 import {activityForDay} from '../../../domain/activity/activity';
 import {store} from '../../../storage';
 import * as runtime from '../../../domain/ambient/pulseRuntime';
@@ -108,5 +110,60 @@ it('a missed chime opens to be logged, and Done marks it done', () => {
   });
   expect(activityForDay().some(item => item.pulseId === pulseId)).toBe(true);
   expect(tree.root.findByType(LateLogSheet).props.row).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('a logged row can be removed, and stops counting', () => {
+  const tree = renderToday();
+  act(() => {
+    byTestId(tree, 'water-add').props.onPress();
+  });
+  const row = tree.root.findAll(
+    (node: ReactTestInstance) =>
+      typeof node.props.testID === 'string' &&
+      node.props.testID.startsWith('day-row-journal:'),
+  )[0];
+  act(() => {
+    row.props.onPress();
+  });
+  expect(tree.root.findByType(LoggedSheet).props.row).toBeDefined();
+  act(() => {
+    byTestId(tree, 'logged-remove').props.onPress();
+  });
+  expect(activityForDay()).toEqual([]);
+  expect(byTestId(tree, 'water-count').props.children).toEqual([0, '/', 8]);
+  act(() => tree.unmount());
+});
+
+it('catch up logs several missed chimes at once', () => {
+  jest.setSystemTime(new Date(2026, 8, 14, 13, 0));
+  const tree = renderToday();
+  act(() => {
+    byTestId(tree, 'catch-up-open').props.onPress();
+  });
+  expect(tree.root.findByType(CatchUpSheet).props.visible).toBe(true);
+  const ids: string[] = [
+    ...new Set(
+      tree.root
+        .findAll(
+          (node: ReactTestInstance) =>
+            typeof node.props.testID === 'string' &&
+            node.props.testID.startsWith('catch-up-row-'),
+        )
+        .map(node => node.props.testID.replace('catch-up-row-', '')),
+    ),
+  ];
+  expect(ids.length).toBeGreaterThanOrEqual(2);
+  for (const id of ids.slice(0, 2)) {
+    act(() => {
+      byTestId(tree, `catch-up-row-${id}`).props.onPress();
+    });
+  }
+  act(() => {
+    byTestId(tree, 'catch-up-log').props.onPress();
+  });
+  const pulseIds = activityForDay().map(item => item.pulseId);
+  expect(pulseIds).toEqual(expect.arrayContaining(ids.slice(0, 2)));
+  expect(tree.root.findByType(CatchUpSheet).props.visible).toBe(false);
   act(() => tree.unmount());
 });

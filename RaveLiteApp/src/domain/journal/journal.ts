@@ -17,7 +17,9 @@ export function dayKey(d: Date = new Date()): string {
 
 /** Monotonic-ish id: epoch + small random, sortable lexicographically. */
 function newEntryId(at: number): string {
-  const r = Math.floor(Math.random() * 0xffff).toString(16).padStart(4, '0');
+  const r = Math.floor(Math.random() * 0xffff)
+    .toString(16)
+    .padStart(4, '0');
   return `${at.toString(36)}-${r}`;
 }
 
@@ -49,21 +51,57 @@ export function append(entry: NewJournalEntry): JournalEntry {
   return full;
 }
 
-/** Read all entries for a single day, oldest first. */
+/**
+ * Take back a logged entry (Undo, or Remove from a day list). The log stays
+ * append-only: a void record joins the entry's own day, and readers skip
+ * the entry from then on.
+ */
+export function voidEntry(
+  entry: Pick<JournalEntry, 'id' | 'at'>,
+): JournalEntry {
+  return append({
+    kind: 'entry.voided',
+    entryId: entry.id,
+    voidedAt: Date.now(),
+    at: entry.at,
+  });
+}
+
+/** Bring back a voided entry as a fresh copy at its original time. */
+export function restoreEntry(entry: JournalEntry): JournalEntry {
+  const copy: Partial<JournalEntry> = {...entry};
+  delete copy.id;
+  return append(copy as NewJournalEntry);
+}
+
+/** Entries minus any taken back; the void records themselves stay. */
+function withoutVoided(entries: JournalEntry[]): JournalEntry[] {
+  const voided = new Set<string>();
+  for (const e of entries) {
+    if (e.kind === 'entry.voided') {
+      voided.add(e.entryId);
+    }
+  }
+  return voided.size === 0 ? entries : entries.filter(e => !voided.has(e.id));
+}
+
+/** Read all entries for a single day, oldest first, minus any taken back. */
 export function entriesForDay(d: Date = new Date()): JournalEntry[] {
   const prefix = KEYS.journalDay(dayKey(d));
   const keys = store.keysWithPrefix(prefix).sort();
   const out: JournalEntry[] = [];
   for (const k of keys) {
     const raw = store.getString(k);
-    if (!raw) {continue;}
+    if (!raw) {
+      continue;
+    }
     try {
       out.push(JSON.parse(raw) as JournalEntry);
     } catch {
       // Skip corrupt entries — append-only log tolerates partial loss.
     }
   }
-  return out;
+  return withoutVoided(out);
 }
 
 /** Read all entries within an inclusive day range, oldest first. */

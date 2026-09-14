@@ -16,9 +16,11 @@ import {DrillCard} from '../../components/element/DrillCard';
 import {LibrarySheet} from '../../components/element/LibrarySheet';
 import {Tap} from '../../components/Tap';
 import {DayList} from '../../components/today/DayList';
+import {LoggedSheet} from '../../components/today/LoggedSheet';
 import {CalendarPicker} from '../../components/training/CalendarPicker';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {subscribeActivity} from '../../domain/activity/activity';
+import {takeBack} from '../../domain/activity/corrections';
 import {
   buildDayRibbon,
   elementActivityInRange,
@@ -26,6 +28,7 @@ import {
 } from '../../domain/activity/elementDay';
 import {streakDays, windowStart} from '../../domain/activity/stats';
 import type {Target} from '../../domain/exercises/types';
+import {entriesForDay} from '../../domain/journal/journal';
 import {
   getElementPrefs,
   setElementPrefs,
@@ -66,6 +69,7 @@ export function ElementPage({element}: Props) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
+  const [logged, setLogged] = useState<DayRow | undefined>();
 
   const today = startOfDay(Date.now());
   const isToday = day === today;
@@ -113,14 +117,32 @@ export function ElementPage({element}: Props) {
     [element.id],
   );
 
-  // A Train entry in the log opens for edit; others aren't pressable.
+  // A Train entry opens for edit; anything else logged opens to keep or
+  // remove.
   const onRowPress = useCallback((row: DayRow) => {
+    if (row.ref?.store === 'journal') {
+      setLogged(row);
+      return;
+    }
     const id = row.ref?.store === 'train' ? row.ref.id : undefined;
     const entry = id ? loadEntries().find(e => e.id === id) : undefined;
     if (entry) {
       setEditing(entry);
     }
   }, []);
+
+  const removeLogged = useCallback(() => {
+    const ref = logged?.ref;
+    if (logged && ref?.store === 'journal') {
+      const entry = entriesForDay(new Date(logged.at)).find(
+        e => e.id === ref.id,
+      );
+      if (entry?.kind === 'completion') {
+        takeBack(entry, {announce: true});
+      }
+    }
+    setLogged(undefined);
+  }, [logged]);
 
   const dayLabel = isToday
     ? 'Today'
@@ -210,6 +232,11 @@ export function ElementPage({element}: Props) {
         }.`}
       />
 
+      <LoggedSheet
+        row={logged}
+        onRemove={removeLogged}
+        onClose={() => setLogged(undefined)}
+      />
       <LibrarySheet
         visible={libraryOpen}
         onClose={() => setLibraryOpen(false)}
