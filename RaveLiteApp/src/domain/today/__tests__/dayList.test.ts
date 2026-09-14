@@ -11,6 +11,7 @@ const item = (
   element: 'fire',
   source: 'manual',
   label: 'Drill',
+  points: 2,
   ref: {store: 'journal', id: over.id},
   ...over,
 });
@@ -179,4 +180,41 @@ describe('buildDayList', () => {
       expect.objectContaining({id: 'tp.1', status: 'active'}),
     ]);
   });
+});
+
+it('shows an answered water call as its drill, with the eye break beside it', () => {
+  const ref = {store: 'journal' as const, id: 'w1'};
+  const at = NOON - 30 * MIN;
+  const rows = buildDayList({
+    ...base,
+    activity: [
+      item({
+        id: 'w1',
+        at,
+        ref,
+        element: 'water',
+        label: 'Refill Ritual',
+        detail: 'Refill the bottle + 3 big sips',
+        hydration: true,
+        points: 1,
+      }),
+      item({
+        id: 'w1:eyes',
+        at,
+        ref,
+        element: 'air',
+        label: 'Eye break',
+        detail: '20 sec',
+        points: 1,
+      }),
+    ],
+  });
+  expect(rows).toEqual([
+    expect.objectContaining({
+      status: 'done',
+      element: 'water',
+      label: 'Refill Ritual',
+      detail: 'Refill the bottle + 3 big sips · Eye break',
+    }),
+  ]);
 });

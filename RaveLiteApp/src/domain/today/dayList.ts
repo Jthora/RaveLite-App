@@ -11,7 +11,8 @@ import type {JournalEntry} from '../journal/types';
  *
  * A done record is one row even when it expands into several activity
  * items: a round reads as its moves, with its partner drill and glass of
- * water as the detail. A chime that was answered shows only as that done
+ * water as the detail; a drill with a ride-along (a water call's eye break)
+ * reads as the drill. A chime that was answered shows only as that done
  * row. Missed chimes stay in the list, dimmed by the view, and are never
  * counted or used as a headline.
  */
@@ -89,6 +90,16 @@ function doneRow(items: ActivityItem[]): DayRow {
   }
   const moves = items.filter(i => i.trackId);
   const extras = items.filter(i => !i.trackId);
+  if (moves.length === 0) {
+    const [, ...rest] = items;
+    return {
+      ...base,
+      label: first.label,
+      detail:
+        [first.detail, ...rest.map(i => i.label)].filter(Boolean).join(' · ') ||
+        undefined,
+    };
+  }
   return {
     ...base,
     label: moves
