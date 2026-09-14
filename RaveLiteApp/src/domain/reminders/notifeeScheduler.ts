@@ -3,6 +3,7 @@ import notifee, {
   AndroidVisibility,
   EventType,
   type Event,
+  type Notification,
 } from '@notifee/react-native';
 import {ELEMENTS, ElementId} from '../../theme/elements';
 import {ReminderPayload, Plan} from './types';
@@ -13,8 +14,10 @@ import {recordPulseFire} from '../journal/lastPulse';
  * Notifee-backed implementation of ReminderScheduler.
  *
  * Scope:
- *   - ensureChannels()    → idempotent; one channel per element, each with
- *                           its own cue sound + vibration signature.
+ *   - ensureChannels()    → idempotent; two channels per element:
+ *       · sounding `elem.<id>.v3`       — element cue as the channel sound
+ *       · quiet    `elem.<id>.quiet.v1` — same vibration, no sound, used
+ *         when the cue already played in-app on the alarm stream
  *   - requestPermission() → Android 13+ POST_NOTIFICATIONS prompt.
  *   - fireNow()           → real on-device notification. Pulses carry
  *                           Done / +5 / Skip action buttons so a set can
@@ -23,17 +26,27 @@ import {recordPulseFire} from '../journal/lastPulse';
  *   - applyPlan()         → still a no-op stub; the JS pulse runtime owns
  *                           scheduling while the ambient service is alive.
  *
- * Channels are versioned (`elem.<id>.v3`). Channel settings (importance,
- * sound, vibration pattern) are immutable after creation in Android — so
- * any change to a cue or pattern bumps the suffix, and the superseded
- * channels are deleted so they don't linger in system settings.
+ * Channel settings (importance, sound, vibration pattern) are immutable
+ * after creation in Android — so any change bumps that channel set's
+ * version suffix, and superseded channels are deleted so they don't
+ * linger in system settings.
  */
 
 const CHANNEL_VERSION = 'v3';
 const LEGACY_CHANNEL_VERSIONS = ['v1', 'v2'];
+const QUIET_CHANNEL_VERSION = 'v1';
 
 function channelId(element: ElementId, version: string = CHANNEL_VERSION): string {
   return `elem.${element}.${version}`;
+}
+
+function quietChannelId(element: ElementId): string {
+  return `elem.${element}.quiet.${QUIET_CHANNEL_VERSION}`;
+}
+
+/** The channel a pulse notification posts on. */
+export function channelIdFor(element: ElementId, quiet: boolean): string {
+  return quiet ? quietChannelId(element) : channelId(element);
 }
 
 /**
@@ -45,7 +58,8 @@ function channelId(element: ElementId, version: string = CHANNEL_VERSION): strin
  *   Water — two bubbly rising bloops     (flow)
  *   Heart — lub-dub under a two-note chime (seal)
  *
- * Changing a file here requires a native rebuild AND a CHANNEL_VERSION bump.
+ * The same files are played in-app on the alarm stream by the native
+ * RaveLiteDevice module. Changing a file requires a native rebuild.
  */
 const CHANNEL_SOUND: Record<ElementId, string> = {
   air: 'cue_air',
@@ -101,7 +115,7 @@ async function ensureChannels(): Promise<void> {
   // Notifee is no-op on iOS for channels; we only ship Android today,
   // but the call is safe regardless.
   await Promise.all(
-    ids.map(id => {
+    ids.flatMap(id => {
       const pattern = VIBRATION_PATTERNS[id];
       const valid = isValidVibrationPattern(pattern);
       if (!valid) {
@@ -110,17 +124,29 @@ async function ensureChannels(): Promise<void> {
           `[notifeeScheduler] invalid vibrationPattern for ${id}; falling back to default vibration`,
         );
       }
-      return notifee.createChannel({
-        id: channelId(id),
-        name: `${ELEMENTS[id].name} reminders`,
+      const shared = {
         importance: AndroidImportance.HIGH,
-        sound: CHANNEL_SOUND[id],
         vibration: true,
         ...(valid ? {vibrationPattern: pattern} : {}),
         lights: true,
         lightColor: ELEMENTS[id].color,
         visibility: AndroidVisibility.PUBLIC,
-      });
+      };
+      return [
+        notifee.createChannel({
+          ...shared,
+          id: channelId(id),
+          name: `${ELEMENTS[id].name} reminders`,
+          sound: CHANNEL_SOUND[id],
+        }),
+        notifee.createChannel({
+          ...shared,
+          id: quietChannelId(id),
+          name: `${ELEMENTS[id].name} reminders (in-app cue)`,
+          description:
+            'Used while RaveLite plays the cue itself on the alarm stream.',
+        }),
+      ];
     }),
   );
   channelsReady = true;
@@ -196,40 +222,53 @@ export async function cancelPulseNotification(pulseId: string): Promise<void> {
   await notifee.cancelNotification(pulseId);
 }
 
+/**
+ * Pure: the notifee notification for a pulse payload. `quiet` selects the
+ * element's no-sound channel (the cue already played in-app, or is Off).
+ */
+export function buildPulseNotification(
+  payload: ReminderPayload,
+  opts: {quiet: boolean},
+): Notification {
+  const el = ELEMENTS[payload.element];
+  return {
+    // Pulse id doubles as the notification id so an in-app answer can
+    // cancel the matching notification.
+    ...(payload.pulseId ? {id: payload.pulseId} : {}),
+    title: payload.title,
+    body: payload.body,
+    data: {
+      element: payload.element,
+      exerciseId: payload.exerciseId,
+      ...(payload.pulseId ? {pulseId: payload.pulseId} : {}),
+      ...(payload.data ?? {}),
+    },
+    android: {
+      channelId: channelIdFor(payload.element, opts.quiet),
+      color: payload.color,
+      colorized: true,
+      smallIcon: 'ic_launcher', // TODO: ship a monochrome status-bar icon
+      pressAction: {id: 'default', launchActivity: 'default'},
+      showTimestamp: true,
+      ...(payload.pulseId
+        ? {
+            actions: [
+              {title: el.verbDone, pressAction: {id: 'seal'}},
+              {title: '+5 min', pressAction: {id: 'snooze'}},
+              {title: 'Skip', pressAction: {id: 'skip'}},
+            ],
+          }
+        : {}),
+    },
+  };
+}
+
 export const notifeeScheduler: ReminderScheduler = {
   async fireNow(payload: ReminderPayload) {
     await ensureChannels();
-    const el = ELEMENTS[payload.element];
-    await notifee.displayNotification({
-      // Pulse id doubles as the notification id so an in-app answer can
-      // cancel the matching notification.
-      ...(payload.pulseId ? {id: payload.pulseId} : {}),
-      title: payload.title,
-      body: payload.body,
-      data: {
-        element: payload.element,
-        exerciseId: payload.exerciseId,
-        ...(payload.pulseId ? {pulseId: payload.pulseId} : {}),
-        ...(payload.data ?? {}),
-      },
-      android: {
-        channelId: channelId(payload.element),
-        color: payload.color,
-        colorized: true,
-        smallIcon: 'ic_launcher', // TODO: ship a monochrome status-bar icon
-        pressAction: {id: 'default', launchActivity: 'default'},
-        showTimestamp: true,
-        ...(payload.pulseId
-          ? {
-              actions: [
-                {title: el.verbDone, pressAction: {id: 'seal'}},
-                {title: '+5 min', pressAction: {id: 'snooze'}},
-                {title: 'Skip', pressAction: {id: 'skip'}},
-              ],
-            }
-          : {}),
-      },
-    });
+    await notifee.displayNotification(
+      buildPulseNotification(payload, {quiet: payload.silent === true}),
+    );
     // Record so NowPanel can show "Pulse fired Nm ago" within the
     // 30-minute recent window. Intentionally fire-and-forget; the
     // notification has already displayed regardless.

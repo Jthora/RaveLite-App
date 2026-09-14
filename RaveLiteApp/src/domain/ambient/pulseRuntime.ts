@@ -36,6 +36,10 @@ import {
   type QueueState,
 } from './pulseQueue';
 import {pagingAllowedAt} from './activeHours';
+import {chooseCueRoute, cueSettingsFor} from './cueVolume';
+import {getInterruptionFilter, playCue} from '../../native/raveLiteDevice';
+import type {ReminderPayload} from '../reminders/types';
+import type {SetPrescription} from '../program/types';
 import type {ActivePulseSummary} from './ribbon';
 import type {Pulse, PulseOutcome} from './types';
 
@@ -53,6 +57,27 @@ export function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
+  };
+}
+
+export interface PulseFiredEvent {
+  pulseId: string;
+  element: ElementId;
+  prescription?: SetPrescription;
+}
+
+const firedListeners = new Set<(event: PulseFiredEvent) => void>();
+
+/**
+ * Fires once each time a pulse goes active — the moment it chimes. The
+ * alive layer uses it for the visual cue. Returns an unsubscribe fn.
+ */
+export function onPulseFired(
+  listener: (event: PulseFiredEvent) => void,
+): () => void {
+  firedListeners.add(listener);
+  return () => {
+    firedListeners.delete(listener);
   };
 }
 
@@ -102,38 +127,67 @@ function dismiss(pulseId: string): void {
   cancelPulseNotification(pulseId).catch(() => {});
 }
 
+/**
+ * Make a fired pulse heard. By default the element cue plays in-app on the
+ * alarm stream (cutting through silent mode and DND) and the notification
+ * posts on the quiet channel. If the cue can't play, the notification uses
+ * the sounding channel instead, so a chime is never silent by accident.
+ * See `cueVolume.chooseCueRoute` for the Off / Respect-DND routes.
+ */
+async function chime(payload: ReminderPayload): Promise<void> {
+  const {volume, respectDnd} = cueSettingsFor(payload.element);
+  const route = chooseCueRoute({
+    volume,
+    respectDnd,
+    interruptionFilter: respectDnd ? await getInterruptionFilter() : null,
+  });
+  let silent = route === 'silent';
+  if (route === 'alarm') {
+    silent = await playCue(payload.element, volume);
+  }
+  await notifeeScheduler.fireNow({...payload, silent});
+}
+
 function commit(writes: ReturnType<typeof queueTick>['writes']): void {
   for (const w of writes) {
     append(w);
     if (w.kind !== 'reminder.fired') {
       continue;
     }
-    const el = ELEMENTS[w.element as ElementId];
+    const element = w.element as ElementId;
+    const el = ELEMENTS[element];
     const pulse = state.pulses.find(p => p.id === w.pulseId);
     const drill = drillFor(w);
     const rx = pulse?.prescription;
     const cue = drill?.cues?.[0];
     // Fire-and-forget; failure must not abort the queue advance.
-    notifeeScheduler
-      .fireNow({
-        element: w.element as ElementId,
-        color: el.color,
-        title: rx
-          ? `${rx.label} · ${formatSetAmount(rx.amount, rx.unit)}`
-          : drill?.name ?? `${el.name} pulse`,
-        body: rx
-          ? `Set ${rx.setIndex} of ${rx.sets}${cue ? ` · ${cue}` : ''}`
-          : cue ?? `Time for ${el.name}.`,
-        exerciseId: drill?.id ?? 'unknown',
-        pulseId: w.pulseId,
-        data: rx
-          ? {trackId: rx.trackId, amount: String(rx.amount), unit: rx.unit}
-          : undefined,
-      })
-      .catch(err =>
+    chime({
+      element,
+      color: el.color,
+      title: rx
+        ? `${rx.label} · ${formatSetAmount(rx.amount, rx.unit)}`
+        : drill?.name ?? `${el.name} pulse`,
+      body: rx
+        ? `Set ${rx.setIndex} of ${rx.sets}${cue ? ` · ${cue}` : ''}`
+        : cue ?? `Time for ${el.name}.`,
+      exerciseId: drill?.id ?? 'unknown',
+      pulseId: w.pulseId,
+      data: rx
+        ? {trackId: rx.trackId, amount: String(rx.amount), unit: rx.unit}
+        : undefined,
+    }).catch(err =>
+      // eslint-disable-next-line no-console
+      console.warn('[pulseRuntime] chime failed', err),
+    );
+    const event: PulseFiredEvent = {pulseId: w.pulseId, element, prescription: rx};
+    for (const listener of firedListeners) {
+      try {
+        listener(event);
+      } catch (e) {
         // eslint-disable-next-line no-console
-        console.warn('[pulseRuntime] fireNow failed', err),
-      );
+        console.warn('[pulseRuntime] pulse-fired listener threw', e);
+      }
+    }
   }
 }
 
@@ -306,6 +360,7 @@ export const __test = {
   reset: () => {
     state = emptyQueue();
     listeners.clear();
+    firedListeners.clear();
     stopPulseRuntime();
   },
   getState: () => state,

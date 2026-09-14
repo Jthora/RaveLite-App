@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {ScreenScaffold} from '../components/ScreenScaffold';
 import {ExerciseRow} from '../components/ExerciseRow';
 import {CardGrid} from '../components/CardGrid';
@@ -12,6 +12,7 @@ import {InsightsPanel} from './heart/InsightsPanel';
 import {AlwaysOnPanel} from './heart/AlwaysOnPanel';
 import {ThemePanel} from './heart/ThemePanel';
 import {SetsPanel} from './heart/SetsPanel';
+import {ChimesPanel} from './heart/ChimesPanel';
 import type {CircuitLeg} from '../domain/circuit/circuit';
 import {ELEMENTS} from '../theme/elements';
 import {exercisesFor} from '../domain/exercises/library';
@@ -289,7 +290,10 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp, onElementC
       )}
 
       {subTab === 'settings' && (
-        <>
+        <ScrollView
+          style={styles.settingsScroll}
+          contentContainerStyle={styles.settingsContent}
+          showsVerticalScrollIndicator={false}>
           {/* Signal banner — system voice, real permission state. */}
           {permission === 'denied' ? (
             <View style={[styles.notifBanner, styles.notifBannerWarn]}>
@@ -307,9 +311,8 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp, onElementC
               </Text>
               <Text style={styles.notifBody}>
                 Tap <Text style={styles.kbd}>Test Pulse</Text> to fire one Air
-                pulse — haptic + notification, no schedule needed.{' '}
-                <Text style={styles.kbd}>Apply Plan</Text> will arm the
-                rolling 24h schedule (Phase B).
+                pulse now — cue, vibration and notification. Your plan and
+                Daily Sets chime on their own; nothing needs arming.
               </Text>
             </View>
           )}
@@ -331,8 +334,9 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp, onElementC
               <Text style={styles.btnText}>Apply Plan</Text>
             </Tap>
           </View>
+          <ChimesPanel />
           <ThemePanel />
-        </>
+        </ScrollView>
       )}
 
       {subTab === 'always-on' && <AlwaysOnPanel />}
@@ -355,6 +359,8 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp, onElementC
 };
 
 const styles = StyleSheet.create({
+  settingsScroll: {flex: 1},
+  settingsContent: {paddingBottom: spacing.xxl},
   notifBanner: {
     borderWidth: 1,
     borderRadius: radius.md,

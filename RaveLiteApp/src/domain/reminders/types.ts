@@ -60,4 +60,7 @@ export interface ReminderPayload {
   pulseId?: string;
   /** Extra string data echoed back to action handlers. */
   data?: Record<string, string>;
+  /** Post on the element's quiet channel (vibration, no channel sound)
+   *  because the cue already played in-app, or cues are set to Off. */
+  silent?: boolean;
 }
