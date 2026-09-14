@@ -10,7 +10,6 @@ import notifee, {
 import {ELEMENTS, ElementId} from '../../theme/elements';
 import {ReminderPayload, Plan} from './types';
 import {VIBRATION_PATTERNS, type ReminderScheduler} from './scheduler';
-import {recordPulseFire} from '../journal/lastPulse';
 
 /**
  * Notifee-backed implementation of ReminderScheduler.
@@ -354,10 +353,6 @@ export const notifeeScheduler: ReminderScheduler = {
     await notifee.displayNotification(
       buildPulseNotification(payload, {quiet: payload.silent === true}),
     );
-    // Record so NowPanel can show "Pulse fired Nm ago" within the
-    // 30-minute recent window. Intentionally fire-and-forget; the
-    // notification has already displayed regardless.
-    recordPulseFire(payload.element, payload.exerciseId);
   },
 
   async clear() {

@@ -44,11 +44,8 @@ import {palette} from '../theme';
 import {store} from '../storage';
 import {KEYS} from '../storage/keys';
 
-import FireScreen from '../screens/FireScreen';
-import AirScreen from '../screens/AirScreen';
+import {makeElementScreen} from '../screens/ElementScreen';
 import HeartScreen from '../screens/HeartScreen';
-import EarthScreen from '../screens/EarthScreen';
-import WaterScreen from '../screens/WaterScreen';
 
 /**
  * The contract every element screen now satisfies.
@@ -65,26 +62,35 @@ export interface ElementScreenProps {
 }
 
 const SCREENS: Record<ElementId, React.ComponentType<ElementScreenProps>> = {
-  fire: FireScreen as React.ComponentType<ElementScreenProps>,
-  air: AirScreen as React.ComponentType<ElementScreenProps>,
-  heart: HeartScreen as React.ComponentType<ElementScreenProps>,
-  earth: EarthScreen as React.ComponentType<ElementScreenProps>,
-  water: WaterScreen as React.ComponentType<ElementScreenProps>,
+  fire: makeElementScreen('fire'),
+  air: makeElementScreen('air'),
+  heart: HeartScreen,
+  earth: makeElementScreen('earth'),
+  water: makeElementScreen('water'),
 };
 
 const SUBTAB_KEY = KEYS.setting('shell.subTabByElement');
 
+/** Element tabs from earlier layouts, mapped to where that content lives. */
+const RENAMED_TABS: Readonly<Record<string, string>> = {
+  now: 'drills',
+  tune: 'drills',
+  log: 'history',
+  stats: 'history',
+};
+
 /**
  * Pure: the sub-tab each element opens on at launch. Heart always opens on
  * its first tab (Today); other elements get their stored tab back when it
- * still exists.
+ * still exists, with tabs from earlier layouts renamed.
  */
 export function restoreSubTabMap(
   stored: Readonly<Record<string, string>> | undefined,
 ): Record<ElementId, string> {
   const out = {...DEFAULT_SUB_SLUG};
   for (const id of ELEMENT_ORDER) {
-    const slug = stored?.[id];
+    const saved = stored?.[id];
+    const slug = saved ? RENAMED_TABS[saved] ?? saved : undefined;
     if (
       id !== 'heart' &&
       slug &&

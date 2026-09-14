@@ -1,21 +1,10 @@
 /**
- * Per-element operator preferences.
+ * Per-element preferences: the focus areas that filter an element's Drills
+ * tab and steer its "try this now" pick.
  *
- * Two distinct concepts coexist in the Tune panel:
- *
- *   1. **Explicit prefs** (this file)
- *      - User declared. Stored as JSON keyed per element.
- *      - haptic intensity, target focus filter, daily target, signal preset.
- *      - Snapshot in time.
- *
- *   2. **Implicit prefs** (derived in `domain/exercises/scoring.ts`)
- *      - Auto-derived from the journal's last N days.
- *      - "What targets has the operator actually been doing?"
- *      - Read-only by default; can be promoted into explicit prefs via
- *        TunePanel's "Lock these in" action.
- *
- * Settings KV is the storage substrate. One JSON blob per element keeps
- * the read/write atomic.
+ * One JSON blob per element in the settings store. Blobs saved by earlier
+ * versions may still carry retired fields (daily target, haptic level,
+ * operating mode); reads ignore them.
  */
 
 import type {ElementId} from '../../theme/elements';
@@ -23,37 +12,19 @@ import type {Target} from '../exercises/types';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 
-/** Three operating modes — taps into the cyberpunk-raver dial language.
- *  Snaps haptic + signal preferences as a unit. */
-export type SignalPreset = 'stealth' | 'standard' | 'beacon';
-
-/** Haptic intensity for pulse + seal feedback. */
-export type HapticIntensity = 'off' | 'low' | 'high';
-
 export interface ElementPrefs {
-  /** Operator-active "focus areas" for this element. Empty = no filter. */
+  /** Focus areas for this element. Empty = no filter. */
   focusTargets: Target[];
-  /** Daily completion target — anchors sparkline scale. */
-  dailyTarget: number;
-  /** Per-element haptic intensity. */
-  haptic: HapticIntensity;
-  /** Operating mode — drives haptic + notification banner behavior. */
-  preset: SignalPreset;
-  /** Whether `focusTargets` was set manually (true) or is using defaults. */
+  /** Whether `focusTargets` was chosen by the operator or is the default. */
   focusLocked: boolean;
 }
 
-/** First-run defaults. Air pre-selects the posture corrections plus
- *  breath work. Earth now carries core and leg strength as well as
- *  alignment, so it starts unfiltered like Fire/Water/Heart — otherwise
- *  crunches, squats and hangs would hide behind the corrections filter. */
+/** First-run defaults. Air starts on the posture corrections plus breath
+ *  work; the other elements start unfiltered. */
 function defaultPrefs(element: ElementId): ElementPrefs {
   const airDefaults: Target[] = ['UCS', 'Hourglass', 'Breath'];
   return {
     focusTargets: element === 'air' ? airDefaults : [],
-    dailyTarget: element === 'heart' ? 2 : 3,
-    haptic: 'high',
-    preset: 'standard',
     focusLocked: false,
   };
 }
@@ -62,14 +33,19 @@ const prefsKey = (element: ElementId) =>
   KEYS.setting(`element.prefs.${element}`);
 
 export function getElementPrefs(element: ElementId): ElementPrefs {
+  const defaults = defaultPrefs(element);
   const raw = store.getString(prefsKey(element));
-  if (!raw) {return defaultPrefs(element);}
+  if (!raw) {
+    return defaults;
+  }
   try {
     const parsed = JSON.parse(raw) as Partial<ElementPrefs>;
-    // Spread over defaults so any new field added later auto-fills.
-    return {...defaultPrefs(element), ...parsed};
+    return {
+      focusTargets: parsed.focusTargets ?? defaults.focusTargets,
+      focusLocked: parsed.focusLocked ?? defaults.focusLocked,
+    };
   } catch {
-    return defaultPrefs(element);
+    return defaults;
   }
 }
 
@@ -80,20 +56,4 @@ export function setElementPrefs(
   const next = {...getElementPrefs(element), ...patch};
   store.set(prefsKey(element), JSON.stringify(next));
   return next;
-}
-
-export function resetElementPrefs(element: ElementId): ElementPrefs {
-  const next = defaultPrefs(element);
-  store.set(prefsKey(element), JSON.stringify(next));
-  return next;
-}
-
-/** Snap haptic + (future) banner behavior to a named preset. */
-export function applyPreset(
-  element: ElementId,
-  preset: SignalPreset,
-): ElementPrefs {
-  const haptic: HapticIntensity =
-    preset === 'stealth' ? 'low' : preset === 'beacon' ? 'high' : 'high';
-  return setElementPrefs(element, {preset, haptic});
 }

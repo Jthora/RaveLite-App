@@ -19,11 +19,6 @@
  *     full available space. Every page (and sub-page) can fit content
  *     snugly in both portrait and landscape on phone and tablet without
  *     the global chrome stealing real estate.
- *
- * The component still accepts (and ignores) the legacy props
- * (`subtitle`, `nextFireTs`, `everyMinutes`) so existing callers compile
- * without churn. They are deprecated and will be removed once all
- * screens drop them.
  */
 import React, {useEffect} from 'react';
 import {StyleSheet, View} from 'react-native';
@@ -38,12 +33,6 @@ import {AliveAura} from './alive/AliveAura';
 interface Props {
   element: ElementIdentity;
   children?: React.ReactNode;
-  /** @deprecated Hero removed. Prop retained for source compat. */
-  subtitle?: string;
-  /** @deprecated Cadence ribbon removed. Prop retained for source compat. */
-  nextFireTs?: number;
-  /** @deprecated Cadence ribbon removed. Prop retained for source compat. */
-  everyMinutes?: number;
 }
 
 export const ScreenScaffold: React.FC<Props> = ({element, children}) => {

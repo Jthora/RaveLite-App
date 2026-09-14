@@ -7,15 +7,14 @@
  *
  * Heart is home: Today (the day at a glance and the chime to answer),
  * Progress (Daily Sets and the week), Setup (My day, chimes, plan, look).
+ * Fire, Air, Earth and Water: Drills (a drill to try now and the library),
+ * Train (sessions typed in by hand), History (everything done, by day).
  */
 import {
-  Activity,
-  BarChart3,
   Dumbbell,
   History,
   ListChecks,
   Settings,
-  SlidersHorizontal,
   Sun,
   TrendingUp,
 } from 'lucide-react-native';
@@ -40,25 +39,12 @@ export function isHeartSlug(slug: string): slug is HeartSubSlug {
 
 // ---- Shared element sub-tabs (Fire/Air/Earth/Water) -----------------------
 
-export type ElementSubSlug =
-  | 'now'
-  | 'drills'
-  | 'log'
-  | 'stats'
-  | 'tune'
-  | 'train';
+export type ElementSubSlug = 'drills' | 'train' | 'history';
 
-// All four non-Heart elements share the same six-slot shape, with a
-// 'Train' tab between Drills and Log for manual numerical entries
-// (runs, holds, reps). Per-element catalogs (see
-// `domain/training/builtinMetrics.ts`) decide what shows up inside.
-const WITH_TRAIN_SUB_TABS: ReadonlyArray<SubTab<ElementSubSlug>> = [
-  {slug: 'now', label: 'Now', Icon: Activity},
+const ELEMENT_SUB_TABS: ReadonlyArray<SubTab<ElementSubSlug>> = [
   {slug: 'drills', label: 'Drills', Icon: ListChecks},
   {slug: 'train', label: 'Train', Icon: Dumbbell},
-  {slug: 'log', label: 'Log', Icon: History},
-  {slug: 'stats', label: 'Stats', Icon: BarChart3},
-  {slug: 'tune', label: 'Tune', Icon: SlidersHorizontal},
+  {slug: 'history', label: 'History', Icon: History},
 ];
 
 // ---- Registry -------------------------------------------------------------
@@ -67,19 +53,19 @@ export const SUB_TABS_BY_ELEMENT: Record<
   ElementId,
   ReadonlyArray<SubTab<string>>
 > = {
-  fire: WITH_TRAIN_SUB_TABS,
-  air: WITH_TRAIN_SUB_TABS,
-  earth: WITH_TRAIN_SUB_TABS,
-  water: WITH_TRAIN_SUB_TABS,
+  fire: ELEMENT_SUB_TABS,
+  air: ELEMENT_SUB_TABS,
+  earth: ELEMENT_SUB_TABS,
+  water: ELEMENT_SUB_TABS,
   heart: HEART_SUB_TABS,
 };
 
 /** First slug for each element — what we land on when the element is
  *  first opened (and what we fall back to if a stored slug is invalid). */
 export const DEFAULT_SUB_SLUG: Record<ElementId, string> = {
-  fire: 'now',
-  air: 'now',
-  earth: 'now',
-  water: 'now',
+  fire: 'drills',
+  air: 'drills',
+  earth: 'drills',
+  water: 'drills',
   heart: 'today',
 };
