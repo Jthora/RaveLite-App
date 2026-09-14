@@ -1,32 +1,20 @@
 import {Plan} from './types';
 
 /**
- * Default reminder plan — opinionated starting point for the operator.
+ * Default reminder plan — the operator's factory settings.
  *
  * Kit: bodyweight, a mat right behind the desk, a big backyard, a porch
  * edge to hang from, and bricks. No pool, no weights.
  *
- * Strength volume (push, row, pull, squat, core, holds, hangs) is NOT in
- * this plan — the Daily Sets program spreads those sets across the day
- * and ramps them week by week. The plan carries everything else:
- *
- *   Desk hours (Mon-Fri 09:00-17:00):
- *     Air every 30 min    — micro posture/breath reset
- *     Heart every 45 min  — pulse check / rave vision (presence, ≤ 60 sec)
- *     Water every 120 min — fascia stretch that fits beside the desk
+ * The day's backbone is the Daily Sets program: about nine rounds of
+ * strength moves, each followed by a short partner drill from another
+ * element (a chest opener, a hip opener, a breath). Posture, breath and
+ * presence ride along with those rounds, so the plan no longer chimes for
+ * them on its own. The plan carries only what rounds can't:
  *
  *   Water calls (daily 09:20-21:00):
- *     Water every 90 min — drink a glass. 8 calls ≈ 2 L. Starts at :20 so
- *     it never lands on the quarter-hour ticks every other slot uses, and
- *     inside the default active hours so no call is suppressed.
- *
- *   Morning training block (06:00-08:00 daily):
- *     Heart 0:00  — Morning Intent
- *     Air 0:10    — Crocodile / Standing Belly Release
- *     Earth 0:20  — Posterior pelvic tilt + glute bridge work
- *     Fire 0:35   — PFT block (rotating: pushups / situps / run day)
- *     Water 0:55  — Flow segment, full song minimum
- *     Heart 1:55  — Closing presence drill
+ *     Water every 90 min — drink a glass. 8 calls ≈ 2 L. A call within
+ *     20 min of a round rides along with it instead of chiming alone.
  *
  *   Backyard session (daily 17:30-19:00) — explosive + skill work that
  *   needs a warm-up and fresh legs, so it never rides a desk chime:
@@ -39,12 +27,14 @@ import {Plan} from './types';
  *   Evening (21:30):
  *     Heart 1× — Evening Review
  *
- * The user can edit this from the Heart screen later. Keep this file the
- * single source of "factory settings". A persisted plan is never
- * overwritten — changes here reach a device via Plan → Reset to default.
+ * Everything sits inside the default My day (09:00-22:00); a weekday comes
+ * to roughly twenty chimes.
+ *
+ * Keep this file the single source of "factory settings". A persisted plan
+ * is only replaced by a storage migration (which keeps the old one as a
+ * backup) or by Plan → Reset to default.
  */
 
-const WORK_DAYS = [1, 2, 3, 4, 5];
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 export const DEFAULT_PLAN: Plan = {
@@ -52,40 +42,18 @@ export const DEFAULT_PLAN: Plan = {
   name: 'Operator Baseline',
   windows: [
     {
-      id: 'desk-hours',
-      label: 'Desk Hours',
-      startTime: '09:00',
-      endTime: '17:00',
-      daysOfWeek: WORK_DAYS,
-      slots: [
-        {element: 'air', everyMinutes: 30, maxSeconds: 90, requiredTags: ['NoFloor']},
-        {element: 'heart', everyMinutes: 45, maxSeconds: 60, requiredTags: ['Presence', 'NoFloor']},
-        {element: 'water', everyMinutes: 120, maxSeconds: 120, requiredTags: ['Mobility']},
-      ],
-    },
-    {
       id: 'hydration',
       label: 'Water Calls',
       startTime: '09:20',
       endTime: '21:00',
       daysOfWeek: ALL_DAYS,
       slots: [
-        {element: 'water', everyMinutes: 90, maxSeconds: 60, requiredTags: ['Hydration']},
-      ],
-    },
-    {
-      id: 'morning-block',
-      label: 'Morning Training',
-      startTime: '06:00',
-      endTime: '08:00',
-      daysOfWeek: ALL_DAYS,
-      exclusive: true,
-      slots: [
-        {element: 'heart', everyMinutes: 120, maxSeconds: 180},
-        {element: 'air', everyMinutes: 30},
-        {element: 'earth', everyMinutes: 30},
-        {element: 'fire', everyMinutes: 60},
-        {element: 'water', everyMinutes: 90},
+        {
+          element: 'water',
+          everyMinutes: 90,
+          maxSeconds: 60,
+          requiredTags: ['Hydration'],
+        },
       ],
     },
     {

@@ -19,7 +19,7 @@ const MISSING_KIT =
 const drillText = (ex: (typeof EXERCISE_LIBRARY)[number]) =>
   [ex.name, ex.purpose, ex.dose, ...(ex.cues ?? [])].join(' ');
 
-// A Monday, so desk hours are live alongside every daily window.
+// A Monday, so every daily window is live.
 const MONDAY = new Date(2026, 8, 14).getTime();
 const firesOnMonday = () =>
   expandPlanToFires(DEFAULT_PLAN, MONDAY, MONDAY + 86_399_999);

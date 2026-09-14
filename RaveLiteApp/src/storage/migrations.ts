@@ -1,24 +1,22 @@
 import {store} from './index';
 import {CURRENT_SCHEMA_VERSION, KEYS} from './keys';
+import {DEFAULT_PLAN} from '../domain/reminders/defaultPlan';
+import {plansEqual} from '../domain/reminders/planMutations';
+import type {Plan} from '../domain/reminders/types';
 
 /**
  * Storage schema migration runner.
  *
- * Called once at app start (from App.tsx). Reads the persisted schema
- * version, applies any pending step-migrations, then writes the current
- * version back.
- *
- * Today the body is a no-op — there is only one shipped version. This
- * file exists so the call site is wired up *before* we ever need a real
- * migration; that way the first breaking change is "add a case", not
- * "rewire startup, hope nothing else breaks".
+ * Called once at app start (from App.tsx), before any scheduler starts.
+ * Reads the persisted schema version, applies any pending step-migrations,
+ * then writes the current version back.
  *
  * Conventions:
  *   - Migrations are forward-only. We do not downgrade.
  *   - Each step takes the store from version N to N+1. Compose for jumps.
  *   - Migrations must be idempotent (safe to re-run on partial failure).
  */
-export function runMigrations(): void {
+export function runMigrations(now: number = Date.now()): void {
   const stored = store.getNumber(KEYS.schemaVersion);
   const from = typeof stored === 'number' ? stored : 0;
 
@@ -34,9 +32,51 @@ export function runMigrations(): void {
     return;
   }
 
-  // Future step migrations go here, e.g.:
-  //   if (from < 2) { migrateV1toV2(); }
-  //   if (from < 3) { migrateV2toV3(); }
+  if (from < 2) {
+    migrateToRoundsAndMyDay(now);
+  }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
+}
+
+/**
+ * v2 — Daily Sets rounds and one My day window.
+ *
+ *  - A saved plan that isn't the new default is kept under `planBackupV1`
+ *    and replaced, so its posture and presence cadences stop chiming on
+ *    top of the rounds. Setup offers to restore it.
+ *  - Daily Sets lose their own day window; rounds spread across My day.
+ *
+ * A fresh install has nothing saved yet, so nothing changes.
+ */
+function migrateToRoundsAndMyDay(now: number): void {
+  const rawPlan = store.getString(KEYS.planCurrent);
+  if (rawPlan !== undefined && !isDefaultPlan(rawPlan)) {
+    // Keep the first backup if an earlier run was interrupted.
+    if (store.getString(KEYS.planBackupV1) === undefined) {
+      store.set(KEYS.planBackupV1, rawPlan);
+    }
+    store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
+    store.set(KEYS.planReplacedAt, now);
+  }
+
+  const rawProgram = store.getString(KEYS.programState);
+  if (rawProgram !== undefined) {
+    try {
+      const program = JSON.parse(rawProgram) as Record<string, unknown>;
+      delete program.dayStart;
+      delete program.dayEnd;
+      store.set(KEYS.programState, JSON.stringify(program));
+    } catch {
+      // Corrupt: loadProgram already falls back to a fresh program.
+    }
+  }
+}
+
+function isDefaultPlan(raw: string): boolean {
+  try {
+    return plansEqual(JSON.parse(raw) as Plan, DEFAULT_PLAN);
+  } catch {
+    return false;
+  }
 }
