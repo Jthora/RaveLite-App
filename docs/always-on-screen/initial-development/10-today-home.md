@@ -63,7 +63,11 @@ Top to bottom, one scroll:
    every source (chimes and rounds, drill taps, circuit legs, Train log
    entries, max tests) and the day's chimes as active, upcoming, skipped or
    missed. Missed and skipped rows are dimmed, never red, never counted.
-   Train entries open for edit.
+   Train entries open for edit. A missed or skipped chime opens a Log it
+   sheet (a round's moves with −/+, or the drill's dose): Done records it at
+   the chime's own time, as a manual completion carrying the chime's pulse
+   id, so the row turns done and a round counts toward Daily Sets
+   (`src/domain/ambient/lateDone.ts`).
 7. **+ Log a session** (Train log sheet) and **Practice** (circuits, then
    Heart drills, in one scroll).
 

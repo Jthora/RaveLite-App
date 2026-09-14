@@ -215,7 +215,7 @@ function ActiveCard({
   );
 }
 
-function AmountRow({
+export function AmountRow({
   label,
   unit,
   value,

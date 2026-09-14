@@ -81,6 +81,7 @@ function roundChime(fire: SetFire): ScheduledChime {
       .join(' + '),
     detail: extras.join(' · ') || undefined,
     move: moveForTrack(movesOf(rx)[0]?.trackId),
+    exerciseId: fire.exerciseId,
   };
 }
 
@@ -119,6 +120,7 @@ export function buildTodayModel(
       label: drill?.name ?? ELEMENTS[fire.element].name,
       detail: window?.label,
       move: moveForExercise(drill?.id),
+      exerciseId: drill?.id,
     });
   }
   const rounds = [

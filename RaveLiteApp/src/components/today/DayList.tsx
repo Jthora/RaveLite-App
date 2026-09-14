@@ -18,7 +18,8 @@ const MARK: Record<DayRowStatus, string> = {
 
 interface Props {
   rows: readonly DayRow[];
-  /** Train entries become pressable (to edit) when this is set. */
+  /** When set, Train entries open to edit and missed or skipped chimes
+   *  open to be logged. */
   onRowPress?: (row: DayRow) => void;
   /** Shown when there are no rows. */
   emptyText?: string;
@@ -42,7 +43,9 @@ export function DayList({
         const el = ELEMENTS[row.element];
         const quiet = row.status === 'skipped' || row.status === 'missed';
         const lit = row.status === 'done' || row.status === 'active';
-        const editable = onRowPress !== undefined && row.ref?.store === 'train';
+        const late = row.status === 'missed' || row.status === 'skipped';
+        const editable =
+          onRowPress !== undefined && (row.ref?.store === 'train' || late);
         const body = (
           <>
             <Text style={styles.time}>{formatHM(row.at)}</Text>
@@ -86,8 +89,8 @@ export function DayList({
             color={el.color}
             onPress={() => onRowPress(row)}
             accessibilityRole="button"
-            accessibilityLabel={`Edit ${row.label}`}
-            style={styles.rowTap}>
+            accessibilityLabel={`${late ? 'Log' : 'Edit'} ${row.label}`}
+            style={[styles.rowTap, quiet && styles.quiet]}>
             <View style={styles.rowInner}>{body}</View>
           </Tap>
         ) : (

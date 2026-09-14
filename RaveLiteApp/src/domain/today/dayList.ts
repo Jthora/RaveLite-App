@@ -36,6 +36,8 @@ export interface DayRow {
   ref?: ActivityItem['ref'];
   /** The movement, for its pictogram. */
   move?: MoveId;
+  /** For chime rows: the drill the chime asked for. */
+  exerciseId?: string;
 }
 
 /** A chime on today's schedule (plan chime or Daily Sets round). */
@@ -46,6 +48,7 @@ export interface ScheduledChime {
   label: string;
   detail?: string;
   move?: MoveId;
+  exerciseId?: string;
 }
 
 export interface DayListInput {
@@ -139,6 +142,7 @@ export function buildDayList(input: DayListInput): DayRow[] {
       label: chime.label,
       detail: chime.detail,
       move: chime.move,
+      exerciseId: chime.exerciseId,
     });
   }
 

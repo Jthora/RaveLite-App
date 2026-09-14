@@ -2,6 +2,8 @@ import React from 'react';
 import renderer, {act, type ReactTestInstance} from 'react-test-renderer';
 import {afterEach, beforeEach, expect, it, jest} from '@jest/globals';
 
+import {LateLogSheet} from '../../../components/today/LateLogSheet';
+import {activityForDay} from '../../../domain/activity/activity';
 import {store} from '../../../storage';
 import * as runtime from '../../../domain/ambient/pulseRuntime';
 import {DailySetsSheet} from '../DailySetsSheet';
@@ -83,5 +85,28 @@ it('the gear opens Settings and the meters open Daily Sets', () => {
     byTestId(tree, 'sets-open').props.onPress();
   });
   expect(tree.root.findByType(DailySetsSheet).props.visible).toBe(true);
+  act(() => tree.unmount());
+});
+
+it('a missed chime opens to be logged, and Done marks it done', () => {
+  const tree = renderToday();
+  const missed = tree.root.findAll(
+    (node: ReactTestInstance) =>
+      typeof node.props.testID === 'string' &&
+      node.props.testID.startsWith('day-row-') &&
+      !node.props.testID.startsWith('day-row-train:') &&
+      !node.props.testID.startsWith('day-row-journal:'),
+  )[0];
+  expect(missed).toBeDefined();
+  const pulseId = missed.props.testID.replace('day-row-', '');
+  act(() => {
+    missed.props.onPress();
+  });
+  expect(tree.root.findByType(LateLogSheet).props.row?.id).toBe(pulseId);
+  act(() => {
+    byTestId(tree, 'late-done').props.onPress();
+  });
+  expect(activityForDay().some(item => item.pulseId === pulseId)).toBe(true);
+  expect(tree.root.findByType(LateLogSheet).props.row).toBeUndefined();
   act(() => tree.unmount());
 });

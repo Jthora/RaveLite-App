@@ -7,13 +7,14 @@
  * Settings, Daily Sets in full, logging a session and practice open as
  * sheets, so the page itself stays a glance.
  */
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {AppState, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../../components/Tap';
 import {BalanceStrip} from '../../components/today/BalanceStrip';
 import {ChimeCard, type DoneAdjust} from '../../components/today/ChimeCard';
 import {DayList} from '../../components/today/DayList';
+import {LateLogSheet} from '../../components/today/LateLogSheet';
 import {MyDaySheet} from '../../components/today/MyDaySheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
 import {SetsMeters} from '../../components/today/SetsMeters';
@@ -26,6 +27,7 @@ import {
   gatherHealthInputs,
   summarizeHealth,
 } from '../../domain/ambient/healthChecks';
+import {logMissedChime} from '../../domain/ambient/lateDone';
 import {setPause} from '../../domain/ambient/pause';
 import {
   cancelQueued,
@@ -34,6 +36,7 @@ import {
   sealActive,
   snoozeActive,
 } from '../../domain/ambient/pulseRuntime';
+import {setsToday} from '../../domain/ambient/setScheduler';
 import type {CircuitLeg} from '../../domain/circuit/circuit';
 import {append} from '../../domain/journal/journal';
 import type {DayRow} from '../../domain/today/dayList';
@@ -99,6 +102,8 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [setsOpen, setSetsOpen] = useState(false);
+  /** A missed or skipped chime being logged after the fact. */
+  const [late, setLate] = useState<DayRow | undefined>();
   const next = model.next;
 
   // Sealing writes the completion; the sets scheduler trims later rounds
@@ -118,14 +123,28 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
     cancelQueued([next.id]);
     append({kind: 'reminder.skipped', pulseId: next.id, respondedAfterMs: 0});
   }, [next]);
-  // A Train entry in the day list opens for edit; others aren't pressable.
+  // A Train entry opens for edit; a missed or skipped chime opens to be
+  // logged. Nothing else in the list is pressable.
   const onRowPress = useCallback((row: DayRow) => {
+    if (row.status === 'missed' || row.status === 'skipped') {
+      setLate(row);
+      return;
+    }
     const id = row.ref?.store === 'train' ? row.ref.id : undefined;
     const entry = id ? loadEntries().find(e => e.id === id) : undefined;
     if (entry) {
       setEditing(entry);
     }
   }, []);
+
+  // A round's moves, partner and glass, looked up when its row opens.
+  const lateRound = useMemo(
+    () =>
+      late
+        ? setsToday(Date.now()).fires.find(f => f.id === late.id)
+        : undefined,
+    [late],
+  );
 
   const accent = ELEMENTS.heart.accent;
 
@@ -222,6 +241,26 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           }}
         />
         <DailySetsSheet visible={setsOpen} onClose={() => setSetsOpen(false)} />
+        <LateLogSheet
+          row={late}
+          prescription={lateRound?.prescription}
+          onClose={() => setLate(undefined)}
+          onDone={adjust => {
+            if (late) {
+              logMissedChime(
+                {
+                  pulseId: late.id,
+                  at: late.at,
+                  element: lateRound?.element ?? late.element,
+                  exerciseId: lateRound?.exerciseId ?? late.exerciseId,
+                  prescription: lateRound?.prescription,
+                },
+                adjust,
+              );
+            }
+            setLate(undefined);
+          }}
+        />
       </ScrollView>
     </ElementProvider>
   );
