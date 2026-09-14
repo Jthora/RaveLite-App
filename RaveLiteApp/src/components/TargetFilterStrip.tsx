@@ -6,10 +6,10 @@
  * surfaced via a quick-toggle "MY CORRECTIONS" pill at the head of the
  * row.
  *
- * Used by DrillsPanel (live filter) and TunePanel (persisted prefs).
+ * Used by an element's Library sheet (focus areas saved per element).
  */
 import React from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text} from 'react-native';
 import type {Target} from '../domain/exercises/types';
 import {palette, radius, spacing} from '../theme';
 
@@ -107,6 +107,10 @@ function Pill({label, active, onPress, color, accent}: PillProps) {
   return (
     <Pressable
       onPress={onPress}
+      // Pills are ~28 dp tall; the slop brings the touch target to 48 dp.
+      hitSlop={{top: 10, bottom: 10}}
+      accessibilityRole="button"
+      accessibilityState={{selected: active}}
       style={({pressed}) => [
         styles.pill,
         active && {backgroundColor: color, borderColor: color},
@@ -117,11 +121,7 @@ function Pill({label, active, onPress, color, accent}: PillProps) {
         style={[
           styles.pillText,
           {
-            color: active
-              ? palette.bg
-              : accent
-              ? color
-              : palette.textDim,
+            color: active ? palette.bg : accent ? color : palette.textDim,
           },
         ]}>
         {label}
