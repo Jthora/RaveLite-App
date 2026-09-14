@@ -11,10 +11,6 @@ import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
  * (week 1, day 1) the first time it is loaded.
  */
 
-/** Matches the default active hours start so the first set isn't suppressed. */
-export const DEFAULT_DAY_START = '09:00';
-export const DEFAULT_DAY_END = '21:00';
-
 export function defaultProgram(now: Date = new Date()): ProgramState {
   const tracks = {} as Record<TrackId, TrackState>;
   for (const t of TRACKS) {
@@ -27,8 +23,6 @@ export function defaultProgram(now: Date = new Date()): ProgramState {
   return {
     version: 1,
     startDay: localDayKey(now.getTime()),
-    dayStart: DEFAULT_DAY_START,
-    dayEnd: DEFAULT_DAY_END,
     tracks,
   };
 }
@@ -111,17 +105,6 @@ export function recordMaxTest(
 
 export function levelUpTrack(id: TrackId): ProgramState {
   return updateTrack(id, s => levelUp(trackById(id), s));
-}
-
-/** Change the set window. Ignored unless end is after start. */
-export function setDayWindow(dayStart: string, dayEnd: string): ProgramState {
-  const program = loadProgram();
-  if (dayEnd <= dayStart) {
-    return program;
-  }
-  const next = {...program, dayStart, dayEnd};
-  saveProgram(next);
-  return next;
 }
 
 /** Every enabled track's work for `date`, in catalog order. */

@@ -23,11 +23,17 @@
  *   - Cancels queued pulses the plan no longer produces, so a removed or
  *     retimed window stops chiming. A pulse already waiting behind an
  *     active one (past grace) is left to play out.
+ *   - Skips water calls that ride along with a Daily Sets round
+ *     (`skipIds`), and cancels them if they were already queued.
  *   - GC's enqueued IDs whose ts is older than `now - retainMs` so the
  *     set doesn't grow unbounded across an all-day session.
  */
 import {entriesForDay, firedPulseIds} from '../journal/journal';
-import {expandPlanToFires, type FireSpec} from '../reminders/expandPlan';
+import {
+  expandPlanToFires,
+  planPulseId,
+  type FireSpec,
+} from '../reminders/expandPlan';
 import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import {loadPlan, subscribePlan} from '../reminders/repository';
 import type {Plan} from '../reminders/types';
@@ -36,6 +42,9 @@ import {
   enqueue as runtimeEnqueue,
   queuedPulses,
 } from './pulseRuntime';
+import {absorbedWaterCalls} from './setScheduler';
+
+export {planPulseId};
 
 /** Default rolling horizon — 24h ahead. */
 export const DEFAULT_HORIZON_MS = 24 * 60 * 60_000;
@@ -46,11 +55,6 @@ export const DEFAULT_RETAIN_MS = 6 * 60 * 60_000;
 /** Run the impure reconciler at most once per minute. */
 export const DEFAULT_RECONCILE_MS = 60_000;
 
-/** Stable id for a plan-derived pulse. */
-export function planPulseId(fire: FireSpec): string {
-  return `plan:${fire.windowId}:${fire.slotIndex}:${fire.ts}`;
-}
-
 export interface ReconcileInput {
   now: number;
   plan: Plan;
@@ -60,6 +64,8 @@ export interface ReconcileInput {
   firedIds?: ReadonlySet<string>;
   /** Plan pulse ids waiting in the runtime queue (not active). */
   queuedPlanIds?: ReadonlySet<string>;
+  /** Plan pulse ids another chime already covers (water riding along). */
+  skipIds?: ReadonlySet<string>;
   horizonMs?: number;
   graceMs?: number;
   retainMs?: number;
@@ -87,12 +93,15 @@ export function reconcilePlan(input: ReconcileInput): ReconcileResult {
     alreadyEnqueued,
     firedIds = new Set<string>(),
     queuedPlanIds = new Set<string>(),
+    skipIds = new Set<string>(),
     horizonMs = DEFAULT_HORIZON_MS,
     graceMs = DEFAULT_GRACE_MS,
     retainMs = DEFAULT_RETAIN_MS,
   } = input;
 
-  const fires = expandPlanToFires(plan, now - graceMs, now + horizonMs);
+  const fires = expandPlanToFires(plan, now - graceMs, now + horizonMs).filter(
+    fire => !skipIds.has(planPulseId(fire)),
+  );
   const expandedIds = new Set(fires.map(planPulseId));
   const toEnqueue: FireSpec[] = [];
   const nextEnqueued = new Set<string>();
@@ -107,8 +116,9 @@ export function reconcilePlan(input: ReconcileInput): ReconcileResult {
   }
 
   // Queued pulses the plan no longer produces (window removed or
-  // retimed). Ones already past grace are waiting behind an active pulse
-  // and were legitimately due, so they stay.
+  // retimed, or now riding along with a round). Ones already past grace
+  // are waiting behind an active pulse and were legitimately due, so
+  // they stay.
   const toCancel: string[] = [];
   for (const id of queuedPlanIds) {
     const ts = parsePlanIdTs(id);
@@ -168,6 +178,7 @@ export function reconcileNow(now: number = Date.now()): void {
     alreadyEnqueued: enqueuedIds,
     firedIds: firedPulseIds(entriesForDay(new Date(now))),
     queuedPlanIds,
+    skipIds: absorbedWaterCalls(now),
   });
   enqueuedIds = nextEnqueued;
   if (toCancel.length > 0) {

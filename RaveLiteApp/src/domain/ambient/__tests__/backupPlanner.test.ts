@@ -8,7 +8,7 @@ import {
 } from '../backupPlanner';
 import {DEFAULT_ACTIVE_HOURS} from '../types';
 
-// Monday 14 Sep 2026, 10:00 local. Default active hours are 09:00–23:00.
+// Monday 14 Sep 2026, 10:00 local. Default active hours are 09:00–22:00.
 const NOW = new Date(2026, 8, 14, 10, 0).getTime();
 const MIN = 60_000;
 

@@ -6,11 +6,12 @@
  *   - "+ set" to log a set done outside a chime
  *   - max test (NumberPad) — the only thing that raises set size
  *   - level up to the next variation once the set size graduates
- *   - track on/off and the set-chime window
+ *   - track on/off
  *
- * All writes go through the program repository or the journal; the sets
- * scheduler picks them up (program saves re-lay the day, logged sets
- * retire redundant chimes).
+ * Rounds spread across My day (active hours), so there is no separate set
+ * window here. All writes go through the program repository or the
+ * journal; the sets scheduler picks them up (program saves re-lay the day,
+ * logged sets trim upcoming rounds).
  */
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -18,6 +19,7 @@ import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Tap} from '../../components/Tap';
 import {NumberPad} from '../../components/training/NumberPad';
 
+import {getActiveHours} from '../../domain/ambient/activeHours';
 import {reconcileSetsNow, setsToday} from '../../domain/ambient/setScheduler';
 import {subscribe as subscribePulseRuntime} from '../../domain/ambient/pulseRuntime';
 import {EXERCISE_LIBRARY} from '../../domain/exercises/library';
@@ -35,7 +37,6 @@ import {
   levelUpTrack,
   loadProgram,
   recordMaxTest,
-  setDayWindow,
   setTrackEnabled,
   subscribeProgram,
 } from '../../domain/program/repository';
@@ -71,13 +72,14 @@ export function SetsPanel() {
       program,
       week,
       phase: phaseForWeek(week),
+      myDay: getActiveHours(),
       today: setsToday(now),
       done: doneByTrack(entriesForDay(date)),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
 
-  const {program, today, done, week, phase, date} = view;
+  const {program, today, done, week, phase, date, myDay} = view;
   const accent = ELEMENTS.heart.accent;
   const setsTotal = today.prescriptions.reduce((s, p) => s + p.sets, 0);
   const setsDone = today.prescriptions.reduce(
@@ -108,15 +110,6 @@ export function SetsPanel() {
     [refresh],
   );
 
-  const shiftWindow = useCallback(
-    (edge: 'start' | 'end', minutes: number) => {
-      const start = edge === 'start' ? shiftHHMM(program.dayStart, minutes) : program.dayStart;
-      const end = edge === 'end' ? shiftHHMM(program.dayEnd, minutes) : program.dayEnd;
-      setDayWindow(start, end);
-    },
-    [program.dayStart, program.dayEnd],
-  );
-
   return (
     <ScrollView
       style={styles.scroll}
@@ -128,7 +121,7 @@ export function SetsPanel() {
           {phase === 'deload' ? 'DELOAD + TEST WEEK' : 'BUILD'}
         </Text>
         <Text style={styles.subtitle}>
-          {setsDone} of {setsTotal} sets · chimes {program.dayStart}–{program.dayEnd}
+          {setsDone} of {setsTotal} sets · My day {myDay.start}–{myDay.end}
         </Text>
       </View>
 
@@ -178,20 +171,6 @@ export function SetsPanel() {
           Rest today: {restTracks.map(tr => tr.name).join(' · ')}
         </Text>
       ) : null}
-
-      <Text style={styles.section}>Set chime window</Text>
-      <View style={styles.windowRow}>
-        <WindowStepper
-          label="Start"
-          value={program.dayStart}
-          onShift={m => shiftWindow('start', m)}
-        />
-        <WindowStepper
-          label="End"
-          value={program.dayEnd}
-          onShift={m => shiftWindow('end', m)}
-        />
-      </View>
 
       <Text style={styles.section}>Tracks</Text>
       {TRACKS.map(tr => {
@@ -323,33 +302,6 @@ function TrackCard({
   );
 }
 
-// ─── Window stepper ─────────────────────────────────────────────────
-
-function WindowStepper({
-  label,
-  value,
-  onShift,
-}: {
-  label: string;
-  value: string;
-  onShift: (minutes: number) => void;
-}) {
-  return (
-    <View style={styles.stepper}>
-      <Text style={styles.stepperLabel}>{label}</Text>
-      <View style={styles.stepperRow}>
-        <Tap variant="ghost" color={palette.textDim} onPress={() => onShift(-30)} style={styles.stepperBtn}>
-          <Text style={styles.stepperBtnText}>−</Text>
-        </Tap>
-        <Text style={styles.stepperValue}>{value}</Text>
-        <Tap variant="ghost" color={palette.textDim} onPress={() => onShift(30)} style={styles.stepperBtn}>
-          <Text style={styles.stepperBtnText}>+</Text>
-        </Tap>
-      </View>
-    </View>
-  );
-}
-
 // ─── Max test sheet ─────────────────────────────────────────────────
 
 function MaxTestSheet({
@@ -420,13 +372,6 @@ function formatMax(track: Track, max: number): string {
 function formatHHMM(ts: number): string {
   const d = new Date(ts);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
-/** Shift "HH:MM" by minutes, clamped to 05:00–23:30. */
-function shiftHHMM(hhmm: string, minutes: number): string {
-  const [h, m] = hhmm.split(':').map(Number);
-  const total = Math.max(5 * 60, Math.min(23 * 60 + 30, h * 60 + m + minutes));
-  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
 
 const styles = StyleSheet.create({
@@ -551,45 +496,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
-  },
-  windowRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  stepper: {
-    flex: 1,
-    backgroundColor: palette.surface,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    alignItems: 'center',
-  },
-  stepperLabel: {
-    ...t.caption,
-    color: palette.textDim,
-    textTransform: 'uppercase',
-  },
-  stepperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginTop: spacing.xs,
-  },
-  stepperBtn: {
-    width: 40,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: 0,
-    borderRadius: radius.pill,
-  },
-  stepperBtnText: {
-    color: palette.text,
-    fontSize: 18,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  stepperValue: {
-    ...t.title,
-    color: palette.text,
-    fontVariant: ['tabular-nums'],
   },
   trackRow: {
     flexDirection: 'row',

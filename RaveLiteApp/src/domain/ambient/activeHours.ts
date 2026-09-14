@@ -3,10 +3,12 @@ import {KEYS} from '../../storage/keys';
 import {ActiveHours, DEFAULT_ACTIVE_HOURS} from './types';
 
 /**
- * Active-hours predicate + storage helpers.
+ * Active hours — the operator's "My day" window — plus the paging rule.
  *
- * Pure logic for: "given this `ActiveHours` config and this instant,
- * is the surface allowed to actively page the operator right now?"
+ * My day is the single window everything keys off: chimes page only inside
+ * it, Daily Sets rounds spread across it, and the screen dims for the night
+ * outside it. Saving it notifies subscribers so schedules and the screen
+ * follow straight away.
  *
  * See `docs/always-on-screen/initial-development/01-requirements/active-hours.md`.
  */
@@ -117,6 +119,19 @@ export function getActiveHours(): ActiveHours {
   }
 }
 
+type ActiveHoursListener = (next: ActiveHours) => void;
+const listeners = new Set<ActiveHoursListener>();
+
+/** Fires after My day is saved. Returns an unsubscribe function. */
+export function subscribeActiveHours(
+  listener: ActiveHoursListener,
+): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 /** Persist the operator's active-hours config. Validates before write. */
 export function setActiveHours(next: ActiveHours): void {
   parseHHMM(next.start);
@@ -125,6 +140,13 @@ export function setActiveHours(next: ActiveHours): void {
     throw new Error('daysMask must be a number');
   }
   store.set(KEYS.activeHours, JSON.stringify(next));
+  for (const listener of listeners) {
+    try {
+      listener(next);
+    } catch (e) {
+      console.warn('[activeHours] listener threw', e);
+    }
+  }
 }
 
 /**

@@ -19,6 +19,13 @@ export interface FireSpec {
   everyMinutes: number;
 }
 
+/** Stable pulse id for a plan fire: `plan:${windowId}:${slotIndex}:${ts}`. */
+export function planPulseId(
+  fire: Pick<FireSpec, 'windowId' | 'slotIndex' | 'ts'>,
+): string {
+  return `plan:${fire.windowId}:${fire.slotIndex}:${fire.ts}`;
+}
+
 /**
  * Expand a Plan into the concrete list of fires falling inside [fromTs, toTs].
  *

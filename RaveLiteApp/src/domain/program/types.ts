@@ -82,13 +82,11 @@ export interface TrackState {
   testedAt?: number;
 }
 
+/** Rounds spread across My day (the ambient active hours), not a window of their own. */
 export interface ProgramState {
   version: 1;
   /** Local YYYY-MM-DD — day 1 of week 1. */
   startDay: string;
-  /** "HH:MM" window the day's sets are spread across. */
-  dayStart: string;
-  dayEnd: string;
   tracks: Record<TrackId, TrackState>;
 }
 

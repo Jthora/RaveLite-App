@@ -1,5 +1,6 @@
 /**
- * App-wide ambient lifecycle, checked every minute.
+ * App-wide ambient lifecycle, checked every minute and whenever My day
+ * (active hours) is saved.
  *
  *  - Foreground service: keeps the JS runtime (and so every chime) alive
  *    while RaveLite is in the background or the screen is off. Running
@@ -8,7 +9,7 @@
  *  - Screen policy: day inside active hours, dimmed night outside them
  *    (see `screenPolicy`).
  */
-import {pagingAllowedAt} from './activeHours';
+import {pagingAllowedAt, subscribeActiveHours} from './activeHours';
 import {
   startAmbientForegroundService,
   stopAmbientForegroundService,
@@ -18,6 +19,7 @@ import {syncScreenPolicy} from './screenPolicy';
 export const AMBIENT_CHECK_MS = 60_000;
 
 let timer: ReturnType<typeof setInterval> | null = null;
+let unsubscribe: (() => void) | null = null;
 let running: boolean | null = null;
 
 /** Start or stop the service to match the paging rule right now. */
@@ -50,6 +52,7 @@ export function startAmbientLifecycle(): void {
   }
   tick();
   timer = setInterval(tick, AMBIENT_CHECK_MS);
+  unsubscribe = subscribeActiveHours(() => tick());
 }
 
 export function stopAmbientLifecycle(): void {
@@ -57,5 +60,7 @@ export function stopAmbientLifecycle(): void {
     clearInterval(timer);
     timer = null;
   }
+  unsubscribe?.();
+  unsubscribe = null;
   running = null;
 }

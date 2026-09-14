@@ -36,15 +36,24 @@ export interface PlaceInput {
   date: Date;
   dayStart: string;
   dayEnd: string;
+  /** Rounds stop this long before `dayEnd`, leaving the evening quiet. */
+  endMarginMs?: number;
   rounds: Round[];
   /** Plan chime timestamps to keep clear of. */
   blockedTs?: number[];
 }
 
 export function placeRounds(input: PlaceInput): SetFire[] {
-  const {date, dayStart, dayEnd, rounds, blockedTs = []} = input;
+  const {
+    date,
+    dayStart,
+    dayEnd,
+    endMarginMs = 0,
+    rounds,
+    blockedTs = [],
+  } = input;
   const start = atLocal(date, dayStart);
-  const end = atLocal(date, dayEnd);
+  const end = atLocal(date, dayEnd) - endMarginMs;
   if (end <= start || rounds.length === 0) {
     return [];
   }
