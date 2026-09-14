@@ -31,6 +31,9 @@ import {startSetScheduler} from './src/domain/ambient/setScheduler';
 import {startBackupScheduler} from './src/domain/ambient/backupScheduler';
 import {ElementShell} from './src/shell/ElementShell';
 import {NightVeil} from './src/components/alive/NightVeil';
+import {CueWash} from './src/components/alive/CueWash';
+import {startAliveBridge} from './src/domain/ambient/aliveBridge';
+import {touch as aliveTouch} from './src/lib/aliveClock';
 
 // Hook Notifee's foreground events once at boot so notifications actually
 // present while RaveLite is the active app (the common case for a training
@@ -41,6 +44,12 @@ startNotifeeForegroundBridge(handleNotificationAction);
 // `startAmbientLifecycle` starts/stops the service itself based on
 // active-hours + manual-pause state.
 registerAmbientForegroundService();
+
+// Every touch anywhere nudges the alive clock. Touch events bubble, so
+// this observes taps without taking them from buttons or scroll views.
+function onRootTouch(): void {
+  aliveTouch();
+}
 
 function App(): React.JSX.Element {
   // Gate the first render until persisted state has been loaded into
@@ -77,6 +86,7 @@ function App(): React.JSX.Element {
         startSetScheduler();
         startBackupScheduler();
         startAmbientLifecycle();
+        startAliveBridge();
       }
     })();
     return () => {
@@ -91,12 +101,13 @@ function App(): React.JSX.Element {
   }, []);
 
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView style={styles.root} onTouchStart={onRootTouch}>
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" backgroundColor={palette.bg} />
         {hydrated ? (
           <>
             <ElementShell key={themeEpoch} />
+            <CueWash />
             <NightVeil />
           </>
         ) : (

@@ -35,6 +35,7 @@ import {getActiveHours} from '../../domain/ambient/activeHours';
 import {buildRibbonRows, type RibbonRow} from '../../domain/ambient/ribbon';
 import {syncAmbientService} from '../../domain/ambient/ambientLifecycle';
 import {reconcileBackupsNow} from '../../domain/ambient/backupScheduler';
+import {refreshAlivePause} from '../../domain/ambient/aliveBridge';
 import {reconcileSetsNow, setsToday} from '../../domain/ambient/setScheduler';
 import {formatSetAmount} from '../../domain/program/progress';
 import {
@@ -251,6 +252,7 @@ export function AlwaysOnPanel() {
     syncAmbientService();
     // A pause suppresses chimes, so re-plan the OS backups right away.
     reconcileBackupsNow();
+    refreshAlivePause();
     setTick(k => k + DERIVE_EVERY_TICKS);
   }, []);
 

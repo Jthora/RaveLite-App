@@ -3,10 +3,12 @@
  *
  * What it provides:
  *   - SafeAreaView (top-edge inset)
- *   - Ambient deep-tone radial glow + corner vignettes (atmosphere — free,
- *     absolute-positioned, costs no layout space)
- *   - Element-wash on focus: a brief 220ms color-bloom that signals
- *     "you've entered this house" + a haptic fingerprint
+ *   - AliveAura: the element's radial glow, breathing on the shared alive
+ *     clock, plus corner vignettes (atmosphere — absolute-positioned, costs
+ *     no layout space, always behind content)
+ *   - Element-wash on focus: a brief color-bloom (drawn by the root
+ *     CueWash) that signals "you've entered this house" + a haptic
+ *     fingerprint
  *   - A flex container for screen content, capped at 1200dp on tablet
  *
  * What it intentionally does NOT provide:
@@ -23,13 +25,15 @@
  * without churn. They are deprecated and will be removed once all
  * screens drop them.
  */
-import React, {useEffect, useRef} from 'react';
-import {Animated, Easing, StyleSheet, View} from 'react-native';
+import React, {useEffect} from 'react';
+import {StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {ElementIdentity} from '../theme/elements';
 import {palette, spacing} from '../theme';
 import {useLayout} from '../hooks/useLayout';
+import {washWith} from '../lib/aliveClock';
 import {pulseHaptic} from '../lib/elementHaptics';
+import {AliveAura} from './alive/AliveAura';
 
 interface Props {
   element: ElementIdentity;
@@ -46,49 +50,18 @@ export const ScreenScaffold: React.FC<Props> = ({element, children}) => {
   const layout = useLayout();
   const tablet = layout.isTablet;
 
-  // Element wash: brief full-screen color-bloom on focus. Says "entered
-  // a new chamber" without a hard navigation transition. Re-runs when
-  // the element id changes.
-  const wash = useRef(new Animated.Value(0)).current;
+  // Entering an element's house: a brief wash in its color (drawn by the
+  // root CueWash, sized by the motion budget) plus its haptic fingerprint.
   useEffect(() => {
     pulseHaptic(element.id, 'enter');
-    wash.setValue(0);
-    Animated.sequence([
-      Animated.timing(wash, {
-        toValue: 1,
-        duration: 220,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(wash, {
-        toValue: 0,
-        duration: 480,
-        easing: Easing.in(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [wash, element.id]);
-  const washOpacity = wash.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 0.18],
-  });
+    washWith(element.color, 'enter');
+  }, [element.id, element.color]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Ambient element-deep glow — absolute, no layout cost. */}
+      {/* Ambient atmosphere — absolute, behind content, no layout cost. */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-        <View
-          style={[
-            styles.glowOuter,
-            {backgroundColor: element.deep, opacity: 0.16},
-          ]}
-        />
-        <View
-          style={[
-            styles.glowInner,
-            {backgroundColor: element.color, opacity: 0.08},
-          ]}
-        />
+        <AliveAura color={element.color} deep={element.deep} />
         {(['TL', 'TR', 'BL', 'BR'] as const).map(corner => (
           <React.Fragment key={corner}>
             <View
@@ -124,15 +97,6 @@ export const ScreenScaffold: React.FC<Props> = ({element, children}) => {
         ]}>
         {children}
       </View>
-
-      {/* Element-color wash overlay sits above content during the bloom. */}
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          StyleSheet.absoluteFillObject,
-          {backgroundColor: element.color, opacity: washOpacity},
-        ]}
-      />
     </SafeAreaView>
   );
 };
@@ -146,22 +110,6 @@ const styles = StyleSheet.create({
   },
   /** Cap content width on tablets so prose stays readable. */
   contentTablet: {maxWidth: 1200, width: '100%', alignSelf: 'center'},
-  glowOuter: {
-    position: 'absolute',
-    top: -300,
-    left: -150,
-    right: -150,
-    height: 700,
-    borderRadius: 500,
-  },
-  glowInner: {
-    position: 'absolute',
-    top: -200,
-    alignSelf: 'center',
-    width: 400,
-    height: 400,
-    borderRadius: 200,
-  },
   vignette: {
     position: 'absolute',
     backgroundColor: '#000',
