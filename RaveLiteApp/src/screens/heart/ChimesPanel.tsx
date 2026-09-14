@@ -76,7 +76,7 @@ export function ChimesPanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>⏵  CHIMES</Text>
+      <Text style={[styles.eyebrow, {color: accent}]}>▸  CHIMES</Text>
       <Text style={styles.body}>
         Cues play on the alarm channel, so they sound through silent mode and
         Do Not Disturb during active hours. Alarm volume is the ceiling.

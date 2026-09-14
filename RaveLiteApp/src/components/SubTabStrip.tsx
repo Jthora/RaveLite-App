@@ -1,5 +1,12 @@
-import React from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {useCallback, useEffect, useRef} from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 import type {LucideIcon} from 'lucide-react-native';
 import {palette, radius, spacing} from '../theme';
 
@@ -29,6 +36,19 @@ interface Props<TSlug extends string> {
 }
 
 /**
+ * Scroll offset that centers a tab (its start and size along the scroll
+ * axis) in the visible strip, never before the strip's start. The native
+ * ScrollView clamps the far end.
+ */
+export function revealOffset(
+  start: number,
+  size: number,
+  viewport: number,
+): number {
+  return Math.max(0, Math.round(start - (viewport - size) / 2));
+}
+
+/**
  * Sub-tab rail used at the top (portrait) or left side (landscape) of an
  * element screen.
  *
@@ -39,6 +59,9 @@ interface Props<TSlug extends string> {
  *
  * Lucide icons render at 18px (active) / 16px (inactive) — small enough
  * that this rail doesn't fight the hero card for attention.
+ *
+ * On a phone the tabs overflow the strip, so the active tab is scrolled
+ * into view — otherwise a tab past the edge leaves no sign of where you are.
  */
 export function SubTabRail<TSlug extends string>({
   tabs,
@@ -48,19 +71,62 @@ export function SubTabRail<TSlug extends string>({
   axis = 'horizontal',
 }: Props<TSlug>) {
   const isVertical = axis === 'vertical';
+  const scrollRef = useRef<ScrollView>(null);
+  const viewport = useRef(0);
+  const spans = useRef(new Map<string, {start: number; size: number}>());
+
+  const reveal = useCallback(
+    (slug: string, animated: boolean) => {
+      const span = spans.current.get(slug);
+      if (!span || viewport.current <= 0) {
+        return;
+      }
+      const offset = revealOffset(span.start, span.size, viewport.current);
+      scrollRef.current?.scrollTo(
+        isVertical ? {y: offset, animated} : {x: offset, animated},
+      );
+    },
+    [isVertical],
+  );
+
+  useEffect(() => {
+    reveal(active, true);
+  }, [active, reveal]);
+
+  // Layout events arrive in no fixed order; whichever lands last reveals.
+  const onViewportLayout = (e: LayoutChangeEvent) => {
+    const {width, height} = e.nativeEvent.layout;
+    viewport.current = isVertical ? height : width;
+    reveal(active, false);
+  };
+
+  const onTabLayout = (slug: TSlug) => (e: LayoutChangeEvent) => {
+    const {x, y, width, height} = e.nativeEvent.layout;
+    spans.current.set(
+      slug,
+      isVertical ? {start: y, size: height} : {start: x, size: width},
+    );
+    if (slug === active) {
+      reveal(slug, false);
+    }
+  };
+
   return (
     <ScrollView
+      ref={scrollRef}
       horizontal={!isVertical}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
+      onLayout={onViewportLayout}
       contentContainerStyle={isVertical ? styles.colContent : styles.rowContent}
-      style={isVertical ? styles.vRail : undefined}>
+      style={isVertical ? styles.vRail : styles.hRail}>
       {tabs.map(({slug, label, Icon}) => {
         const focused = slug === active;
         return (
           <Pressable
             key={slug}
             onPress={() => onChange(slug)}
+            onLayout={onTabLayout(slug)}
             style={({pressed}) => [
               isVertical ? styles.vTab : styles.hTab,
               {opacity: pressed ? 0.7 : 1},
@@ -108,9 +174,17 @@ export const SubTabStrip = SubTabRail;
 
 const styles = StyleSheet.create({
   // ---- Horizontal (portrait, top) ---------------------------------------
+  /** A ScrollView grows by default (flexGrow: 1). In the portrait column it
+      split the screen height with the content below, floating the tabs
+      mid-screen; pin the strip to its own content height. */
+  hRail: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
   rowContent: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    /* Room for the bloom (top: -10) — a horizontal ScrollView clips it. */
+    paddingTop: spacing.md,
     paddingBottom: spacing.md,
     gap: spacing.lg,
   },

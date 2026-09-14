@@ -123,7 +123,7 @@ export function SetsPanel() {
       showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accent}]}>
-          ⏵  DAILY SETS · WEEK {week} ·{' '}
+          ▸  DAILY SETS · WEEK {week} ·{' '}
           {phase === 'deload' ? 'DELOAD + TEST WEEK' : 'BUILD'}
         </Text>
         <Text style={styles.subtitle}>

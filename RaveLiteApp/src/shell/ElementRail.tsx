@@ -37,6 +37,7 @@ export function ElementRail({active, onChange, axis, isTablet}: Props) {
   const isVertical = axis === 'vertical';
   const glyphSize = isTablet ? 30 : 22;
   const labelSize = isTablet ? 13 : 11;
+  const heartGlyphSize = Math.round(glyphSize * 1.3);
 
   const {phase, budget} = useAliveBreath();
   const bloomOpacity = useMemo(() => {
@@ -59,7 +60,7 @@ export function ElementRail({active, onChange, axis, isTablet}: Props) {
         const el = ELEMENTS[id];
         const focused = id === active;
         const isHeart = id === 'heart';
-        const fs = isHeart ? Math.round(glyphSize * 1.3) : glyphSize;
+        const fs = isHeart ? heartGlyphSize : glyphSize;
         const tint = focused ? el.color : palette.textMuted;
         return (
           <Pressable
@@ -72,7 +73,9 @@ export function ElementRail({active, onChange, axis, isTablet}: Props) {
             accessibilityRole="tab"
             accessibilityState={{selected: focused}}
             accessibilityLabel={el.name}>
-            <View style={styles.iconWrap}>
+            {/* Every slot is as tall as Heart's larger glyph so all five
+                labels sit on one line. */}
+            <View style={[styles.iconWrap, {height: heartGlyphSize + 6}]}>
               {focused && (
                 <>
                   <Animated.View

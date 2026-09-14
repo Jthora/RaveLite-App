@@ -61,7 +61,7 @@ export function InsightsPanel({
       showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accent}]}>
-          ⏵  INSIGHTS  ·  LAST 7 DAYS
+          ▸  INSIGHTS  ·  LAST 7 DAYS
         </Text>
         <Text style={styles.subtitle}>
           The trace of your week. Bars fill at one signed pulse per

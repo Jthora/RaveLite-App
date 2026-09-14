@@ -48,7 +48,7 @@ export function AlivePanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>⏵  ALIVE</Text>
+      <Text style={[styles.eyebrow, {color: accent}]}>▸  ALIVE</Text>
       <Text style={styles.body}>
         How much RaveLite breathes while it sits beside you.
       </Text>

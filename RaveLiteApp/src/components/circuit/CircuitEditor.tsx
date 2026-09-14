@@ -111,7 +111,7 @@ export function CircuitEditor({
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ⏵  {isNew ? 'NEW CIRCUIT' : 'EDIT CIRCUIT'}
+        ▸  {isNew ? 'NEW CIRCUIT' : 'EDIT CIRCUIT'}
       </Text>
 
       {/* Name */}

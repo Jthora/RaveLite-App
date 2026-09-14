@@ -108,7 +108,7 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ⏵  {isNew ? 'NEW WINDOW' : 'EDIT WINDOW'}
+        ▸  {isNew ? 'NEW WINDOW' : 'EDIT WINDOW'}
       </Text>
 
       {/* Label */}

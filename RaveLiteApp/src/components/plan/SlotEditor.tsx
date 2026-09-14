@@ -102,7 +102,7 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
       showsVerticalScrollIndicator={false}>
       {/* Header */}
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ⏵  {isNew ? 'NEW SLOT' : 'EDIT SLOT'}
+        ▸  {isNew ? 'NEW SLOT' : 'EDIT SLOT'}
       </Text>
       <Text style={styles.summary}>{summary}</Text>
 

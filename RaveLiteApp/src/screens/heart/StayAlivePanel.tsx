@@ -56,7 +56,7 @@ export function StayAlivePanel() {
   if (!inputs) {
     return (
       <View style={styles.panel}>
-        <Text style={[styles.eyebrow, {color: accent}]}>⏵  STAY ALIVE</Text>
+        <Text style={[styles.eyebrow, {color: accent}]}>▸  STAY ALIVE</Text>
         <Text style={styles.body}>Checking this phone…</Text>
       </View>
     );
@@ -66,7 +66,7 @@ export function StayAlivePanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>⏵  STAY ALIVE</Text>
+      <Text style={[styles.eyebrow, {color: accent}]}>▸  STAY ALIVE</Text>
       <Text style={styles.body}>
         {warnings === 0
           ? 'All set — chimes should keep firing all day.'

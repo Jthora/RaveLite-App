@@ -1121,6 +1121,9 @@ const styles = StyleSheet.create({
   },
   targetRow: {
     flexDirection: 'row',
+    /* Five pills don't fit a phone-width card; wrap instead of squeezing
+       and clipping the last one. */
+    flexWrap: 'wrap',
     gap: spacing.sm,
     paddingHorizontal: spacing.xs,
   },

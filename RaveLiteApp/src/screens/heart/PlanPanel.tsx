@@ -130,7 +130,7 @@ export function PlanPanel({onPlanCommitted}: Props) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>
-          ⏵  PLAN · {draft.name.toUpperCase()}
+          ▸  PLAN · {draft.name.toUpperCase()}
         </Text>
         <Text style={styles.subtitle}>
           {draft.windows.length} window{draft.windows.length === 1 ? '' : 's'}  ·  {totalSlotCount(draft)} slot

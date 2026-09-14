@@ -73,6 +73,7 @@ export function TargetFilterStrip({active, onChange, color}: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.strip}
       contentContainerStyle={styles.row}>
       <Pill
         label="⌖  MY CORRECTIONS"
@@ -130,6 +131,12 @@ function Pill({label, active, onPress, color, accent}: PillProps) {
 }
 
 const styles = StyleSheet.create({
+  /** Both callers sit in a body padded by spacing.lg. Bleed out to that
+      edge so the first pill lines up with the section title and pills
+      scroll off the page edge rather than being cut mid-card. */
+  strip: {
+    marginHorizontal: -spacing.lg,
+  },
   row: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,

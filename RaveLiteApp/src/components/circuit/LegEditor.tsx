@@ -68,7 +68,7 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ⏵  {isNew ? 'NEW LEG' : 'EDIT LEG'}
+        ▸  {isNew ? 'NEW LEG' : 'EDIT LEG'}
       </Text>
       <Text style={styles.summary}>{summary}</Text>
 

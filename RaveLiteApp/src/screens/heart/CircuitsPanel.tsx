@@ -117,7 +117,7 @@ export function CircuitsPanel({onEngageLegs}: Props) {
       showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>
-          ⏵  CIRCUITS
+          ▸  CIRCUITS
         </Text>
         <Text style={styles.subtitle}>
           The signature pentagram, plus your own sequences.
@@ -127,7 +127,7 @@ export function CircuitsPanel({onEngageLegs}: Props) {
       {/* Built-in pentagram card */}
       <View style={[styles.card, {borderColor: accent}]}>
         <Text style={[styles.cardEyebrow, {color: accentDim}]}>
-          ⏵  BUILT-IN
+          ▸  BUILT-IN
         </Text>
         <Text style={styles.cardTitle}>The Pentagram</Text>
         <Text style={styles.cardMeta}>
