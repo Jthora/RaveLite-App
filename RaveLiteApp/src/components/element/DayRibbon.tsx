@@ -89,7 +89,7 @@ export function DayRibbon({days, selected, color, onSelect}: Props) {
                     {
                       height,
                       backgroundColor: d.count > 0 ? color : palette.border,
-                      opacity: on || d.isToday ? 1 : 0.6,
+                      opacity: on || d.isToday || d.count === 0 ? 1 : 0.6,
                     },
                   ]}
                 />

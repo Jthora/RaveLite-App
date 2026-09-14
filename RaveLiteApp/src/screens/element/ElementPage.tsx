@@ -137,30 +137,30 @@ export function ElementPage({element}: Props) {
       style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
+      <View>
+        <View style={styles.header}>
           <Text style={[styles.name, {color: element.color}]}>
             {element.glyph} {element.name}
           </Text>
-          <Text testID="element-stats" style={styles.stats}>
-            {view.stats}
-          </Text>
-          {view.best ? (
-            <Text style={styles.best} numberOfLines={1}>
-              {view.best}
-            </Text>
-          ) : null}
+          <Tap
+            testID="log-open"
+            variant="ghost"
+            color={element.accent}
+            onPress={() => setLogOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={`Log a ${element.name} session`}
+            style={styles.logBtn}>
+            <Text style={[styles.logText, {color: element.accent}]}>+ Log</Text>
+          </Tap>
         </View>
-        <Tap
-          testID="log-open"
-          variant="ghost"
-          color={element.accent}
-          onPress={() => setLogOpen(true)}
-          accessibilityRole="button"
-          accessibilityLabel={`Log a ${element.name} session`}
-          style={styles.logBtn}>
-          <Text style={[styles.logText, {color: element.accent}]}>+ Log</Text>
-        </Tap>
+        <Text testID="element-stats" style={styles.stats}>
+          {view.stats}
+        </Text>
+        {view.best ? (
+          <Text style={styles.best} numberOfLines={1}>
+            {view.best}
+          </Text>
+        ) : null}
       </View>
 
       <DrillCard
@@ -256,13 +256,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: spacing.md,
-  },
-  headerText: {
-    flex: 1,
   },
   name: {
     ...t.title,
+    flexShrink: 1,
   },
   stats: {
     ...t.body,

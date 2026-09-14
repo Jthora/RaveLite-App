@@ -113,8 +113,7 @@ export function DailySetsSection() {
     <View>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accent}]}>
-          ▸ DAILY SETS · WEEK {week} ·{' '}
-          {phase === 'deload' ? 'DELOAD + TEST WEEK' : 'BUILD'}
+          ▸ WEEK {week} · {phase === 'deload' ? 'DELOAD + TEST WEEK' : 'BUILD'}
         </Text>
         <Text style={styles.subtitle}>
           {setsDone} of {setsTotal} sets · My day {myDay.start}–{myDay.end}
