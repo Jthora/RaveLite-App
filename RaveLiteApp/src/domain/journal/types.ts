@@ -28,6 +28,8 @@ export type EntryKind =
   | 'reminder.suppressed'
   /** Post-hoc rollup: the operator was absent across a span. */
   | 'journal.absence'
+  /** Daily Sets: the operator tested a new max on a track. */
+  | 'program.test'
   /** A music attunement event — beat, BPM lock, song change. Future. */
   | 'music.event'
   /** A free-form session note — start/end of a training block. */
@@ -65,6 +67,13 @@ export interface CompletionEntry extends BaseEntry {
   trackId?: string;
   /** Daily Sets: reps or seconds actually done, in the track's unit. */
   amount?: number;
+  /** Daily Sets round: every move done in one chime, each in its track's unit. */
+  moves?: Array<{trackId: string; amount: number}>;
+  /** Partner drill done alongside a set round. */
+  partnerExerciseId?: string;
+  partnerSec?: number;
+  /** A glass of water rode along with this chime. */
+  water?: boolean;
 }
 
 export interface ReminderFiredEntry extends BaseEntry {
@@ -151,6 +160,20 @@ export interface SessionEndEntry extends BaseEntry {
   durationSec: number;
 }
 
+/**
+ * Daily Sets max test. The new max also lives in program state; this entry
+ * puts the test in the day's activity and history.
+ */
+export interface ProgramTestEntry extends BaseEntry {
+  kind: 'program.test';
+  trackId: string;
+  /** New max, in the track's unit. */
+  max: number;
+  /** Rung the max was tested on. */
+  rung: number;
+  element: ElementId;
+}
+
 /** `Omit` that distributes over a union, so each entry kind keeps its own fields. */
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
   ? Omit<T, K>
@@ -165,4 +188,5 @@ export type JournalEntry =
   | AbsenceEntry
   | MusicEventEntry
   | SessionStartEntry
-  | SessionEndEntry;
+  | SessionEndEntry
+  | ProgramTestEntry;

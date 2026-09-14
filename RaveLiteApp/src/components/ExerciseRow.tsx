@@ -1,7 +1,7 @@
 import React, {useRef} from 'react';
 import {Animated, Easing, Pressable, StyleSheet, Text, View} from 'react-native';
 import {Exercise} from '../domain/exercises/types';
-import {recordCompletion} from '../domain/journal/recordCompletion';
+import {recordDrillTap} from '../domain/activity/record';
 import {elementOf} from '../theme/elements';
 import {palette, radius, spacing, type} from '../theme';
 import {pulseHaptic} from '../lib/elementHaptics';
@@ -21,7 +21,8 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
   const sealAnim = useRef(new Animated.Value(0)).current;
 
   const onDone = () => {
-    recordCompletion(exercise, 'manual');
+    // Counts toward Daily Sets when the drill is a track's current rung.
+    recordDrillTap(exercise);
     pulseHaptic(exercise.element, 'seal');
     onCompleted?.();
     Animated.sequence([

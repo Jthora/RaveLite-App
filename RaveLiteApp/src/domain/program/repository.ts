@@ -1,5 +1,6 @@
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
+import {append} from '../journal/journal';
 import {localDayKey} from '../training/grading';
 import {TRACKS, trackById} from './tracks';
 import {applyTest, levelUp, prescribeDay} from './progression';
@@ -90,12 +91,22 @@ export function setTrackEnabled(id: TrackId, enabled: boolean): ProgramState {
   return updateTrack(id, s => ({...s, enabled}));
 }
 
+/** Save a new max and journal the test so it shows in the day's activity. */
 export function recordMaxTest(
   id: TrackId,
   max: number,
   at: number = Date.now(),
 ): ProgramState {
-  return updateTrack(id, s => applyTest(s, max, at));
+  const next = updateTrack(id, s => applyTest(s, max, at));
+  append({
+    kind: 'program.test',
+    at,
+    trackId: id,
+    max,
+    rung: next.tracks[id].rung,
+    element: trackById(id).element,
+  });
+  return next;
 }
 
 export function levelUpTrack(id: TrackId): ProgramState {

@@ -134,8 +134,8 @@ export const CircuitChamber: React.FC<Props> = ({
   }, [remaining]);
 
   const sealAndAdvance = () => {
-    // Journal this leg.
-    recordCompletion(leg.exercise, 'manual');
+    // Journal this leg as a circuit completion.
+    recordCompletion(leg.exercise, 'auto');
     // Element-signature seal haptic.
     pulseHaptic(leg.element, 'seal');
     if (legIdx < circuit.length - 1) {

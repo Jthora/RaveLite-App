@@ -21,6 +21,17 @@ function newEntryId(at: number): string {
   return `${at.toString(36)}-${r}`;
 }
 
+type JournalListener = (entry: JournalEntry) => void;
+const listeners = new Set<JournalListener>();
+
+/** Fires after every append. Returns an unsubscribe function. */
+export function subscribeJournal(listener: JournalListener): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 /** Append a fact. The only write API to the journal. */
 export function append(entry: NewJournalEntry): JournalEntry {
   const at = entry.at ?? Date.now();
@@ -28,6 +39,13 @@ export function append(entry: NewJournalEntry): JournalEntry {
   const full = {...entry, id, at} as JournalEntry;
   const key = KEYS.journalEntry(dayKey(new Date(at)), id);
   store.set(key, JSON.stringify(full));
+  for (const l of listeners) {
+    try {
+      l(full);
+    } catch (e) {
+      console.warn('[journal] listener threw', e);
+    }
+  }
   return full;
 }
 

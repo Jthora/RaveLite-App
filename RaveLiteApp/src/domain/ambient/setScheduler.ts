@@ -6,12 +6,12 @@
  *   1. Prescribe today's sets and spread them across the set window,
  *      keeping clear of the plan's own chimes.
  *   2. Compare against today's journal: sets already done (from a chime,
- *      a notification button, or a manual "+ set") reduce how many
- *      upcoming chimes are still needed.
+ *      a notification button, a drill tap, or a manual "+ set") reduce
+ *      how many upcoming chimes are still needed.
  *   3. Enqueue needed chimes not yet enqueued; cancel queued chimes that
  *      are no longer needed.
  */
-import {entriesForDay} from '../journal/journal';
+import {entriesForDay, subscribeJournal} from '../journal/journal';
 import {expandPlanToFires} from '../reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../reminders/repository';
 import {doneByTrack, firedSetIds} from '../program/progress';
@@ -121,7 +121,18 @@ export function startSetScheduler(): void {
   }
   reconcileSetsNow();
   timer = setInterval(() => reconcileSetsNow(), SET_RECONCILE_MS);
-  unsubs = [subscribeProgram(relay), subscribePlan(relay)];
+  unsubs = [
+    subscribeProgram(relay),
+    subscribePlan(relay),
+    // A set logged anywhere (drill tap, "+ set", a chime) retires the
+    // chimes it made redundant. Deferred so a runtime seal that is still
+    // writing its entry finishes before the queue changes under it.
+    subscribeJournal(e => {
+      if (e.kind === 'completion' && (e.trackId || e.moves)) {
+        setTimeout(() => reconcileSetsNow(), 0);
+      }
+    }),
+  ];
 }
 
 export function stopSetScheduler(): void {

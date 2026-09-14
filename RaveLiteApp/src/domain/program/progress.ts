@@ -25,12 +25,20 @@ export function doneByTrack(
 ): Partial<Record<TrackId, TrackDone>> {
   const out: Partial<Record<TrackId, TrackDone>> = {};
   for (const e of entries) {
-    if (e.kind !== 'completion' || !e.trackId || typeof e.amount !== 'number') {
+    if (e.kind !== 'completion') {
       continue;
     }
-    const id = e.trackId as TrackId;
-    const cur = out[id] ?? {amount: 0, sets: 0};
-    out[id] = {amount: cur.amount + e.amount, sets: cur.sets + 1};
+    // A round records every move; older single-set entries carry one.
+    const moves =
+      e.moves ??
+      (e.trackId && typeof e.amount === 'number'
+        ? [{trackId: e.trackId, amount: e.amount}]
+        : []);
+    for (const m of moves) {
+      const id = m.trackId as TrackId;
+      const cur = out[id] ?? {amount: 0, sets: 0};
+      out[id] = {amount: cur.amount + m.amount, sets: cur.sets + 1};
+    }
   }
   return out;
 }
