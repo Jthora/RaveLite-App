@@ -56,7 +56,7 @@ Top to bottom, one scroll:
 3. **Balance strip** — today's count per element, and seven dots for the
    last seven days (lit when that element had anything). Tap to open the
    element. Partner drills and glasses count toward their own elements.
-4. **Water** — glasses today out of 8, with **+1**.
+4. **Drink** — glasses of water today out of 8, with **+1**.
 5. **Daily Sets meters** — sets done, then one small meter per track in its
    element's color. Tap for the Daily Sets sheet.
 6. **Today · N-day streak** and the day's list — one row per record from
@@ -102,6 +102,28 @@ One scroll:
 Older Train entries whose kind is custom with no element (`'any'`) appear
 on every element page, as the Train tab showed them, but count once, where
 `trainElement` credits them (`src/domain/activity/elementDay.ts`).
+
+## Move icons (`src/domain/exercises/moves.ts`, `src/components/icons/`)
+
+Below the element sits the move: what the operator is actually doing.
+
+- **33 pictograms** on a 24-unit grid, in one bold weight: stick figures
+  (solid head, 2.6-unit limbs) for body moves — push, pull, row, hang,
+  squat, lunge, plank, crunch, run, staff flow and so on — and Lucide shapes
+  for breath, drink, fuel, presence, evening review and pulse. The shapes
+  live in `moveGlyphs.json`; `MoveIcon` draws them tinted by the element.
+- **Every drill, Daily Sets track and built-in Train kind maps to a move**;
+  `moves.test.ts` fails if a new drill, kind or track has none, or a move has
+  no pictogram. Kinds the operator adds fall back to run or a pulse line.
+- **Where they show:** the chime card (on a soft tile of the element's
+  color), Today's list and each element's day log, the Daily Sets meters and
+  track cards, the drill card and the Library and Practice cards.
+- **Notifications** use the move as the status-bar icon, tinted by element.
+  Android needs vector drawables, so `node scripts/gen-move-drawables.js`
+  writes `res/drawable/ic_move_*.xml` from the same JSON; run it after
+  editing a shape. The keep-alive notification uses the pulse icon.
+- The water counter reads **Drink** with a glass, so drinking water isn't
+  confused with the Water element's count in the balance strip.
 
 ## Chimes (`src/domain/program/rounds.ts`, `src/domain/ambient/setScheduler.ts`)
 
