@@ -1,5 +1,11 @@
 import type {ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
+import {
+  moveForExercise,
+  moveForMetric,
+  moveForTrack,
+  type MoveId,
+} from '../exercises/moves';
 import type {Exercise} from '../exercises/types';
 import {
   dayKey,
@@ -61,6 +67,8 @@ export interface ActivityItem {
   pulseId?: string;
   /** Counts as a glass of water. */
   hydration?: boolean;
+  /** The movement, for its pictogram. */
+  move?: MoveId;
   /** Where the underlying record lives. */
   ref: {store: 'journal' | 'train'; id: string};
 }
@@ -149,6 +157,7 @@ function completionItems(
         exerciseId: single?.id,
         trackId: m.trackId,
         amount: m.amount,
+        move: moveForTrack(m.trackId),
       });
     }
   } else {
@@ -160,6 +169,7 @@ function completionItems(
       label: ex?.name ?? (e.exerciseId === 'retro' ? 'Logged later' : 'Drill'),
       detail: ex?.dose,
       exerciseId: e.exerciseId,
+      move: moveForExercise(e.exerciseId),
       hydration: isHydration(ex) || undefined,
     });
   }
@@ -175,6 +185,7 @@ function completionItems(
       label: partner.name,
       detail: e.partnerSec ? `${e.partnerSec} sec` : partner.dose,
       exerciseId: partner.id,
+      move: moveForExercise(partner.id),
       hydration: isHydration(partner) || undefined,
     });
   }
@@ -185,6 +196,7 @@ function completionItems(
       element: 'water',
       label: 'Glass of water',
       exerciseId: WATER_GLASS_EXERCISE_ID,
+      move: 'drink',
       hydration: true,
     });
   }
@@ -202,6 +214,7 @@ function testItem(e: ProgramTestEntry): ActivityItem {
     detail: `max ${track ? formatSetAmount(e.max, track.unit) : e.max}`,
     trackId: e.trackId,
     amount: e.max,
+    move: moveForTrack(e.trackId),
     ref: {store: 'journal', id: e.id},
   };
 }
@@ -222,6 +235,7 @@ function trainItem(
     source: 'train',
     label: kind?.label ?? 'Training',
     detail: kind ? formatEntryValue(entry, kind) : undefined,
+    move: moveForMetric(kind),
     ref: {store: 'train', id: entry.id},
   };
 }

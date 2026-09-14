@@ -3,6 +3,7 @@
  * track (amount done against the day's quota).
  */
 import type {ElementId} from '../../theme/elements';
+import {moveForTrack, type MoveId} from '../exercises/moves';
 import type {doneByTrack} from './progress';
 import {TRACKS} from './tracks';
 import type {DayPrescription, TrackId} from './types';
@@ -11,6 +12,7 @@ export interface SetsMeter {
   trackId: TrackId;
   name: string;
   element: ElementId;
+  move: MoveId;
   /** Amount done, capped at the day's quota. */
   done: number;
   total: number;
@@ -47,6 +49,7 @@ export function summarizeSets(
         trackId: p.trackId,
         name: TRACKS.find(tr => tr.id === p.trackId)?.name ?? p.label,
         element: p.element,
+        move: moveForTrack(p.trackId) ?? 'activity',
         done: amount,
         total,
         fill: meterFill(amount, total),

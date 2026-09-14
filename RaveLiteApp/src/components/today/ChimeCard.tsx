@@ -2,10 +2,16 @@ import React, {useMemo, useState} from 'react';
 import {Animated, StyleSheet, Text, View} from 'react-native';
 
 import {formatEta, formatHM} from '../ambient/format';
+import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {useAliveBreath} from '../../hooks/useAlive';
 import {steppedBreath} from '../../lib/aliveMath';
 import type {ActivePulseSummary} from '../../domain/ambient/types';
+import {
+  moveForExercise,
+  moveForTrack,
+  type MoveId,
+} from '../../domain/exercises/moves';
 import {formatSetAmount} from '../../domain/program/progress';
 import type {SetUnit, TrackId} from '../../domain/program/types';
 import type {DayRow} from '../../domain/today/dayList';
@@ -37,6 +43,37 @@ export interface ChimeCardProps {
  * with its own −/+), its partner and glass, a draining answer window, and
  * Done / +5 / Skip. Otherwise: the next chime, with +5 and Skip.
  */
+/** The move on a soft square of its element's color; the element glyph when there is none. */
+function MoveTile({
+  move,
+  color,
+  glyph,
+  idle,
+}: {
+  move?: MoveId;
+  color: string;
+  glyph: string;
+  idle?: boolean;
+}) {
+  if (!move) {
+    return (
+      <Text style={[styles.glyph, idle && styles.glyphIdle, {color}]}>
+        {glyph}
+      </Text>
+    );
+  }
+  return (
+    <View
+      style={[
+        styles.tile,
+        idle && styles.tileIdle,
+        {backgroundColor: `${color}29`},
+      ]}>
+      <MoveIcon move={move} color={color} size={idle ? 28 : 32} />
+    </View>
+  );
+}
+
 export function ChimeCard(props: ChimeCardProps) {
   return props.active ? (
     <ActiveCard key={props.active.pulseId} {...props} active={props.active} />
@@ -86,7 +123,14 @@ function ActiveCard({
         style={[styles.accent, {borderColor: el.color, opacity: accentOpacity}]}
       />
       <View style={styles.head}>
-        <Text style={[styles.glyph, {color: el.color}]}>{el.glyph}</Text>
+        <MoveTile
+          move={
+            moveForTrack(rx?.moves?.[0]?.trackId ?? rx?.trackId) ??
+            moveForExercise(active.drillId)
+          }
+          color={el.color}
+          glyph={el.glyph}
+        />
         <View style={styles.headText}>
           <Text style={[styles.eyebrow, {color: el.color}]}>
             NOW · {formatHM(active.fireAt)}
@@ -228,9 +272,7 @@ function NextCard({now, next, onDeferNext, onSkipNext}: ChimeCardProps) {
   return (
     <View style={[styles.card, styles.idle]}>
       <View style={styles.head}>
-        <Text style={[styles.glyph, styles.glyphIdle, {color: el.color}]}>
-          {el.glyph}
-        </Text>
+        <MoveTile move={next.move} color={el.color} glyph={el.glyph} idle />
         <View style={styles.headText}>
           <Text style={styles.eyebrowIdle}>
             NEXT · {formatHM(next.at)} · {formatEta(next.at - now)}
@@ -295,6 +337,18 @@ const styles = StyleSheet.create({
     lineHeight: 46,
     width: 48,
     textAlign: 'center',
+  },
+  tile: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tileIdle: {
+    width: 44,
+    height: 44,
+    opacity: 0.85,
   },
   glyphIdle: {
     fontSize: 28,

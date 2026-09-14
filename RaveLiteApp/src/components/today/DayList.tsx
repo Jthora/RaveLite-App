@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import {formatHM} from '../ambient/format';
+import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import type {DayRow, DayRowStatus} from '../../domain/today/dayList';
 import {ELEMENTS} from '../../theme/elements';
@@ -52,7 +53,13 @@ export function DayList({
               ]}>
               {MARK[row.status]}
             </Text>
-            <Text style={[styles.glyph, {color: el.color}]}>{el.glyph}</Text>
+            {row.move ? (
+              <View style={styles.icon}>
+                <MoveIcon move={row.move} color={el.color} size={18} />
+              </View>
+            ) : (
+              <Text style={[styles.glyph, {color: el.color}]}>{el.glyph}</Text>
+            )}
             <View style={styles.body}>
               <Text
                 style={[
@@ -140,6 +147,10 @@ const styles = StyleSheet.create({
     width: 20,
     fontSize: 16,
     textAlign: 'center',
+  },
+  icon: {
+    width: 20,
+    alignItems: 'center',
   },
   body: {
     flex: 1,

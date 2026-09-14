@@ -1,6 +1,7 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -20,7 +21,10 @@ export function WaterCounter({glasses, target = WATER_TARGET, onAdd}: Props) {
   return (
     <View style={styles.row}>
       <View style={styles.info}>
-        <Text style={styles.label}>Water</Text>
+        <View style={styles.labelRow}>
+          <MoveIcon move="drink" color={water.color} size={14} />
+          <Text style={styles.label}>Drink</Text>
+        </View>
         <View style={styles.cups}>
           {Array.from({length: target}, (_, i) => (
             <View
@@ -63,6 +67,11 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   label: {
     ...t.caption,

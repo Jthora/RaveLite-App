@@ -15,6 +15,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Modal, StyleSheet, Text, View} from 'react-native';
 
+import {MoveIcon} from '../../components/icons/MoveIcon';
 import {Tap} from '../../components/Tap';
 import {NumberPad} from '../../components/training/NumberPad';
 
@@ -22,6 +23,7 @@ import {getActiveHours} from '../../domain/ambient/activeHours';
 import {reconcileSetsNow, setsToday} from '../../domain/ambient/setScheduler';
 import {subscribe as subscribePulseRuntime} from '../../domain/ambient/pulseRuntime';
 import {EXERCISE_LIBRARY} from '../../domain/exercises/library';
+import {moveForTrack} from '../../domain/exercises/moves';
 import {append, entriesForDay} from '../../domain/journal/journal';
 import {doneByTrack, formatSetAmount} from '../../domain/program/progress';
 import {movesOf} from '../../domain/program/rounds';
@@ -253,9 +255,16 @@ function TrackCard({
         {borderColor: complete ? el.color : palette.border},
       ]}>
       <View style={styles.cardTop}>
-        <Text style={[styles.cardTitle, {color: el.color}]} numberOfLines={1}>
-          {el.glyph} {p.label}
-        </Text>
+        <View style={styles.cardName}>
+          <MoveIcon
+            move={moveForTrack(track.id) ?? 'activity'}
+            color={el.color}
+            size={20}
+          />
+          <Text style={[styles.cardTitle, {color: el.color}]} numberOfLines={1}>
+            {p.label}
+          </Text>
+        </View>
         <Text style={styles.cardCount}>
           {doneAmount}/{total} {unitWord}
         </Text>
@@ -431,9 +440,15 @@ const styles = StyleSheet.create({
   },
   cardTop: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+  },
+  cardName: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexShrink: 1,
   },
   cardTitle: {
     ...t.subtitle,

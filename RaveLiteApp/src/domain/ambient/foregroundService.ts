@@ -87,7 +87,7 @@ export async function startAmbientForegroundService(): Promise<void> {
       channelId: CHANNEL_ID,
       asForegroundService: true,
       ongoing: true,
-      smallIcon: 'ic_launcher',
+      smallIcon: 'ic_move_pulse',
       pressAction: {id: 'default', launchActivity: 'default'},
     },
   });

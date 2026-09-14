@@ -7,6 +7,7 @@ import notifee, {
   type Event,
   type Notification,
 } from '@notifee/react-native';
+import {moveForExercise} from '../exercises/moves';
 import {ELEMENTS, ElementId} from '../../theme/elements';
 import {ReminderPayload, Plan} from './types';
 import {VIBRATION_PATTERNS, type ReminderScheduler} from './scheduler';
@@ -37,7 +38,10 @@ const CHANNEL_VERSION = 'v3';
 const LEGACY_CHANNEL_VERSIONS = ['v1', 'v2'];
 const QUIET_CHANNEL_VERSION = 'v1';
 
-function channelId(element: ElementId, version: string = CHANNEL_VERSION): string {
+function channelId(
+  element: ElementId,
+  version: string = CHANNEL_VERSION,
+): string {
   return `elem.${element}.${version}`;
 }
 
@@ -93,7 +97,9 @@ export type NotificationActionHandler = (
  */
 function isValidVibrationPattern(p: readonly number[]): boolean {
   return (
-    p.length > 0 && p.length % 2 === 0 && p.every(n => Number.isFinite(n) && n > 0)
+    p.length > 0 &&
+    p.length % 2 === 0 &&
+    p.every(n => Number.isFinite(n) && n > 0)
   );
 }
 
@@ -120,7 +126,6 @@ async function ensureChannels(): Promise<void> {
       const pattern = VIBRATION_PATTERNS[id];
       const valid = isValidVibrationPattern(pattern);
       if (!valid) {
-        // eslint-disable-next-line no-console
         console.warn(
           `[notifeeScheduler] invalid vibrationPattern for ${id}; falling back to default vibration`,
         );
@@ -169,7 +174,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
  * `undefined` if it isn't a pulse button press. Shared by the foreground
  * bridge and the background handler registered in `index.js`.
  */
-export function toNotificationAction(event: Event): NotificationAction | undefined {
+export function toNotificationAction(
+  event: Event,
+): NotificationAction | undefined {
   if (event.type !== EventType.ACTION_PRESS) {
     return undefined;
   }
@@ -204,7 +211,6 @@ export function startNotifeeForegroundBridge(
     const action = toNotificationAction(event);
     if (action && onAction) {
       Promise.resolve(onAction(action)).catch(err =>
-        // eslint-disable-next-line no-console
         console.warn('[notifee] action handler failed', err),
       );
       return;
@@ -212,7 +218,7 @@ export function startNotifeeForegroundBridge(
     if (event.type === EventType.PRESS) {
       // Future: deep-link to the relevant element screen using
       // detail.notification.data.element.
-      // eslint-disable-next-line no-console
+
       console.log('[notifee] press', event.detail.notification?.data);
     }
   });
@@ -280,7 +286,10 @@ export async function scheduleBackupChime(
 /** Backup chimes the OS currently holds: pulse id → trigger time. */
 export async function listBackupChimes(): Promise<Map<string, number>> {
   const out = new Map<string, number>();
-  for (const {notification, trigger} of await notifee.getTriggerNotifications()) {
+  for (const {
+    notification,
+    trigger,
+  } of await notifee.getTriggerNotifications()) {
     if (
       notification.id &&
       notification.data?.[BACKUP_FLAG] === '1' &&
@@ -331,7 +340,8 @@ export function buildPulseNotification(
       channelId: channelIdFor(payload.element, opts.quiet),
       color: payload.color,
       colorized: true,
-      smallIcon: 'ic_launcher', // TODO: ship a monochrome status-bar icon
+      // The move's pictogram (res/drawable/ic_move_*), tinted by `color`.
+      smallIcon: `ic_move_${moveForExercise(payload.exerciseId) ?? 'pulse'}`,
       pressAction: {id: 'default', launchActivity: 'default'},
       showTimestamp: true,
       ...(payload.pulseId

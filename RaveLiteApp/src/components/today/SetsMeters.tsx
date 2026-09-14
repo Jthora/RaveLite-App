@@ -1,6 +1,7 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import type {SetsSummary} from '../../domain/program/setsSummary';
 import {ELEMENTS} from '../../theme/elements';
@@ -52,6 +53,7 @@ export function SetsMeters({sets, onPress}: Props) {
               return (
                 <View key={tr.trackId} style={styles.meter}>
                   <View style={styles.meterText}>
+                    <MoveIcon move={tr.move} color={color} size={14} />
                     <Text style={styles.meterName} numberOfLines={1}>
                       {tr.name}
                     </Text>
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
   },
   meterText: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     gap: 4,
   },
   meterName: {

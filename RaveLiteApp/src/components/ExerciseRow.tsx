@@ -1,7 +1,16 @@
 import React, {useRef} from 'react';
-import {Animated, Easing, Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {Exercise} from '../domain/exercises/types';
 import {recordDrillTap} from '../domain/activity/record';
+import {moveForExercise} from '../domain/exercises/moves';
+import {MoveIcon} from './icons/MoveIcon';
 import {elementOf} from '../theme/elements';
 import {palette, radius, spacing, type} from '../theme';
 import {pulseHaptic} from '../lib/elementHaptics';
@@ -53,6 +62,11 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
         style={[styles.topEdge, {backgroundColor: el.color, opacity: 0.5}]}
       />
       <View style={styles.head}>
+        <MoveIcon
+          move={moveForExercise(exercise.id) ?? 'activity'}
+          color={el.color}
+          size={22}
+        />
         <Text style={styles.title}>{exercise.name}</Text>
         {/* Dose chip — small lit pill in the element's tint. Reads as a
             label / metadata, not body text. */}
@@ -70,7 +84,10 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
           {exercise.targets.map(t => (
             <View
               key={t}
-              style={[styles.tag, {backgroundColor: el.tint, borderColor: el.color}]}>
+              style={[
+                styles.tag,
+                {backgroundColor: el.tint, borderColor: el.color},
+              ]}>
               <Text style={[styles.tagText, {color: el.color}]}>{t}</Text>
             </View>
           ))}
@@ -80,7 +97,7 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
         <View style={styles.cues}>
           {exercise.cues.map((c, i) => (
             <Text key={i} style={styles.cue}>
-              <Text style={[styles.cueBullet, {color: el.color}]}>·  </Text>
+              <Text style={[styles.cueBullet, {color: el.color}]}>· </Text>
               {c}
             </Text>
           ))}
@@ -101,11 +118,7 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
         />
         {/* Base label — always rendered, claims the button's width
             so swapping in "Logged" doesn't reflow. */}
-        <Text
-          style={[
-            styles.doneTxt,
-            {color: el.color, opacity: 1},
-          ]}>
+        <Text style={[styles.doneTxt, {color: el.color, opacity: 1}]}>
           Done
         </Text>
         {/* Overlay label — fades in/out with sealAnim, sits on top of
@@ -116,7 +129,7 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
             styles.sealLabel,
             {color: palette.bg, opacity: sealAnim},
           ]}>
-          ✓  Logged
+          ✓ Logged
         </Animated.Text>
       </Pressable>
     </View>

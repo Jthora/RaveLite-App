@@ -1,4 +1,5 @@
 import type {ElementId} from '../../theme/elements';
+import type {MoveId} from '../exercises/moves';
 import type {ActivityItem, ActivitySource} from '../activity/activity';
 import type {JournalEntry} from '../journal/types';
 
@@ -33,6 +34,8 @@ export interface DayRow {
   source?: ActivitySource;
   /** For done rows: the stored record, so a Train entry can be edited. */
   ref?: ActivityItem['ref'];
+  /** The movement, for its pictogram. */
+  move?: MoveId;
 }
 
 /** A chime on today's schedule (plan chime or Daily Sets round). */
@@ -42,6 +45,7 @@ export interface ScheduledChime {
   element: ElementId;
   label: string;
   detail?: string;
+  move?: MoveId;
 }
 
 export interface DayListInput {
@@ -75,6 +79,7 @@ function doneRow(items: ActivityItem[]): DayRow {
     status: 'done' as const,
     source: first.source,
     ref: first.ref,
+    move: first.move,
   };
   if (items.length === 1) {
     return {...base, label: first.label, detail: first.detail};
@@ -133,6 +138,7 @@ export function buildDayList(input: DayListInput): DayRow[] {
       status,
       label: chime.label,
       detail: chime.detail,
+      move: chime.move,
     });
   }
 

@@ -1,0 +1,207 @@
+/**
+ * Moves — what the operator is actually doing, one step below the element:
+ * a push, a row, a hang, a glass of water. Every drill, Daily Sets track and
+ * Train log kind maps to one, and each move has a pictogram
+ * (`components/icons/MoveIcon`, data in `moveGlyphs.json`) that lists,
+ * meters, cards and notifications draw in the element's color.
+ */
+import type {TrackId} from '../program/types';
+import type {MetricKind} from '../training/types';
+
+export const MOVE_IDS = [
+  'push',
+  'pull',
+  'row',
+  'hang',
+  'squat',
+  'lunge',
+  'wallsit',
+  'plank',
+  'sideplank',
+  'crunch',
+  'legraise',
+  'bridge',
+  'balance',
+  'carry',
+  'run',
+  'walk',
+  'jump',
+  'kick',
+  'posture',
+  'chestopener',
+  'stretch',
+  'hipopener',
+  'hamstring',
+  'staff',
+  'footwork',
+  'breath',
+  'drink',
+  'fuel',
+  'presence',
+  'intent',
+  'evening',
+  'pulse',
+  'activity',
+] as const;
+
+export type MoveId = (typeof MOVE_IDS)[number];
+
+const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
+  // Air
+  'air.chin-tuck': 'posture',
+  'air.wall-angels': 'posture',
+  'air.crocodile-breathing': 'breath',
+  'air.standing-belly-release': 'breath',
+  'air.doorway-pec-stretch': 'chestopener',
+  'air.coherence-breath': 'breath',
+  'air.box-breath': 'breath',
+  'air.physiological-sigh': 'breath',
+  'air.brick-halo': 'posture',
+  'air.thread-the-needle': 'chestopener',
+  'air.nasal-recovery-walk': 'walk',
+  'air.shadow-rope': 'jump',
+  // Earth
+  'earth.posterior-pelvic-tilt': 'bridge',
+  'earth.glute-bridge': 'bridge',
+  'earth.couch-stretch': 'hipopener',
+  'earth.standing-hip-airplane': 'balance',
+  'earth.deadbug': 'legraise',
+  'earth.crunch': 'crunch',
+  'earth.leg-raise': 'legraise',
+  'earth.side-up': 'crunch',
+  'earth.plank': 'plank',
+  'earth.side-plank': 'sideplank',
+  'earth.hollow-hold': 'legraise',
+  'earth.squat': 'squat',
+  'earth.wall-sit': 'wallsit',
+  'earth.cossack-squat': 'lunge',
+  'earth.single-leg-balance': 'balance',
+  'earth.porch-dead-hang': 'hang',
+  'earth.brick-farmer-walk': 'carry',
+  'earth.brick-pinch': 'carry',
+  'earth.pause-squat': 'squat',
+  'earth.split-squat': 'lunge',
+  'earth.bulgarian-split-squat': 'lunge',
+  'earth.shrimp-squat': 'squat',
+  'earth.hanging-knee-raise': 'legraise',
+  'earth.hanging-leg-raise': 'legraise',
+  'earth.situp': 'crunch',
+  'earth.v-up': 'crunch',
+  'earth.side-plank-hip-dip': 'sideplank',
+  'earth.long-lever-plank': 'plank',
+  'earth.active-hang': 'hang',
+  'earth.one-arm-assisted-hang': 'hang',
+  // Fire
+  'fire.pushups': 'push',
+  'fire.situps': 'crunch',
+  'fire.wall-pushups': 'push',
+  'fire.kick-flow': 'kick',
+  'fire.porch-pullup': 'pull',
+  'fire.pullup-negative': 'pull',
+  'fire.scap-pull': 'pull',
+  'fire.pushup-groove': 'push',
+  'fire.jump-squat': 'jump',
+  'fire.burpee': 'jump',
+  'fire.mountain-climbers': 'plank',
+  'fire.backyard-strides': 'run',
+  'fire.zone2-run': 'run',
+  'fire.run-1.5': 'run',
+  'fire.fire-rounds': 'jump',
+  'fire.kick-flip-foundations': 'kick',
+  'fire.incline-pushup': 'push',
+  'fire.diamond-pushup': 'push',
+  'fire.decline-pushup': 'push',
+  'fire.archer-pushup': 'push',
+  'fire.doorframe-row': 'row',
+  'fire.one-arm-doorframe-row': 'row',
+  'fire.table-row': 'row',
+  'fire.brick-pack-pullup': 'pull',
+  // Water
+  'water.figure-8': 'staff',
+  'water.beat-locks': 'footwork',
+  'water.sword-form-slow': 'staff',
+  'water.album-no-drop': 'staff',
+  'water.sip': 'drink',
+  'water.refill': 'drink',
+  'water.walk-and-drink': 'drink',
+  'water.deep-squat-hold': 'hipopener',
+  'water.side-line-stretch': 'stretch',
+  'water.worlds-greatest-stretch': 'lunge',
+  'water.hamstring-floss': 'hamstring',
+  'water.calf-wall-stretch': 'hamstring',
+  'water.pancake-reach': 'hamstring',
+  'water.pigeon': 'hipopener',
+  'water.frog-stretch': 'hipopener',
+  'water.front-split-progression': 'lunge',
+  'water.beat-step': 'footwork',
+  'water.staff-combat-rounds': 'staff',
+  // Heart
+  'heart.morning-intent': 'intent',
+  'heart.mirror-presence': 'presence',
+  'heart.evening-review': 'evening',
+  'heart.pulse-check': 'pulse',
+  'heart.fuel-check': 'fuel',
+  'heart.rave-vision': 'presence',
+};
+
+const BY_METRIC: Readonly<Record<string, MoveId>> = {
+  'builtin.run-3mi': 'run',
+  'builtin.run-2mi': 'run',
+  'builtin.run-1.5mi': 'run',
+  'builtin.run-custom': 'run',
+  'builtin.pushups-amrap': 'push',
+  'builtin.pushups-2min': 'push',
+  'builtin.situps-2min': 'crunch',
+  'builtin.pullups-amrap': 'pull',
+  'builtin.burpees-2min': 'jump',
+  'builtin.breath-hold': 'breath',
+  'builtin.exhale-hold': 'breath',
+  'builtin.box-breath-2min': 'breath',
+  'builtin.skipping-2min': 'jump',
+  'builtin.crunches-2min': 'crunch',
+  'builtin.leg-hipup': 'legraise',
+  'builtin.side-ups-amrap': 'crunch',
+  'builtin.squats-amrap': 'squat',
+  'builtin.plank': 'plank',
+  'builtin.side-plank': 'sideplank',
+  'builtin.deadhang': 'hang',
+  'builtin.wall-sit': 'wallsit',
+  'builtin.farmer-carry': 'carry',
+  'builtin.weighted-carry-time': 'carry',
+  'builtin.balance-hold': 'balance',
+  'builtin.flow-no-drop': 'staff',
+  'builtin.flow-hold': 'staff',
+  'builtin.deep-squat-hold': 'hipopener',
+  'builtin.shoulder-cars': 'posture',
+  'builtin.hip-cars': 'hipopener',
+};
+
+const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {
+  push: 'push',
+  row: 'row',
+  pull: 'pull',
+  squat: 'squat',
+  'legs-up': 'legraise',
+  crunch: 'crunch',
+  side: 'sideplank',
+  plank: 'plank',
+  hang: 'hang',
+};
+
+export function moveForExercise(id: string | undefined): MoveId | undefined {
+  return id ? BY_EXERCISE[id] : undefined;
+}
+
+export function moveForTrack(id: string | undefined): MoveId | undefined {
+  return id ? BY_TRACK[id as TrackId] : undefined;
+}
+
+/** Built-in kinds have their own move; kinds the operator added fall back. */
+export function moveForMetric(
+  kind: MetricKind | undefined,
+): MoveId | undefined {
+  if (!kind) {
+    return undefined;
+  }
+  return BY_METRIC[kind.id] ?? (kind.category === 'run' ? 'run' : 'activity');
+}

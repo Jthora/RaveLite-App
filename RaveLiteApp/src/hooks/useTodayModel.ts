@@ -25,6 +25,7 @@ import {
 } from '../domain/ambient/pulseRuntime';
 import {setsToday} from '../domain/ambient/setScheduler';
 import type {ActiveHours, ActivePulseSummary} from '../domain/ambient/types';
+import {moveForExercise, moveForTrack} from '../domain/exercises/moves';
 import {entriesForDay, handledPulseIds} from '../domain/journal/journal';
 import {doneByTrack} from '../domain/program/progress';
 import {subscribeProgram} from '../domain/program/repository';
@@ -79,6 +80,7 @@ function roundChime(fire: SetFire): ScheduledChime {
       .map(m => m.label)
       .join(' + '),
     detail: extras.join(' · ') || undefined,
+    move: moveForTrack(movesOf(rx)[0]?.trackId),
   };
 }
 
@@ -116,6 +118,7 @@ export function buildTodayModel(
       element: fire.element,
       label: drill?.name ?? ELEMENTS[fire.element].name,
       detail: window?.label,
+      move: moveForExercise(drill?.id),
     });
   }
   const rounds = [
@@ -133,6 +136,9 @@ export function buildTodayModel(
         label:
           scheduled.find(c => c.id === summary.pulseId)?.label ??
           summary.drillName,
+        move:
+          scheduled.find(c => c.id === summary.pulseId)?.move ??
+          moveForExercise(summary.drillId),
       }
     : undefined;
   const rows = buildDayList({

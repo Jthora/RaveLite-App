@@ -1,9 +1,11 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {recordDrillTap} from '../../domain/activity/record';
 import {exercisesFor} from '../../domain/exercises/library';
+import {moveForExercise} from '../../domain/exercises/moves';
 import {rankDrillsFor, type DrillContext} from '../../domain/exercises/scoring';
 import type {Target} from '../../domain/exercises/types';
 import {completionsTodayEntriesForElement} from '../../domain/journal/stats';
@@ -88,6 +90,11 @@ export function DrillCard({element, focus, version, onOpenLibrary}: Props) {
         }`}
         style={styles.titleTap}>
         <View style={styles.titleRow}>
+          <MoveIcon
+            move={moveForExercise(pick.id) ?? 'activity'}
+            color={element.color}
+            size={32}
+          />
           <View style={styles.titleText}>
             <Text testID="pick-name" style={styles.name}>
               {pick.name}
