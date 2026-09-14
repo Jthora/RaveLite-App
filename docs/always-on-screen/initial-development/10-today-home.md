@@ -164,13 +164,14 @@ Below the element sits the move: what the operator is actually doing.
 - **Water rides along.** A plan water call within 20 minutes of a round
   becomes that round's glass; the plan scheduler and OS backups skip it.
 - **Budget.** Rounds, the remaining water calls, two fuel checks, the
-  evening review and the backyard session come to about twenty on a
+  evening review and the morning session come to about twenty on a
   default weekday. `chimeBudget.test.ts` keeps week 1 and week 3 ≤ 24.
 - **Done everywhere.** Buttons and notifications say "Done".
 
 ## My day
 
-`ambient.activeHours`, default **09:00–22:00**, all days. The one window
+`ambient.activeHours`, default **05:00–22:00**, all days (moved from 09:00 on
+2026-09-14: the operator runs in the morning). The one window
 for paging, for spreading rounds (they stop 90 minutes before the end) and
 for night dimming. Saving it re-lays chimes, re-plans backups and re-checks
 the screen and foreground service at once.
@@ -192,6 +193,10 @@ the screen and foreground service at once.
   Daily Sets day window is dropped. Fresh installs are untouched.
 - **v3.** The stored per-element tab (`settings.shell.subTabByElement`) is
   dropped; there are no tabs to return to.
+- **v4.** An untouched My day (09:00–22:00) moves to 05:00–22:00, and an
+  untouched default plan moves to the morning: water calls every 2 h from
+  05:30, and the evening Backyard Session becomes a 05:45–07:00 Morning
+  Session (run and flow). Anything the operator changed stays.
 
 ## Verification
 

@@ -2,7 +2,8 @@ import {DEFAULT_PLAN} from '../../domain/reminders/defaultPlan';
 import type {Plan} from '../../domain/reminders/types';
 import {store} from '../index';
 import {CURRENT_SCHEMA_VERSION, KEYS} from '../keys';
-import {runMigrations} from '../migrations';
+import {V3_DEFAULT_PLAN, runMigrations} from '../migrations';
+import {DEFAULT_ACTIVE_HOURS} from '../../domain/ambient/types';
 
 const NOW = 1_700_000_000_000;
 
@@ -104,6 +105,36 @@ describe('v3', () => {
     expect(store.getString(key)).toBeUndefined();
     // v2 already ran: the saved plan is left alone.
     expect(store.getString(KEYS.planBackupV1)).toBeUndefined();
-    expect(store.getNumber(KEYS.schemaVersion)).toBe(3);
+    expect(store.getNumber(KEYS.schemaVersion)).toBe(CURRENT_SCHEMA_VERSION);
+  });
+});
+
+describe('v4', () => {
+  it('moves an untouched My day and plan to the morning', () => {
+    store.set(KEYS.schemaVersion, 3);
+    store.set(
+      KEYS.activeHours,
+      JSON.stringify({start: '09:00', end: '22:00', daysMask: 0b1111111}),
+    );
+    store.set(KEYS.planCurrent, JSON.stringify(V3_DEFAULT_PLAN));
+    runMigrations(NOW);
+    expect(json(KEYS.activeHours)).toEqual(DEFAULT_ACTIVE_HOURS);
+    expect(json(KEYS.activeHours).start).toBe('05:00');
+    expect(json(KEYS.planCurrent)).toEqual(DEFAULT_PLAN);
+    expect(store.getString(KEYS.planBackupV1)).toBeUndefined();
+  });
+
+  it('leaves a My day or plan the operator changed', () => {
+    store.set(KEYS.schemaVersion, 3);
+    const hours = {start: '07:00', end: '23:00', daysMask: 0b0011111};
+    const plan = {
+      ...V3_DEFAULT_PLAN,
+      windows: V3_DEFAULT_PLAN.windows.slice(1),
+    };
+    store.set(KEYS.activeHours, JSON.stringify(hours));
+    store.set(KEYS.planCurrent, JSON.stringify(plan));
+    runMigrations(NOW);
+    expect(json(KEYS.activeHours)).toEqual(hours);
+    expect(json(KEYS.planCurrent)).toEqual(plan);
   });
 });

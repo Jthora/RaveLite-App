@@ -19,9 +19,9 @@ import type {ActiveHours} from '../types';
  * changes, and plan water calls near a round ride along as its glass.
  */
 
-// Monday 14 Sep 2026, 08:00 local — before My day starts, so every round
-// is still upcoming.
-const MORNING = new Date(2026, 8, 14, 8, 0).getTime();
+// Monday 14 Sep 2026, 04:00 local — before My day starts, so every round
+// and water call is still upcoming.
+const MORNING = new Date(2026, 8, 14, 4, 0).getTime();
 const at = (h: number, m = 0) => new Date(2026, 8, 14, h, m).getTime();
 
 beforeEach(() => {
@@ -50,7 +50,7 @@ describe('My day', () => {
     expect(fires.length).toBeGreaterThan(0);
     const latest = at(22) - ROUND_END_MARGIN_MS + SPILL_MS;
     for (const f of fires) {
-      expect(f.ts).toBeGreaterThanOrEqual(at(9));
+      expect(f.ts).toBeGreaterThanOrEqual(at(5));
       expect(f.ts).toBeLessThanOrEqual(latest);
     }
   });

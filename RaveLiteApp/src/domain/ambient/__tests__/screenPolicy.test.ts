@@ -19,7 +19,7 @@ jest.mock('../../../native/raveLiteDevice', () => ({
 
 const setWindowBrightness = device.setWindowBrightness as jest.Mock;
 
-// Monday 14 Sep 2026, local. Default active hours are 09:00–23:00.
+// Monday 14 Sep 2026, local. Default active hours are 05:00–22:00.
 const at = (h: number, m = 0) => new Date(2026, 8, 14, h, m).getTime();
 
 beforeEach(() => {
@@ -37,7 +37,7 @@ describe('screenModeAt', () => {
     const activeHours = DEFAULT_ACTIVE_HOURS;
     expect(screenModeAt({now: at(12), activeHours})).toBe('day');
     expect(screenModeAt({now: at(23, 30), activeHours})).toBe('night');
-    expect(screenModeAt({now: at(8), activeHours})).toBe('night');
+    expect(screenModeAt({now: at(4), activeHours})).toBe('night');
   });
 
   it('a wake window keeps night hours bright until it ends', () => {

@@ -202,7 +202,7 @@ describe('pagingAllowedAt', () => {
   });
 
   it('returns "outside-active-hours" before start', () => {
-    expect(pagingAllowedAt(MON_2026_05_04(7, 0))).toBe('outside-active-hours');
+    expect(pagingAllowedAt(MON_2026_05_04(4, 0))).toBe('outside-active-hours');
   });
 
   it('returns "manual-pause" when paused, even inside active hours', () => {

@@ -1,5 +1,6 @@
 import {store} from './index';
 import {CURRENT_SCHEMA_VERSION, KEYS} from './keys';
+import {DEFAULT_ACTIVE_HOURS, type ActiveHours} from '../domain/ambient/types';
 import {DEFAULT_PLAN} from '../domain/reminders/defaultPlan';
 import {plansEqual} from '../domain/reminders/planMutations';
 import type {Plan} from '../domain/reminders/types';
@@ -36,6 +37,9 @@ export function runMigrations(now: number = Date.now()): void {
   }
   if (from < 3) {
     forgetSubTabs();
+  }
+  if (from < 4) {
+    moveDayToMorning();
   }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
@@ -84,9 +88,108 @@ function forgetSubTabs(): void {
 }
 
 function isDefaultPlan(raw: string): boolean {
+  return isPlan(raw, DEFAULT_PLAN);
+}
+
+function isPlan(raw: string, plan: Plan): boolean {
   try {
-    return plansEqual(JSON.parse(raw) as Plan, DEFAULT_PLAN);
+    return plansEqual(JSON.parse(raw) as Plan, plan);
   } catch {
     return false;
+  }
+}
+
+/** My day as the factory set it before v4. */
+const V3_DEFAULT_HOURS: ActiveHours = {
+  start: '09:00',
+  end: '22:00',
+  daysMask: 0b1111111,
+};
+
+const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
+
+/** The default plan as it stood in v2 and v3, before the day moved to 05:00. */
+export const V3_DEFAULT_PLAN: Plan = {
+  id: 'default',
+  name: 'Operator Baseline',
+  windows: [
+    {
+      id: 'hydration',
+      label: 'Water Calls',
+      startTime: '09:20',
+      endTime: '21:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {
+          element: 'water',
+          everyMinutes: 90,
+          maxSeconds: 60,
+          requiredTags: ['Hydration'],
+        },
+      ],
+    },
+    {
+      id: 'backyard-session',
+      label: 'Backyard Session',
+      startTime: '17:30',
+      endTime: '19:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'fire', everyMinutes: 45, requiredTags: ['Agility']},
+        {element: 'water', everyMinutes: 40, requiredTags: ['Flow']},
+      ],
+    },
+    {
+      id: 'fuel-lunch',
+      label: 'Fuel Check — Lunch',
+      startTime: '11:55',
+      endTime: '11:56',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'fuel-dinner',
+      label: 'Fuel Check — Dinner',
+      startTime: '19:05',
+      endTime: '19:06',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'evening-close',
+      label: 'Evening Review',
+      startTime: '21:30',
+      endTime: '21:31',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, maxSeconds: 200}],
+    },
+  ],
+};
+
+/**
+ * v4 — the day starts at 05:00, water calls start on waking, and the
+ * evening Backyard Session becomes a Morning Session. Only untouched
+ * defaults move: a My day or plan the operator changed stays as it is.
+ */
+function moveDayToMorning(): void {
+  const rawHours = store.getString(KEYS.activeHours);
+  if (rawHours !== undefined) {
+    try {
+      const hours = JSON.parse(rawHours) as ActiveHours;
+      if (
+        hours.start === V3_DEFAULT_HOURS.start &&
+        hours.end === V3_DEFAULT_HOURS.end &&
+        hours.daysMask === V3_DEFAULT_HOURS.daysMask
+      ) {
+        store.set(KEYS.activeHours, JSON.stringify(DEFAULT_ACTIVE_HOURS));
+      }
+    } catch {
+      // Corrupt: getActiveHours already falls back to the default.
+    }
+  }
+
+  const rawPlan = store.getString(KEYS.planCurrent);
+  if (rawPlan !== undefined && isPlan(rawPlan, V3_DEFAULT_PLAN)) {
+    store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
   }
 }

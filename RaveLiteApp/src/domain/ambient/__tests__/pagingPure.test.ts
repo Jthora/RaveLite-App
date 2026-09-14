@@ -29,7 +29,7 @@ describe('pagingAllowedAtPure', () => {
   });
 
   it('applies active hours, and pause wins over outside-active-hours', () => {
-    expect(pagingAllowedAtPure(at(7), DEFAULT_ACTIVE_HOURS)).toBe(
+    expect(pagingAllowedAtPure(at(4), DEFAULT_ACTIVE_HOURS)).toBe(
       'outside-active-hours',
     );
     expect(pagingAllowedAtPure(at(3), DEFAULT_ACTIVE_HOURS, at(4))).toBe(

@@ -78,11 +78,11 @@ export interface ActiveHours {
 }
 
 /**
- * Default "My day": 09:00–22:00, all 7 days. The one window for chimes,
+ * Default "My day": 05:00–22:00, all 7 days. The one window for chimes,
  * for spreading Daily Sets rounds, and for when the screen dims at night.
  */
 export const DEFAULT_ACTIVE_HOURS: ActiveHours = {
-  start: '09:00',
+  start: '05:00',
   end: '22:00',
   daysMask: 0b1111111,
 };
