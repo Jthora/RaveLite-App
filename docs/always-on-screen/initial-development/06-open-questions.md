@@ -95,6 +95,9 @@ small-N to keep the planning wave decisive.
   chip (long-press).
 - Open: should the daysMask default exclude weekend mornings? Likely
   no — single window, all days, operator tunes per-day if needed.
+- **Status**: `resolved` (2026-09-14) — "My day", default 09:00–22:00
+  all days, editable from Today's status line and Heart › Setup. It is
+  the one window for chimes, spreading rounds and night dimming.
 
 ## OQ-10 — Branch verification budget
 
@@ -136,6 +139,8 @@ small-N to keep the planning wave decisive.
 - Phase 1A keeps scope tight: pulses surface as actions, circuits
   remain reachable from the Heart > Circuits sub-tab.
 - Phase 2 can add the pulse-launches-circuit deep link.
+- **Status**: `resolved` (2026-09-14) — circuits launch from Today ›
+  Practice (Pentagram and saved circuits); the Circuits tab is gone.
 
 ## OQ-13 — Onboarding deferability
 
@@ -151,3 +156,27 @@ small-N to keep the planning wave decisive.
 - **Status**: `proposed` — single FGS-permission dialog only in
   Phase 1A; full onboarding flow lands in Phase 2 as AOS-122.
   Operator may overturn before Slice 5.
+
+## OQ-14 — Daily chime load
+
+> How many chimes a day can the operator actually answer?
+
+- **Status**: `resolved` (2026-09-14) — about twenty. Daily Sets chime as
+  rounds of a few moves with a partner drill (about nine a day) instead of
+  one set per chime; the default plan drops Desk Hours and Morning
+  Training. Guarded by `chimeBudget.test.ts`.
+
+## OQ-15 — Done button label
+
+> Element verbs (Ignite, Inhale, Root, Flow, Seal) or one word?
+
+- **Status**: `resolved` (2026-09-14) — "Done" everywhere, in the app and
+  on notifications; element colour and glyph carry the flavour.
+
+## OQ-16 — Water calls
+
+> Should water calls chime on their own?
+
+- **Status**: `resolved` (2026-09-14) — a water call within 20 minutes of a
+  round rides along as that round's glass; otherwise it chimes alone.
+  Glasses from chimes, ride-alongs and Today's +1 all count.

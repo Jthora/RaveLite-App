@@ -40,6 +40,17 @@ without becoming a battery-drain villain or a distraction.
   in recents, on charger — with a button to the fixing system screen, or
   "Mark done" for what Android can't report.
 
+## Chime load
+
+About twenty chimes on a default weekday, all inside My day (default
+09:00–22:00): Daily Sets rounds — a few moves back to back, then a
+partner drill from another element — plus water calls (one within 20
+minutes of a round rides along with it), two fuel checks, the evening
+review and the backyard session. `chimeBudget.test.ts` keeps week 1 and
+week 3 at or under 24. A chime that waited behind another gets its full
+answer window, and plan edits cancel queued chimes the plan no longer
+produces. See [../10-today-home.md](../10-today-home.md).
+
 ## Audio cues
 
 ### Catalog

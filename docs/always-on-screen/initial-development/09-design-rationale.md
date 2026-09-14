@@ -178,3 +178,20 @@ the summer deadline, not just architecture. Concrete homes:
 - [05-roadmap/phase-1b-goal.md](05-roadmap/phase-1b-goal.md) — new Phase 1B (PFT moves up).
 - [05-roadmap/phase-2-content-discipline.md](05-roadmap/phase-2-content-discipline.md) — Phase 2 rewritten.
 - [05-roadmap/phase-3-expansion.md](05-roadmap/phase-3-expansion.md) — Phase 3 reduced to optional.
+
+## 2026-09-14 — "I have to check around too much"
+
+The operator reviewed the built app against their real use: a phone beside
+the monitors, a chime, a small set, one tap. The app was organised around
+the five-element metaphor rather than those jobs — 31 tabs, three stores
+for a "done" that no screen read together, controls that did nothing,
+about 71 chimes a day, and balance that only happened if the operator chose
+to visit other elements (they admitted sticking to Fire).
+
+They chose to keep the element rail but make Heart › Today the home, cut
+Heart to Today · Progress · Setup and the elements to Drills · Train ·
+History, read every count from one activity model, chime about twenty
+times a day as Daily Sets rounds with partner drills from other elements
+(water riding along), keep one editable My day window, say "Done"
+everywhere, and leave the PFT content as it is. Balance now arrives with
+the chimes instead of by navigation. See [10-today-home.md](10-today-home.md).

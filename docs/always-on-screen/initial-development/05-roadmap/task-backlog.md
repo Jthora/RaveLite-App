@@ -140,3 +140,16 @@ discipline → 3 expansion).
   `withinActiveHours`.
 - All `AOS-V##` are gated by operator/verifier availability;
   per-table gate, never a phase-wide block.
+
+## Today home redesign (2026-09-14, branch `today-home`)
+
+| ID    | Task                                                                  | Status |
+| ----- | --------------------------------------------------------------------- | ------ |
+| TH-P0 | Queue expiry fix, plan edits cancel queued chimes, ribbon overlap     | done   |
+| TH-P1 | One activity model (journal + Train log + max tests), water glasses   | done   |
+| TH-P2 | Rounds + partner drills, My day window, water ride-along, "Done"      | done   |
+| TH-P2b| Leaner default plan, schema v2 migration with plan backup            | done   |
+| TH-P3 | Heart › Today home; Heart Today · Progress · Setup                    | done   |
+| TH-P4 | Element pages Drills · Train · History                                | done   |
+| TH-P5 | Docs amended; `10-today-home.md`                                      | done   |
+| TH-V1 | Full-day device pass on the Redmi A3 (chime count, killed-app Done, My day edits, Restore) | open |

@@ -10,6 +10,12 @@ mobile-app UX defaults wherever they conflict.
 > motion (the *alive layer*); everything else still has to be earned by
 > an event. See `03-architecture/always-on-strategy.md` › Alive layer.
 
+> **Amended again 2026-09-14 (Today home).** The surface is Heart › Today.
+> P-2's single card is the chime card at the top of Today. P-7 and P-8
+> hold: missed chimes are dimmed in the day's list, never counted or
+> headlined. A chime budget now applies — about twenty a day; see
+> `03-architecture/always-on-strategy.md` › Chime load.
+
 ## P-1 — Quiet is the resting state
 
 The dashboard is quiet and dim by default. Sound and strong motion must

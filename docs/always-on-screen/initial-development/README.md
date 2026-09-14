@@ -6,6 +6,16 @@ through deep-work silos with sound, motion, and big-target check-ins so
 the operator actually does the fitness work the rest of the app plans —
 in service of a fixed summer deadline.
 
+> **Amended 2026-09-14 — Heart › Today.** The surface now lives on the
+> phone as RaveLite's home screen, Heart › Today, not a separate Always-On
+> tab: one home screen, one activity model behind every count, about
+> twenty chimes a day built from Daily Sets rounds with partner drills,
+> one editable "My day" window, and "Done" on every button. The docs
+> below still describe the pulse state machine, journal contract and
+> ambient discipline; where they describe tablet zones, the ribbon,
+> adherence rings or a separate active-hours window,
+> [10-today-home.md](10-today-home.md) takes precedence.
+
 ## Reading order
 
 1. [00-vision.md](00-vision.md) — the felt experience and why
@@ -44,6 +54,8 @@ in service of a fixed summer deadline.
 8. [09-design-rationale.md](09-design-rationale.md) — the WHY behind
    the post-critique refactor. Read after the rest if you want
    the why-and-how-we-got-here narrative.
+9. [10-today-home.md](10-today-home.md) — the current app shape after
+   the 2026-09-14 redesign: Heart › Today, rounds, My day.
 
 ## Naming
 

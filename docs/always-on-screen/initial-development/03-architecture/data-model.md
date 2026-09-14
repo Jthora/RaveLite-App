@@ -1,5 +1,7 @@
 # Data Model
 
+> **Amended 2026-09-14** — see *Activity, rounds and My day* at the end.
+
 The Always-On surface is a *consumer* of existing RaveLite domain
 state plus a small additive layer for the new interaction outcomes
 and PFT records. Reuses the journal as the source-of-truth log.
@@ -224,3 +226,27 @@ Insights gains:
 
 Each is a pure derivation over journal + pft store, mirroring
 the existing `stats.ts` pattern.
+
+## Activity, rounds and My day (2026-09-14)
+
+- **Activity read model** (`src/domain/activity/`): every count — balance,
+  streak, History, Progress, water — reads one list merged from journal
+  completions, Train log entries (`training.entries`) and `program.test`
+  entries. Train entries stay editable; nothing is mirrored into the
+  append-only journal.
+- **`CompletionEntry`** gains `moves[]` (a Daily Sets round),
+  `partnerExerciseId` / `partnerSec` and `water`. One completion per chime;
+  `doneByTrack` reads `moves` and still accepts the older `trackId` /
+  `amount`.
+- **`program.test`** — `{trackId, max, rung, element}`, appended by
+  `recordMaxTest`.
+- **Rounds** — `SetPrescription` adds `moves`, `partner`, `roundIndex` /
+  `rounds` and `water`; pulse ids are `sets:<day>:round:<n>`. Notification
+  data carries the moves as a JSON string beside the lead move's fields.
+- **My day** — `ambient.activeHours` (default 09:00–22:00) is the single
+  window; `ProgramState` no longer has `dayStart` / `dayEnd`.
+- **`handledPulseIds`** — fired or skipped ahead of time; the plan, set and
+  backup schedulers never re-queue either.
+- **Schema v2** (`src/storage/migrations.ts`) — a saved plan that differs
+  from the new default moves to `plan.backup.v1` (Setup › Previous plan
+  restores it); the program's day window is dropped.

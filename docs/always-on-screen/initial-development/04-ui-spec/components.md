@@ -1,5 +1,11 @@
 # Components
 
+> **Amended 2026-09-14.** `NowCard`, `UpcomingStrip`, `ActivityLog` and
+> `AdherenceRings` became `ChimeCard`, `DayList` and `BalanceStrip` in
+> `src/components/today/`; `ActiveHoursChip` now opens `MyDaySheet`. The
+> PFT goal, attempt and 30-day components below were never built. See
+> [../10-today-home.md](../10-today-home.md).
+
 Component-level contracts for the Always-On surface. Each section
 lists props, states, and interaction rules.
 
