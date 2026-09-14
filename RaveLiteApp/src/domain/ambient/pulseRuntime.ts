@@ -41,8 +41,7 @@ import {chooseCueRoute, cueSettingsFor} from './cueVolume';
 import {getInterruptionFilter, playCue} from '../../native/raveLiteDevice';
 import type {ReminderPayload} from '../reminders/types';
 import type {SetPrescription, TrackId} from '../program/types';
-import type {ActivePulseSummary} from './ribbon';
-import type {Pulse, PulseOutcome} from './types';
+import type {ActivePulseSummary, Pulse, PulseOutcome} from './types';
 
 let state: QueueState = emptyQueue();
 const listeners = new Set<() => void>();

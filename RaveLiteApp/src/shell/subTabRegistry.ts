@@ -5,24 +5,19 @@
  * The shell reads this to render the SubTabRail. Element screens read
  * their slug list to type-check their own switch statement.
  *
- * Heart is fully built out. Fire/Air/Earth/Water share a 5-slot shape
- * (now/drills/log/stats/tune) as placeholders until step 4 fleshes
- * them out per element.
+ * Heart is home: Today (the day at a glance and the chime to answer),
+ * Progress (Daily Sets and the week), Setup (My day, chimes, plan, look).
  */
 import {
   Activity,
   BarChart3,
-  CalendarClock,
   Dumbbell,
-  Gauge,
-  GitBranch,
   History,
   ListChecks,
-  Radio,
-  Repeat,
   Settings,
   SlidersHorizontal,
-  Sparkles,
+  Sun,
+  TrendingUp,
 } from 'lucide-react-native';
 
 import type {ElementId} from '../theme/elements';
@@ -30,28 +25,28 @@ import type {SubTab} from '../components/SubTabStrip';
 
 // ---- Heart sub-tabs -------------------------------------------------------
 
-export type HeartSubSlug =
-  | 'dash'
-  | 'sets'
-  | 'plan'
-  | 'circuits'
-  | 'always-on'
-  | 'insights'
-  | 'settings';
+export const HEART_SLUGS = ['today', 'progress', 'setup'] as const;
+export type HeartSubSlug = (typeof HEART_SLUGS)[number];
 
 const HEART_SUB_TABS: ReadonlyArray<SubTab<HeartSubSlug>> = [
-  {slug: 'dash', label: 'Dash', Icon: Gauge},
-  {slug: 'sets', label: 'Sets', Icon: Repeat},
-  {slug: 'plan', label: 'Plan', Icon: CalendarClock},
-  {slug: 'circuits', label: 'Circuits', Icon: GitBranch},
-  {slug: 'always-on', label: 'Always-On', Icon: Radio},
-  {slug: 'insights', label: 'Insights', Icon: Sparkles},
-  {slug: 'settings', label: 'Settings', Icon: Settings},
+  {slug: 'today', label: 'Today', Icon: Sun},
+  {slug: 'progress', label: 'Progress', Icon: TrendingUp},
+  {slug: 'setup', label: 'Setup', Icon: Settings},
 ];
+
+export function isHeartSlug(slug: string): slug is HeartSubSlug {
+  return (HEART_SLUGS as readonly string[]).includes(slug);
+}
 
 // ---- Shared element sub-tabs (Fire/Air/Earth/Water) -----------------------
 
-export type ElementSubSlug = 'now' | 'drills' | 'log' | 'stats' | 'tune' | 'train';
+export type ElementSubSlug =
+  | 'now'
+  | 'drills'
+  | 'log'
+  | 'stats'
+  | 'tune'
+  | 'train';
 
 // All four non-Heart elements share the same six-slot shape, with a
 // 'Train' tab between Drills and Log for manual numerical entries
@@ -86,5 +81,5 @@ export const DEFAULT_SUB_SLUG: Record<ElementId, string> = {
   air: 'now',
   earth: 'now',
   water: 'now',
-  heart: 'dash',
+  heart: 'today',
 };

@@ -1,5 +1,5 @@
 /**
- * Tests for the new aggregates that drive InsightsPanel.
+ * Tests for the day and element aggregates behind Progress and History.
  */
 import {append} from '../journal';
 import {

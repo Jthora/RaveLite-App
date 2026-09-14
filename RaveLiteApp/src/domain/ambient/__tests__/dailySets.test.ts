@@ -1,21 +1,19 @@
 import {store} from '../../../storage';
 import {entriesForDay} from '../../journal/journal';
-import type {CompletionEntry, JournalEntry} from '../../journal/types';
+import type {CompletionEntry} from '../../journal/types';
 import type {SetPrescription} from '../../program/types';
 import {handleNotificationAction} from '../notificationActions';
 import {ALWAYS_PAGE, emptyQueue, enqueue, tick} from '../pulseQueue';
 import * as runtime from '../pulseRuntime';
-import {buildRibbonRows} from '../ribbon';
 import {__test as setSchedulerTest} from '../setScheduler';
 
 /**
  * The chime → set → answer loop for Daily Sets, end to end through the
- * pure queue, the ribbon view-model, the runtime and notification buttons.
+ * pure queue, the runtime and notification buttons.
  */
 
 // Monday 14 Sep 2026, 10:00 local — inside default active hours.
 const NOW = new Date(2026, 8, 14, 10, 0).getTime();
-const EMPTY_PLAN = {id: 'p', name: 'p', windows: []};
 
 const rx: SetPrescription = {
   trackId: 'push',
@@ -48,63 +46,6 @@ describe('pulse queue', () => {
     r = tick(r.state, NOW, ALWAYS_PAGE);
     expect(r.state.pulses[0].prescription).toEqual(rx);
     expect(r.writes[0]).toMatchObject({kind: 'reminder.fired', trackId: 'push'});
-  });
-});
-
-describe('ribbon', () => {
-  const base = {
-    now: NOW,
-    windowBackMs: 4 * 3_600_000,
-    windowForwardMs: 4 * 3_600_000,
-    plan: EMPTY_PLAN,
-    journal: [] as JournalEntry[],
-  };
-
-  it('shows upcoming set chimes as future rows', () => {
-    const rows = buildRibbonRows({
-      ...base,
-      extraFutures: [
-        {id: 'sets:d:push:3', at: NOW + 1_800_000, element: 'fire', label: 'Push-ups', detail: '10 reps · set 3/6'},
-      ],
-    });
-    expect(rows.find(r => r.id === 'sets:d:push:3')).toMatchObject({
-      kind: 'future',
-      label: 'Push-ups',
-      detail: '10 reps · set 3/6',
-    });
-  });
-
-  it('puts the amount and set number on the active row', () => {
-    const rows = buildRibbonRows({
-      ...base,
-      activePulse: {
-        pulseId: 'sets:d:push:2',
-        fireAt: NOW,
-        expiresAt: NOW + 480_000,
-        element: 'fire',
-        drillId: 'fire.pushup-groove',
-        drillName: 'Push-ups',
-        durationSec: 45,
-        cuesShort: [],
-        prescription: rx,
-      },
-    });
-    const active = rows.find(r => r.kind === 'now-active');
-    expect(active?.detail).toBe('10 reps · set 2/6');
-    expect(active?.active?.prescription).toEqual(rx);
-  });
-
-  it('labels sealed sets with the drill name and amount', () => {
-    const rows = buildRibbonRows({
-      ...base,
-      journal: [
-        {id: 'f', at: NOW - 60_000, kind: 'reminder.fired', pulseId: 'sets:d:push:1', element: 'fire'},
-        {id: 'c', at: NOW - 30_000, kind: 'completion', pulseId: 'sets:d:push:1', exerciseId: 'fire.pushup-groove', element: 'fire', source: 'always-on', trackId: 'push', amount: 8, respondedAfterMs: 30_000},
-      ],
-    });
-    const sealed = rows.find(r => r.kind === 'past-sealed');
-    expect(sealed?.label).toBe('Push-Ups — Grease the Groove');
-    expect(sealed?.detail).toBe('8 · +30s');
   });
 });
 

@@ -41,7 +41,7 @@ interface Props {
   /** Hands the saved plan back up to HeartScreen so it can call
    *  notifeeScheduler.applyPlan() — keeps native side effects out of
    *  this purely-presentational panel. */
-  onPlanCommitted: (plan: Plan) => void;
+  onPlanCommitted?: (plan: Plan) => void;
 }
 
 export function PlanPanel({onPlanCommitted}: Props) {
@@ -57,7 +57,7 @@ export function PlanPanel({onPlanCommitted}: Props) {
   const onApply = useCallback(() => {
     savePlan(draft);
     setCommitted(draft);
-    onPlanCommitted(draft);
+    onPlanCommitted?.(draft);
   }, [draft, onPlanCommitted]);
 
   const onRevert = useCallback(() => {
@@ -178,7 +178,7 @@ export function PlanPanel({onPlanCommitted}: Props) {
         </Tap>
       </View>
 
-      {/* Apply Plan — primary commit */}
+      {/* Save — primary commit */}
       <View style={styles.applyRow}>
         <Tap
           variant="solid"
@@ -187,7 +187,7 @@ export function PlanPanel({onPlanCommitted}: Props) {
           disabled={!dirty}
           style={styles.applyBtn}>
           <Text style={styles.applyText}>
-            {dirty ? 'Apply Plan' : 'Plan armed'}
+            {dirty ? 'Save plan' : 'Saved'}
           </Text>
         </Tap>
       </View>

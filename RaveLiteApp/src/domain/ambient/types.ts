@@ -86,3 +86,16 @@ export const DEFAULT_ACTIVE_HOURS: ActiveHours = {
   end: '22:00',
   daysMask: 0b1111111,
 };
+
+/** The pulse sounding right now, expanded for the chime card. */
+export interface ActivePulseSummary {
+  pulseId: string;
+  fireAt: number;
+  expiresAt: number;
+  element: ElementId;
+  drillId: string;
+  drillName: string;
+  durationSec: number;
+  cuesShort: string[];
+  prescription?: SetPrescription;
+}

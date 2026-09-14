@@ -26,9 +26,9 @@
  *   │         │                   │ l │
  *   └─────────┴───────────────────┴───┘
  *
- * Per-element sub-tab state is held here (not inside the screens) so it
- * survives element switches and rotation. AsyncStorage persistence is
- * deferred to step 4 — for v1 the state is in-memory only.
+ * The app always opens on Heart › Today, the home screen. Every other
+ * element remembers the sub-tab it was left on (persisted), so switching
+ * back finds it where it was.
  */
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Animated, StyleSheet, View} from 'react-native';
@@ -55,13 +55,12 @@ import WaterScreen from '../screens/WaterScreen';
  *
  * `subTab` is the active sub-page slug for THIS element. The screen
  * branches its body on it. `onSubTabChange` is forwarded so screens can
- * deep-link from inline CTAs (e.g. "Open Plan editor" from Dash).
+ * deep-link from inline CTAs (e.g. Today's sets line → Progress).
  */
 export interface ElementScreenProps {
   subTab: string;
   onSubTabChange: (slug: string) => void;
-  /** Cross-element jump. Used by Heart Insights to deep-link to another
-   *  element's Now panel, and by Log footer cells when implemented. */
+  /** Cross-element jump, e.g. Today's balance strip opening an element. */
   onElementChange: (next: ElementId) => void;
 }
 
@@ -73,44 +72,39 @@ const SCREENS: Record<ElementId, React.ComponentType<ElementScreenProps>> = {
   water: WaterScreen as React.ComponentType<ElementScreenProps>,
 };
 
-/** Initial sub-tab map — every element starts on its default slug. */
-function initialSubTabMap(): Record<ElementId, string> {
-  return {...DEFAULT_SUB_SLUG};
-}
-
-// ── Persistence keys ────────────────────────────────────────────────────
-// Stored as JSON-encoded primitives so the swap to MMKV is a no-op.
-const ACTIVE_KEY = KEYS.setting('shell.activeElement');
 const SUBTAB_KEY = KEYS.setting('shell.subTabByElement');
 
-function loadActive(): ElementId {
-  const raw = store.getString(ACTIVE_KEY);
-  if (raw && (ELEMENT_ORDER as string[]).includes(raw)) {
-    return raw as ElementId;
+/**
+ * Pure: the sub-tab each element opens on at launch. Heart always opens on
+ * its first tab (Today); other elements get their stored tab back when it
+ * still exists.
+ */
+export function restoreSubTabMap(
+  stored: Readonly<Record<string, string>> | undefined,
+): Record<ElementId, string> {
+  const out = {...DEFAULT_SUB_SLUG};
+  for (const id of ELEMENT_ORDER) {
+    const slug = stored?.[id];
+    if (
+      id !== 'heart' &&
+      slug &&
+      SUB_TABS_BY_ELEMENT[id].some(t => t.slug === slug)
+    ) {
+      out[id] = slug;
+    }
   }
-  return 'heart';
+  return out;
 }
+
 function loadSubTabMap(): Record<ElementId, string> {
   const raw = store.getString(SUBTAB_KEY);
-  if (!raw) {return initialSubTabMap();}
+  if (!raw) {
+    return restoreSubTabMap(undefined);
+  }
   try {
-    const parsed = JSON.parse(raw) as Record<string, string>;
-    const out = initialSubTabMap();
-    for (const id of ELEMENT_ORDER) {
-      // Migration: legacy 'aos' slug → 'always-on' (May 2026 rename).
-      // Migration: legacy heart 'signal' / 'theme' → 'settings' merge.
-      const stored = parsed[id];
-      let slug = stored;
-      if (stored === 'aos') {slug = 'always-on';}
-      else if (id === 'heart' && (stored === 'signal' || stored === 'theme')) {
-        slug = 'settings';
-      }
-      const valid = SUB_TABS_BY_ELEMENT[id].some(t => t.slug === slug);
-      if (valid) {out[id] = slug;}
-    }
-    return out;
+    return restoreSubTabMap(JSON.parse(raw) as Record<string, string>);
   } catch {
-    return initialSubTabMap();
+    return restoreSubTabMap(undefined);
   }
 }
 
@@ -118,15 +112,9 @@ export function ElementShell(): React.JSX.Element {
   const {orientation, isTablet} = useOrientation();
   const isLandscape = orientation === 'landscape';
 
-  const [activeElement, setActiveElementState] = useState<ElementId>(loadActive);
-  const [subTabByElement, setSubTabByElement] = useState<
-    Record<ElementId, string>
-  >(loadSubTabMap);
-
-  // Persist activeElement.
-  useEffect(() => {
-    store.set(ACTIVE_KEY, activeElement);
-  }, [activeElement]);
+  const [activeElement, setActiveElement] = useState<ElementId>('heart');
+  const [subTabByElement, setSubTabByElement] =
+    useState<Record<ElementId, string>>(loadSubTabMap);
 
   // Persist sub-tab map (one write per change is fine — small payload).
   useEffect(() => {
@@ -150,16 +138,12 @@ export function ElementShell(): React.JSX.Element {
     }).start();
   }, [transitionKey, fade]);
 
-  // The entered screen's ScreenScaffold plays the "enter" haptic; firing
-  // it here too buzzed twice on every element switch.
-  const setActiveElement = useCallback((next: ElementId) => {
-    setActiveElementState(next);
-  }, []);
-
   const setSubTab = useCallback(
     (slug: string) => {
       setSubTabByElement(prev => {
-        if (prev[activeElement] === slug) {return prev;}
+        if (prev[activeElement] === slug) {
+          return prev;
+        }
         return {...prev, [activeElement]: slug};
       });
     },
@@ -202,7 +186,9 @@ export function ElementShell(): React.JSX.Element {
 
   if (isLandscape) {
     return (
-      <SafeAreaView style={styles.root} edges={['top', 'bottom', 'left', 'right']}>
+      <SafeAreaView
+        style={styles.root}
+        edges={['top', 'bottom', 'left', 'right']}>
         <View style={styles.row}>
           {subTabRail}
           {screen}

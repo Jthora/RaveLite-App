@@ -1,20 +1,19 @@
 /**
- * SetsPanel — Heart > Sets tab body.
+ * DailySetsSection — the Daily Sets part of Heart › Progress.
  *
- * Today's Daily Sets at a glance, and the controls that drive the ramp:
- *   - per-track progress (amount done / quota, sets done, next chime)
+ * Today's sets per track, and the controls that drive the ramp:
+ *   - per-track progress (amount done / quota, sets done, next round)
  *   - "+ set" to log a set done outside a chime
  *   - max test (NumberPad) — the only thing that raises set size
  *   - level up to the next variation once the set size graduates
  *   - track on/off
  *
- * Rounds spread across My day (active hours), so there is no separate set
- * window here. All writes go through the program repository or the
- * journal; the sets scheduler picks them up (program saves re-lay the day,
- * logged sets trim upcoming rounds).
+ * Renders as a plain section; the Progress panel owns the scroll. Rounds
+ * spread across My day. All writes go through the program repository or
+ * the journal; the sets scheduler picks them up.
  */
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Modal, StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../../components/Tap';
 import {NumberPad} from '../../components/training/NumberPad';
@@ -50,7 +49,7 @@ import {palette, radius, spacing, type as t} from '../../theme';
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const REFRESH_MS = 30_000;
 
-export function SetsPanel() {
+export function DailySetsSection() {
   const [tick, setTick] = useState(0);
   const [testing, setTesting] = useState<TrackId | null>(null);
   const refresh = useCallback(() => setTick(k => k + 1), []);
@@ -111,13 +110,10 @@ export function SetsPanel() {
   );
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <View>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accent}]}>
-          ▸  DAILY SETS · WEEK {week} ·{' '}
+          ▸ DAILY SETS · WEEK {week} ·{' '}
           {phase === 'deload' ? 'DELOAD + TEST WEEK' : 'BUILD'}
         </Text>
         <Text style={styles.subtitle}>
@@ -179,8 +175,12 @@ export function SetsPanel() {
         return (
           <View key={tr.id} style={styles.trackRow}>
             <View style={styles.trackInfo}>
-              <Text style={[styles.trackName, {color: state.enabled ? el.color : palette.textMuted}]}>
-                {el.glyph}  {tr.name} · {currentRung(tr, state).label}
+              <Text
+                style={[
+                  styles.trackName,
+                  {color: state.enabled ? el.color : palette.textMuted},
+                ]}>
+                {el.glyph} {tr.name} · {currentRung(tr, state).label}
               </Text>
               <Text style={styles.trackMeta}>
                 max {formatMax(tr, state.testMax)}
@@ -194,7 +194,11 @@ export function SetsPanel() {
               color={state.enabled ? el.color : palette.textDim}
               onPress={() => setTrackEnabled(tr.id, !state.enabled)}
               style={styles.toggle}>
-              <Text style={[styles.toggleText, {color: state.enabled ? palette.bg : palette.textDim}]}>
+              <Text
+                style={[
+                  styles.toggleText,
+                  {color: state.enabled ? palette.bg : palette.textDim},
+                ]}>
                 {state.enabled ? 'On' : 'Off'}
               </Text>
             </Tap>
@@ -210,7 +214,7 @@ export function SetsPanel() {
           setTesting(null);
         }}
       />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -254,20 +258,30 @@ function TrackCard({
   const unitWord = p.unit === 'seconds' ? 'sec' : 'reps';
 
   return (
-    <View style={[styles.card, {borderColor: complete ? el.color : palette.border}]}>
+    <View
+      style={[
+        styles.card,
+        {borderColor: complete ? el.color : palette.border},
+      ]}>
       <View style={styles.cardTop}>
         <Text style={[styles.cardTitle, {color: el.color}]} numberOfLines={1}>
-          {el.glyph}  {p.label}
+          {el.glyph} {p.label}
         </Text>
         <Text style={styles.cardCount}>
           {doneAmount}/{total} {unitWord}
         </Text>
       </View>
       <View style={styles.barTrack}>
-        <View style={[styles.barFill, {backgroundColor: el.color, width: `${pct * 100}%`}]} />
+        <View
+          style={[
+            styles.barFill,
+            {backgroundColor: el.color, width: `${pct * 100}%`},
+          ]}
+        />
       </View>
       <Text style={styles.cardMeta}>
-        {Math.min(doneSets, p.sets)} of {p.sets} sets · {formatSetAmount(p.setSize, p.unit)} each
+        {Math.min(doneSets, p.sets)} of {p.sets} sets ·{' '}
+        {formatSetAmount(p.setSize, p.unit)} each
         {complete ? ' · done ✓' : nextAt ? ` · next ${formatHHMM(nextAt)}` : ''}
       </Text>
       {untested ? (
@@ -278,7 +292,11 @@ function TrackCard({
         <Text style={styles.cardNote}>Test week: log a fresh max.</Text>
       ) : null}
       <View style={styles.cardActions}>
-        <Tap variant="solid" color={el.color} onPress={onLogSet} style={styles.cardBtn}>
+        <Tap
+          variant="solid"
+          color={el.color}
+          onPress={onLogSet}
+          style={styles.cardBtn}>
           <Text style={styles.cardBtnSolidText}>+ set</Text>
         </Tap>
         <Tap
@@ -286,13 +304,23 @@ function TrackCard({
           color={testDue ? el.color : palette.textDim}
           onPress={onTest}
           style={styles.cardBtn}>
-          <Text style={[styles.cardBtnText, {color: testDue ? el.color : palette.text}]}>
+          <Text
+            style={[
+              styles.cardBtnText,
+              {color: testDue ? el.color : palette.text},
+            ]}>
             Test max
           </Text>
         </Tap>
         {canLevelUp && nextRungLabel ? (
-          <Tap variant="ghost" color={el.accent} onPress={onLevelUp} style={styles.cardBtnWide}>
-            <Text style={[styles.cardBtnText, {color: el.accent}]} numberOfLines={1}>
+          <Tap
+            variant="ghost"
+            color={el.accent}
+            onPress={onLevelUp}
+            style={styles.cardBtnWide}>
+            <Text
+              style={[styles.cardBtnText, {color: el.accent}]}
+              numberOfLines={1}>
               Level up → {nextRungLabel}
             </Text>
           </Tap>
@@ -330,7 +358,9 @@ function MaxTestSheet({
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.sheet, {borderColor: el.color}]}>
-          <Text style={[styles.sheetTitle, {color: el.color}]}>Max test · {rung.label}</Text>
+          <Text style={[styles.sheetTitle, {color: el.color}]}>
+            Max test · {rung.label}
+          </Text>
           <Text style={styles.sheetBody}>
             {seconds
               ? 'Warm up, then hold until your form breaks. Log the time.'
@@ -345,7 +375,11 @@ function MaxTestSheet({
             compact
           />
           <View style={styles.sheetActions}>
-            <Tap variant="ghost" color={palette.textDim} onPress={onClose} style={styles.sheetBtn}>
+            <Tap
+              variant="ghost"
+              color={palette.textDim}
+              onPress={onClose}
+              style={styles.sheetBtn}>
               <Text style={styles.cardBtnText}>Cancel</Text>
             </Tap>
             <Tap
@@ -371,15 +405,12 @@ function formatMax(track: Track, max: number): string {
 
 function formatHHMM(ts: number): string {
   const d = new Date(ts);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
 }
 
 const styles = StyleSheet.create({
-  scroll: {flex: 1},
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
   header: {
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
