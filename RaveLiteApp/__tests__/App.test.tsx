@@ -7,11 +7,27 @@ import React from 'react';
 import App from '../App';
 
 // Note: import explicitly to use the types shipped with jest.
-import {it} from '@jest/globals';
+import {afterEach, beforeEach, it, jest} from '@jest/globals';
 
 // Note: test renderer must be required after react-native.
-import renderer from 'react-test-renderer';
+import renderer, {act} from 'react-test-renderer';
 
-it('renders correctly', () => {
-  renderer.create(<App />);
+// After hydration App starts 1 s / 60 s schedulers. Fake timers keep them
+// from outliving the test.
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.useRealTimers();
+});
+
+it('hydrates and renders the shell', async () => {
+  let tree: renderer.ReactTestRenderer | undefined;
+  await act(async () => {
+    tree = renderer.create(<App />);
+  });
+  act(() => {
+    tree?.unmount();
+  });
 });

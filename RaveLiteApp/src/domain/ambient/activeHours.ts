@@ -148,19 +148,41 @@ export function isManuallyPaused(now: Date = new Date()): boolean {
   return true;
 }
 
+/** Current manual-pause end (epoch ms), without clearing an expired one. */
+export function readPauseUntil(): number | undefined {
+  const raw = store.getString(KEYS.manualPauseUntil);
+  const until = raw ? Number(raw) : NaN;
+  return Number.isFinite(until) ? until : undefined;
+}
+
+/**
+ * Pure paging decision for any instant — no storage reads or writes.
+ * Planners use this to ask about *future* times (e.g. backup chimes)
+ * without `isManuallyPaused`'s side effect of clearing the pause key.
+ */
+export function pagingAllowedAtPure(
+  ts: number,
+  config: ActiveHours,
+  pauseUntil?: number,
+): null | 'outside-active-hours' | 'manual-pause' {
+  if (pauseUntil !== undefined && ts < pauseUntil) {
+    return 'manual-pause';
+  }
+  if (!withinActiveHours(new Date(ts), config)) {
+    return 'outside-active-hours';
+  }
+  return null;
+}
+
 /**
  * High-level decision: is the surface allowed to page right now?
  * Returns the suppression reason if not, or `null` if it may page.
+ * Clears an expired manual pause as a side effect.
  */
 export function pagingAllowedAt(
   now: Date = new Date(),
   config: ActiveHours = getActiveHours(),
 ): null | 'outside-active-hours' | 'manual-pause' {
-  if (isManuallyPaused(now)) {
-    return 'manual-pause';
-  }
-  if (!withinActiveHours(now, config)) {
-    return 'outside-active-hours';
-  }
-  return null;
+  isManuallyPaused(now);
+  return pagingAllowedAtPure(now.getTime(), config, readPauseUntil());
 }

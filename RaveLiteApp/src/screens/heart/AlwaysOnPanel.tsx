@@ -15,12 +15,8 @@
  * ActivityLog) remain on disk; we no longer mount them. They will be
  * deleted in Step 7 of the Ribbon plan once the new surface settles.
  */
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {
-  activateKeepAwake,
-  deactivateKeepAwake,
-} from '@sayem314/react-native-keep-awake';
 
 import {Ribbon, type RetroOutcome} from '../../components/ambient/Ribbon';
 import {RibbonStatusBar} from '../../components/ambient/RibbonStatusBar';
@@ -35,12 +31,14 @@ import {palette, spacing, type as t} from '../../theme';
 import {loadPlan} from '../../domain/reminders/repository';
 import {entriesForDay, append} from '../../domain/journal/journal';
 import {adherenceForDay} from '../../domain/ambient/stats';
-import {getActiveHours, pagingAllowedAt} from '../../domain/ambient/activeHours';
+import {getActiveHours} from '../../domain/ambient/activeHours';
 import {buildRibbonRows, type RibbonRow} from '../../domain/ambient/ribbon';
 import {syncAmbientService} from '../../domain/ambient/ambientLifecycle';
 import {reconcileSetsNow, setsToday} from '../../domain/ambient/setScheduler';
 import {formatSetAmount} from '../../domain/program/progress';
 import {
+  cancelQueued as runtimeCancelQueued,
+  deferQueued as runtimeDeferQueued,
   getActivePulseSummary,
   resolveActive as runtimeResolve,
   sealActive as runtimeSeal,
@@ -58,6 +56,11 @@ const WINDOW_BACK_MS = 4 * 60 * 60 * 1000;
 const WINDOW_FORWARD_MS = 4 * 60 * 60 * 1000;
 /** Threshold for showing the welcome-back banner on mount. */
 const WELCOME_BACK_THRESHOLD_MS = 5 * 60_000;
+/** How often the last-seen stamp is persisted (it's an absence detector,
+ *  not a clock — writing it every second was wasted storage churn). */
+const LAST_SEEN_WRITE_MS = 30_000;
+/** +5 on the next chime pushes it back by this much. */
+const PLUS_FIVE_MS = 5 * 60_000;
 
 export function AlwaysOnPanel() {
   const {orientation, isTablet} = useOrientation();
@@ -83,6 +86,7 @@ export function AlwaysOnPanel() {
     return awayMs > WELCOME_BACK_THRESHOLD_MS ? {awayMs} : null;
   });
 
+  const lastSeenWriteRef = useRef(Date.now());
   useEffect(() => {
     const id = setInterval(() => {
       const t = Date.now();
@@ -90,7 +94,10 @@ export function AlwaysOnPanel() {
       setTick(k => k + 1);
       // Keep `ambientLastSeenAt` warm so a foregrounded session
       // doesn't accumulate stale absence on the next mount.
-      store.set(KEYS.ambientLastSeenAt, String(t));
+      if (t - lastSeenWriteRef.current >= LAST_SEEN_WRITE_MS) {
+        store.set(KEYS.ambientLastSeenAt, String(t));
+        lastSeenWriteRef.current = t;
+      }
       // The pulse runtime self-ticks at app boot (see App.tsx →
       // startPulseRuntime), so no per-screen tick is needed here.
     }, POLL_INTERVAL_MS);
@@ -139,24 +146,6 @@ export function AlwaysOnPanel() {
     return Number.isFinite(v) && v > now ? v : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deriveBucket]);
-
-  // Slice 5 — wake-lock: keep the screen on whenever the surface is
-  // allowed to page (within active hours + not manually paused).
-  // Recomputed once per derive bucket so we don't thrash native every
-  // tick. Releases on unmount.
-  const wakeAllowed = useMemo(
-    () => pagingAllowedAt(new Date(now), activeHours) === null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deriveBucket, activeHours, manualPauseUntil],
-  );
-  useEffect(() => {
-    if (wakeAllowed) {
-      activateKeepAwake();
-      return () => deactivateKeepAwake();
-    }
-    deactivateKeepAwake();
-    return undefined;
-  }, [wakeAllowed]);
 
   const adherence = useMemo(() => {
     const a = adherenceForDay(new Date(now));
@@ -292,6 +281,8 @@ export function AlwaysOnPanel() {
       pulseId: nextFuture.id,
       respondedAfterMs: 0,
     });
+    // Actually move the queued chime, not just the ribbon row.
+    runtimeDeferQueued(nextFuture.id, PLUS_FIVE_MS);
     setTick(k => k + DERIVE_EVERY_TICKS);
   }, [nextFuture]);
 
@@ -313,6 +304,8 @@ export function AlwaysOnPanel() {
       pulseId: nextFuture.id,
       respondedAfterMs: 0,
     });
+    // Actually drop the queued chime, not just mark the ribbon row.
+    runtimeCancelQueued([nextFuture.id]);
     setTick(k => k + DERIVE_EVERY_TICKS);
   }, [nextFuture]);
 

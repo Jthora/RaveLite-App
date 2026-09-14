@@ -15,6 +15,11 @@ jest.mock('@sayem314/react-native-keep-awake', () => ({
   default: () => null,
 }));
 
+jest.mock(
+  'react-native-safe-area-context',
+  () => require('react-native-safe-area-context/jest/mock').default,
+);
+
 jest.mock('@notifee/react-native', () => ({
   __esModule: true,
   default: {
@@ -28,8 +33,28 @@ jest.mock('@notifee/react-native', () => ({
     deleteChannel: jest.fn().mockResolvedValue(undefined),
     registerForegroundService: jest.fn(),
     stopForegroundService: jest.fn().mockResolvedValue(undefined),
+    createTriggerNotification: jest.fn().mockResolvedValue('trigger'),
+    cancelTriggerNotification: jest.fn().mockResolvedValue(undefined),
+    getTriggerNotifications: jest.fn().mockResolvedValue([]),
+    getTriggerNotificationIds: jest.fn().mockResolvedValue([]),
+    getNotificationSettings: jest
+      .fn()
+      .mockResolvedValue({authorizationStatus: 1, android: {alarm: 1}}),
+    isBatteryOptimizationEnabled: jest.fn().mockResolvedValue(false),
+    openBatteryOptimizationSettings: jest.fn().mockResolvedValue(undefined),
+    getPowerManagerInfo: jest.fn().mockResolvedValue({activity: null}),
+    openPowerManagerSettings: jest.fn().mockResolvedValue(undefined),
+    openAlarmPermissionSettings: jest.fn().mockResolvedValue(undefined),
   },
   AndroidImportance: {LOW: 1, DEFAULT: 3, HIGH: 4},
   AndroidVisibility: {SECRET: -1, PRIVATE: 0, PUBLIC: 1},
   EventType: {DISMISSED: 0, PRESS: 1, ACTION_PRESS: 2, DELIVERED: 3},
+  AlarmType: {
+    SET: 0,
+    SET_AND_ALLOW_WHILE_IDLE: 1,
+    SET_EXACT: 2,
+    SET_EXACT_AND_ALLOW_WHILE_IDLE: 3,
+    SET_ALARM_CLOCK: 4,
+  },
+  TriggerType: {TIMESTAMP: 0, INTERVAL: 1},
 }));

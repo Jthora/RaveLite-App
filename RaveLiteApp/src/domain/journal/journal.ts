@@ -61,3 +61,24 @@ export function entriesInRange(fromDay: Date, toDay: Date): JournalEntry[] {
   }
   return out;
 }
+
+/**
+ * Pulse ids with a `reminder.fired` entry, optionally limited to one plan
+ * window / producer. Schedulers use this so a restart never re-chimes a
+ * pulse that already went off.
+ */
+export function firedPulseIds(
+  entries: readonly JournalEntry[],
+  windowId?: string,
+): Set<string> {
+  const out = new Set<string>();
+  for (const e of entries) {
+    if (
+      e.kind === 'reminder.fired' &&
+      (windowId === undefined || e.windowId === windowId)
+    ) {
+      out.add(e.pulseId);
+    }
+  }
+  return out;
+}

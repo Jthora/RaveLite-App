@@ -23,6 +23,7 @@
  *   - GC's enqueued IDs whose ts is older than `now - retainMs` so the
  *     set doesn't grow unbounded across an all-day session.
  */
+import {entriesForDay, firedPulseIds} from '../journal/journal';
 import {expandPlanToFires, type FireSpec} from '../reminders/expandPlan';
 import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import {loadPlan, subscribePlan} from '../reminders/repository';
@@ -47,6 +48,9 @@ export interface ReconcileInput {
   now: number;
   plan: Plan;
   alreadyEnqueued: ReadonlySet<string>;
+  /** Pulse ids that already fired today — never re-enqueued, so an app
+   *  restart inside the grace window can't chime the same pulse twice. */
+  firedIds?: ReadonlySet<string>;
   horizonMs?: number;
   graceMs?: number;
   retainMs?: number;
@@ -70,6 +74,7 @@ export function reconcilePlan(input: ReconcileInput): ReconcileResult {
     now,
     plan,
     alreadyEnqueued,
+    firedIds = new Set<string>(),
     horizonMs = DEFAULT_HORIZON_MS,
     graceMs = DEFAULT_GRACE_MS,
     retainMs = DEFAULT_RETAIN_MS,
@@ -93,7 +98,7 @@ export function reconcilePlan(input: ReconcileInput): ReconcileResult {
       continue; // too late; ribbon will absorb it
     }
     const id = planPulseId(fire);
-    if (nextEnqueued.has(id)) {
+    if (nextEnqueued.has(id) || firedIds.has(id)) {
       continue;
     }
     toEnqueue.push(fire);
@@ -130,6 +135,7 @@ export function reconcileNow(now: number = Date.now()): void {
     now,
     plan,
     alreadyEnqueued: enqueuedIds,
+    firedIds: firedPulseIds(entriesForDay(new Date(now))),
   });
   enqueuedIds = nextEnqueued;
   for (const fire of toEnqueue) {

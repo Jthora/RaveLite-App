@@ -157,3 +157,19 @@ describe('reconcilePlan', () => {
     expect(nextEnqueued.size).toBeGreaterThanOrEqual(4);
   });
 });
+
+describe('reconcilePlan — restart safety', () => {
+  it('never re-enqueues a pulse that already fired today', () => {
+    const now = nineAm() + 30_000; // the 09:00 fire is still inside grace
+    const firedId = 'plan:w1:0:' + nineAm();
+    const {toEnqueue} = reconcilePlan({
+      now,
+      plan: makePlan(),
+      alreadyEnqueued: new Set(),
+      firedIds: new Set([firedId]),
+      horizonMs: 60 * 60_000,
+    });
+    expect(toEnqueue.map(planPulseId)).not.toContain(firedId);
+    expect(toEnqueue).toHaveLength(3);
+  });
+});

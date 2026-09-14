@@ -123,7 +123,7 @@ interface RibbonRowViewProps {
   onRetroOutcome: (outcome: RetroOutcome) => void;
 }
 
-function RibbonRowView({
+function RibbonRowViewImpl({
   row,
   isNow,
   now,
@@ -170,22 +170,9 @@ function RibbonRowView({
   // Past or future row.
   const isPast = !isNow && row.at < Date.now();
   const interactive = row.kind === 'past-absorbed';
-  const Wrap: React.ComponentType<{children: React.ReactNode}> = interactive
-    ? ({children}) => (
-        <Pressable
-          style={({pressed}) => [
-            styles.row,
-            pressed && {opacity: 0.6},
-          ]}
-          onPress={onAbsorbedPress}>
-          {children}
-        </Pressable>
-      )
-    : ({children}) => <View style={styles.row}>{children}</View>;
-
   return (
     <View>
-      <Wrap>
+      <RowWrap interactive={interactive} onPress={onAbsorbedPress}>
         <View style={styles.timeCol}>
           <Text
             style={[
@@ -218,7 +205,7 @@ function RibbonRowView({
             </Text>
           ) : null}
         </View>
-      </Wrap>
+      </RowWrap>
       {expanded && row.kind === 'past-absorbed' ? (
         <View style={styles.retroRow}>
           <Pressable
@@ -240,6 +227,56 @@ function RibbonRowView({
       ) : null}
     </View>
   );
+}
+
+/**
+ * Rows re-render only when what they show changes. The panel ticks `now`
+ * every second; before this, every row re-rendered (and remounted, via an
+ * inline wrapper component) each tick. Only the now-row needs `now`.
+ * Handler props are ignored: the panel's handlers are stable callbacks and
+ * per-row closures capture only the row's id and stable setters.
+ */
+function rowPropsEqual(prev: RibbonRowViewProps, next: RibbonRowViewProps): boolean {
+  if (prev.isNow !== next.isNow || prev.expanded !== next.expanded) {
+    return false;
+  }
+  if (next.isNow && prev.now !== next.now) {
+    return false;
+  }
+  const a = prev.row;
+  const b = next.row;
+  return (
+    a.id === b.id &&
+    a.kind === b.kind &&
+    a.at === b.at &&
+    a.element === b.element &&
+    a.label === b.label &&
+    a.detail === b.detail &&
+    a.active?.expiresAt === b.active?.expiresAt
+  );
+}
+
+const RibbonRowView = React.memo(RibbonRowViewImpl, rowPropsEqual);
+
+function RowWrap({
+  interactive,
+  onPress,
+  children,
+}: {
+  interactive: boolean;
+  onPress: () => void;
+  children: React.ReactNode;
+}) {
+  if (interactive) {
+    return (
+      <Pressable
+        style={({pressed}) => [styles.row, pressed && styles.rowPressed]}
+        onPress={onPress}>
+        {children}
+      </Pressable>
+    );
+  }
+  return <View style={styles.row}>{children}</View>;
 }
 
 interface ActiveRowProps {
@@ -419,6 +456,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     gap: spacing.md,
+  },
+  rowPressed: {
+    opacity: 0.6,
   },
   rowActive: {
     borderWidth: 1,

@@ -1,3 +1,4 @@
+import {firedPulseIds} from '../journal/journal';
 import type {JournalEntry} from '../journal/types';
 import {SETS_WINDOW_ID, type SetUnit, type TrackId} from './types';
 
@@ -36,11 +37,5 @@ export function doneByTrack(
 
 /** Pulse ids of set chimes that have already fired in these entries. */
 export function firedSetIds(entries: readonly JournalEntry[]): Set<string> {
-  const out = new Set<string>();
-  for (const e of entries) {
-    if (e.kind === 'reminder.fired' && e.windowId === SETS_WINDOW_ID) {
-      out.add(e.pulseId);
-    }
-  }
-  return out;
+  return firedPulseIds(entries, SETS_WINDOW_ID);
 }

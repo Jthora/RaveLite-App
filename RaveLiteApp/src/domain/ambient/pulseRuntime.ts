@@ -178,6 +178,26 @@ export function cancelQueued(ids: readonly string[]): void {
   }
 }
 
+/**
+ * Push a queued pulse later by `byMs` (e.g. "+5" on the next chime). Its
+ * answer window moves with it. Active pulses are left alone.
+ */
+export function deferQueued(id: string, byMs: number): void {
+  const idx = state.pulses.findIndex(p => p.id === id && p.state === 'queued');
+  if (idx < 0) {
+    return;
+  }
+  const pulse = state.pulses[idx];
+  const pulses = [...state.pulses];
+  pulses[idx] = {
+    ...pulse,
+    fireAt: pulse.fireAt + byMs,
+    expiresAt: pulse.expiresAt + byMs,
+  };
+  state = {pulses};
+  notify();
+}
+
 /** Drive the reducer one step at the given epoch ms. */
 export function tickNow(now: number = Date.now()): void {
   const result = queueTick(state, now, t =>
