@@ -9,8 +9,8 @@
  * If the runtime still holds the pulse as active, the answer goes through
  * it exactly like a tap on the Always-On screen. If it doesn't (the pulse
  * expired, or the process was started just to handle the press), the
- * answer is written straight to the journal so the set still counts — and
- * a +5 is handed to the OS as a snooze chime.
+ * answer is written straight to the journal so the round still counts —
+ * and a +5 is handed to the OS as a snooze chime.
  */
 import {append, entriesForDay} from '../journal/journal';
 import {
@@ -20,7 +20,7 @@ import {
   type NotificationAction,
 } from '../reminders/notifeeScheduler';
 import type {ElementId} from '../../theme/elements';
-import {prescriptionFromData, pulsePayload} from './pulsePayload';
+import {doneFields, prescriptionFromData, pulsePayload} from './pulsePayload';
 import {answerActivePulse} from './pulseRuntime';
 import {reconcileSetsNow} from './setScheduler';
 
@@ -63,7 +63,13 @@ function recordDetachedAnswer(action: NotificationAction, now: number): void {
     return;
   }
   if (action.actionId === 'seal') {
+    const rx = prescriptionFromData(action.data);
     const parsed = Number(amount);
+    const set = rx
+      ? doneFields(rx)
+      : trackId && Number.isFinite(parsed)
+      ? {trackId, amount: parsed}
+      : {};
     append({
       kind: 'completion',
       at: now,
@@ -71,7 +77,7 @@ function recordDetachedAnswer(action: NotificationAction, now: number): void {
       element: (element ?? 'heart') as ElementId,
       source: 'notification',
       pulseId,
-      ...(trackId && Number.isFinite(parsed) ? {trackId, amount: parsed} : {}),
+      ...set,
     });
   } else if (action.actionId === 'skip') {
     append({

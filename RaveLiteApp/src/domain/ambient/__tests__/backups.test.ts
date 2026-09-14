@@ -1,6 +1,7 @@
 import notifee from '@notifee/react-native';
 
 import {store} from '../../../storage';
+import {entriesForDay} from '../../journal/journal';
 import {BACKUP_OFFSET_MS} from '../backupPlanner';
 import {backupCandidates, reconcileBackupsNow} from '../backupScheduler';
 import {
@@ -154,5 +155,119 @@ describe('+5 on a notification the app no longer holds', () => {
     });
     expect(notification.data.backup).toBeUndefined();
     expect(trigger.timestamp).toBe(NOW + DETACHED_SNOOZE_MS);
+  });
+});
+
+describe('round chimes', () => {
+  const round = {
+    trackId: 'push' as const,
+    label: 'Push-ups',
+    unit: 'reps' as const,
+    amount: 5,
+    setIndex: 1,
+    sets: 4,
+    roundIndex: 3,
+    rounds: 9,
+    moves: [
+      {
+        trackId: 'push' as const,
+        exerciseId: 'fire.pushup-groove',
+        element: 'fire' as const,
+        label: 'Push-ups',
+        unit: 'reps' as const,
+        amount: 5,
+        setIndex: 1,
+        sets: 4,
+      },
+      {
+        trackId: 'hang' as const,
+        exerciseId: 'earth.porch-dead-hang',
+        element: 'earth' as const,
+        label: 'Dead hang',
+        unit: 'seconds' as const,
+        amount: 15,
+        setIndex: 2,
+        sets: 3,
+      },
+    ],
+    partner: {
+      exerciseId: 'air.doorway-pec-stretch',
+      element: 'air' as const,
+      label: 'Doorway pec stretch',
+      seconds: 30,
+    },
+    water: true,
+  };
+
+  it('name every move, the partner and the glass, and survive notification data', () => {
+    const payload = pulsePayload({
+      pulseId: 'sets:x:round:3',
+      element: 'fire',
+      exerciseId: 'fire.pushup-groove',
+      prescription: round,
+    });
+    expect(payload.title).toBe('Round 3/9 · Push-ups 5 + Dead hang 15s');
+    expect(payload.body).toMatch(/^then 30 s .+ · drink a glass of water$/);
+    expect(prescriptionFromData(payload.data!)).toMatchObject({
+      roundIndex: 3,
+      rounds: 9,
+      water: true,
+      moves: round.moves,
+      partner: {exerciseId: 'air.doorway-pec-stretch', seconds: 30},
+    });
+  });
+
+  it('still read a single-set notification scheduled before rounds', () => {
+    expect(
+      prescriptionFromData({
+        trackId: 'push',
+        amount: '10',
+        unit: 'reps',
+        label: 'Push-ups',
+        setIndex: '2',
+        sets: '6',
+      }),
+    ).toEqual({
+      trackId: 'push',
+      label: 'Push-ups',
+      unit: 'reps',
+      amount: 10,
+      setIndex: 2,
+      sets: 6,
+    });
+  });
+
+  it('Done on a round the app lost logs its moves once', async () => {
+    const payload = pulsePayload({
+      pulseId: 'sets:x:round:4',
+      element: 'fire',
+      exerciseId: 'fire.pushup-groove',
+      prescription: round,
+    });
+    const action = {
+      actionId: 'seal' as const,
+      data: {
+        ...payload.data!,
+        pulseId: 'sets:x:round:4',
+        element: 'fire',
+        exerciseId: 'fire.pushup-groove',
+      },
+    };
+    await handleNotificationAction(action, NOW);
+    await handleNotificationAction(action, NOW + 1_000);
+    const completions = entriesForDay(new Date(NOW)).filter(
+      e => e.kind === 'completion',
+    );
+    expect(completions).toEqual([
+      expect.objectContaining({
+        pulseId: 'sets:x:round:4',
+        moves: [
+          {trackId: 'push', amount: 5},
+          {trackId: 'hang', amount: 15},
+        ],
+        partnerExerciseId: 'air.doorway-pec-stretch',
+        water: true,
+      }),
+    ]);
   });
 });

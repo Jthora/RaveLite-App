@@ -316,7 +316,6 @@ export function buildPulseNotification(
   payload: ReminderPayload,
   opts: {quiet: boolean},
 ): Notification {
-  const el = ELEMENTS[payload.element];
   return {
     // Pulse id doubles as the notification id so an in-app answer can
     // cancel the matching notification.
@@ -339,7 +338,7 @@ export function buildPulseNotification(
       ...(payload.pulseId
         ? {
             actions: [
-              {title: el.verbDone, pressAction: {id: 'seal'}},
+              {title: 'Done', pressAction: {id: 'seal'}},
               {title: '+5 min', pressAction: {id: 'snooze'}},
               {title: 'Skip', pressAction: {id: 'skip'}},
             ],

@@ -16,7 +16,7 @@ interface Props {
 export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
   const el = elementOf(exercise.element);
   // Animated seal: 0 = idle, 1 = sealed peak. Drives an overlay fill +
-  // the "Sealed" label opacity. Replaces the previous setTimeout/state
+  // the "Logged" label opacity. Replaces the previous setTimeout/state
   // toggle so the seal eases out instead of snapping back to idle.
   const sealAnim = useRef(new Animated.Value(0)).current;
 
@@ -100,13 +100,13 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
           ]}
         />
         {/* Base label — always rendered, claims the button's width
-            so swapping in "Sealed" doesn't reflow. */}
+            so swapping in "Logged" doesn't reflow. */}
         <Text
           style={[
             styles.doneTxt,
             {color: el.color, opacity: 1},
           ]}>
-          {el.verbDone}
+          Done
         </Text>
         {/* Overlay label — fades in/out with sealAnim, sits on top of
             both the fill and the base label. */}
@@ -116,7 +116,7 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
             styles.sealLabel,
             {color: palette.bg, opacity: sealAnim},
           ]}>
-          ✦  Sealed
+          ✓  Logged
         </Animated.Text>
       </Pressable>
     </View>
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
   /** Absolutely-positioned overlay so it sits centered on top of the
-      base verbDone label without affecting button layout. */
+      base "Done" label without affecting button layout. */
   sealLabel: {
     position: 'absolute',
     left: 0,

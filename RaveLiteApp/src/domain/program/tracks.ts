@@ -14,6 +14,9 @@ import type {Track, TrackId} from './types';
  *   - Explosive work (jumps, sprints, kicks) is NOT a track. It needs a
  *     warm-up and fresh legs, so it lives in the backyard session.
  *   - Sets start at ~50% of max: never to failure, always crisp.
+ *   - Each round ends with a partner from another element — a chest
+ *     opener after pushing, a hip opener after squats, a breath after
+ *     trunk work — so Air, Water and Heart ride along with the strength.
  */
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6];
@@ -39,6 +42,10 @@ export const TRACKS: Track[] = [
     maxSets: 10,
     enabledByDefault: true,
     why: 'Pushing strength and upper-body density. Always paired with Row.',
+    partners: [
+      {exerciseId: 'air.doorway-pec-stretch', seconds: 30},
+      {exerciseId: 'air.physiological-sigh', seconds: 30},
+    ],
   },
   {
     id: 'row',
@@ -58,6 +65,10 @@ export const TRACKS: Track[] = [
     maxSets: 10,
     enabledByDefault: true,
     why: 'A pull for every push — the desk-side fix for rounded shoulders.',
+    partners: [
+      {exerciseId: 'air.chin-tuck', seconds: 30},
+      {exerciseId: 'heart.pulse-check', seconds: 30},
+    ],
   },
   {
     id: 'pull',
@@ -78,6 +89,10 @@ export const TRACKS: Track[] = [
     maxSets: 8,
     enabledByDefault: true,
     why: 'Back, arms and grip from the porch edge — the strength to hang, climb and spin.',
+    partners: [
+      {exerciseId: 'air.standing-belly-release', seconds: 30},
+      {exerciseId: 'water.side-line-stretch', seconds: 30},
+    ],
   },
   {
     id: 'squat',
@@ -99,6 +114,10 @@ export const TRACKS: Track[] = [
     maxSets: 8,
     enabledByDefault: true,
     why: 'Legs for all-night stepping; later rungs build one-leg control for kicks.',
+    partners: [
+      {exerciseId: 'water.deep-squat-hold', seconds: 30},
+      {exerciseId: 'water.hamstring-floss', seconds: 30},
+    ],
   },
   {
     id: 'legs-up',
@@ -119,6 +138,10 @@ export const TRACKS: Track[] = [
     maxSets: 8,
     enabledByDefault: true,
     why: 'Lower abs that pull the pelvis out of tilt and lift the legs for flips.',
+    partners: [
+      {exerciseId: 'water.hamstring-floss', seconds: 30},
+      {exerciseId: 'air.physiological-sigh', seconds: 30},
+    ],
   },
   {
     id: 'crunch',
@@ -138,6 +161,10 @@ export const TRACKS: Track[] = [
     maxSets: 6,
     enabledByDefault: true,
     why: 'Trunk flexion strength, capped on purpose: the gut goes with food and movement.',
+    partners: [
+      {exerciseId: 'air.standing-belly-release', seconds: 30},
+      {exerciseId: 'air.physiological-sigh', seconds: 30},
+    ],
   },
   {
     id: 'side',
@@ -156,6 +183,7 @@ export const TRACKS: Track[] = [
     maxSets: 6,
     enabledByDefault: true,
     why: 'Obliques and the side line — the twist behind staff spins and kicks.',
+    partners: [{exerciseId: 'water.side-line-stretch', seconds: 30}],
   },
   {
     id: 'plank',
@@ -175,6 +203,7 @@ export const TRACKS: Track[] = [
     maxSets: 6,
     enabledByDefault: true,
     why: 'A rigid trunk while the arms, legs and staff move fast.',
+    partners: [{exerciseId: 'heart.rave-vision', seconds: 30}],
   },
   {
     id: 'hang',
@@ -194,6 +223,10 @@ export const TRACKS: Track[] = [
     maxSets: 8,
     enabledByDefault: true,
     why: 'Grip, shoulder health and a decompressed spine after desk hours.',
+    partners: [
+      {exerciseId: 'air.physiological-sigh', seconds: 30},
+      {exerciseId: 'heart.pulse-check', seconds: 30},
+    ],
   },
 ];
 

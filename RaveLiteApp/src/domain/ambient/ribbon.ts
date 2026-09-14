@@ -290,9 +290,11 @@ export function buildRibbonRows(input: BuildRibbonInput): RibbonRow[] {
       element: activePulse.element,
       kind: 'now-active',
       label: activePulse.drillName,
-      detail: activePulse.prescription
-        ? `${formatSetAmount(activePulse.prescription.amount, activePulse.prescription.unit)} · set ${activePulse.prescription.setIndex}/${activePulse.prescription.sets}`
-        : `${activePulse.durationSec}s`,
+      detail: !activePulse.prescription
+        ? `${activePulse.durationSec}s`
+        : activePulse.prescription.moves
+        ? `round ${activePulse.prescription.roundIndex}/${activePulse.prescription.rounds}`
+        : `${formatSetAmount(activePulse.prescription.amount, activePulse.prescription.unit)} · set ${activePulse.prescription.setIndex}/${activePulse.prescription.sets}`,
       active: {
         drillId: activePulse.drillId,
         drillName: activePulse.drillName,

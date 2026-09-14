@@ -13,7 +13,7 @@
  *     changes without manually polling the runtime.
  *
  * Producers: `planScheduler` (element cadence from the Plan),
- * `setScheduler` (Daily Sets), and Test Pulse.
+ * `setScheduler` (Daily Sets rounds), and Test Pulse.
  */
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {append} from '../journal/journal';
@@ -36,11 +36,11 @@ import {
   type QueueState,
 } from './pulseQueue';
 import {pagingAllowedAt} from './activeHours';
-import {pulsePayload} from './pulsePayload';
+import {doneFields, pulsePayload} from './pulsePayload';
 import {chooseCueRoute, cueSettingsFor} from './cueVolume';
 import {getInterruptionFilter, playCue} from '../../native/raveLiteDevice';
 import type {ReminderPayload} from '../reminders/types';
-import type {SetPrescription} from '../program/types';
+import type {SetPrescription, TrackId} from '../program/types';
 import type {ActivePulseSummary} from './ribbon';
 import type {Pulse, PulseOutcome} from './types';
 
@@ -288,13 +288,17 @@ export function tickNow(now: number = Date.now()): void {
 }
 
 /**
- * Seal the active pulse: resolve it and write the CompletionEntry. For a
- * Daily Sets pulse the entry carries `trackId` + `amount` (the prescribed
- * amount unless the operator adjusted it).
+ * Seal the active pulse: resolve it and write the CompletionEntry. A
+ * single set logs its track and amount; a round logs every move (the
+ * prescribed amounts unless the operator adjusted them), its partner and
+ * its glass of water.
  */
 export function sealActive(
   opts: {
+    /** Single set: the amount actually done. */
     amount?: number;
+    /** Round: per-track amounts actually done (0 = that move skipped). */
+    amounts?: Partial<Record<TrackId, number>>;
     source?: CompletionEntry['source'];
     at?: number;
   } = {},
@@ -318,7 +322,7 @@ export function sealActive(
     pulseId: active.id,
     respondedAfterMs: Math.max(0, at - active.fireAt),
     durationSec: drill?.approxSeconds,
-    ...(rx ? {trackId: rx.trackId, amount: opts.amount ?? rx.amount} : {}),
+    ...(rx ? doneFields(rx, {amount: opts.amount, amounts: opts.amounts}) : {}),
   }) as CompletionEntry;
   dismiss(active.id);
   notify();

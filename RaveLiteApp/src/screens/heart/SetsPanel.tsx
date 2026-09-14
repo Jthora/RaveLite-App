@@ -23,6 +23,7 @@ import {subscribe as subscribePulseRuntime} from '../../domain/ambient/pulseRunt
 import {EXERCISE_LIBRARY} from '../../domain/exercises/library';
 import {append, entriesForDay} from '../../domain/journal/journal';
 import {doneByTrack, formatSetAmount} from '../../domain/program/progress';
+import {movesOf} from '../../domain/program/rounds';
 import {
   currentRung,
   isTestDue,
@@ -133,8 +134,8 @@ export function SetsPanel() {
 
       <View style={styles.ruleCard}>
         <Text style={styles.ruleText}>
-          Each chime is one crisp set at about half your max. Stop two reps
-          before it gets ugly.{' '}
+          Each chime is a round: a few crisp sets back to back at about half
+          your max, then a short stretch. Stop two reps before it gets ugly.{' '}
           {phase === 'deload'
             ? 'Deload week: fewer sets — test your maxes while fresh.'
             : 'Sets climb weekly; a new max test is what grows each set.'}
@@ -148,7 +149,9 @@ export function SetsPanel() {
           const track = trackById(p.trackId);
           const state = program.tracks[p.trackId];
           const d = done[p.trackId] ?? {amount: 0, sets: 0};
-          const next = today.upcoming.find(f => f.prescription.trackId === p.trackId);
+          const next = today.upcoming.find(f =>
+            movesOf(f.prescription).some(m => m.trackId === p.trackId),
+          );
           return (
             <TrackCard
               key={p.trackId}

@@ -48,7 +48,7 @@ import {
   type ElementPrefs,
   type SignalPreset,
 } from '../../domain/settings/elementPrefs';
-import {recordCompletion} from '../../domain/journal/recordCompletion';
+import {recordDrillTap} from '../../domain/activity/record';
 import {pulseHaptic} from '../../lib/elementHaptics';
 import {ELEMENTS, ELEMENT_ORDER} from '../../theme/elements';
 import {ElementProvider} from '../../theme/elementContext';
@@ -180,9 +180,9 @@ function NowPanel({element, onOpenLibrary}: NowProps) {
       <Text style={styles.helpBody}>
         A pulse is a one-tap drill cued by a chime or this screen. Tap{' '}
         <Text style={[styles.helpAccent, {color: element.color}]}>
-          {element.verbDone}
+          Done
         </Text>{' '}
-        to seal it. Swap rerolls if it doesn’t fit the moment.
+        to log it. Swap rerolls if it doesn’t fit the moment.
       </Text>
       <Tap
         variant="plain"
@@ -222,12 +222,12 @@ function NowPanel({element, onOpenLibrary}: NowProps) {
           variant="solid"
           color={element.color}
           onPress={() => {
-            recordCompletion(hero, 'manual');
+            recordDrillTap(hero);
             pulseHaptic(element.id, 'seal');
             setSwapTick(n => n + 1);
           }}
           style={styles.btnFlex}>
-          <Text style={styles.btnText}>{element.verbDone}</Text>
+          <Text style={styles.btnText}>Done</Text>
         </Tap>
         <Tap
           variant="ghost"

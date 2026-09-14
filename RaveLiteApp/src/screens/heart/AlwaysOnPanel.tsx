@@ -131,8 +131,12 @@ export function AlwaysOnPanel() {
         id: f.id,
         at: f.ts,
         element: f.element,
-        label: f.prescription.label,
-        detail: `${formatSetAmount(f.prescription.amount, f.prescription.unit)} · set ${f.prescription.setIndex}/${f.prescription.sets}`,
+        label: f.prescription.moves
+          ? f.prescription.moves.map(m => m.label).join(' + ')
+          : f.prescription.label,
+        detail: f.prescription.moves
+          ? `round ${f.prescription.roundIndex}/${f.prescription.rounds}`
+          : `${formatSetAmount(f.prescription.amount, f.prescription.unit)} · set ${f.prescription.setIndex}/${f.prescription.sets}`,
       })),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

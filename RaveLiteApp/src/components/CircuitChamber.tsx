@@ -50,8 +50,8 @@ const ELEMENT_BPM: Record<string, number> = {
  *   - Tap "Pause" to halt the timer
  *   - Tap "Leave" to exit (no completions logged for unsealed legs)
  *
- * Completions are journaled per leg as `recordCompletion(ex, 'manual')`,
- * so the Heart screen mandala blooms after a full pentagram.
+ * Completions are journaled per leg as `recordCompletion(ex, 'auto')` —
+ * circuit completions — so every element's count grows after a pentagram.
  *
  * Implementation notes:
  *   - Tick-based countdown (200ms interval) to keep the timer ring smooth
@@ -184,7 +184,7 @@ export const CircuitChamber: React.FC<Props> = ({
         {/* Header: leg counter + leave. */}
         <View style={styles.header}>
           <Text style={[styles.legCount, {color: element.color}]}>
-            {done ? 'Sealed' : `${legIdx + 1} / ${circuit.length}`}
+            {done ? 'Complete' : `${legIdx + 1} / ${circuit.length}`}
           </Text>
           <Pressable onPress={onLeave} hitSlop={12}>
             <Text style={[styles.leave, {color: element.color}]}>Leave</Text>
@@ -277,7 +277,7 @@ export const CircuitChamber: React.FC<Props> = ({
                   {backgroundColor: element.color, borderColor: element.color},
                 ]}>
                 <Text style={[styles.btnText, {color: palette.bg}]}>
-                  Seal & Advance
+                  Done · next
                 </Text>
               </Pressable>
             </View>

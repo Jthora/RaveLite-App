@@ -155,3 +155,41 @@ describe('answering a set', () => {
     expect(completions()).toEqual([]);
   });
 });
+
+describe('answering a round', () => {
+  const round: SetPrescription = {
+    trackId: 'push',
+    label: 'Push-ups',
+    unit: 'reps',
+    amount: 5,
+    setIndex: 1,
+    sets: 4,
+    roundIndex: 1,
+    rounds: 9,
+    moves: [
+      {trackId: 'push', exerciseId: 'fire.pushup-groove', element: 'fire', label: 'Push-ups', unit: 'reps', amount: 5, setIndex: 1, sets: 4},
+      {trackId: 'squat', exerciseId: 'earth.squat', element: 'earth', label: 'Squats', unit: 'reps', amount: 10, setIndex: 1, sets: 4},
+    ],
+    partner: {exerciseId: 'air.doorway-pec-stretch', element: 'air', label: 'Doorway pec stretch', seconds: 30},
+    water: true,
+  };
+
+  it('one Done records every move, the partner and the glass', () => {
+    runtime.enqueue({id: 'sets:x:round:1', fireAt: NOW, element: 'fire', exerciseId: 'fire.pushup-groove', prescription: round});
+    runtime.tickNow(NOW);
+    runtime.sealActive({amounts: {squat: 8}, at: NOW + 20_000});
+    const [entry] = completions();
+    expect(completions()).toHaveLength(1);
+    expect(entry).toMatchObject({
+      pulseId: 'sets:x:round:1',
+      moves: [
+        {trackId: 'push', amount: 5},
+        {trackId: 'squat', amount: 8},
+      ],
+      partnerExerciseId: 'air.doorway-pec-stretch',
+      partnerSec: 30,
+      water: true,
+    });
+    expect(entry.trackId).toBeUndefined();
+  });
+});

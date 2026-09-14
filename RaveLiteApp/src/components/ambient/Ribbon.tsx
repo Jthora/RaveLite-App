@@ -329,7 +329,16 @@ function ActiveRow({row, now, onSeal, onSkip, onSnooze}: ActiveRowProps) {
         <Text style={[styles.activeLabel, {color: tint}]} numberOfLines={1}>
           {row.label.toUpperCase()}
         </Text>
-        {rx ? (
+        {rx?.moves ? (
+          rx.moves.map(m => (
+            <Text
+              key={m.trackId}
+              style={[styles.rxAmount, {color: tint}]}
+              numberOfLines={1}>
+              {m.label} · {formatSetAmount(m.amount, m.unit)}
+            </Text>
+          ))
+        ) : rx ? (
           <View style={styles.rxRow}>
             <Pressable
               accessibilityLabel="Less"
@@ -353,11 +362,23 @@ function ActiveRow({row, now, onSeal, onSkip, onSnooze}: ActiveRowProps) {
             </Text>
           </View>
         ) : null}
-        {active.cuesShort.slice(0, rx ? 3 : 4).map((cue, idx) => (
-          <Text key={idx} style={styles.activeCue} numberOfLines={1}>
-            · {cue}
+        {rx?.partner ? (
+          <Text style={styles.activeCue} numberOfLines={1}>
+            · then {rx.partner.seconds} s {rx.partner.label}
           </Text>
-        ))}
+        ) : null}
+        {rx?.water ? (
+          <Text style={styles.activeCue} numberOfLines={1}>
+            · drink a glass of water
+          </Text>
+        ) : null}
+        {rx?.moves
+          ? null
+          : active.cuesShort.slice(0, rx ? 3 : 4).map((cue, idx) => (
+              <Text key={idx} style={styles.activeCue} numberOfLines={1}>
+                · {cue}
+              </Text>
+            ))}
         <View style={styles.meterTrack}>
           <View
             style={[
@@ -369,9 +390,9 @@ function ActiveRow({row, now, onSeal, onSkip, onSnooze}: ActiveRowProps) {
         <View style={styles.actionsRow}>
           <Pressable
             style={[styles.actionBtnLarge, {backgroundColor: tint}]}
-            onPress={() => onSeal?.(row, rx ? amount : undefined)}>
+            onPress={() => onSeal?.(row, rx && !rx.moves ? amount : undefined)}>
             <Text style={[styles.actionTextLarge, {color: '#000'}]}>
-              {el.verbDone ?? 'Seal'}
+              Done
             </Text>
           </Pressable>
           <Pressable

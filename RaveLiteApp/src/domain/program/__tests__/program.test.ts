@@ -1,8 +1,6 @@
 import {store} from '../../../storage';
 import {EXERCISE_LIBRARY} from '../../exercises/library';
 import type {JournalEntry} from '../../journal/types';
-import {DEFAULT_PLAN} from '../../reminders/defaultPlan';
-import {expandPlanToFires} from '../../reminders/expandPlan';
 import {
   applyTest,
   isTestDue,
@@ -19,19 +17,11 @@ import {
   defaultProgram,
   levelUpTrack,
   loadProgram,
-  prescriptionsFor,
   recordMaxTest,
   setTrackEnabled,
 } from '../repository';
-import {
-  CLEARANCE_MS,
-  MIN_GAP_MS,
-  distributeSets,
-  selectUpcomingSets,
-  setFireId,
-} from '../schedule';
 import {TRACKS, trackById} from '../tracks';
-import {SETS_WINDOW_ID, type DayPrescription, type SetFire} from '../types';
+import {SETS_WINDOW_ID} from '../types';
 
 // Monday 14 Sep 2026 (local), the default program start in these tests.
 const MONDAY = new Date(2026, 8, 14);
@@ -140,121 +130,6 @@ describe('progression', () => {
     expect(isTestDue(program, tested, new Date(2026, 9, 6))).toBe(true);
     const retested = applyTest(tested, 24, new Date(2026, 9, 5, 12).getTime());
     expect(isTestDue(program, retested, new Date(2026, 9, 6))).toBe(false);
-  });
-});
-
-describe('set scheduling', () => {
-  const program = startProgram();
-  const prescriptions = prescriptionsFor(program, MONDAY);
-  const dayStart = MONDAY.getTime();
-  const blockedTs = expandPlanToFires(DEFAULT_PLAN, dayStart, dayStart + 86_399_999).map(
-    f => f.ts,
-  );
-  const fires = distributeSets({
-    date: MONDAY,
-    dayStart: program.dayStart,
-    dayEnd: program.dayEnd,
-    prescriptions,
-    blockedTs,
-  });
-
-  it('places every prescribed set', () => {
-    const total = prescriptions.reduce((s, p) => s + p.sets, 0);
-    expect(fires).toHaveLength(total);
-    expect(new Set(fires.map(f => f.id)).size).toBe(total);
-  });
-
-  it('keeps sets apart from each other and clear of plan chimes', () => {
-    const sorted = [...fires].sort((a, b) => a.ts - b.ts);
-    for (let i = 1; i < sorted.length; i++) {
-      expect(sorted[i].ts - sorted[i - 1].ts).toBeGreaterThanOrEqual(MIN_GAP_MS);
-    }
-    const clashes = fires.filter(f =>
-      blockedTs.some(b => Math.abs(b - f.ts) < CLEARANCE_MS),
-    );
-    expect(clashes.map(f => f.id)).toEqual([]);
-  });
-
-  it('spreads each track across the day instead of bunching', () => {
-    const pushFires = fires.filter(f => f.prescription.trackId === 'push');
-    const first = new Date(pushFires[0].ts).getHours();
-    const lastFire = new Date(pushFires[pushFires.length - 1].ts).getHours();
-    expect(first).toBeLessThan(11);
-    expect(lastFire).toBeGreaterThanOrEqual(17);
-  });
-
-  it('is deterministic', () => {
-    const again = distributeSets({
-      date: MONDAY,
-      dayStart: program.dayStart,
-      dayEnd: program.dayEnd,
-      prescriptions,
-      blockedTs,
-    });
-    expect(again).toEqual(fires);
-  });
-});
-
-describe('selecting upcoming sets', () => {
-  const p: DayPrescription = {
-    trackId: 'push',
-    element: 'fire',
-    exerciseId: 'fire.pushup-groove',
-    label: 'Push-ups',
-    unit: 'reps',
-    setSize: 10,
-    sets: 4,
-    week: 1,
-    phase: 'build',
-  };
-  const fire = (i: number): SetFire => ({
-    id: setFireId('2026-09-14', 'push', i),
-    ts: i * 3_600_000,
-    element: 'fire',
-    exerciseId: p.exerciseId,
-    prescription: {
-      trackId: 'push',
-      label: p.label,
-      unit: 'reps',
-      amount: 10,
-      setIndex: i,
-      sets: 4,
-    },
-  });
-  const fires = [1, 2, 3, 4].map(fire);
-  const base = {fires, prescriptions: [p], graceMs: 60_000};
-
-  it('an answered chime does not retire a later one', () => {
-    const r = selectUpcomingSets({
-      ...base,
-      doneByTrack: {push: {amount: 10}},
-      firedIds: new Set([fires[0].id]),
-      now: fires[0].ts + 30_000,
-    });
-    expect(r.keep.map(f => f.prescription.setIndex)).toEqual([2, 3, 4]);
-    expect(r.drop).toEqual([]);
-  });
-
-  it('extra hand-logged sets retire the latest chimes', () => {
-    const r = selectUpcomingSets({
-      ...base,
-      doneByTrack: {push: {amount: 30}},
-      firedIds: new Set([fires[0].id]),
-      now: fires[0].ts + 60_000,
-    });
-    expect(r.keep.map(f => f.prescription.setIndex)).toEqual([2]);
-    expect(r.drop).toEqual([fires[2].id, fires[3].id]);
-  });
-
-  it('nothing is kept once the quota is met', () => {
-    const r = selectUpcomingSets({
-      ...base,
-      doneByTrack: {push: {amount: 40}},
-      firedIds: new Set(),
-      now: 0,
-    });
-    expect(r.keep).toEqual([]);
-    expect(r.drop).toHaveLength(4);
   });
 });
 

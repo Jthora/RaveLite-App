@@ -10,6 +10,9 @@ import type {ElementId} from '../../theme/elements';
  * `graduateAt`, the next rung (a harder variation) replaces endless extra
  * reps — that's what keeps building strength and density instead of just
  * endurance.
+ *
+ * Sets are chimed in rounds: one chime covers a few different moves back
+ * to back, then a short partner drill from another element.
  */
 
 export type TrackId =
@@ -35,6 +38,12 @@ export interface Rung {
   graduateAt: number;
 }
 
+/** A partner drill option: a library drill and how long to do it. */
+export interface TrackPartner {
+  exerciseId: string;
+  seconds: number;
+}
+
 export interface Track {
   id: TrackId;
   name: string;
@@ -57,6 +66,11 @@ export interface Track {
   enabledByDefault: boolean;
   /** One line: why this track exists. */
   why: string;
+  /**
+   * Short drills from other elements for rounds this track leads,
+   * rotated round by round.
+   */
+  partners: TrackPartner[];
 }
 
 export interface TrackState {
@@ -94,7 +108,31 @@ export interface DayPrescription {
   phase: Phase;
 }
 
-/** Attached to a pulse so the chime says exactly what to do. */
+/** One move inside a round chime. */
+export interface SetMove {
+  trackId: TrackId;
+  exerciseId: string;
+  element: ElementId;
+  label: string;
+  unit: SetUnit;
+  amount: number;
+  /** 1-based: which of the day's sets for this track. */
+  setIndex: number;
+  sets: number;
+}
+
+/** The short drill done right after a round's moves. */
+export interface Partner {
+  exerciseId: string;
+  element: ElementId;
+  label: string;
+  seconds: number;
+}
+
+/**
+ * Attached to a pulse so the chime says exactly what to do. The top-level
+ * fields describe the lead move; a round lists every move in `moves`.
+ */
 export interface SetPrescription {
   trackId: TrackId;
   label: string;
@@ -103,6 +141,14 @@ export interface SetPrescription {
   /** 1-based. */
   setIndex: number;
   sets: number;
+  /** Every move in the round, lead first. */
+  moves?: SetMove[];
+  partner?: Partner;
+  /** 1-based round number, and how many rounds the day has. */
+  roundIndex?: number;
+  rounds?: number;
+  /** A glass of water rides along with this round. */
+  water?: boolean;
 }
 
 /** A single scheduled set chime. */
