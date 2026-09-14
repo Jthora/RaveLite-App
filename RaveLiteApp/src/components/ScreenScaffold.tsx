@@ -15,10 +15,10 @@
  *   - A hero banner, sigil glyph, element name, ethos line, or cadence
  *     ribbon. Earlier versions did. They ate ~30–40% of the viewport on
  *     tablet portrait and forced screens to scroll. Now: the element rail
- *     and sub-tab rail communicate location; the screen body owns its
- *     full available space. Every page (and sub-page) can fit content
- *     snugly in both portrait and landscape on phone and tablet without
- *     the global chrome stealing real estate.
+ *     communicates location; the screen body owns its full available
+ *     space. Every page can fit content snugly in both portrait and
+ *     landscape on phone and tablet without the global chrome stealing
+ *     real estate.
  */
 import React, {useEffect} from 'react';
 import {StyleSheet, View} from 'react-native';
@@ -48,8 +48,10 @@ export const ScreenScaffold: React.FC<Props> = ({element, children}) => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Ambient atmosphere — absolute, behind content, no layout cost. */}
-      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      {/* Ambient atmosphere — absolute, behind content, no layout cost.
+          Clipped: the corner vignettes reach 400dp past the edges, and
+          Android would let them darken whatever the shell draws nearby. */}
+      <View pointerEvents="none" style={styles.atmosphere}>
         <AliveAura color={element.color} deep={element.deep} />
         {(['TL', 'TR', 'BL', 'BR'] as const).map(corner => (
           <React.Fragment key={corner}>
@@ -92,6 +94,7 @@ export const ScreenScaffold: React.FC<Props> = ({element, children}) => {
 
 const styles = StyleSheet.create({
   safe: {flex: 1, backgroundColor: palette.bg},
+  atmosphere: {...StyleSheet.absoluteFillObject, overflow: 'hidden'},
   content: {
     flex: 1,
     paddingTop: spacing.sm,

@@ -61,15 +61,13 @@ export function ElementRail({active, onChange, axis, isTablet}: Props) {
         const focused = id === active;
         const isHeart = id === 'heart';
         const fs = isHeart ? heartGlyphSize : glyphSize;
-        const tint = focused ? el.color : palette.textMuted;
+        // Resting items stay readable from across the desk.
+        const tint = focused ? el.color : palette.textDim;
         return (
           <Pressable
             key={id}
             onPress={() => onChange(id)}
-            style={({pressed}) => [
-              styles.tab,
-              {opacity: pressed ? 0.7 : 1},
-            ]}
+            style={({pressed}) => [styles.tab, {opacity: pressed ? 0.7 : 1}]}
             accessibilityRole="tab"
             accessibilityState={{selected: focused}}
             accessibilityLabel={el.name}>
@@ -97,7 +95,6 @@ export function ElementRail({active, onChange, axis, isTablet}: Props) {
                   fontSize: fs,
                   lineHeight: fs + 4,
                   color: tint,
-                  opacity: focused ? 1 : 0.7,
                   marginTop: 2,
                 }}>
                 {el.glyph}
@@ -109,7 +106,6 @@ export function ElementRail({active, onChange, axis, isTablet}: Props) {
                 {
                   fontSize: labelSize,
                   color: tint,
-                  opacity: focused ? 1 : 0.85,
                 },
               ]}>
               {el.name}

@@ -42,7 +42,7 @@ describe('runMigrations', () => {
     expect(store.getString(KEYS.planBackupV1)).toBe(raw);
     expect(json(KEYS.planCurrent)).toEqual(DEFAULT_PLAN);
     expect(store.getNumber(KEYS.planReplacedAt)).toBe(NOW);
-    expect(store.getNumber(KEYS.schemaVersion)).toBe(2);
+    expect(store.getNumber(KEYS.schemaVersion)).toBe(CURRENT_SCHEMA_VERSION);
   });
 
   it('leaves a plan that already matches the default alone', () => {
@@ -91,5 +91,19 @@ describe('runMigrations', () => {
     runMigrations(NOW);
     expect(json(KEYS.planCurrent)).toEqual(OLD_PLAN);
     warn.mockRestore();
+  });
+});
+
+describe('v3', () => {
+  it('forgets the sub-tab each element was left on', () => {
+    const key = KEYS.setting('shell.subTabByElement');
+    store.set(KEYS.schemaVersion, 2);
+    store.set(key, JSON.stringify({fire: 'train', air: 'history'}));
+    store.set(KEYS.planCurrent, JSON.stringify({windows: []}));
+    runMigrations(NOW);
+    expect(store.getString(key)).toBeUndefined();
+    // v2 already ran: the saved plan is left alone.
+    expect(store.getString(KEYS.planBackupV1)).toBeUndefined();
+    expect(store.getNumber(KEYS.schemaVersion)).toBe(3);
   });
 });

@@ -6,7 +6,7 @@
  * and re-keys the shell, so every screen redraws with the new colors,
  * glyph, and verb).
  *
- * The variant ID stays internal — sub-tab slugs, plan storage, journal
+ * The variant ID stays internal — plan storage, journal
  * entries all continue to use `'heart'`. This is purely a presentation
  * skin.
  */
@@ -86,10 +86,7 @@ export function ThemePanel(): React.JSX.Element {
                 </View>
                 {sel && (
                   <View
-                    style={[
-                      styles.selDot,
-                      {backgroundColor: v.identity.color},
-                    ]}
+                    style={[styles.selDot, {backgroundColor: v.identity.color}]}
                   />
                 )}
               </View>
@@ -110,7 +107,7 @@ export function ThemePanel(): React.JSX.Element {
       </View>
 
       <Text style={styles.footnote}>
-        Live preview: the rail glyph, sub-tab accents, and{' '}
+        Live preview: the rail glyph, page accents, and{' '}
         <Text style={{color: ELEMENTS.heart.color}}>
           {ELEMENTS.heart.name.toLowerCase()}
         </Text>{' '}

@@ -24,7 +24,6 @@ export function runMigrations(now: number = Date.now()): void {
     return;
   }
   if (from > CURRENT_SCHEMA_VERSION) {
-    // eslint-disable-next-line no-console
     console.warn(
       `[migrations] stored schema v${from} is newer than app v${CURRENT_SCHEMA_VERSION}; ` +
         'leaving data untouched (downgrade not supported).',
@@ -34,6 +33,9 @@ export function runMigrations(now: number = Date.now()): void {
 
   if (from < 2) {
     migrateToRoundsAndMyDay(now);
+  }
+  if (from < 3) {
+    forgetSubTabs();
   }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
@@ -71,6 +73,14 @@ function migrateToRoundsAndMyDay(now: number): void {
       // Corrupt: loadProgram already falls back to a fresh program.
     }
   }
+}
+
+/**
+ * v3 — one page per element. The shell has no sub-tabs any more, so the
+ * tab each element was last left on is dropped.
+ */
+function forgetSubTabs(): void {
+  store.delete(KEYS.setting('shell.subTabByElement'));
 }
 
 function isDefaultPlan(raw: string): boolean {

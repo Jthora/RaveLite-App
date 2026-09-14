@@ -6,8 +6,8 @@
  *   - SafeAreaProvider          (for SafeAreaView in screens)
  *   - StatusBar light-content   (rave context = dark UI, light glyphs)
  *   - ElementShell              (orientation-adaptive nav: drops React
- *                                Navigation, hand-rolls bottom/right rail
- *                                + top/left sub-tab rail)
+ *                                Navigation, hand-rolls a bottom/right
+ *                                element rail; one page per element)
  */
 import React, {useEffect, useState} from 'react';
 import {StatusBar, StyleSheet, View} from 'react-native';

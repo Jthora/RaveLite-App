@@ -16,7 +16,7 @@
  *      which re-keys the shell so all screens re-mount with the new theme.
  *
  * The `'heart'` ElementId stays the same — we are NOT introducing a new
- * element. Plans, journal entries, sub-tab registries, and storage keys
+ * element. Plans, journal entries, and storage keys
  * all continue to use `'heart'` regardless of variant. The variant is a
  * pure presentation skin: name, glyph, colors, ethos, verb.
  */
@@ -46,7 +46,8 @@ export interface HeartVariantDef {
 export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
   heart: {
     id: 'heart',
-    description: 'Magenta conductor — the integrator that doesn’t exist in the spectrum.',
+    description:
+      'Magenta conductor — the integrator that doesn’t exist in the spectrum.',
     identity: {
       name: 'Heart',
       domain: 'Integration & Cadence',
