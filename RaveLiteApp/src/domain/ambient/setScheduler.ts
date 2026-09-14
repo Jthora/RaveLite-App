@@ -13,6 +13,9 @@
  *   4. Enqueue needed rounds not yet enqueued, re-queue a waiting round
  *      whose contents changed, and cancel rounds no longer needed.
  */
+import type {ElementId} from '../../theme/elements';
+import {activityInRange} from '../activity/activity';
+import {countsByElement} from '../activity/stats';
 import {entriesForDay, subscribeJournal} from '../journal/journal';
 import {
   expandPlanToFires,
@@ -72,6 +75,27 @@ function isWaterCall(plan: Plan, fire: FireSpec): boolean {
   return slot?.requiredTags?.includes('Hydration') ?? false;
 }
 
+let balanceCache: {day: string; counts: Record<ElementId, number>} | undefined;
+
+/**
+ * Things done per element over the seven days before today, for smart
+ * partners. Past days only, so a round's partner holds steady all day and
+ * its chime is never re-queued for a partner change.
+ */
+function partnerBalance(date: Date): Record<ElementId, number> {
+  const day = localDayKey(date.getTime());
+  if (balanceCache?.day !== day) {
+    const from = new Date(date);
+    from.setHours(0, 0, 0, 0);
+    from.setDate(from.getDate() - 7);
+    const to = new Date(date);
+    to.setHours(0, 0, 0, 0);
+    to.setDate(to.getDate() - 1);
+    balanceCache = {day, counts: countsByElement(activityInRange(from, to))};
+  }
+  return balanceCache.counts;
+}
+
 /** Today's rounds, computed from current storage. Safe to call from UI. */
 export function setsToday(now: number = Date.now()): SetsToday {
   const date = new Date(now);
@@ -91,7 +115,7 @@ export function setsToday(now: number = Date.now()): SetsToday {
     dayStart: myDay.start,
     dayEnd: myDay.end,
     endMarginMs: ROUND_END_MARGIN_MS,
-    rounds: groupIntoRounds(prescriptions),
+    rounds: groupIntoRounds(prescriptions, {balance: partnerBalance(date)}),
     blockedTs: planFires.map(f => f.ts),
   });
   const entries = entriesForDay(date);

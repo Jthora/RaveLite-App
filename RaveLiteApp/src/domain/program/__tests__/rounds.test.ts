@@ -2,7 +2,12 @@ import {EXERCISE_LIBRARY} from '../../exercises/library';
 import {doneFields} from '../../ambient/pulsePayload';
 import {setsForWeek} from '../progression';
 import {defaultProgram, prescriptionsFor} from '../repository';
-import {MAX_MOVES_PER_ROUND, TARGET_ROUNDS, groupIntoRounds} from '../rounds';
+import {
+  MAX_MOVES_PER_ROUND,
+  PARTNER_POOL,
+  TARGET_ROUNDS,
+  groupIntoRounds,
+} from '../rounds';
 import {
   CLEARANCE_MS,
   MIN_GAP_MS,
@@ -217,5 +222,47 @@ describe('doneFields', () => {
       trackId: 'push',
       amount: 7,
     });
+  });
+});
+
+describe('smart partners', () => {
+  it('lean toward the element with the least work this week', () => {
+    const rounds = groupIntoRounds(monday, {
+      balance: {fire: 30, earth: 30, air: 12, water: 0, heart: 12},
+    });
+    expect(rounds[0].partner?.element).toBe('water');
+  });
+
+  it('spread across the neglected elements through the day', () => {
+    const rounds = groupIntoRounds(monday, {
+      balance: {fire: 30, earth: 30, air: 0, water: 0, heart: 0},
+    });
+    const tally: Record<string, number> = {air: 0, water: 0, heart: 0};
+    for (const r of rounds) {
+      const element = r.partner!.element;
+      tally[element] = (tally[element] ?? 0) + 1;
+    }
+    expect(Object.keys(tally).sort()).toEqual(['air', 'heart', 'water']);
+    const counts = Object.values(tally);
+    expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+  });
+
+  it('never end a round with an element already in it', () => {
+    const rounds = groupIntoRounds(monday, {
+      balance: {fire: 0, earth: 0, air: 50, water: 50, heart: 50},
+    });
+    for (const r of rounds) {
+      expect(r.moves.map(m => m.element)).not.toContain(r.partner?.element);
+    }
+  });
+
+  it('draw from real drills filed under their own element', () => {
+    for (const [element, options] of Object.entries(PARTNER_POOL)) {
+      for (const option of options) {
+        expect(
+          EXERCISE_LIBRARY.find(e => e.id === option.exerciseId)?.element,
+        ).toBe(element);
+      }
+    }
   });
 });

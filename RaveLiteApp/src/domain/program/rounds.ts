@@ -1,3 +1,4 @@
+import type {ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {TRACKS} from './tracks';
 import type {
@@ -6,6 +7,7 @@ import type {
   SetMove,
   SetPrescription,
   TrackId,
+  TrackPartner,
 } from './types';
 
 /**
@@ -25,6 +27,11 @@ import type {
  *   - Moves run push, row, squat, pull, crunch, leg-ups, hang, plank,
  *     side, so fire and earth alternate; grip-heavy row, pull and hang
  *     are kept in separate rounds when there's room.
+ *
+ * Smart partners: given the week's work per element, each round's partner
+ * comes from the least-worked element not already in the round (the lead
+ * move's own partner when one fits, else the pool), and every partner
+ * placed counts toward the next round's pick, so the day spreads them.
  */
 
 /** Rounds a day aims for. */
@@ -45,6 +52,46 @@ const ROUND_ORDER: readonly TrackId[] = [
   'side',
 ];
 const GRIP: ReadonlySet<TrackId> = new Set<TrackId>(['row', 'pull', 'hang']);
+
+/** Short drills any round can end with, by element, for smart partners. */
+export const PARTNER_POOL: Readonly<
+  Record<ElementId, readonly TrackPartner[]>
+> = {
+  air: [
+    {exerciseId: 'air.physiological-sigh', seconds: 30},
+    {exerciseId: 'air.chin-tuck', seconds: 30},
+    {exerciseId: 'air.doorway-pec-stretch', seconds: 30},
+    {exerciseId: 'air.standing-belly-release', seconds: 30},
+  ],
+  water: [
+    {exerciseId: 'water.side-line-stretch', seconds: 30},
+    {exerciseId: 'water.hamstring-floss', seconds: 30},
+    {exerciseId: 'water.deep-squat-hold', seconds: 30},
+    {exerciseId: 'water.calf-wall-stretch', seconds: 30},
+  ],
+  heart: [
+    {exerciseId: 'heart.pulse-check', seconds: 30},
+    {exerciseId: 'heart.rave-vision', seconds: 30},
+  ],
+  earth: [
+    {exerciseId: 'earth.posterior-pelvic-tilt', seconds: 30},
+    {exerciseId: 'earth.single-leg-balance', seconds: 30},
+    {exerciseId: 'earth.wall-sit', seconds: 30},
+  ],
+  fire: [{exerciseId: 'fire.wall-pushups', seconds: 20}],
+};
+
+/** Tie-break order when elements have had the same work. */
+const BALANCE_ORDER: readonly ElementId[] = [
+  'air',
+  'water',
+  'heart',
+  'earth',
+  'fire',
+];
+
+/** Things done per element, e.g. over the last week. */
+export type ElementBalance = Readonly<Partial<Record<ElementId, number>>>;
 
 export interface Round {
   /** 1-based. */
@@ -69,18 +116,11 @@ function moveFor(p: DayPrescription): SetMove {
   };
 }
 
-/** Partner for a round led by `trackId`, rotating through its options. */
-export function partnerFor(
-  trackId: TrackId,
-  roundIndex: number,
-): Partner | undefined {
-  const options = TRACKS.find(t => t.id === trackId)?.partners ?? [];
-  if (options.length === 0) {
-    return undefined;
-  }
-  const option = options[(roundIndex - 1) % options.length];
-  const drill = EXERCISE_LIBRARY.find(e => e.id === option.exerciseId);
-  return drill
+function toPartner(option: TrackPartner | undefined): Partner | undefined {
+  const drill = option
+    ? EXERCISE_LIBRARY.find(e => e.id === option.exerciseId)
+    : undefined;
+  return drill && option
     ? {
         exerciseId: drill.id,
         element: drill.element,
@@ -90,8 +130,51 @@ export function partnerFor(
     : undefined;
 }
 
+const elementOf = (exerciseId: string): ElementId | undefined =>
+  EXERCISE_LIBRARY.find(e => e.id === exerciseId)?.element;
+
+/**
+ * Partner for a round led by `trackId`. Without `balance` it rotates through
+ * the lead move's own partners. With it, it picks from the least-worked
+ * elements not in the round: the lead's own partner when one fits, else a
+ * drill from the pool.
+ */
+export function partnerFor(
+  trackId: TrackId,
+  roundIndex: number,
+  balance?: ElementBalance,
+  roundElements: readonly ElementId[] = [],
+): Partner | undefined {
+  const track = TRACKS.find(t => t.id === trackId);
+  const own = track?.partners ?? [];
+  const pick = (options: readonly TrackPartner[]) =>
+    toPartner(options[(roundIndex - 1) % options.length]);
+  if (!balance) {
+    return own.length > 0 ? pick(own) : undefined;
+  }
+  const taken = new Set<ElementId>(roundElements);
+  if (track) {
+    taken.add(track.element);
+  }
+  let candidates = BALANCE_ORDER.filter(e => !taken.has(e));
+  if (candidates.length === 0) {
+    candidates = BALANCE_ORDER.filter(e => e !== track?.element);
+  }
+  const work = (e: ElementId) => balance[e] ?? 0;
+  const least = Math.min(...candidates.map(work));
+  const lowest = candidates.filter(e => work(e) === least);
+  const fitting = own.filter(o => {
+    const element = elementOf(o.exerciseId);
+    return element !== undefined && lowest.includes(element);
+  });
+  const options =
+    fitting.length > 0 ? fitting : lowest.flatMap(e => PARTNER_POOL[e]);
+  return options.length > 0 ? pick(options) : undefined;
+}
+
 export function groupIntoRounds(
   prescriptions: readonly DayPrescription[],
+  opts: {balance?: ElementBalance} = {},
 ): Round[] {
   const active = prescriptions.filter(p => p.sets > 0);
   const total = active.reduce((sum, p) => sum + p.sets, 0);
@@ -144,6 +227,10 @@ export function groupIntoRounds(
 
   // Number each track's sets in the order the rounds come.
   const seen = new Map<TrackId, number>();
+  // Partners placed so far count toward the next pick.
+  const running: Partial<Record<ElementId, number>> | undefined = opts.balance
+    ? {...opts.balance}
+    : undefined;
   return slots
     .filter(moves => moves.length > 0)
     .map((moves, i) => {
@@ -154,11 +241,16 @@ export function groupIntoRounds(
           seen.set(m.trackId, setIndex);
           return {...m, setIndex};
         });
-      return {
-        index: i + 1,
-        moves: ordered,
-        partner: partnerFor(ordered[0].trackId, i + 1),
-      };
+      const partner = partnerFor(
+        ordered[0].trackId,
+        i + 1,
+        running,
+        ordered.map(m => m.element),
+      );
+      if (running && partner) {
+        running[partner.element] = (running[partner.element] ?? 0) + 1;
+      }
+      return {index: i + 1, moves: ordered, partner};
     });
 }
 
