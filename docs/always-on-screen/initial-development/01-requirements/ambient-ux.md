@@ -4,11 +4,24 @@ Ground rules for designing a surface that lives in the operator's
 peripheral vision for hours. These principles supersede normal
 mobile-app UX defaults wherever they conflict.
 
+> **Amended 2026-09-14.** The operator asked for the app to feel subtly
+> alive — breathing, responsive to touch — while staying quiet enough to
+> sit beside an IDE all day. P-1 and P-12 now allow one budgeted ambient
+> motion (the *alive layer*); everything else still has to be earned by
+> an event. See `03-architecture/always-on-strategy.md` › Alive layer.
+
 ## P-1 — Quiet is the resting state
 
-The dashboard is silent and dim by default. Any sound or animation
-must be **earned by an event** (scheduled pulse, response confirmation,
-goal-deadline alarm). No looping animations. No idle sound design.
+The dashboard is quiet and dim by default. Sound and strong motion must
+be **earned by an event** (scheduled pulse, response confirmation,
+goal-deadline alarm). No idle sound design.
+
+The single exception is the **alive layer**: a slow breathing glow in
+the element's color, within a strict budget — Whisper 2–5 % opacity
+(default), Glow 4–9 %, or Still (no breathing). It moves in discrete
+steps, adds at most a few percent on touch, and rests completely at
+night, during a manual pause, and when Android's "Remove animations" is
+on.
 
 ## P-2 — One thing at a time
 
@@ -50,6 +63,9 @@ If the operator does not respond to a pulse within its window, the
 pulse logs `ignored` and **does not re-fire**. No second ping, no
 escalating alarms. The next scheduled pulse takes over.
 
+(An OS backup chime is not a second ping: it only sounds when the app
+was killed and the live chime never happened.)
+
 ## P-8 — No streak shame
 
 The dashboard never leads with what was missed. Misses are accessible
@@ -65,10 +81,9 @@ the surface restores cleanly.
 
 ## P-10 — Plug-in awareness
 
-Always-on screen behavior is gated on the device being plugged in.
-On battery, the page falls back to standard screen-timeout to protect
-battery health. The page surfaces this distinction in a small,
-non-shaming corner badge.
+The screen is held on all day, so the device is expected to be on its
+charger (the Stay Alive checklist asks the operator to confirm it).
+Automatic plug detection and a battery fallback are not built yet.
 
 ## P-11 — Element coherence
 
@@ -79,4 +94,7 @@ map remains the single source of truth.
 ## P-12 — Honest motion
 
 Motion communicates time and state. A 60-second action shows a 60-second
-ring; a 45-second action shows a 45-second ring. No "for show" animations.
+ring; a 45-second action shows a 45-second ring. The alive layer's
+breathing (P-1) is the only ambient motion and must stay inside its
+budget; while a pulse is active it quickens to 0.4 Hz because that *is*
+state. Nothing else animates just for show.

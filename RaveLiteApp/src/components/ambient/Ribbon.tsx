@@ -13,13 +13,15 @@
  *     (sealed = filled glyph, skipped = strike, ignored = ghost,
  *     absorbed = dashed, future = outline, now-active = filled hero).
  */
-import React, {useState} from 'react';
-import {StyleSheet, Text, View, Pressable} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import {Animated, StyleSheet, Text, View, Pressable} from 'react-native';
 
 import {ELEMENTS, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import type {RibbonRow, RibbonRowKind} from '../../domain/ambient/ribbon';
 import {formatSetAmount} from '../../domain/program/progress';
+import {useAliveBreath} from '../../hooks/useAlive';
+import {steppedBreath} from '../../lib/aliveMath';
 
 /** Visible window: how many past + future rows we render. */
 const VISIBLE_PAST = 3;
@@ -304,8 +306,21 @@ function ActiveRow({row, now, onSeal, onSkip, onSnooze}: ActiveRowProps) {
   const remainingMs = Math.max(0, active.expiresAt - now);
   const meterPct = Math.max(0, Math.min(1, remainingMs / totalMs));
   const step = rx?.unit === 'seconds' ? 5 : 1;
+  // The card's accent breathes with the alive clock — at 0.4 Hz while a
+  // pulse is active (FR-6.5). Opacity only; a steady border when motion
+  // is resting.
+  const {phase, budget} = useAliveBreath();
+  const accentOpacity = useMemo(
+    () =>
+      budget.breathMax > 0 ? phase.interpolate(steppedBreath(0.35, 1, 6)) : 1,
+    [phase, budget],
+  );
   return (
-    <View style={[styles.row, styles.rowActive, {borderColor: tint}]}>
+    <View style={[styles.row, styles.rowActive, {borderColor: dim}]}>
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.activeAccent, {borderColor: tint, opacity: accentOpacity}]}
+      />
       <View style={[styles.timeCol, styles.timeColActive]}>
         <Text style={[styles.timeText, styles.timeTextActive]}>{formatHHMM(row.at)}</Text>
         <Text style={[styles.glyphHero, {color: tint}]}>{el.glyph}</Text>
@@ -466,6 +481,11 @@ const styles = StyleSheet.create({
     backgroundColor: palette.surface,
     paddingVertical: spacing.sm,
     marginHorizontal: spacing.sm,
+  },
+  activeAccent: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 1,
+    borderRadius: radius.md,
   },
   rowIdle: {
     backgroundColor: palette.surface,

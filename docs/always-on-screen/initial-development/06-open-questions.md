@@ -122,6 +122,11 @@ small-N to keep the planning wave decisive.
 - Recommendation: respect DND by default; add a settings toggle
   "Pierce DND when Always-On is foreground" for operators who want
   the harder commitment.
+- **Status**: `resolved` (2026-09-14) — the operator chose the harder
+  commitment by default: cues play on the alarm audio stream and cut
+  through silent mode and DND during active hours. Heart › Settings ›
+  Chimes has a "Respect Do Not Disturb" toggle (off by default) that
+  hands DND back to the OS.
 
 ## OQ-12 — Scope creep guard
 

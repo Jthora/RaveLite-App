@@ -59,8 +59,9 @@ the desk and instantly read:
 - **Quiet by default.** The dashboard does not strobe. It pulses on
   cue and rests in between.
 - Sounds are short, distinct per element, and tunable in volume.
-- No animation that competes with the operator's IDE in peripheral
-  vision when there's nothing to do.
+- Nothing competes with the operator's IDE in peripheral vision when
+  there's nothing to do — at most a barely-there breathing glow (the
+  alive layer's Whisper budget, 2–5 % opacity) that rests at night.
 
 ## North-star scenario
 

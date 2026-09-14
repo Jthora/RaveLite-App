@@ -1,7 +1,9 @@
-import React from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import React, {useMemo} from 'react';
+import {Animated, Pressable, StyleSheet, Text, View} from 'react-native';
 import {ELEMENTS, ELEMENT_ORDER, type ElementId} from '../theme/elements';
 import {palette, spacing} from '../theme';
+import {useAliveBreath} from '../hooks/useAlive';
+import {steppedBreath} from '../lib/aliveMath';
 
 export type ElementRailAxis = 'horizontal' | 'vertical';
 
@@ -16,17 +18,36 @@ interface Props {
   isTablet: boolean;
 }
 
+/** Resting opacity of the focused element's bloom. */
+const BLOOM_OPACITY = 0.32;
+/** Visible opacity steps per breath for the bloom. */
+const BLOOM_LEVELS = 6;
+
 /**
  * The 5-element nav rail. Portable to bottom (portrait) or right side
  * (landscape) by flipping `axis`. Visual language matches the prior
  * BottomTab implementation: bloom + 2px indicator + glyph + label.
  *
  * Heart keeps its 1.3× glyph privilege — it's the conductor.
+ *
+ * The focused element's bloom breathes with the shared alive clock
+ * (opacity only, stepped); it holds steady when motion is resting.
  */
 export function ElementRail({active, onChange, axis, isTablet}: Props) {
   const isVertical = axis === 'vertical';
   const glyphSize = isTablet ? 30 : 22;
   const labelSize = isTablet ? 13 : 11;
+
+  const {phase, budget} = useAliveBreath();
+  const bloomOpacity = useMemo(() => {
+    if (budget.breathMax <= 0) {
+      return BLOOM_OPACITY;
+    }
+    const swing = budget.breathMax * 1.5;
+    return phase.interpolate(
+      steppedBreath(BLOOM_OPACITY - swing, BLOOM_OPACITY + swing, BLOOM_LEVELS),
+    );
+  }, [phase, budget]);
 
   return (
     <View
@@ -54,10 +75,10 @@ export function ElementRail({active, onChange, axis, isTablet}: Props) {
             <View style={styles.iconWrap}>
               {focused && (
                 <>
-                  <View
+                  <Animated.View
                     style={[
                       isVertical ? styles.vBloom : styles.hBloom,
-                      {backgroundColor: el.color},
+                      {backgroundColor: el.color, opacity: bloomOpacity},
                     ]}
                   />
                   <View
@@ -148,13 +169,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   // ---- Indicators -------------------------------------------------------
+  // Bloom opacity comes from the alive clock (BLOOM_OPACITY at rest).
   hBloom: {
     position: 'absolute',
     top: -16,
     width: 44,
     height: 10,
     borderRadius: 5,
-    opacity: 0.32,
   },
   hBar: {
     position: 'absolute',
@@ -171,7 +192,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 44,
     borderRadius: 5,
-    opacity: 0.32,
   },
   vBar: {
     position: 'absolute',

@@ -97,22 +97,42 @@ What works today:
   chimes alive whichever screen is open, or with the app in the background.
 - Permission (Android 13+ `POST_NOTIFICATIONS`) is requested in context
   on first Heart-screen visit, not at cold start.
+- **Cues that always sound** — a small native module (`RaveLiteDevice`)
+  plays the cue on the alarm audio stream, so chimes cut through silent
+  mode and Do Not Disturb during active hours. The notification then posts
+  on a quiet channel; if the cue can't play, it uses the sounding channel
+  instead. Heart › Settings › Chimes: volumes, per-element test, and a
+  "Respect Do Not Disturb" toggle.
+- **Backup chimes** — the OS also holds an exact-alarm notification ~90 s
+  after every upcoming chime. The live app cancels it when the chime comes
+  due, so you hear one chime; if the app has been killed, the backup
+  still arrives with the same buttons.
+- **Stay alive checklist** — Heart › Settings lists what keeps chimes
+  firing on this phone (notifications, exact alarms, battery, HyperOS
+  Autostart, alarm volume, locked in recents, charger) with a button to
+  fix each.
 
-Not yet: OS-scheduled triggers for when the process is killed outright,
-and cues that sound through the alarm stream regardless of notification
-volume or Do Not Disturb.
+Not yet verified on a device.
 
 OEM caveat: stock Android (Galaxy Tab A7) is friendly. MIUI/HyperOS on
-the Redmi A3 will require Autostart permission to be granted manually
-in system settings; battery-optimization-exemption alone is not
-sufficient. Phase C will add a guided flow.
+the Redmi A3 needs Autostart turned on manually in system settings;
+battery-optimization exemption alone is not sufficient. The Stay Alive
+checklist links to both.
 
-## Keep-screen-on
+## Screen, night mode and the alive layer
 
 While RaveLite is foregrounded the screen stays on (`FLAG_KEEP_SCREEN_ON`
-is set in [`MainActivity.kt`](RaveLiteApp/android/app/src/main/java/com/raveliteapp/MainActivity.kt)).
-Backgrounding the app restores normal sleep behavior, so battery cost
-is bounded to active training sessions.
+is set in [`MainActivity.kt`](RaveLiteApp/android/app/src/main/java/com/raveliteapp/MainActivity.kt)),
+so keep the phone on its charger. Outside active hours the screen goes to
+night mode instead of sleeping: backlight near minimum, a dark veil, no
+motion — a tap wakes it for two minutes.
+
+The UI breathes: a faint element-colored glow on one shared, native-driven
+clock (`src/lib/aliveClock.ts`), a small swell on touch, and a soft color
+wash when a chime fires. Heart › Settings › Alive picks Whisper (default),
+Glow or Still; night, a pause, or Android's "Remove animations" make it
+rest. The clock's `aliveDriver` is the plug-in point for the beat
+recognizer.
 
 ## Contributing
 
