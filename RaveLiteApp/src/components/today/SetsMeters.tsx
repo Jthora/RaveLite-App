@@ -57,19 +57,22 @@ export function SetsMeters({sets, onPress}: Props) {
                     <Text style={styles.meterName} numberOfLines={1}>
                       {tr.name}
                     </Text>
+                  </View>
+                  {/* The count sits beside the bar so the name keeps its room. */}
+                  <View style={styles.barRow}>
+                    <View style={styles.bar}>
+                      <View
+                        style={[
+                          styles.fill,
+                          {width: `${tr.fill * 100}%`, backgroundColor: color},
+                        ]}
+                      />
+                    </View>
                     <Text
                       style={[styles.meterCount, tr.fill >= 1 && {color}]}
                       numberOfLines={1}>
                       {tr.done}/{tr.total}
                     </Text>
-                  </View>
-                  <View style={styles.bar}>
-                    <View
-                      style={[
-                        styles.fill,
-                        {width: `${tr.fill * 100}%`, backgroundColor: color},
-                      ]}
-                    />
                   </View>
                 </View>
               );
@@ -136,9 +139,15 @@ const styles = StyleSheet.create({
     color: palette.textDim,
     fontVariant: ['tabular-nums'],
   },
+  barRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 3,
+  },
   bar: {
+    flex: 1,
     height: 3,
-    marginTop: 4,
     borderRadius: 2,
     overflow: 'hidden',
     backgroundColor: palette.border,
