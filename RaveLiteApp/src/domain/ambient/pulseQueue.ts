@@ -1,6 +1,11 @@
 import {ElementId} from '../../theme/elements';
-import {JournalEntry, SuppressionReason} from '../journal/types';
+import {
+  DistributiveOmit,
+  JournalEntry,
+  SuppressionReason,
+} from '../journal/types';
 import {Pulse, PulseOutcome} from './types';
+import type {SetPrescription} from '../program/types';
 
 /**
  * Always-On pulse queue — pure reducer.
@@ -41,6 +46,7 @@ export interface PulseSpec {
   expiresAt?: number;
   windowId?: string;
   exerciseId?: string;
+  prescription?: SetPrescription;
 }
 
 /**
@@ -59,7 +65,7 @@ export const ALWAYS_PAGE: PagingPolicy = () => null;
  * A journal entry the caller should commit. Mirrors `JournalEntry`
  * minus the storage-side fields the journal layer fills in.
  */
-export type PendingJournalEntry = Omit<JournalEntry, 'id'>;
+export type PendingJournalEntry = DistributiveOmit<JournalEntry, 'id'>;
 
 export interface QueueState {
   pulses: Pulse[];
@@ -105,6 +111,7 @@ export function enqueue(state: QueueState, spec: PulseSpec): QueueResult {
     element: spec.element,
     windowId: spec.windowId,
     exerciseId: spec.exerciseId,
+    prescription: spec.prescription,
   };
   return {state: withPulses([...state.pulses, pulse]), writes: []};
 }
@@ -181,6 +188,7 @@ export function tick(
       element: p.element,
       windowId: p.windowId,
       exerciseId: p.exerciseId,
+      trackId: p.prescription?.trackId,
     });
   }
 

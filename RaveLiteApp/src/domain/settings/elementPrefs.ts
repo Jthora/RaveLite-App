@@ -43,14 +43,14 @@ export interface ElementPrefs {
   focusLocked: boolean;
 }
 
-/** First-run defaults. The operator's three active corrections are
- *  pre-selected for Air/Earth (posture-relevant), but Fire/Water/Heart
- *  start with empty filter — those elements are less correction-driven. */
+/** First-run defaults. Air pre-selects the posture corrections plus
+ *  breath work. Earth now carries core and leg strength as well as
+ *  alignment, so it starts unfiltered like Fire/Water/Heart — otherwise
+ *  crunches, squats and hangs would hide behind the corrections filter. */
 function defaultPrefs(element: ElementId): ElementPrefs {
-  const correctionDefaults: Target[] = ['UCS', 'Hourglass', 'APT'];
+  const airDefaults: Target[] = ['UCS', 'Hourglass', 'Breath'];
   return {
-    focusTargets:
-      element === 'air' || element === 'earth' ? correctionDefaults : [],
+    focusTargets: element === 'air' ? airDefaults : [],
     dailyTarget: element === 'heart' ? 2 : 3,
     haptic: 'high',
     preset: 'standard',

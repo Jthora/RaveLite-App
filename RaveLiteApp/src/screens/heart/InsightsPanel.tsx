@@ -12,7 +12,7 @@
  * empty-state instead of a row of flat bars.
  */
 import React, {useMemo} from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {MiniSparkline} from '../../components/MiniSparkline';
 import {
@@ -31,7 +31,11 @@ const TOTAL_DAILY_TARGET = 5;
 /** Daily target for per-element rows (one signed pulse). */
 const ELEMENT_DAILY_TARGET = 1;
 
-export function InsightsPanel() {
+export function InsightsPanel({
+  onElementChange,
+}: {
+  onElementChange?: (next: ElementId) => void;
+} = {}) {
   const data = useMemo(() => {
     return {
       weekTotal: completionsLastNDays(WINDOW_DAYS),
@@ -114,10 +118,22 @@ export function InsightsPanel() {
               const id = ELEMENTS[el];
               const total = data.byElementTotal[el];
               const dim = total === 0;
+              const tappable = el !== 'heart' && !!onElementChange;
+              const Row: any = tappable ? Pressable : View;
               return (
-                <View
+                <Row
                   key={el}
-                  style={[styles.elRow, dim && styles.elRowDim]}>
+                  onPress={
+                    tappable ? () => onElementChange!(el) : undefined
+                  }
+                  android_ripple={
+                    tappable ? {color: id.accent + '22'} : undefined
+                  }
+                  style={({pressed}: {pressed?: boolean} = {}) => [
+                    styles.elRow,
+                    dim && styles.elRowDim,
+                    pressed && styles.elRowPressed,
+                  ]}>
                   <View style={styles.elHead}>
                     <Text style={[styles.elGlyph, {color: id.color}]}>
                       {id.glyph}
@@ -135,6 +151,11 @@ export function InsightsPanel() {
                       ]}>
                       {total}
                     </Text>
+                    {tappable && (
+                      <Text style={[styles.elArrow, {color: id.accent}]}>
+                        ›
+                      </Text>
+                    )}
                   </View>
                   <MiniSparkline
                     data={data.byElementSeries[el]}
@@ -142,7 +163,7 @@ export function InsightsPanel() {
                     color={id.color}
                     height={36}
                   />
-                </View>
+                </Row>
               );
             })}
           </View>
@@ -270,6 +291,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   elRowDim: {opacity: 0.55},
+  elRowPressed: {opacity: 0.7},
   elHead: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -298,5 +320,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
+  },
+  elArrow: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginLeft: spacing.sm,
   },
 });

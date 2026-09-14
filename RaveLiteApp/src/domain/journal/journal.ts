@@ -1,6 +1,11 @@
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
-import {JournalEntry} from './types';
+import {DistributiveOmit, JournalEntry} from './types';
+
+/** An entry as callers write it — the journal fills in `id` (and `at` if omitted). */
+export type NewJournalEntry = DistributiveOmit<JournalEntry, 'id' | 'at'> & {
+  at?: number;
+};
 
 /** "YYYY-MM-DD" in local time. Used as the day-bucket key. */
 export function dayKey(d: Date = new Date()): string {
@@ -17,7 +22,7 @@ function newEntryId(at: number): string {
 }
 
 /** Append a fact. The only write API to the journal. */
-export function append(entry: Omit<JournalEntry, 'id' | 'at'> & {at?: number}): JournalEntry {
+export function append(entry: NewJournalEntry): JournalEntry {
   const at = entry.at ?? Date.now();
   const id = newEntryId(at);
   const full = {...entry, id, at} as JournalEntry;

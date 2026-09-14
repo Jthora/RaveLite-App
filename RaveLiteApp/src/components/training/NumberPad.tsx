@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {palette, radius, spacing, type as typeTokens} from '../../theme';
 
@@ -53,8 +53,28 @@ export interface NumberPadProps {
 export function NumberPad({mode, value, onChange, accent, max, compact}: NumberPadProps) {
   const accentColor = accent ?? palette.text;
 
-  const digits = encodeToDigits(mode, value);
+  // Internal digit-string state. We can't derive this from `value` each render
+  // because mmss decode clamps seconds to 59, so typing "1813" would round-trip
+  // through 119s and reappear as digits "159" — losing the 8 the user typed.
+  // Sync from prop only when an external change (not our own onChange) lands.
+  const [digits, setDigits] = useState(() => encodeToDigits(mode, value));
+  const lastEmitted = useRef<number>(value);
+  useEffect(() => {
+    if (value !== lastEmitted.current) {
+      setDigits(encodeToDigits(mode, value));
+      lastEmitted.current = value;
+    }
+  }, [mode, value]);
+
   const display = formatDigits(mode, digits);
+
+  const emit = (next: string) => {
+    const numeric = decodeFromDigits(mode, next);
+    if (max !== undefined && numeric > max) return;
+    setDigits(next);
+    lastEmitted.current = numeric;
+    onChange(numeric);
+  };
 
   const push = (d: string) => {
     let next = digits + d;
@@ -71,17 +91,14 @@ export function NumberPad({mode, value, onChange, accent, max, compact}: NumberP
     if (mode === 'integer') {
       next = next.slice(-3); // up to 3 digits → 999
     }
-    const numeric = decodeFromDigits(mode, next);
-    if (max !== undefined && numeric > max) return;
-    onChange(numeric);
+    emit(next);
   };
 
   const back = () => {
-    const next = digits.slice(0, -1);
-    onChange(decodeFromDigits(mode, next));
+    emit(digits.slice(0, -1));
   };
 
-  const clear = () => onChange(0);
+  const clear = () => emit('');
 
   return (
     <View style={styles.wrap}>

@@ -37,13 +37,13 @@ import {entriesForDay, append} from '../../domain/journal/journal';
 import {adherenceForDay} from '../../domain/ambient/stats';
 import {getActiveHours, pagingAllowedAt} from '../../domain/ambient/activeHours';
 import {buildRibbonRows, type RibbonRow} from '../../domain/ambient/ribbon';
-import {
-  startAmbientForegroundService,
-  stopAmbientForegroundService,
-} from '../../domain/ambient/foregroundService';
+import {syncAmbientService} from '../../domain/ambient/ambientLifecycle';
+import {reconcileSetsNow, setsToday} from '../../domain/ambient/setScheduler';
+import {formatSetAmount} from '../../domain/program/progress';
 import {
   getActivePulseSummary,
   resolveActive as runtimeResolve,
+  sealActive as runtimeSeal,
   snoozeActive as runtimeSnooze,
   subscribe as subscribePulseRuntime,
 } from '../../domain/ambient/pulseRuntime';
@@ -62,6 +62,7 @@ const WELCOME_BACK_THRESHOLD_MS = 5 * 60_000;
 export function AlwaysOnPanel() {
   const {orientation, isTablet} = useOrientation();
   const showRail = orientation === 'landscape' && isTablet;
+  const phoneLandscape = orientation === 'landscape' && !isTablet;
   const [now, setNow] = useState(() => Date.now());
   const [tick, setTick] = useState(0);
 
@@ -117,6 +118,13 @@ export function AlwaysOnPanel() {
       plan,
       journal,
       activePulse: getActivePulseSummary(),
+      extraFutures: setsToday(now).upcoming.map(f => ({
+        id: f.id,
+        at: f.ts,
+        element: f.element,
+        label: f.prescription.label,
+        detail: `${formatSetAmount(f.prescription.amount, f.prescription.unit)} · set ${f.prescription.setIndex}/${f.prescription.sets}`,
+      })),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deriveBucket]);
@@ -150,28 +158,6 @@ export function AlwaysOnPanel() {
     return undefined;
   }, [wakeAllowed]);
 
-  // Slice 5 — ambient FGS lifecycle. Bound to the same gate as the
-  // wake-lock so the persistent notification + service only run while
-  // the surface is allowed to page. Errors are swallowed because a
-  // failed start (e.g. user revoked POST_NOTIFICATIONS) must not break
-  // the panel itself; the ribbon remains usable in foreground.
-  useEffect(() => {
-    if (wakeAllowed) {
-      startAmbientForegroundService().catch(err =>
-        // eslint-disable-next-line no-console
-        console.warn('[AlwaysOnPanel] FGS start failed', err),
-      );
-      return () => {
-        stopAmbientForegroundService().catch(err =>
-          // eslint-disable-next-line no-console
-          console.warn('[AlwaysOnPanel] FGS stop failed', err),
-        );
-      };
-    }
-    stopAmbientForegroundService().catch(() => {});
-    return undefined;
-  }, [wakeAllowed]);
-
   const adherence = useMemo(() => {
     const a = adherenceForDay(new Date(now));
     return {sealed: a.completed, scheduled: a.scheduled};
@@ -183,24 +169,14 @@ export function AlwaysOnPanel() {
   // it up and the row visibly updates kind. Slice 5 will replace the
   // RetroLog handler with a real "log past completion" sheet.
 
-  const onSeal = useCallback((row: RibbonRow) => {
+  const onSeal = useCallback((row: RibbonRow, amount?: number) => {
     if (!row.active) {
       return;
     }
-    const at = Date.now();
-    // Resolve through the runtime first — drops the active pulse and
-    // emits no journal write for `completed`. Then post the
-    // CompletionEntry ourselves so adherence + history reflect it.
-    runtimeResolve('completed', at);
-    append({
-      kind: 'completion',
-      exerciseId: row.active.drillId,
-      element: row.element,
-      source: 'always-on',
-      pulseId: row.id,
-      respondedAfterMs: at - row.at,
-      durationSec: row.active.durationSec,
-    });
+    // The runtime resolves the pulse, writes the CompletionEntry (with
+    // track + amount for Daily Sets) and dismisses the notification.
+    runtimeSeal({amount});
+    reconcileSetsNow();
     setTick(k => k + DERIVE_EVERY_TICKS);
   }, []);
 
@@ -282,6 +258,7 @@ export function AlwaysOnPanel() {
       const until = computePauseUntil(key, Date.now());
       store.set(KEYS.manualPauseUntil, String(until));
     }
+    syncAmbientService();
     setTick(k => k + DERIVE_EVERY_TICKS);
   }, []);
 
@@ -355,28 +332,60 @@ export function AlwaysOnPanel() {
           onDismiss={() => setWelcomeBack(null)}
         />
       ) : null}
-      {rows.length === 0 ? (
-        <View style={styles.emptyWrap}>
-          <Text style={styles.emptyText}>no cadence</Text>
+      {phoneLandscape ? (
+        <View style={styles.phoneLandRow}>
+          <View style={styles.phoneLandRibbon}>
+            {rows.length === 0 ? (
+              <View style={styles.emptyWrap}>
+                <Text style={styles.emptyText}>no cadence</Text>
+              </View>
+            ) : (
+              <Ribbon
+                rows={rows}
+                now={now}
+                onSeal={onSeal}
+                onSkip={onSkip}
+                onSnooze={onSnooze}
+                onRetroLog={onRetroLog}
+              />
+            )}
+          </View>
+          <RibbonControls
+            vertical
+            pausedUntil={manualPauseUntil}
+            now={now}
+            onPause={onPause}
+            onPlusFive={onPlusFive}
+            onSkipNext={onSkipNext}
+            hasNext={!!nextFuture}
+          />
         </View>
       ) : (
-        <Ribbon
-          rows={rows}
-          now={now}
-          onSeal={onSeal}
-          onSkip={onSkip}
-          onSnooze={onSnooze}
-          onRetroLog={onRetroLog}
-        />
+        <>
+          {rows.length === 0 ? (
+            <View style={styles.emptyWrap}>
+              <Text style={styles.emptyText}>no cadence</Text>
+            </View>
+          ) : (
+            <Ribbon
+              rows={rows}
+              now={now}
+              onSeal={onSeal}
+              onSkip={onSkip}
+              onSnooze={onSnooze}
+              onRetroLog={onRetroLog}
+            />
+          )}
+          <RibbonControls
+            pausedUntil={manualPauseUntil}
+            now={now}
+            onPause={onPause}
+            onPlusFive={onPlusFive}
+            onSkipNext={onSkipNext}
+            hasNext={!!nextFuture}
+          />
+        </>
       )}
-      <RibbonControls
-        pausedUntil={manualPauseUntil}
-        now={now}
-        onPause={onPause}
-        onPlusFive={onPlusFive}
-        onSkipNext={onSkipNext}
-        hasNext={!!nextFuture}
-      />
       </View>
       {showRail ? <TrainingLogRail /> : null}
     </View>
@@ -417,5 +426,12 @@ const styles = StyleSheet.create({
     ...t.body,
     color: palette.textDim,
     letterSpacing: 1.4,
+  },
+  phoneLandRow: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  phoneLandRibbon: {
+    flex: 1,
   },
 });

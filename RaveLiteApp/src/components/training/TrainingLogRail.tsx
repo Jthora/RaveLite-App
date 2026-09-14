@@ -30,6 +30,7 @@ import {
 } from '../../domain/training/repository';
 import {MetricKind, TrainingLogEntry} from '../../domain/training/types';
 import {TrainingLogSheet} from './TrainingLogSheet';
+import {MS_PER_DAY} from '../../lib/constants';
 
 const PANEL_WIDTH = 280;
 
@@ -134,7 +135,7 @@ function buildHeadline(
   entries: TrainingLogEntry[],
   metrics: MetricKind[],
 ): Headline | undefined {
-  const THIRTY = 30 * 86_400_000;
+  const THIRTY = 30 * MS_PER_DAY;
   const cutoff = Date.now() - THIRTY;
   let best: ReturnType<typeof gradeForRun> | undefined;
   let bestKind: MetricKind | undefined;

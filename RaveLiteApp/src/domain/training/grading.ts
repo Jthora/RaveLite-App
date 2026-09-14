@@ -1,4 +1,5 @@
 import {MetricKind, TrainingLogEntry} from './types';
+import {METERS_PER_MILE as MI} from '../../lib/constants';
 
 /** Operator's whiteboard 3-mile grade table. See docs/02-fitness-standards/grading-table-3mi.md. */
 export type Grade =
@@ -43,8 +44,6 @@ export function gradeFor3Mi(seconds: number): Grade {
   }
   return 'F';
 }
-
-const MI = 1609.344;
 
 /**
  * Equivalent 3-mile grade for a run of any distance ≥ 1 mile.
@@ -126,9 +125,10 @@ export function localDayKey(at: number): string {
 }
 
 /**
- * Best (lowest time / highest reps) entry for a given kind in a window.
- * Higher is better for `integer`, lower is better for `mmss` /
- * `distance-time`. `decimal` falls back to highest.
+ * Best entry for a given kind in a window. Lower is better only for
+ * runs (`category: 'run'` or `distance-time` input) — a faster time.
+ * Everything else is higher-is-better, including `mmss` holds: a longer
+ * plank, dead hang or no-drop flow is the better read.
  */
 export function bestEntry(
   entries: TrainingLogEntry[],
@@ -143,7 +143,7 @@ export function bestEntry(
   );
   if (candidates.length === 0) return undefined;
   const lowerIsBetter =
-    kind.inputMode === 'mmss' || kind.inputMode === 'distance-time';
+    kind.category === 'run' || kind.inputMode === 'distance-time';
   return candidates.reduce((best, e) => {
     if (!best) return e;
     if (lowerIsBetter) return e.value < best.value ? e : best;

@@ -19,6 +19,7 @@ import {ElementId} from '../../theme/elements';
  */
 
 import {SuppressionReason} from '../journal/types';
+import type {SetPrescription} from '../program/types';
 
 export type PulseState =
   | 'queued'
@@ -50,6 +51,8 @@ export interface Pulse {
   /** Plan window that scheduled the pulse, when known. */
   windowId?: string;
   exerciseId?: string;
+  /** Daily Sets: exactly what this chime asks for (set n of m, amount). */
+  prescription?: SetPrescription;
   /** Set when state transitions through `snoozed`. */
   snoozedFrom?: number;
   /** Populated once the pulse leaves `active`. */

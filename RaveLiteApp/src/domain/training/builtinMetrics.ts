@@ -1,18 +1,22 @@
 import {MetricKind} from './types';
+import {METERS_PER_MILE as MI} from '../../lib/constants';
 
 /**
  * Built-in metric catalog. The operator can archive items they don't
  * use and add custom kinds on top. Ids are stable so old entries keep
- * resolving across versions.
+ * resolving across versions — relabel freely, never re-id.
  *
  * Tied to the operator's whiteboard (B+ @ 21:00 for 3 mi) and the
  * USMC "Perfect" reference (3 mi ≤ 18 min, 100 crunches/2 min, 20
  * pullups, 3 min plank stretch goal).
+ *
+ * Kit-bound: bodyweight, mat, backyard, porch-edge hang, bricks. No
+ * pool, no weights. Each metric sits under the same element as the
+ * drill it measures (see `exercises/library.ts`).
  */
-const MI = 1609.344;
 
 export const BUILTIN_METRICS: MetricKind[] = [
-  // ─── Cardio ──────────────────────────────────────────────────────
+  // ─── FIRE — runs, pushing, pulling, conditioning ─────────────────
   {
     id: 'builtin.run-3mi',
     label: '3-Mile Run',
@@ -21,6 +25,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     defaultDistanceMeters: Math.round(3 * MI),
     builtIn: true,
+    element: 'fire',
   },
   {
     id: 'builtin.run-2mi',
@@ -30,6 +35,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     defaultDistanceMeters: Math.round(2 * MI),
     builtIn: true,
+    element: 'fire',
   },
   {
     id: 'builtin.run-1.5mi',
@@ -39,6 +45,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     defaultDistanceMeters: Math.round(1.5 * MI),
     builtIn: true,
+    element: 'fire',
   },
   {
     id: 'builtin.run-custom',
@@ -47,19 +54,8 @@ export const BUILTIN_METRICS: MetricKind[] = [
     unit: 'seconds',
     inputMode: 'distance-time',
     builtIn: true,
+    element: 'fire',
   },
-
-  // ─── Holds ───────────────────────────────────────────────────────
-  {
-    id: 'builtin.plank',
-    label: 'Plank — max hold',
-    category: 'hold',
-    unit: 'seconds',
-    inputMode: 'mmss',
-    builtIn: true,
-  },
-
-  // ─── Reps ────────────────────────────────────────────────────────
   {
     id: 'builtin.pushups-amrap',
     label: 'Pushups — max set',
@@ -67,6 +63,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     unit: 'reps',
     inputMode: 'integer',
     builtIn: true,
+    element: 'fire',
   },
   {
     id: 'builtin.pushups-2min',
@@ -75,15 +72,84 @@ export const BUILTIN_METRICS: MetricKind[] = [
     unit: 'reps',
     inputMode: 'integer',
     builtIn: true,
+    element: 'fire',
   },
   {
-    id: 'builtin.pullups-amrap',
-    label: 'Pullups — max set',
+    id: 'builtin.situps-2min',
+    label: 'Sit-ups — 2 min',
     category: 'reps',
     unit: 'reps',
     inputMode: 'integer',
     builtIn: true,
+    element: 'fire',
   },
+  {
+    id: 'builtin.pullups-amrap',
+    label: 'Porch pull-ups — max set',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'fire',
+    notes: 'From a dead hang on the deck edge. Clean reps only.',
+  },
+  {
+    id: 'builtin.burpees-2min',
+    label: 'Burpees — 2 min',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'fire',
+    notes: 'Step-back burpees count. Smooth reps over sloppy speed.',
+  },
+
+  // ─── AIR — breath, cadence, lightness ────────────────────────────
+  {
+    id: 'builtin.breath-hold',
+    label: 'Breath hold — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'air',
+    notes: 'Inhale, then hold. Time to first contraction is the read.',
+  },
+  {
+    id: 'builtin.exhale-hold',
+    label: 'Exhale hold — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'air',
+    notes: 'Full exhale, then hold. CO2 tolerance read.',
+  },
+  {
+    id: 'builtin.box-breath-2min',
+    label: 'Box breaths — 2 min',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'air',
+    notes: 'Count completed 4-4-4-4 cycles in 2 min.',
+  },
+  {
+    id: 'builtin.skipping-2min',
+    label: 'Shadow-rope skips — 2 min',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'air',
+    notes: 'No rope needed. One hop per turn of the imaginary rope.',
+  },
+
+  // ─── EARTH — core, legs, holds, hangs, brick carries ─────────────
+  // Crunches, leg-ups and plank moved here from Fire so they sit with
+  // the core drills. Legacy entries follow the kind, so history moves
+  // with them.
   {
     id: 'builtin.crunches-2min',
     label: 'Crunches — 2 min',
@@ -91,6 +157,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     unit: 'reps',
     inputMode: 'integer',
     builtIn: true,
+    element: 'earth',
   },
   {
     id: 'builtin.leg-hipup',
@@ -99,8 +166,146 @@ export const BUILTIN_METRICS: MetricKind[] = [
     unit: 'reps',
     inputMode: 'integer',
     builtIn: true,
+    element: 'earth',
     notes:
       'Back-safe core: legs straight, lift to vertical, then push hips up. Lower back stays glued to floor.',
+  },
+  {
+    id: 'builtin.side-ups-amrap',
+    label: 'Side-ups — max set (weaker side)',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'earth',
+    notes: 'Do both sides; log the lower count.',
+  },
+  {
+    id: 'builtin.squats-amrap',
+    label: 'Squats — max set',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'earth',
+  },
+  {
+    id: 'builtin.plank',
+    label: 'Plank — max hold',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'earth',
+  },
+  {
+    id: 'builtin.side-plank',
+    label: 'Side plank — max hold (weaker side)',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'earth',
+  },
+  {
+    id: 'builtin.deadhang',
+    label: 'Porch dead hang — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'earth',
+    notes:
+      'Passive hang from the deck edge, shoulders relaxed. Test the hang point first.',
+  },
+  {
+    id: 'builtin.wall-sit',
+    label: 'Wall sit — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'earth',
+  },
+  {
+    id: 'builtin.farmer-carry',
+    label: 'Brick farmer walk — distance',
+    category: 'custom',
+    unit: 'meters',
+    inputMode: 'decimal',
+    builtIn: true,
+    element: 'earth',
+    notes: 'One or two bricks per hand. Meters walked before set-down.',
+  },
+  {
+    id: 'builtin.weighted-carry-time',
+    label: 'Brick carry — duration',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'earth',
+  },
+  {
+    id: 'builtin.balance-hold',
+    label: 'Single-leg balance — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'earth',
+    notes: 'Eyes open, arms folded, single leg.',
+  },
+
+  // ─── WATER — flow, fascia, joint glide ───────────────────────────
+  {
+    id: 'builtin.flow-no-drop',
+    label: 'Staff flow — no-drop time',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'water',
+    notes: 'Continuous flow on the beat until the first drop.',
+  },
+  {
+    id: 'builtin.flow-hold',
+    label: 'Fascia hold — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'water',
+    notes: 'Single deep mobility position; time to involuntary tension.',
+  },
+  {
+    id: 'builtin.deep-squat-hold',
+    label: 'Deep squat hold — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'water',
+    notes: 'Heels down, chest up. A brick under the heels is fine to start.',
+  },
+  {
+    id: 'builtin.shoulder-cars',
+    label: 'Shoulder CARs — reps',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'water',
+    notes: 'Controlled articular rotations, slow, full range.',
+  },
+  {
+    id: 'builtin.hip-cars',
+    label: 'Hip CARs — reps',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'water',
   },
 ];
 

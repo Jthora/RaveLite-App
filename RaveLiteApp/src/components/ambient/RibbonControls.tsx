@@ -19,6 +19,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import {Pause, SkipForward} from 'lucide-react-native';
 
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -34,6 +35,12 @@ export interface RibbonControlsProps {
   onSkipNext: () => void;
   /** Has-next flag — disables the +5 / skip-next buttons when false. */
   hasNext: boolean;
+  /**
+   * When true, render as a vertical stack instead of a horizontal bar.
+   * Used in phone-landscape so the Ribbon keeps its full vertical
+   * real estate while the controls dock on the right edge.
+   */
+  vertical?: boolean;
 }
 
 export function RibbonControls({
@@ -43,13 +50,16 @@ export function RibbonControls({
   onPlusFive,
   onSkipNext,
   hasNext,
+  vertical,
 }: RibbonControlsProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const isPaused = typeof pausedUntil === 'number' && pausedUntil > now;
   const accent = ELEMENTS.heart.accent;
+  const glyphColor = (active?: boolean) =>
+    active ? accent : palette.text;
 
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar, vertical && styles.barVertical]}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={isPaused ? 'Paused — tap to manage' : 'Pause'}
@@ -59,13 +69,12 @@ export function RibbonControls({
           pressed && styles.btnPressed,
         ]}
         onPress={() => setSheetOpen(true)}>
-        <Text
-          style={[
-            styles.btnGlyph,
-            isPaused && {color: accent},
-          ]}>
-          ⏸
-        </Text>
+        <Pause
+          size={22}
+          color={glyphColor(isPaused)}
+          strokeWidth={2}
+          fill={isPaused ? accent : 'transparent'}
+        />
         <Text
           style={[
             styles.btnLabel,
@@ -99,7 +108,7 @@ export function RibbonControls({
           pressed && styles.btnPressed,
         ]}
         onPress={onSkipNext}>
-        <Text style={styles.btnGlyph}>↷</Text>
+        <SkipForward size={22} color={palette.text} strokeWidth={2} />
         <Text style={styles.btnLabel}>skip</Text>
       </Pressable>
 
@@ -206,6 +215,14 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  barVertical: {
+    flexDirection: 'column',
+    width: 88,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderLeftWidth: 1,
+    borderLeftColor: palette.border,
   },
   btn: {
     flex: 1,

@@ -23,6 +23,9 @@ import {Plan} from '../reminders/types';
 import {expandPlanToFires} from '../reminders/expandPlan';
 import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import {JournalEntry, ReminderFiredEntry} from '../journal/types';
+import {EXERCISE_LIBRARY} from '../exercises/library';
+import {formatSetAmount} from '../program/progress';
+import type {SetPrescription} from '../program/types';
 
 export type RibbonRowKind =
   | 'past-sealed'
@@ -41,6 +44,8 @@ export interface RibbonActivePayload {
   cuesShort: string[];
   /** Window-expiry deadline. */
   expiresAt: number;
+  /** Daily Sets: amount + set n of m. */
+  prescription?: SetPrescription;
 }
 
 export interface RibbonRow {
@@ -69,6 +74,16 @@ export interface ActivePulseSummary {
   drillName: string;
   durationSec: number;
   cuesShort: string[];
+  prescription?: SetPrescription;
+}
+
+/** A future row from a producer other than the Plan (e.g. Daily Sets). */
+export interface RibbonFuture {
+  id: string;
+  at: number;
+  element: ElementId;
+  label: string;
+  detail?: string;
 }
 
 export interface BuildRibbonInput {
@@ -80,6 +95,8 @@ export interface BuildRibbonInput {
   journal: JournalEntry[];
   /** Optional. Provided once Slice 5 wires the reducer. */
   activePulse?: ActivePulseSummary;
+  /** Upcoming non-plan chimes to show as future rows. */
+  extraFutures?: RibbonFuture[];
   /** Awareness threshold for synthesizing past-absorbed rows.
    *  Default 5 min. Plan fires older than this without a journal entry
    *  become 'past-absorbed' (resolved-while-away). */
@@ -99,6 +116,7 @@ export function buildRibbonRows(input: BuildRibbonInput): RibbonRow[] {
     plan,
     journal,
     activePulse,
+    extraFutures = [],
     absorbedThresholdMs = 5 * 60_000,
   } = input;
 
@@ -152,8 +170,13 @@ export function buildRibbonRows(input: BuildRibbonInput): RibbonRow[] {
         at: fired.at,
         element: fired.element,
         kind: 'past-sealed',
-        label: completion.exerciseId,
-        detail: typeof ttR === 'number' ? `+${formatTtr(ttR)}` : undefined,
+        label: drillName(completion.exerciseId),
+        detail: joinDetail(
+          completion.trackId && typeof completion.amount === 'number'
+            ? `${completion.amount}`
+            : undefined,
+          typeof ttR === 'number' ? `+${formatTtr(ttR)}` : undefined,
+        ),
       });
       continue;
     }
@@ -244,6 +267,21 @@ export function buildRibbonRows(input: BuildRibbonInput): RibbonRow[] {
     // or the surface has only just mounted. Let the next rebuild catch it.
   }
 
+  // ── 3b. Non-plan future rows (Daily Sets chimes).
+  for (const f of extraFutures) {
+    if (f.at <= now || firedById.has(f.id)) {
+      continue;
+    }
+    rows.push({
+      id: f.id,
+      at: f.at,
+      element: f.element,
+      kind: 'future',
+      label: f.label,
+      detail: f.detail,
+    });
+  }
+
   // ── 4. Synthesize the now-row.
   if (activePulse) {
     rows.push({
@@ -252,13 +290,16 @@ export function buildRibbonRows(input: BuildRibbonInput): RibbonRow[] {
       element: activePulse.element,
       kind: 'now-active',
       label: activePulse.drillName,
-      detail: `${activePulse.durationSec}s`,
+      detail: activePulse.prescription
+        ? `${formatSetAmount(activePulse.prescription.amount, activePulse.prescription.unit)} · set ${activePulse.prescription.setIndex}/${activePulse.prescription.sets}`
+        : `${activePulse.durationSec}s`,
       active: {
         drillId: activePulse.drillId,
         drillName: activePulse.drillName,
         durationSec: activePulse.durationSec,
         cuesShort: activePulse.cuesShort,
         expiresAt: activePulse.expiresAt,
+        prescription: activePulse.prescription,
       },
     });
   } else {
@@ -309,6 +350,15 @@ function detailForResolution(r: {
     }
   }
   return undefined;
+}
+
+function drillName(exerciseId: string): string {
+  return EXERCISE_LIBRARY.find(e => e.id === exerciseId)?.name ?? exerciseId;
+}
+
+function joinDetail(...parts: Array<string | undefined>): string | undefined {
+  const kept = parts.filter((p): p is string => !!p);
+  return kept.length ? kept.join(' · ') : undefined;
 }
 
 function formatTtr(ms: number): string {

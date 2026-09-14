@@ -1,17 +1,26 @@
 import {Exercise} from './types';
 
 /**
- * Seed library. Curated for the operator's specific corrections:
+ * Seed library. Curated for the operator's body, kit and goals.
+ *
+ * Corrections:
  *   - UCS (Upper Crossed Syndrome): forward head, rounded shoulders
  *   - Hourglass Syndrome (chronic abdominal gripping)
  *   - APT (Anterior Pelvic Tilt) with hyperlordosis
- *   - USSF PFT prep (target: B+)
- *   - Staff/sword flow arts at beat
  *
- * "NoFloor" tag flags drills that work without a clean mat — many of the
- * dirty-property workarounds rely on standing or wall variants.
+ * Goals: lose the gut, stay lean (not bulky), get strong and agile, open
+ * the fascia, build toward kick-flips, and flow staff on the beat.
  *
- * Keep entries terse. Volume comes later — seed quality > seed quantity.
+ * Kit: bodyweight, a mat behind the desk, a big backyard, a porch edge to
+ * hang from, and bricks. No pool, no weights — drills that need anything
+ * else don't belong here (guarded by __tests__/library.test.ts).
+ *
+ * "NoFloor" tag flags drills that work standing or at the desk without
+ * getting down on the mat.
+ *
+ * Ids are stable — journal entries and custom circuits reference them.
+ * Append new drills to the end of their element's section so each
+ * element's first drill (the circuit fallback) stays put.
  */
 export const EXERCISE_LIBRARY: Exercise[] = [
   // ─── AIR — Breath & Posture ────────────────────────────────────────────
@@ -107,8 +116,107 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     venues: ['desk', 'standing'],
     approxSeconds: 240,
   },
+  {
+    id: 'air.box-breath',
+    element: 'air',
+    name: 'Box Breathing',
+    purpose:
+      'Nervous-system reset between focus blocks. The Train tab counts these.',
+    dose: '2 min (4-4-4-4)',
+    cues: [
+      'In for 4 through the nose',
+      'Hold for 4 with a soft throat — no straining',
+      'Out for 4, hold empty for 4',
+      'Lost count? Restart the square, no penalty',
+    ],
+    targets: ['Breath', 'Presence', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'air.physiological-sigh',
+    element: 'air',
+    name: 'Physiological Sigh',
+    purpose:
+      'The fastest way to dump stress mid-task without leaving the chair.',
+    dose: '3 cycles',
+    cues: [
+      'Double inhale through the nose: one big sip, then a top-up sip',
+      'Long, slow exhale through the mouth, all the way out',
+      'Three rounds, then back to work',
+    ],
+    targets: ['Breath', 'Hourglass', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 30,
+  },
+  {
+    id: 'air.brick-halo',
+    element: 'air',
+    name: 'Brick Halos',
+    purpose:
+      'Opens the shoulder girdle and builds staff-spinning endurance with one brick.',
+    dose: '2 × 8 each direction',
+    cues: [
+      'Hold one brick by both ends at chest height',
+      'Circle it around your head, close to the skull, elbows soft',
+      'Ribs down, glutes on — the lower back stays quiet',
+      'Too heavy? Use a full water bottle instead',
+    ],
+    targets: ['UCS', 'Mobility', 'Strength', 'NoFloor'],
+    venues: ['standing', 'yard'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'air.thread-the-needle',
+    element: 'air',
+    name: 'Thread the Needle',
+    purpose:
+      'Unlocks the upper back so the chest lifts and the arms spin freely.',
+    dose: '2 × 6 each side',
+    cues: [
+      'On all fours on the mat',
+      'Slide one arm under the body until shoulder and temple rest down',
+      'Reverse: reach that arm to the sky, eyes follow the hand',
+      'Exhale into each rotation',
+    ],
+    targets: ['UCS', 'Mobility'],
+    venues: ['mat'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'air.nasal-recovery-walk',
+    element: 'air',
+    name: 'Nasal Recovery Walk',
+    purpose:
+      'After sprints or rounds, bring the heart rate down through the nose. Builds breath for all-night dancing.',
+    dose: '2 min',
+    cues: [
+      'Walk slowly with the mouth closed',
+      'Make each exhale longer than the inhale',
+      'Need to mouth-breathe? Slow the walk, keep the rule',
+    ],
+    targets: ['Breath', 'Conditioning', 'NoFloor'],
+    venues: ['yard', 'standing'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'air.shadow-rope',
+    element: 'air',
+    name: 'Shadow Rope Skips',
+    purpose:
+      'Light, springy feet with no rope needed. Calves, ankles and cardio for beat-stepping.',
+    dose: '3 × 45 sec',
+    cues: [
+      'Wrists turn an imaginary rope',
+      'Small hops on the balls of the feet — heels kiss the ground, never slam',
+      'Stay tall; nose-breathe as long as you can',
+    ],
+    targets: ['Agility', 'Conditioning', 'Coordination', 'NoFloor'],
+    venues: ['yard', 'standing'],
+    approxSeconds: 180,
+  },
 
-  // ─── EARTH — Foundation & Alignment ────────────────────────────────────
+  // ─── EARTH — Foundation & Core ─────────────────────────────────────────
   {
     id: 'earth.posterior-pelvic-tilt',
     element: 'earth',
@@ -185,8 +293,411 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     venues: ['mat'],
     approxSeconds: 120,
   },
+  {
+    id: 'earth.crunch',
+    element: 'earth',
+    name: 'Crunches',
+    purpose: 'Front-of-core strength without yanking the neck. The gut belt.',
+    dose: '3 × 15',
+    cues: [
+      'Knees bent, feet flat, fingertips lightly behind the ears',
+      'Exhale and curl the ribs toward the hips until the shoulder blades clear the mat',
+      'Keep space under the chin like holding an apple; never pull on the head',
+      'Lower for 2 sec. Belly firm, never sucked in',
+    ],
+    targets: ['Core', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.leg-raise',
+    element: 'earth',
+    name: 'Leg Raises (Leg-Ups)',
+    purpose: 'Lower-abs strength that pulls the pelvis out of tilt.',
+    dose: '3 × 10',
+    cues: [
+      'Lie flat on the mat, hands under the tailbone',
+      'Press the lower back down before every rep',
+      'Lift straight legs to vertical (bend the knees to start)',
+      'Lower slowly and stop before the back arches',
+    ],
+    targets: ['Core', 'APT', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.side-up',
+    element: 'earth',
+    name: 'Side-Ups',
+    purpose:
+      'Obliques and the side line: the waist that drives staff spins and kicks.',
+    dose: '3 × 12 each side',
+    cues: [
+      'Lie on one side, legs stacked, feet slightly staggered',
+      'Bottom arm across the belly, top hand behind the ear',
+      'Lift the torso sideways and exhale at the top',
+      'Lower slowly with no twisting forward',
+      'Easier: lift both legs together instead',
+    ],
+    targets: ['Core', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'earth.plank',
+    element: 'earth',
+    name: 'Forearm Plank',
+    purpose: 'Holds the spine steady while the arms and staff fly.',
+    dose: '2 × 45 sec',
+    cues: [
+      'Elbows under shoulders, body in one line',
+      'Tuck the tailbone slightly and squeeze the glutes',
+      'Breathe low and steady; stop when the hips sag',
+    ],
+    targets: ['Core', 'APT', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.side-plank',
+    element: 'earth',
+    name: 'Side Plank',
+    purpose: 'Side-to-side stability for kicks, spins and one-leg landings.',
+    dose: '2 × 30 sec each side',
+    cues: [
+      'Elbow under shoulder, hips stacked',
+      'Push the floor away and lift the hips into a straight line',
+      'Knee-down version counts — keep the line',
+    ],
+    targets: ['Core', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.hollow-hold',
+    element: 'earth',
+    name: 'Hollow Body Hold',
+    purpose:
+      'The gymnast core shape. Groundwork for every flip and kick to come.',
+    dose: '3 × 20 sec',
+    cues: [
+      'Lower back pressed into the mat — non-negotiable',
+      'Arms overhead, legs long, shoulders and feet hovering',
+      'Too hard? Bend the knees or bring the arms forward',
+    ],
+    targets: ['Core', 'APT', 'Agility'],
+    venues: ['mat'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'earth.squat',
+    element: 'earth',
+    name: 'Bodyweight Squats',
+    purpose: 'Legs and glutes: the engine for all-night stepping.',
+    dose: '3 × 20',
+    cues: [
+      'Feet shoulder-width, toes turned slightly out',
+      'Sit down between the heels, chest proud, knees tracking the toes',
+      'Pause at the deepest depth you own, then drive up through the whole foot',
+      'Exhale on the way up',
+    ],
+    targets: ['Strength', 'APT', 'NoFloor'],
+    venues: ['desk', 'standing', 'yard'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'earth.wall-sit',
+    element: 'earth',
+    name: 'Wall Sit',
+    purpose: 'Quad endurance and grit, with no impact on the knees.',
+    dose: '2 × 45 sec',
+    cues: [
+      'Back flat on the wall, thighs parallel to the floor',
+      'Knees stacked over ankles',
+      'Count beats of the track instead of seconds',
+    ],
+    targets: ['Strength', 'NoFloor'],
+    venues: ['wall'],
+    approxSeconds: 105,
+  },
+  {
+    id: 'earth.cossack-squat',
+    element: 'earth',
+    name: 'Cossack Squat',
+    purpose:
+      'Side-to-side leg strength and inner-thigh mobility for low stances and kicks.',
+    dose: '2 × 6 each side',
+    cues: [
+      'Wide stance; sit onto one bent leg, the other straight with toes up',
+      'Heel stays down, chest up — hold a brick at the chest as a counterweight',
+      'Go only as deep as you control',
+    ],
+    targets: ['Strength', 'Mobility', 'Agility', 'NoFloor'],
+    venues: ['standing', 'yard', 'mat'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.single-leg-balance',
+    element: 'earth',
+    name: 'Single-Leg Balance',
+    purpose: 'Ankle and hip stability for kicks and uneven festival ground.',
+    dose: '2 × 30 sec each leg',
+    cues: [
+      'Stand on one leg, arms folded',
+      'Soft knee; spread the whole foot and grip the floor',
+      'Level up: eyes closed, or barefoot on the grass',
+    ],
+    targets: ['Coordination', 'Agility', 'NoFloor'],
+    venues: ['desk', 'standing', 'yard'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.porch-dead-hang',
+    element: 'earth',
+    name: 'Porch Dead Hang',
+    purpose:
+      'Grip, shoulder health and spinal decompression from the side of the deck.',
+    dose: '3 × 20–40 sec',
+    cues: [
+      'Test the hang point every session: load it with your feet still on the ground',
+      'Full grip, arms long, let the spine lengthen',
+      'Keep a toe on a step if the grip fails early',
+      'Drop softly and land with bent knees',
+    ],
+    targets: ['Grip', 'Strength', 'Mobility', 'UCS'],
+    venues: ['porch'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'earth.brick-farmer-walk',
+    element: 'earth',
+    name: 'Brick Farmer Walk',
+    purpose:
+      'Loaded carries for grip, core and posture. Bricks do the work of weights.',
+    dose: '4 × 30 m (laps of the yard)',
+    cues: [
+      'One or two bricks per hand, arms long at the sides',
+      'Tall crown, ribs down, short quick steps',
+      'If you lean to one side, carry less',
+    ],
+    targets: ['Grip', 'Core', 'Strength'],
+    venues: ['yard'],
+    approxSeconds: 240,
+  },
+  {
+    id: 'earth.brick-pinch',
+    element: 'earth',
+    name: 'Brick Pinch Hold',
+    purpose: 'Thumb-and-finger crush grip for staff control and longer hangs.',
+    dose: '3 × 20 sec each hand',
+    cues: [
+      'Pinch the brick flat between thumb and fingers, palm off it',
+      'Arm hangs straight at your side',
+      'Hold it over grass and keep toes clear in case it slips',
+    ],
+    targets: ['Grip', 'Strength', 'NoFloor'],
+    venues: ['standing', 'yard'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.pause-squat',
+    element: 'earth',
+    name: 'Pause Squats',
+    purpose:
+      'A 3-second pause at the bottom kills the bounce and builds strength where you are weakest.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Squat to your deepest controlled depth',
+      'Hold 3 seconds — stay tight and keep breathing',
+      'Drive up through the whole foot',
+    ],
+    targets: ['Strength', 'Mobility', 'NoFloor'],
+    venues: ['desk', 'standing', 'yard'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'earth.split-squat',
+    element: 'earth',
+    name: 'Split Squats',
+    purpose:
+      'One leg leads: single-leg strength and balance for kicks and landings.',
+    dose: '1 set at about half your max (each leg)',
+    cues: [
+      'Long stance, back heel up',
+      'Drop the back knee straight down toward the floor',
+      'Front knee tracks over the toes',
+      'Hold a wall for balance at first',
+    ],
+    targets: ['Strength', 'Agility', 'NoFloor'],
+    venues: ['standing', 'yard'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'earth.bulgarian-split-squat',
+    element: 'earth',
+    name: 'Bulgarian Split Squats',
+    purpose:
+      'Rear foot on a chair: the hardest split stance, plus a hip-flexor stretch on the back leg.',
+    dose: '1 set at about half your max (each leg)',
+    cues: [
+      'Back foot laces-down on a chair seat',
+      'Front foot far enough forward that the heel stays down at the bottom',
+      'Lower under control, chest tall',
+      'Hold a brick in each hand once bodyweight is easy',
+    ],
+    targets: ['Strength', 'Mobility', 'APT', 'NoFloor'],
+    venues: ['standing', 'yard'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.shrimp-squat',
+    element: 'earth',
+    name: 'Shrimp Squats',
+    purpose: 'A one-leg squat holding the back foot: kick-flip leg strength.',
+    dose: '1 set at about half your max (each leg)',
+    cues: [
+      'Stand on one leg and hold the other foot behind you',
+      'Lower the back knee to a folded towel under control',
+      'Reach the free arm forward for balance',
+      'Hold a doorframe until you own it',
+    ],
+    targets: ['Strength', 'Agility', 'Coordination'],
+    venues: ['standing', 'mat'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.hanging-knee-raise',
+    element: 'earth',
+    name: 'Hanging Knee Raises',
+    purpose: 'Leg-ups from the porch: lower abs and grip together.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Test the hang point first',
+      'Dead hang with the shoulders pulled down',
+      'Curl the knees toward the chest and tilt the pelvis up',
+      'Lower slowly — no swinging',
+    ],
+    targets: ['Core', 'Grip', 'APT'],
+    venues: ['porch'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'earth.hanging-leg-raise',
+    element: 'earth',
+    name: 'Hanging Leg Raises',
+    purpose:
+      'Straight legs to hip height or higher: the strongest leg-up, and flip-ready abs.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Test the hang point first',
+      'Legs straight; lift to hip height or higher',
+      'Tilt the pelvis at the top',
+      'Lower for a 2-count with no swing',
+    ],
+    targets: ['Core', 'Grip', 'Agility'],
+    venues: ['porch'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'earth.situp',
+    element: 'earth',
+    name: 'Sit-Ups',
+    purpose: 'Full trunk flexion through the whole range.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Knees bent, feet flat (tuck the toes under a couch if needed)',
+      'Arms crossed on the chest',
+      'Exhale and roll up one vertebra at a time',
+      'Lower slowly — no flopping back',
+    ],
+    targets: ['Core', 'Strength', 'PFT-Situps'],
+    venues: ['mat'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'earth.v-up',
+    element: 'earth',
+    name: 'V-Ups',
+    purpose:
+      'Arms and legs meet over the hips: power and control for tucks and flips.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Start in a hollow hold, lower back pressed down',
+      'Lift the arms and straight legs together to touch over the hips',
+      'Lower back to the hollow shape without the back arching',
+      'Bend the knees (tuck-ups) if the legs drop',
+    ],
+    targets: ['Core', 'Agility', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'earth.side-plank-hip-dip',
+    element: 'earth',
+    name: 'Side-Plank Hip Dips',
+    purpose: 'Side plank with reps: obliques through a full range.',
+    dose: '1 set at about half your max (each side)',
+    cues: [
+      'Elbow under shoulder, hips stacked',
+      'Lower the hip to just above the mat',
+      'Lift it back past a straight line',
+      'Knees down to make it easier',
+    ],
+    targets: ['Core', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'earth.long-lever-plank',
+    element: 'earth',
+    name: 'Long-Lever Plank',
+    purpose: 'Elbows reach past the head: a plank that works like an ab wheel.',
+    dose: '1 hold at about half your max',
+    cues: [
+      'Forearm plank, then walk the elbows forward past the forehead',
+      'Tuck the tailbone and squeeze the glutes',
+      'Stop the reach the moment the lower back sags',
+    ],
+    targets: ['Core', 'APT', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'earth.active-hang',
+    element: 'earth',
+    name: 'Active Hang',
+    purpose:
+      'Shoulder blades pulled down while hanging: strong, safe shoulders under load.',
+    dose: '1 hold at about half your max',
+    cues: [
+      'Test the hang point first',
+      'From a dead hang, pull the shoulders away from the ears',
+      'Arms stay straight; the body rises an inch',
+      'Hold and breathe',
+    ],
+    targets: ['Grip', 'Strength', 'UCS'],
+    venues: ['porch'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'earth.one-arm-assisted-hang',
+    element: 'earth',
+    name: 'One-Arm Assisted Hang',
+    purpose:
+      'Most of the weight on one arm: grip and shoulder stability toward one-arm holds.',
+    dose: '1 hold each arm at about half your max',
+    cues: [
+      'Test the hang point first',
+      'Hang from one hand; two fingers of the other rest on the edge',
+      'Shoulder pulled down, not hanging off the joint',
+      'Switch arms',
+    ],
+    targets: ['Grip', 'Strength'],
+    venues: ['porch'],
+    approxSeconds: 120,
+  },
 
-  // ─── FIRE — Power & Conditioning (USSF PFT focus) ──────────────────────
+  // ─── FIRE — Power & Conditioning ───────────────────────────────────────
   {
     id: 'fire.pushups',
     element: 'fire',
@@ -262,8 +773,325 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     venues: ['yard'],
     approxSeconds: 180,
   },
+  {
+    id: 'fire.porch-pullup',
+    element: 'fire',
+    name: 'Porch Pull-Ups',
+    purpose:
+      'Back and arm strength from the deck edge. Bodyweight pulling builds lean, useful muscle.',
+    dose: '4 × max clean reps (leave 1–2 in the tank)',
+    cues: [
+      'Test the hang point before every session: load it with your feet down first',
+      'Start from a dead hang; pull the chest toward the edge, elbows driving down',
+      'Mind your head on the deck edge — pull slightly beside it',
+      'Cannot do one yet? Do negatives instead',
+    ],
+    targets: ['Strength', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 240,
+  },
+  {
+    id: 'fire.pullup-negative',
+    element: 'fire',
+    name: 'Pull-Up Negatives',
+    purpose: 'The fastest path to your first (or next) pull-up.',
+    dose: '3 × 5 slow lowers',
+    cues: [
+      'Test the hang point first',
+      'Step up from a stable step or chair — not loose bricks — to chin over the edge',
+      'Lower for a slow 5-count all the way to a dead hang',
+      'Stop when you can no longer control the lowering',
+    ],
+    targets: ['Strength', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'fire.scap-pull',
+    element: 'fire',
+    name: 'Scap Pulls',
+    purpose:
+      'Wakes the lats and lower traps: the start of every pull-up and a fix for rounded shoulders.',
+    dose: '2 × 8',
+    cues: [
+      'Test the hang point first',
+      'From a dead hang, arms stay straight the whole time',
+      'Pull the shoulder blades down and back so the body rises an inch',
+      'Pause 2 sec, lower slowly',
+    ],
+    targets: ['Strength', 'UCS', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'fire.pushup-groove',
+    element: 'fire',
+    name: 'Push-Ups — Grease the Groove',
+    purpose: 'Frequent easy sets build pushing strength fast without soreness.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Hands under shoulders, body in one line, ribs down',
+      'Chest to fist height, full lockout at the top',
+      'Stop two reps before form breaks — more sets, not uglier reps',
+      'Too hard? Put the hands on the desk edge or a step',
+    ],
+    targets: ['Strength', 'PFT-Pushups'],
+    venues: ['mat', 'yard'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'fire.jump-squat',
+    element: 'fire',
+    name: 'Jump Squats',
+    purpose: 'Explosive leg power for kicks, spins and eventually flips.',
+    dose: '3 × 8',
+    cues: [
+      'Grass or mat only — never concrete',
+      'Drop to a quarter or half squat, then jump tall',
+      'Land quietly: balls of the feet, then heels, knees soft and tracking the toes',
+      'Knees complaining? Swap for fast bodyweight squats',
+    ],
+    targets: ['Agility', 'Conditioning', 'Strength'],
+    venues: ['yard', 'mat'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'fire.burpee',
+    element: 'fire',
+    name: 'Burpees',
+    purpose:
+      'Full-body fat burner. Big effort, no equipment, done in two minutes.',
+    dose: '3 × 8',
+    cues: [
+      'Squat, hands down, step or hop back to a plank',
+      'Chest to the mat is optional; a strong plank is not',
+      'Step or hop the feet in, stand tall, finish with a small jump',
+      'Pace, do not race — smooth reps beat sloppy ones',
+    ],
+    targets: ['Conditioning', 'Strength', 'Core'],
+    venues: ['mat', 'yard'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'fire.mountain-climbers',
+    element: 'fire',
+    name: 'Mountain Climbers',
+    purpose:
+      'Heart-rate spike plus core, right there on the mat behind the desk.',
+    dose: '3 × 30 sec',
+    cues: [
+      'Strong plank, hands under shoulders',
+      'Drive the knees toward the chest, alternating at a steady rhythm',
+      'Keep the hips level — no piking up',
+      'Match the tempo of whatever is playing',
+    ],
+    targets: ['Conditioning', 'Core'],
+    venues: ['mat'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'fire.backyard-strides',
+    element: 'fire',
+    name: 'Backyard Strides',
+    purpose:
+      'Short fast efforts that burn fat and build stamina for the rave floor.',
+    dose: '6 × 15 sec fast, walk back',
+    cues: [
+      'Jog easy for 5 min first — never sprint cold',
+      'Run at about 80%: fast, relaxed, tall',
+      'Walk back to the start as full recovery',
+      'Hamstring twinge = done for the day',
+    ],
+    targets: ['Conditioning', 'Agility', 'PFT-Run'],
+    venues: ['yard'],
+    approxSeconds: 600,
+  },
+  {
+    id: 'fire.zone2-run',
+    element: 'fire',
+    name: 'Easy Run (Zone 2)',
+    purpose:
+      'Easy conversational running builds the engine for a long set and melts fat.',
+    dose: '20–40 min',
+    cues: [
+      'You should be able to talk in full sentences',
+      'Walk breaks are fine — the goal is time on your feet',
+      'Log it in the Train tab when you get back',
+    ],
+    targets: ['Conditioning', 'PFT-Run'],
+    venues: ['yard'],
+    approxSeconds: 1800,
+  },
+  {
+    id: 'fire.fire-rounds',
+    element: 'fire',
+    name: 'Fire Rounds (20 on / 10 off)',
+    purpose: 'Four minutes of intervals that hit like a drop.',
+    dose: '8 rounds: squats → climbers → push-ups → shadow boxing, twice through',
+    cues: [
+      '20 sec hard, 10 sec breathe — rotate through the moves',
+      'Put on a DnB track (170+ BPM) and ride it',
+      'Form goes? Slow down for the rest of the round',
+    ],
+    targets: ['Conditioning', 'Strength', 'Core'],
+    venues: ['yard', 'mat'],
+    approxSeconds: 300,
+  },
+  {
+    id: 'fire.kick-flip-foundations',
+    element: 'fire',
+    name: 'Kick-Flip Foundations',
+    purpose:
+      'Groundwork for tricking: jump height, spin control and hip power before any flip.',
+    dose: '3 rounds: 5 tuck jumps · 5 skip-kicks each leg · 3 spin-jumps each way',
+    cues: [
+      'Grass only, after a full warm-up',
+      'Tuck jumps: knees up, land soft and quiet',
+      'Skip-kicks: skip forward, snap the kick at the top of the skip',
+      'Spin-jumps: 180 first, then 360 — land balanced before adding more',
+      'Actual flips come later: soft landing surface and a spotter',
+    ],
+    targets: ['Agility', 'Coordination', 'Strength'],
+    venues: ['yard'],
+    approxSeconds: 420,
+  },
+  {
+    id: 'fire.incline-pushup',
+    element: 'fire',
+    name: 'Incline Push-Ups',
+    purpose:
+      'The push-up pattern with less load — hands on the desk edge. Builds the groove for full push-ups.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Hands on a sturdy desk edge or counter, shoulder-width',
+      'Body in one line from head to heels, ribs down',
+      'Chest to the edge, full lockout at the top',
+      'Use a lower surface as it gets easy',
+    ],
+    targets: ['Strength', 'PFT-Pushups', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'fire.diamond-pushup',
+    element: 'fire',
+    name: 'Diamond Push-Ups',
+    purpose:
+      'Hands together under the chest: more triceps and inner chest from the same bodyweight.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Thumbs and index fingers form a diamond under the breastbone',
+      'Elbows track back along the ribs, not flared',
+      'Chest to hands, full lockout',
+      'Wrists complain? Widen the hands a little',
+    ],
+    targets: ['Strength', 'PFT-Pushups'],
+    venues: ['mat', 'yard'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'fire.decline-pushup',
+    element: 'fire',
+    name: 'Decline Push-Ups',
+    purpose: 'Feet raised shifts more load onto the shoulders and upper chest.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Feet on a sturdy step or chair seat, hands on the mat',
+      'Body in one line — do not let the hips sag',
+      'Chest to fist height, full lockout',
+      'Higher feet = harder',
+    ],
+    targets: ['Strength', 'PFT-Pushups'],
+    venues: ['mat', 'yard'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'fire.archer-pushup',
+    element: 'fire',
+    name: 'Archer Push-Ups',
+    purpose:
+      'One arm does most of the work: the bridge toward one-arm push-ups.',
+    dose: '1 set at about half your max (each side)',
+    cues: [
+      'Hands very wide, fingers turned out',
+      'Shift down toward one hand while the other arm straightens',
+      'Keep the hips square to the floor',
+      'Alternate sides every rep',
+    ],
+    targets: ['Strength', 'Coordination'],
+    venues: ['mat', 'yard'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'fire.doorframe-row',
+    element: 'fire',
+    name: 'Doorframe Rows',
+    purpose:
+      'A horizontal pull at the desk: balances push-ups and draws the shoulders back.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Grip both sides of a sturdy doorframe at chest height',
+      'Feet close to the frame, lean back with straight arms',
+      'Pull the chest to the frame and squeeze the shoulder blades',
+      'Walk the feet closer to make it harder',
+    ],
+    targets: ['Strength', 'UCS', 'Grip', 'NoFloor'],
+    venues: ['wall', 'desk'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'fire.one-arm-doorframe-row',
+    element: 'fire',
+    name: 'One-Arm Doorframe Rows',
+    purpose:
+      'The same row with one arm: more load per side plus anti-rotation core.',
+    dose: '1 set at about half your max (each arm)',
+    cues: [
+      'One hand on the doorframe edge, lean back with a straight arm',
+      'Pull the chest to the hand without twisting',
+      'Free hand on the ribs to feel them stay square',
+      'Switch arms each set',
+    ],
+    targets: ['Strength', 'UCS', 'Grip', 'Core', 'NoFloor'],
+    venues: ['wall', 'desk'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'fire.table-row',
+    element: 'fire',
+    name: 'Table Rows',
+    purpose:
+      'Body horizontal under a heavy table: the hardest bodyweight row at home.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Only under a heavy, solid table that cannot tip — test it with a hard pull first',
+      'Lie under the edge, grip it shoulder-width, heels on the floor',
+      'Body straight; pull the chest to the edge',
+      'Bend the knees to make it easier',
+    ],
+    targets: ['Strength', 'UCS', 'Grip'],
+    venues: ['mat'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'fire.brick-pack-pullup',
+    element: 'fire',
+    name: 'Brick-Pack Pull-Ups',
+    purpose:
+      'Pull-ups with bricks in a backpack — add load once bodyweight reps come easy.',
+    dose: '1 set at about half your max',
+    cues: [
+      'Test the hang point first — it now holds you plus the bricks',
+      'Start with one brick; strap the pack tight and high',
+      'Dead hang to chin over the edge, controlled lowering',
+      'Add a brick only when every set feels crisp',
+    ],
+    targets: ['Strength', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 180,
+  },
 
-  // ─── WATER — Flow & Music ──────────────────────────────────────────────
+  // ─── WATER — Flow, Fascia & Hydration ──────────────────────────────────
   {
     id: 'water.figure-8',
     element: 'water',
@@ -327,6 +1155,228 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     venues: ['yard'],
     approxSeconds: 2400,
   },
+  {
+    id: 'water.sip',
+    element: 'water',
+    name: 'Water Call',
+    purpose:
+      'Drink a full glass now. Small, steady sips beat one giant catch-up.',
+    dose: '1 glass (~250 ml)',
+    cues: [
+      'Stand up to get it — that is a movement break too',
+      'Sip it, do not chug',
+      'Refill before you sit back down',
+    ],
+    targets: ['Hydration', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 30,
+  },
+  {
+    id: 'water.refill',
+    element: 'water',
+    name: 'Refill Ritual',
+    purpose: "Keep water in arm's reach so drinking takes zero decisions.",
+    dose: 'Refill the bottle + 3 big sips',
+    cues: [
+      'Fill the bottle to the top',
+      'Set it between the keyboard and the phone',
+      'Three sips before you sit',
+    ],
+    targets: ['Hydration', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'water.walk-and-drink',
+    element: 'water',
+    name: 'Walk & Drink',
+    purpose: 'Walk to the tap, drink a glass, walk back: water plus steps.',
+    dose: '1 glass + the walk',
+    cues: [
+      'Take the long way',
+      'Drink the whole glass standing',
+      'Shake out the shoulders on the walk back',
+    ],
+    targets: ['Hydration', 'NoFloor'],
+    venues: ['standing'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'water.deep-squat-hold',
+    element: 'water',
+    name: 'Deep Squat Hold',
+    purpose:
+      'The resting shape most adults lost. Opens ankles, hips and lower back in one position.',
+    dose: '2 × 60 sec',
+    cues: [
+      'Feet shoulder-width, heels down (a brick under the heels is fine at first)',
+      'Elbows press the knees out, chest lifts',
+      'Breathe into the lower back; rock gently side to side',
+    ],
+    targets: ['Mobility', 'APT', 'NoFloor'],
+    venues: ['desk', 'standing', 'yard'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'water.side-line-stretch',
+    element: 'water',
+    name: 'Standing Side-Line Stretch',
+    purpose:
+      'Lengthens the whole side of the body, ankle to fingertip, for spins and staff reach.',
+    dose: '3 slow breaths each side',
+    cues: [
+      'Cross one foot behind the other',
+      'Reach the same-side arm up and over',
+      'Push the hip out and feel the length from ankle to hand',
+    ],
+    targets: ['Mobility', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'water.hamstring-floss',
+    element: 'water',
+    name: 'Hamstring Floss',
+    purpose:
+      'Glides the back of the legs instead of yanking on them. Desk-safe.',
+    dose: '10 each leg',
+    cues: [
+      'Heel on a low step or chair, leg straight',
+      'Hinge forward with a flat back until you feel the pull',
+      'Point and flex the foot while holding the hinge',
+    ],
+    targets: ['Mobility', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'water.calf-wall-stretch',
+    element: 'water',
+    name: 'Calf & Achilles Stretch',
+    purpose: 'Protects the calves for running and keeps beat-steps springy.',
+    dose: '30 sec each leg, straight knee then bent',
+    cues: [
+      'Hands on the wall, one leg back, heel down',
+      'Straight knee stretches the calf; bend it to reach the Achilles',
+      'Ease in — no bouncing',
+    ],
+    targets: ['Mobility', 'NoFloor'],
+    venues: ['wall'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'water.pancake-reach',
+    element: 'water',
+    name: 'Pancake Reach',
+    purpose:
+      'Hamstrings and inner thighs: the range your high kicks are missing.',
+    dose: '3 × 45 sec',
+    cues: [
+      'Sit wide-legged on the mat, knees and toes pointing up',
+      'Hinge from the hips — belly toward the floor, not head to knees',
+      'Melt a little further on each exhale',
+      'Sit on a folded towel if the lower back rounds',
+    ],
+    targets: ['Mobility'],
+    venues: ['mat'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'water.pigeon',
+    element: 'water',
+    name: 'Pigeon Stretch',
+    purpose: 'Deep glute and hip rotation that frees round kicks and spins.',
+    dose: '60–90 sec each side',
+    cues: [
+      'Front shin angled across the mat, back leg long',
+      'Square the hips, then fold forward over the front leg',
+      'Knee pain means back out — do a figure-4 on your back instead',
+    ],
+    targets: ['Mobility', 'APT'],
+    venues: ['mat'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'water.frog-stretch',
+    element: 'water',
+    name: 'Frog Stretch',
+    purpose: 'Inner-thigh opener: the missing range for high side kicks.',
+    dose: '2 × 60 sec',
+    cues: [
+      'On all fours, slide the knees wide with ankles in line with knees',
+      'Rock the hips back slowly, forearms on the mat',
+      'Stay where the breath stays smooth',
+    ],
+    targets: ['Mobility'],
+    venues: ['mat'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'water.worlds-greatest-stretch',
+    element: 'water',
+    name: "World's Greatest Stretch",
+    purpose: 'Hip flexors, hamstrings and upper back in one flowing sequence.',
+    dose: '5 each side',
+    cues: [
+      'Long lunge, back knee down on the mat',
+      'Same-side elbow drops toward the front instep',
+      'Rotate open and reach that hand to the sky',
+      'Straighten the front leg for a hamstring pull, then switch sides',
+    ],
+    targets: ['Mobility', 'Flow', 'APT'],
+    venues: ['mat', 'yard'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'water.front-split-progression',
+    element: 'water',
+    name: 'Front Split Progression',
+    purpose:
+      'Long-game flexibility for kicks and flips. Gentle, frequent, never forced.',
+    dose: '60 sec each side',
+    cues: [
+      'Half-kneeling lunge on the mat, hands on bricks for support',
+      'Slide the front heel forward, hips square',
+      'Stop at a 6/10 stretch — progress comes weekly, not daily',
+    ],
+    targets: ['Mobility', 'Agility'],
+    venues: ['mat'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'water.beat-step',
+    element: 'water',
+    name: 'Beat-Step Footwork',
+    purpose:
+      'Rave-floor footwork locked to the break. Cardio disguised as dancing.',
+    dose: '2 tracks',
+    cues: [
+      'Pick a breakbeat or DnB track',
+      'Step on the kick, accent the snare, keep the feet light',
+      'Add a turn or level change every 16 bars',
+      'No staff yet — the feet lead',
+    ],
+    targets: ['Flow', 'Agility', 'Conditioning', 'Coordination'],
+    venues: ['yard', 'standing'],
+    approxSeconds: 480,
+  },
+  {
+    id: 'water.staff-combat-rounds',
+    element: 'water',
+    name: 'Staff Combat Rounds',
+    purpose:
+      'Dance-combat with the staff: strikes, blocks and spins on the beat.',
+    dose: '3 × 2 min rounds, 1 min walk between',
+    cues: [
+      'Clear the space: full staff radius plus a step',
+      'Strike on the kick, spin on the snare, block on the drop',
+      'Rotate from the hips; the arms follow',
+      'Stay loose — tension kills flow and wrists',
+    ],
+    targets: ['Flow', 'Coordination', 'Conditioning', 'Agility'],
+    venues: ['yard'],
+    approxSeconds: 540,
+  },
 
   // ─── HEART — Integration & Cadence ─────────────────────────────────────
   {
@@ -337,7 +1387,7 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     dose: '2 min',
     cues: [
       'Stand. Breathe coherence pace 6 cycles.',
-      'Name today\'s leading element out loud',
+      "Name today's leading element out loud",
       'Name one specific thing you will not skip',
     ],
     targets: ['Presence', 'NoFloor'],
@@ -368,7 +1418,7 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     cues: [
       'Three sentences, spoken or written',
       'No self-flagellation — observation only',
-      'Choose tomorrow\'s leading element before sleep',
+      "Choose tomorrow's leading element before sleep",
     ],
     targets: ['Presence'],
     venues: ['desk', 'standing'],
@@ -378,8 +1428,7 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     id: 'heart.pulse-check',
     element: 'heart',
     name: 'Pulse Check',
-    purpose:
-      'Mid-day reset. The reminder engine\'s default Heart micro-drill.',
+    purpose: "Mid-day reset. The reminder engine's default Heart micro-drill.",
     dose: '30 sec',
     cues: [
       'Where is the breath right now? Move it lower.',
@@ -389,6 +1438,42 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     targets: ['Presence', 'Hourglass', 'UCS', 'NoFloor'],
     venues: ['desk', 'standing'],
     approxSeconds: 30,
+  },
+  {
+    id: 'heart.fuel-check',
+    element: 'heart',
+    name: 'Fuel Check',
+    purpose:
+      'Build the plate without counting anything: your hand is the measuring cup.',
+    dose: 'Before the meal',
+    cues: [
+      'Water first: one full glass',
+      'Protein: 2 palms',
+      'Vegetables: 2 fists',
+      'Carbs: 1 cupped hand',
+      'Fats: 1 thumb',
+      'Eat slowly; stop at 80% full',
+    ],
+    targets: ['Fuel', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'heart.rave-vision',
+    element: 'heart',
+    name: 'Rave Vision',
+    purpose:
+      'The motivation that works: see yourself at the rave, still dancing at sunrise.',
+    dose: '60 sec',
+    cues: [
+      'Close your eyes. Hear the bass. Feel the staff in your hands.',
+      'See yourself lean, light and strong at 5am — still going',
+      'Ask: does my next choice move me toward that floor?',
+      'Open your eyes. Do the next rep.',
+    ],
+    targets: ['Presence', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 60,
   },
 ];
 

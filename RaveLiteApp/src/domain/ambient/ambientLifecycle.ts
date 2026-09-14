@@ -1,0 +1,55 @@
+/**
+ * App-wide ambient service lifecycle.
+ *
+ * The foreground service keeps the JS runtime (and so every chime) alive
+ * while RaveLite is in the background or the screen is off. It used to be
+ * bound to the Always-On tab being open, which meant switching tabs or
+ * pocketing the phone could silence the day's sets. Now it follows one
+ * rule, checked every minute: running whenever paging is allowed (inside
+ * active hours and not manually paused), stopped otherwise.
+ */
+import {pagingAllowedAt} from './activeHours';
+import {
+  startAmbientForegroundService,
+  stopAmbientForegroundService,
+} from './foregroundService';
+
+export const AMBIENT_CHECK_MS = 60_000;
+
+let timer: ReturnType<typeof setInterval> | null = null;
+let running: boolean | null = null;
+
+/** Start or stop the service to match the paging rule right now. */
+export function syncAmbientService(now: Date = new Date()): void {
+  const allowed = pagingAllowedAt(now) === null;
+  if (allowed === running) {
+    return;
+  }
+  running = allowed;
+  const change = allowed
+    ? startAmbientForegroundService()
+    : stopAmbientForegroundService();
+  change.catch(err =>
+    // A failed start (e.g. notifications revoked) must not crash the app;
+    // chimes still work while RaveLite is in the foreground.
+    // eslint-disable-next-line no-console
+    console.warn('[ambientLifecycle] service change failed', err),
+  );
+}
+
+/** Idempotent; call once after hydration. */
+export function startAmbientLifecycle(): void {
+  if (timer !== null) {
+    return;
+  }
+  syncAmbientService();
+  timer = setInterval(() => syncAmbientService(), AMBIENT_CHECK_MS);
+}
+
+export function stopAmbientLifecycle(): void {
+  if (timer !== null) {
+    clearInterval(timer);
+    timer = null;
+  }
+  running = null;
+}

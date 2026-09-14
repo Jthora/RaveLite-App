@@ -11,6 +11,7 @@ import {CircuitsPanel} from './heart/CircuitsPanel';
 import {InsightsPanel} from './heart/InsightsPanel';
 import {AlwaysOnPanel} from './heart/AlwaysOnPanel';
 import {ThemePanel} from './heart/ThemePanel';
+import {SetsPanel} from './heart/SetsPanel';
 import type {CircuitLeg} from '../domain/circuit/circuit';
 import {ELEMENTS} from '../theme/elements';
 import {exercisesFor} from '../domain/exercises/library';
@@ -35,11 +36,19 @@ import {palette, radius, spacing, type as t} from '../theme';
 
 /** Heart's sub-pages. The shell registry is the single source of truth
  *  for the icon/label list — this type just narrows our local switch. */
-type HeartSubSlug = 'dash' | 'plan' | 'circuits' | 'signal' | 'aos' | 'insights' | 'theme';
+type HeartSubSlug =
+  | 'dash'
+  | 'sets'
+  | 'plan'
+  | 'circuits'
+  | 'always-on'
+  | 'insights'
+  | 'settings';
 
 interface HeartScreenProps {
   subTab: string;
   onSubTabChange: (slug: string) => void;
+  onElementChange?: (next: import('../theme/elements').ElementId) => void;
 }
 
 /**
@@ -52,11 +61,11 @@ interface HeartScreenProps {
  * Layout is responsive: on tablets in landscape ("expanded"), the Today
  * card and Plan card sit side-by-side; on phones they stack.
  */
-const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp}) => {
+const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp, onElementChange}) => {
   // Narrow the incoming string to the local slug union. Unknown slugs
   // fall back to 'dash' so a stale persisted slug never blanks the screen.
   const subTab: HeartSubSlug = (
-    ['dash', 'plan', 'circuits', 'signal', 'aos', 'insights', 'theme'] as const
+    ['dash', 'sets', 'plan', 'circuits', 'always-on', 'insights', 'settings'] as const
   ).includes(subTabProp as HeartSubSlug)
     ? (subTabProp as HeartSubSlug)
     : 'dash';
@@ -269,6 +278,8 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp}) => {
         </>
       )}
 
+      {subTab === 'sets' && <SetsPanel />}
+
       {subTab === 'plan' && (
         <PlanPanel onPlanCommitted={onPlanCommitted} />
       )}
@@ -277,7 +288,7 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp}) => {
         <CircuitsPanel onEngageLegs={onEngageLegs} />
       )}
 
-      {subTab === 'signal' && (
+      {subTab === 'settings' && (
         <>
           {/* Signal banner — system voice, real permission state. */}
           {permission === 'denied' ? (
@@ -320,14 +331,15 @@ const HeartScreen: React.FC<HeartScreenProps> = ({subTab: subTabProp}) => {
               <Text style={styles.btnText}>Apply Plan</Text>
             </Tap>
           </View>
+          <ThemePanel />
         </>
       )}
 
-      {subTab === 'aos' && <AlwaysOnPanel />}
+      {subTab === 'always-on' && <AlwaysOnPanel />}
 
-      {subTab === 'insights' && <InsightsPanel />}
-
-      {subTab === 'theme' && <ThemePanel />}
+      {subTab === 'insights' && (
+        <InsightsPanel onElementChange={onElementChange} />
+      )}
 
       <CircuitChamber
         visible={chamberOpen}

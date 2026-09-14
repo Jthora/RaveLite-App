@@ -39,8 +39,10 @@ const MAX_SEC_PRESETS: Array<number | null> = [60, 90, 120, 180, null];
 const ALL_TAGS: Target[] = [
   'UCS', 'Hourglass', 'APT',
   'PFT-Pushups', 'PFT-Situps', 'PFT-Run',
+  'Core', 'Conditioning', 'Grip', 'Agility',
   'Mobility', 'Strength', 'Coordination',
   'Flow', 'Breath', 'Presence',
+  'Hydration', 'Fuel',
   'NoFloor',
 ];
 

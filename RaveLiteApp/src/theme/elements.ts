@@ -45,7 +45,7 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
     name: 'Fire',
     domain: 'Power & Conditioning',
     ethos:
-      'Outward expression of force. USSF PFT prep, strikes, kicks, explosive drills. Burn the cage.',
+      'Outward expression of force. Lean strength and fat-burning heat: push-ups, porch pull-ups, sprints, kicks, explosive rounds. Burn the cage.',
     glyph: '\u{1F702}', // 🜂
     emoji: '🔥',
     color: '#FF3B2F',
@@ -71,9 +71,9 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
   earth: {
     id: 'earth',
     name: 'Earth',
-    domain: 'Foundation & Alignment',
+    domain: 'Foundation & Core',
     ethos:
-      'Pelvis, glutes, hips, core. Reverse anterior pelvic tilt. Build the base that holds every flow.',
+      'Pelvis, glutes, hips, core. Crunches, leg-ups, side-ups, planks, squats, hangs and brick carries. Reverse anterior pelvic tilt. Build the base that holds every flow.',
     glyph: '\u{1F703}', // 🜃
     emoji: '🌍',
     color: '#34C759',
@@ -85,9 +85,9 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
   water: {
     id: 'water',
     name: 'Water',
-    domain: 'Flow & Music',
+    domain: 'Flow & Fascia',
     ethos:
-      'Staff and sword flow. Beat-locked combos. The body becomes the rhythm. Adapt without breaking shape.',
+      'Staff flow and dance-combat on the beat. Long fascia stretches that turn stiffness into glide. Drink on the call. Adapt without breaking shape.',
     glyph: '\u{1F704}', // 🜄
     emoji: '💧',
     color: '#0A84FF',

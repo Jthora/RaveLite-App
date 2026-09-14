@@ -61,6 +61,9 @@ import WaterScreen from '../screens/WaterScreen';
 export interface ElementScreenProps {
   subTab: string;
   onSubTabChange: (slug: string) => void;
+  /** Cross-element jump. Used by Heart Insights to deep-link to another
+   *  element's Now panel, and by Log footer cells when implemented. */
+  onElementChange: (next: ElementId) => void;
 }
 
 const SCREENS: Record<ElementId, React.ComponentType<ElementScreenProps>> = {
@@ -95,7 +98,14 @@ function loadSubTabMap(): Record<ElementId, string> {
     const parsed = JSON.parse(raw) as Record<string, string>;
     const out = initialSubTabMap();
     for (const id of ELEMENT_ORDER) {
-      const slug = parsed[id];
+      // Migration: legacy 'aos' slug → 'always-on' (May 2026 rename).
+      // Migration: legacy heart 'signal' / 'theme' → 'settings' merge.
+      const stored = parsed[id];
+      let slug = stored;
+      if (stored === 'aos') {slug = 'always-on';}
+      else if (id === 'heart' && (stored === 'signal' || stored === 'theme')) {
+        slug = 'settings';
+      }
       const valid = SUB_TABS_BY_ELEMENT[id].some(t => t.slug === slug);
       if (valid) {out[id] = slug;}
     }
@@ -188,7 +198,11 @@ export function ElementShell(): React.JSX.Element {
 
   const screen = (
     <Animated.View style={[styles.content, {opacity: fade}]}>
-      <Screen subTab={activeSub} onSubTabChange={setSubTab} />
+      <Screen
+        subTab={activeSub}
+        onSubTabChange={setSubTab}
+        onElementChange={setActiveElement}
+      />
     </Animated.View>
   );
 

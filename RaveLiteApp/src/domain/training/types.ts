@@ -22,6 +22,12 @@
  */
 export type InputMode = 'mmss' | 'integer' | 'distance-time' | 'decimal';
 
+import type {ElementId} from '../../theme/elements';
+
+/** Element a metric belongs to. `'any'` is the migration default for
+ *  legacy / cross-cutting kinds and means "show in every Train surface". */
+export type MetricElement = ElementId | 'any';
+
 /** Coarse grouping for the picker — drives section headers. */
 export type MetricCategory = 'run' | 'reps' | 'hold' | 'custom';
 
@@ -39,6 +45,10 @@ export interface MetricKind {
   category: MetricCategory;
   unit: MetricUnit;
   inputMode: InputMode;
+  /** Element this metric belongs to. Drives which Train surface lists
+   *  it. `'any'` means every element shows it (used as the migration
+   *  default for legacy kinds without an explicit element). */
+  element: MetricElement;
   /**
    * When the kind has a fixed distance (e.g. 3-mile run = 4828 m), this
    * locks the distance leg of the input. `distance-time` kinds without
@@ -78,4 +88,9 @@ export interface TrainingLogEntry {
   distanceMeters?: number;
   /** Optional free-text. */
   notes?: string;
+  /** Element this entry belongs to. Denormalized from kind at write
+   *  time so cross-element queries don't need to dereference every
+   *  kind. Optional for legacy entries; readers fall back to the
+   *  kind's element. */
+  element?: ElementId;
 }

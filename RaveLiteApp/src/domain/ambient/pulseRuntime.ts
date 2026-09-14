@@ -3,25 +3,30 @@
  *
  * Wraps the pure `pulseQueue` reducer with:
  *   - in-memory `QueueState`,
- *   - a 1Hz tick (driven by AlwaysOnPanel's existing poll, no new
- *     interval),
+ *   - a 1Hz self-tick started at app boot,
  *   - automatic journal commit for every emitted write,
  *   - automatic notifee fireNow for every `reminder.fired` write so the
- *     OS actually buzzes when a queued pulse promotes to active,
+ *     OS actually chimes when a queued pulse promotes to active,
+ *   - operator answers (seal / snooze / skip) that also dismiss the
+ *     pulse's notification,
  *   - a thin observer API (`subscribe`) so React can re-render on state
  *     changes without manually polling the runtime.
  *
- * Scope: the smallest plumbing layer that lets the Ribbon receive a
- * real `ActivePulseSummary`. The runtime does NOT (yet) auto-enqueue
- * from the Plan — that's Phase B of the scheduler. For now, callers
- * (Test Pulse, Plan-driven scheduler when it lands) call `enqueue()`
- * directly.
+ * Producers: `planScheduler` (element cadence from the Plan),
+ * `setScheduler` (Daily Sets), and Test Pulse.
  */
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {append} from '../journal/journal';
+import type {CompletionEntry} from '../journal/types';
+import {formatSetAmount} from '../program/progress';
 import {ELEMENTS, type ElementId} from '../../theme/elements';
-import {notifeeScheduler} from '../reminders/notifeeScheduler';
 import {
+  cancelPulseNotification,
+  notifeeScheduler,
+  type NotificationActionId,
+} from '../reminders/notifeeScheduler';
+import {
+  cancel as queueCancel,
   emptyQueue,
   enqueue as queueEnqueue,
   resolve as queueResolve,
@@ -32,7 +37,7 @@ import {
 } from './pulseQueue';
 import {pagingAllowedAt} from './activeHours';
 import type {ActivePulseSummary} from './ribbon';
-import type {PulseOutcome} from './types';
+import type {Pulse, PulseOutcome} from './types';
 
 let state: QueueState = emptyQueue();
 const listeners = new Set<() => void>();
@@ -51,49 +56,84 @@ export function subscribe(listener: () => void): () => void {
   };
 }
 
+function drillFor(p: Pick<Pulse, 'exerciseId'>) {
+  return p.exerciseId
+    ? EXERCISE_LIBRARY.find(e => e.id === p.exerciseId)
+    : undefined;
+}
+
+function findActive(): Pulse | undefined {
+  return state.pulses.find(p => p.state === 'active');
+}
+
 /** Read the active pulse, expanded to the shape the Ribbon needs. */
 export function getActivePulseSummary(): ActivePulseSummary | undefined {
-  const active = state.pulses.find(p => p.state === 'active');
+  const active = findActive();
   if (!active) {
     return undefined;
   }
-  const drill = active.exerciseId
-    ? EXERCISE_LIBRARY.find(e => e.id === active.exerciseId)
-    : undefined;
+  const drill = drillFor(active);
   return {
     pulseId: active.id,
     fireAt: active.fireAt,
     expiresAt: active.expiresAt,
     element: active.element,
     drillId: drill?.id ?? active.exerciseId ?? 'unknown',
-    drillName: drill?.name ?? 'Pulse',
+    drillName: active.prescription?.label ?? drill?.name ?? 'Pulse',
     durationSec: drill?.approxSeconds ?? 60,
     cuesShort: drill?.cues?.slice(0, 4) ?? [],
+    prescription: active.prescription,
   };
+}
+
+/** True while the runtime holds a pulse with this id (queued or active). */
+export function hasPulse(id: string): boolean {
+  return state.pulses.some(p => p.id === id);
+}
+
+/** Ids of queued (not yet fired) pulses from one plan window / producer. */
+export function queuedPulseIds(windowId: string): string[] {
+  return state.pulses
+    .filter(p => p.state === 'queued' && p.windowId === windowId)
+    .map(p => p.id);
+}
+
+function dismiss(pulseId: string): void {
+  cancelPulseNotification(pulseId).catch(() => {});
 }
 
 function commit(writes: ReturnType<typeof queueTick>['writes']): void {
   for (const w of writes) {
     append(w);
-    if (w.kind === 'reminder.fired') {
-      const el = ELEMENTS[w.element as ElementId];
-      const drill = w.exerciseId
-        ? EXERCISE_LIBRARY.find(e => e.id === w.exerciseId)
-        : undefined;
-      // Fire-and-forget; failure must not abort the queue advance.
-      notifeeScheduler
-        .fireNow({
-          element: w.element as ElementId,
-          color: el.color,
-          title: drill?.name ?? `${el.name} pulse`,
-          body: drill?.cues?.[0] ?? `Time for ${el.name}.`,
-          exerciseId: drill?.id ?? 'unknown',
-        })
-        .catch(err =>
-          // eslint-disable-next-line no-console
-          console.warn('[pulseRuntime] fireNow failed', err),
-        );
+    if (w.kind !== 'reminder.fired') {
+      continue;
     }
+    const el = ELEMENTS[w.element as ElementId];
+    const pulse = state.pulses.find(p => p.id === w.pulseId);
+    const drill = drillFor(w);
+    const rx = pulse?.prescription;
+    const cue = drill?.cues?.[0];
+    // Fire-and-forget; failure must not abort the queue advance.
+    notifeeScheduler
+      .fireNow({
+        element: w.element as ElementId,
+        color: el.color,
+        title: rx
+          ? `${rx.label} · ${formatSetAmount(rx.amount, rx.unit)}`
+          : drill?.name ?? `${el.name} pulse`,
+        body: rx
+          ? `Set ${rx.setIndex} of ${rx.sets}${cue ? ` · ${cue}` : ''}`
+          : cue ?? `Time for ${el.name}.`,
+        exerciseId: drill?.id ?? 'unknown',
+        pulseId: w.pulseId,
+        data: rx
+          ? {trackId: rx.trackId, amount: String(rx.amount), unit: rx.unit}
+          : undefined,
+      })
+      .catch(err =>
+        // eslint-disable-next-line no-console
+        console.warn('[pulseRuntime] fireNow failed', err),
+      );
   }
 }
 
@@ -124,6 +164,20 @@ export function enqueueNow(opts: {
   tickNow(now);
 }
 
+/** Drop queued pulses by id. Active pulses are left alone. */
+export function cancelQueued(ids: readonly string[]): void {
+  let next = state;
+  for (const id of ids) {
+    if (next.pulses.some(p => p.id === id && p.state === 'queued')) {
+      next = queueCancel(next, id).state;
+    }
+  }
+  if (next !== state) {
+    state = next;
+    notify();
+  }
+}
+
 /** Drive the reducer one step at the given epoch ms. */
 export function tickNow(now: number = Date.now()): void {
   const result = queueTick(state, now, t =>
@@ -137,31 +191,94 @@ export function tickNow(now: number = Date.now()): void {
   notify();
 }
 
-/** Operator resolution of the currently-active pulse. */
+/**
+ * Seal the active pulse: resolve it and write the CompletionEntry. For a
+ * Daily Sets pulse the entry carries `trackId` + `amount` (the prescribed
+ * amount unless the operator adjusted it).
+ */
+export function sealActive(
+  opts: {
+    amount?: number;
+    source?: CompletionEntry['source'];
+    at?: number;
+  } = {},
+): CompletionEntry | undefined {
+  const active = findActive();
+  if (!active) {
+    return undefined;
+  }
+  const at = opts.at ?? Date.now();
+  const drill = drillFor(active);
+  const rx = active.prescription;
+  const result = queueResolve(state, active.id, 'completed', at);
+  state = result.state;
+  commit(result.writes);
+  const entry = append({
+    kind: 'completion',
+    at,
+    exerciseId: drill?.id ?? active.exerciseId ?? 'unknown',
+    element: active.element,
+    source: opts.source ?? 'always-on',
+    pulseId: active.id,
+    respondedAfterMs: Math.max(0, at - active.fireAt),
+    durationSec: drill?.approxSeconds,
+    ...(rx ? {trackId: rx.trackId, amount: opts.amount ?? rx.amount} : {}),
+  }) as CompletionEntry;
+  dismiss(active.id);
+  notify();
+  return entry;
+}
+
+/** Operator resolution (skip / ignore) of the currently-active pulse. */
 export function resolveActive(
   outcome: PulseOutcome,
   at: number = Date.now(),
 ): void {
-  const active = state.pulses.find(p => p.state === 'active');
+  const active = findActive();
   if (!active) {
     return;
   }
   const result = queueResolve(state, active.id, outcome, at);
   state = result.state;
   commit(result.writes);
+  dismiss(active.id);
   notify();
 }
 
 /** Operator snooze of the currently-active pulse. */
 export function snoozeActive(at: number = Date.now()): void {
-  const active = state.pulses.find(p => p.state === 'active');
+  const active = findActive();
   if (!active) {
     return;
   }
   const result = queueSnooze(state, active.id, at);
   state = result.state;
   commit(result.writes);
+  dismiss(active.id);
   notify();
+}
+
+/**
+ * Answer a pulse from its notification buttons. Returns false when the
+ * runtime isn't holding that pulse as active (expired, or the process
+ * restarted) so the caller can record the answer directly.
+ */
+export function answerActivePulse(
+  pulseId: string,
+  action: NotificationActionId,
+  at: number = Date.now(),
+): boolean {
+  if (findActive()?.id !== pulseId) {
+    return false;
+  }
+  if (action === 'seal') {
+    sealActive({source: 'notification', at});
+  } else if (action === 'snooze') {
+    snoozeActive(at);
+  } else {
+    resolveActive('skipped', at);
+  }
+  return true;
 }
 
 /** Test-only state accessors. */

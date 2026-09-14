@@ -10,7 +10,7 @@
  */
 
 import React, {useMemo, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {CardGrid} from '../../components/CardGrid';
 import {ExerciseRow} from '../../components/ExerciseRow';
@@ -23,6 +23,7 @@ import {
 
 import type {ElementIdentity} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {useOrientation} from '../../shell/useOrientation';
 
 import {exercisesFor} from '../../domain/exercises/library';
 import type {Exercise, Target} from '../../domain/exercises/types';
@@ -52,6 +53,10 @@ import {pulseHaptic} from '../../lib/elementHaptics';
 import {ELEMENTS, ELEMENT_ORDER} from '../../theme/elements';
 import {ElementProvider} from '../../theme/elementContext';
 import {TrainingLogPanel} from '../../components/training/TrainingLogPanel';
+import {CalendarPicker} from '../../components/training/CalendarPicker';
+import {MS_PER_DAY} from '../../lib/constants';
+import {store} from '../../storage';
+import {KEYS} from '../../storage/keys';
 
 export type ElementSubSlug = 'now' | 'drills' | 'log' | 'stats' | 'tune' | 'train';
 
@@ -81,10 +86,14 @@ function renderSubPage({element, subTab, onSubTabChange}: Props) {
     case 'drills':
       return <DrillsPanel element={element} />;
     case 'train':
-      return <TrainingLogPanel />;
+      return <TrainingLogPanel element={element.id} />;
     case 'log':
       return (
-        <LogPanel element={element} onJumpElement={onSubTabChange} />
+        <LogPanel
+          element={element}
+          onJumpElement={onSubTabChange}
+          onOpenNow={() => onSubTabChange('now')}
+        />
       );
     case 'stats':
       return <StatsPanel element={element} />;
@@ -96,6 +105,8 @@ function renderSubPage({element, subTab, onSubTabChange}: Props) {
 }
 
 // ─── NowPanel ───────────────────────────────────────────────────────────
+
+const NOW_HELP_KEY = KEYS.setting('nowHelp.dismissed');
 
 interface NowProps {
   element: ElementIdentity;
@@ -120,6 +131,20 @@ function NowPanel({element, onOpenLibrary}: NowProps) {
   const [prefs] = useState(() => getElementPrefs(element.id));
   const [swapTick, setSwapTick] = useState(0);
   const [showAlternates, setShowAlternates] = useState(false);
+  // First-time inline help. Dismissed flag persists across launches; a
+  // single key covers all elements since the concept is universal.
+  const [showHelp, setShowHelp] = useState(
+    () => store.getBoolean(NOW_HELP_KEY) !== true,
+  );
+  const dismissHelp = () => {
+    store.set(NOW_HELP_KEY, true);
+    setShowHelp(false);
+  };
+  const {orientation, isTablet} = useOrientation();
+  // Phone landscape: short and wide. Two-column layout with hero on the
+  // left and alternates auto-expanded on the right kills the dead
+  // whitespace and avoids forcing the operator to scroll for a swap.
+  const phoneLand = orientation === 'landscape' && !isTablet;
 
   // Re-evaluate hero pick on swap. Variety pressure pushes recent picks
   // down, so each swap should yield a fresh face.
@@ -147,52 +172,118 @@ function NowPanel({element, onOpenLibrary}: NowProps) {
     );
   }
 
-  return (
-    <View style={styles.body}>
-      <PulseStrip element={element.id} refreshKey={swapTick} />
-      <View
-        style={[
-          styles.heroCard,
-          {borderColor: element.accent, backgroundColor: '#0E1015'},
-        ]}>
-        <Text style={[styles.eyebrow, {color: element.accent}]}>
-          {element.glyph}  NOW · {element.name.toUpperCase()}
+  const helpBanner = showHelp ? (
+    <View style={[styles.helpBanner, {borderColor: element.accent}]}>
+      <Text style={[styles.helpEyebrow, {color: element.accent}]}>
+        WHAT IS A PULSE?
+      </Text>
+      <Text style={styles.helpBody}>
+        A pulse is a one-tap drill cued by your wrist or this screen. Tap{' '}
+        <Text style={[styles.helpAccent, {color: element.color}]}>
+          {element.verbDone}
+        </Text>{' '}
+        to seal it. Swap rerolls if it doesn’t fit the moment.
+      </Text>
+      <Tap
+        variant="plain"
+        color={element.accent}
+        onPress={dismissHelp}
+        style={styles.helpDismiss}>
+        <Text style={[styles.helpDismissText, {color: element.accent}]}>
+          Got it ×
         </Text>
-        <Text style={styles.heroName}>{hero.name}</Text>
-        <Text style={styles.heroDose}>{hero.dose}</Text>
-        <Text style={styles.heroPurpose}>{hero.purpose}</Text>
-        {hero.cues && hero.cues.length > 0 && (
-          <View style={styles.cueList}>
-            {hero.cues.slice(0, 3).map((c, i) => (
-              <Text key={i} style={styles.cue}>
-                ◦  {c}
-              </Text>
+      </Tap>
+    </View>
+  ) : null;
+
+  const heroBlock = (
+    <View
+      style={[
+        styles.heroCard,
+        {borderColor: element.accent, backgroundColor: '#0E1015'},
+      ]}>
+      <Text style={[styles.eyebrow, {color: element.accent}]}>
+        {element.glyph}  NOW · {element.name.toUpperCase()}
+      </Text>
+      <Text style={styles.heroName}>{hero.name}</Text>
+      <Text style={styles.heroDose}>{hero.dose}</Text>
+      <Text style={styles.heroPurpose}>{hero.purpose}</Text>
+      {hero.cues && hero.cues.length > 0 && (
+        <View style={styles.cueList}>
+          {hero.cues.slice(0, 3).map((c, i) => (
+            <Text key={i} style={styles.cue}>
+              ◦  {c}
+            </Text>
+          ))}
+        </View>
+      )}
+      <View style={styles.heroBtnRow}>
+        <Tap
+          variant="solid"
+          color={element.color}
+          onPress={() => {
+            recordCompletion(hero, 'manual');
+            pulseHaptic(element.id, 'seal');
+            setSwapTick(n => n + 1);
+          }}
+          style={styles.btnFlex}>
+          <Text style={styles.btnText}>{element.verbDone}</Text>
+        </Tap>
+        <Tap
+          variant="ghost"
+          color={element.accent}
+          onPress={() => setSwapTick(n => n + 1)}
+          style={styles.btnFlex}>
+          <Text style={[styles.btnText, {color: element.accent}]}>
+            ↻ Swap
+          </Text>
+        </Tap>
+      </View>
+    </View>
+  );
+
+  if (phoneLand) {
+    return (
+      <View style={styles.nowLandRow}>
+        <ScrollView
+          style={styles.nowLandLeft}
+          contentContainerStyle={styles.body}>
+          <PulseStrip element={element.id} refreshKey={swapTick} />
+          {helpBanner}
+          {heroBlock}
+        </ScrollView>
+        <ScrollView
+          style={styles.nowLandRight}
+          contentContainerStyle={styles.nowLandRightBody}>
+          <Text style={styles.altsHeader}>ALTERNATES</Text>
+          <CardGrid>
+            {alternates.map(ex => (
+              <ExerciseRow
+                key={ex.id}
+                exercise={ex}
+                onCompleted={() => setSwapTick(n => n + 1)}
+              />
             ))}
-          </View>
-        )}
-        <View style={styles.heroBtnRow}>
+          </CardGrid>
           <Tap
-            variant="solid"
-            color={element.color}
-            onPress={() => {
-              recordCompletion(hero, 'manual');
-              pulseHaptic(element.id, 'seal');
-              setSwapTick(n => n + 1);
-            }}
-            style={styles.btnFlex}>
-            <Text style={styles.btnText}>{element.verbDone}</Text>
-          </Tap>
-          <Tap
-            variant="ghost"
+            variant="plain"
             color={element.accent}
-            onPress={() => setSwapTick(n => n + 1)}
-            style={styles.btnFlex}>
-            <Text style={[styles.btnText, {color: element.accent}]}>
-              ↻ Swap
+            onPress={onOpenLibrary}
+            style={styles.linkRow}>
+            <Text style={[styles.linkText, {color: element.accent}]}>
+              See full library →
             </Text>
           </Tap>
-        </View>
+        </ScrollView>
       </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
+      <PulseStrip element={element.id} refreshKey={swapTick} />
+      {helpBanner}
+      {heroBlock}
 
       <Tap
         variant="plain"
@@ -224,7 +315,7 @@ function NowPanel({element, onOpenLibrary}: NowProps) {
           See full library →
         </Text>
       </Tap>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -247,7 +338,7 @@ function DrillsPanel({element}: DrillsProps) {
   }, [all, filter]);
 
   return (
-    <View style={styles.body}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
       <TargetFilterStrip
         active={filter}
         onChange={setFilter}
@@ -270,7 +361,7 @@ function DrillsPanel({element}: DrillsProps) {
           ))}
         </CardGrid>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -283,20 +374,59 @@ interface LogProps {
    *  here; to jump to ANOTHER element's log, the shell would need to do
    *  it. So the footer currently shows counts only, no jump. */
   onJumpElement: (slug: string) => void;
+  /** Jump back to the Now panel for the current element — used as the
+   *  primary CTA when the day's log is empty. */
+  onOpenNow: () => void;
 }
 
-const ELEMENT_EMPTY: Record<string, string> = {
-  fire: 'No fire today. Time to burn the cage.',
-  air: 'Breath untouched. Crack the seal.',
-  earth: 'Frame not set today.',
-  water: 'Flow hasn’t moved today.',
-  heart: 'No conductor pulses today.',
+interface EmptyCopy {
+  title: string;
+  body: string;
+  cta: string;
+}
+
+const ELEMENT_EMPTY: Record<string, EmptyCopy> = {
+  fire: {
+    title: 'No fire today.',
+    body: 'Burn the cage. One drill is enough to break inertia.',
+    cta: 'Pick a drill',
+  },
+  air: {
+    title: 'Breath untouched.',
+    body: 'Crack the seal. Air work resets the nervous system in a minute.',
+    cta: 'Open Air Now',
+  },
+  earth: {
+    title: 'Frame not set today.',
+    body: 'Stand the column. Even one rep tunes posture for hours.',
+    cta: 'Set the frame',
+  },
+  water: {
+    title: 'Flow hasn’t moved.',
+    body: 'A short flow restores joint glide. Enter through Now.',
+    cta: 'Start a flow',
+  },
+  heart: {
+    title: 'No conductor pulses today.',
+    body: 'Heart sets tempo for the other four. Light a pulse.',
+    cta: 'Open Heart Now',
+  },
 };
 
-function LogPanel({element}: LogProps) {
+function LogPanel({element, onOpenNow}: LogProps) {
+  const [selectedDay, setSelectedDay] = useState<number>(() =>
+    startOfDay(Date.now()),
+  );
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const dayDate = useMemo(() => new Date(selectedDay), [selectedDay]);
+  const today = startOfDay(Date.now());
+  const isToday = selectedDay === today;
+  const isFuture = selectedDay > today;
+
   const entries = useMemo(
-    () => completionsTodayEntriesForElement(element.id),
-    [element.id],
+    () => completionsTodayEntriesForElement(element.id, dayDate),
+    [element.id, dayDate],
   );
   const allLib = useMemo(() => exercisesFor(element.id), [element.id]);
   const nameById = useMemo(() => {
@@ -304,19 +434,123 @@ function LogPanel({element}: LogProps) {
     for (const ex of allLib) {m.set(ex.id, ex.name);}
     return m;
   }, [allLib]);
-  const byElement = useMemo(() => completionsTodayByElement(), [
-    // recompute on element switch — cheap.
-    element.id,
-  ]);
+  const byElement = useMemo(
+    () => completionsTodayByElement(dayDate),
+    [dayDate],
+  );
+
+  // Folded stats — these used to live on the StatsPanel. Day count is
+  // for the SELECTED day; week is the trailing 7 ending at selectedDay;
+  // streak is only meaningful "today" so we hide it on history days.
+  const dayCount = useMemo(
+    () => completionsTodayForElement(element.id, dayDate),
+    [element.id, dayDate],
+  );
+  const weekTotal = useMemo(() => {
+    const arr = completionsByDayForElement(element.id, 7, dayDate);
+    return arr.reduce((a, b) => a + b, 0);
+  }, [element.id, dayDate]);
+  const streak = useMemo(
+    () => (isToday ? currentStreakDaysForElement(element.id) : 0),
+    [element.id, isToday],
+  );
+
+  const dayLabel = isToday
+    ? 'Today'
+    : selectedDay === today - MS_PER_DAY
+    ? 'Yesterday'
+    : dayDate.toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
+
+  const stepDay = (delta: number) => {
+    const next = startOfDay(selectedDay + delta * MS_PER_DAY);
+    if (next > today) {return;}
+    setSelectedDay(next);
+  };
 
   return (
-    <View style={styles.body}>
-      <Text style={[styles.metaLine, {color: element.accent}]}>
-        {entries.length} sealed today · {element.name}
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
+      {/* Date scrubber */}
+      <View style={styles.dateScrubRow}>
+        <Tap
+          variant="ghost"
+          color={element.accent}
+          onPress={() => stepDay(-1)}
+          style={styles.dateNavBtn}>
+          <Text style={[styles.dateNavText, {color: element.accent}]}>‹</Text>
+        </Tap>
+        <Tap
+          variant="ghost"
+          color={element.accent}
+          onPress={() => setPickerOpen(true)}
+          style={styles.dateLabelBtn}>
+          <Text style={styles.dateLabelText}>{dayLabel}</Text>
+        </Tap>
+        <Tap
+          variant="ghost"
+          color={element.accent}
+          onPress={() => stepDay(1)}
+          style={[styles.dateNavBtn, isToday && styles.dateNavDisabled]}>
+          <Text
+            style={[
+              styles.dateNavText,
+              {color: isToday ? palette.textMuted : element.accent},
+            ]}>
+            ›
+          </Text>
+        </Tap>
+      </View>
+
+      {/* Folded stats tiles */}
+      <View style={styles.statRow}>
+        <StatTile
+          label={isToday ? 'Today' : 'That day'}
+          value={dayCount}
+          accent={element.color}
+        />
+        <StatTile label="7-day" value={weekTotal} accent={element.color} />
+        {isToday && (
+          <StatTile
+            label="Streak"
+            value={streak}
+            accent={element.color}
+            suffix="d"
+          />
+        )}
+      </View>
+
+      <Text style={[styles.metaLine, {color: element.accent, marginTop: spacing.lg}]}>
+        {entries.length} sealed · {element.name}
       </Text>
+
       {entries.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyText}>{ELEMENT_EMPTY[element.id]}</Text>
+          {isFuture ? (
+            <Text style={styles.emptyText}>The future is unwritten.</Text>
+          ) : !isToday ? (
+            <Text style={styles.emptyText}>Nothing sealed that day.</Text>
+          ) : (
+            <>
+              <Text style={styles.emptyTitle}>
+                {ELEMENT_EMPTY[element.id].title}
+              </Text>
+              <Text style={styles.emptyText}>
+                {ELEMENT_EMPTY[element.id].body}
+              </Text>
+              <Tap
+                variant="solid"
+                color={element.color}
+                onPress={onOpenNow}
+                style={styles.emptyCta}>
+                <Text style={styles.btnText}>
+                  {ELEMENT_EMPTY[element.id].cta}
+                </Text>
+              </Tap>
+            </>
+          )}
         </View>
       ) : (
         <View style={styles.logList}>
@@ -353,8 +587,26 @@ function LogPanel({element}: LogProps) {
           );
         })}
       </View>
-    </View>
+
+      <CalendarPicker
+        visible={pickerOpen}
+        selected={selectedDay}
+        accent={element.accent}
+        onPick={epoch => {
+          const start = startOfDay(epoch);
+          if (start <= today) {setSelectedDay(start);}
+          setPickerOpen(false);
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
+    </ScrollView>
   );
+}
+
+function startOfDay(ms: number): number {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 }
 
 function fmtTime(ms: number): string {
@@ -387,7 +639,7 @@ function StatsPanel({element}: StatsProps) {
   const prefs = getElementPrefs(element.id);
 
   return (
-    <View style={styles.body}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
       <View style={styles.statRow}>
         <StatTile label="Today" value={today} accent={element.color} />
         <StatTile label="7-day" value={sevenDay} accent={element.color} />
@@ -403,7 +655,7 @@ function StatsPanel({element}: StatsProps) {
           color={element.color}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -460,7 +712,7 @@ function TunePanel({element}: TuneProps) {
     update({focusTargets: next, focusLocked: true});
 
   return (
-    <View style={styles.body}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
       <Text style={styles.section}>Operating mode</Text>
       <View style={styles.presetRow}>
         {PRESETS.map(p => {
@@ -533,26 +785,96 @@ function TunePanel({element}: TuneProps) {
         style={styles.resetRow}>
         <Text style={styles.resetText}>Reset {element.name} to defaults</Text>
       </Tap>
-    </View>
+    </ScrollView>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
   body: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
   },
+  nowLandRow: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  nowLandLeft: {
+    flex: 1.2,
+  },
+  nowLandRight: {
+    flex: 1,
+    borderLeftWidth: 1,
+    borderLeftColor: palette.border,
+  },
+  nowLandRightBody: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  altsHeader: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    color: palette.textDim,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
   empty: {
     paddingVertical: spacing.xl,
     alignItems: 'center',
+    gap: spacing.sm,
+  },
+  emptyTitle: {
+    ...t.subtitle,
+    color: palette.text,
+    textAlign: 'center',
   },
   emptyText: {
     ...t.body,
     color: palette.textDim,
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  emptyCta: {
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.xl,
+  },
+
+  // First-time help banner (Now)
+  helpBanner: {
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    backgroundColor: palette.surface,
+  },
+  helpEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    marginBottom: spacing.xs,
+  },
+  helpBody: {
+    ...t.body,
+    color: palette.text,
+    lineHeight: 20,
+  },
+  helpAccent: {
+    fontWeight: '700',
+  },
+  helpDismiss: {
+    alignSelf: 'flex-end',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  helpDismissText: {
+    ...t.caption,
+    fontWeight: '600',
   },
 
   // Hero (Now)
@@ -672,6 +994,41 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.textMuted,
     marginTop: 2,
+  },
+  // Date scrubber (Log)
+  dateScrubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  dateNavBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    minWidth: 44,
+    alignItems: 'center',
+  },
+  dateNavDisabled: {
+    opacity: 0.35,
+  },
+  dateNavText: {
+    fontSize: 24,
+    fontWeight: '600',
+    lineHeight: 24,
+  },
+  dateLabelBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: radius.pill,
+    backgroundColor: palette.surface,
+  },
+  dateLabelText: {
+    ...t.body,
+    color: palette.text,
+    fontWeight: '600',
   },
   crossRow: {
     flexDirection: 'row',

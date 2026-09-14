@@ -79,6 +79,7 @@ describe('bestEntry', () => {
     unit: 'seconds',
     inputMode: 'mmss',
     builtIn: true,
+    element: 'fire',
   };
   const repsKind: MetricKind = {
     id: 'builtin.pushups-amrap',
@@ -87,7 +88,26 @@ describe('bestEntry', () => {
     unit: 'reps',
     inputMode: 'integer',
     builtIn: true,
+    element: 'fire',
   };
+  const holdKind: MetricKind = {
+    id: 'builtin.plank',
+    label: 'Plank — max hold',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'earth',
+  };
+
+  it('longest hold wins for hold kinds, even though they are mm:ss', () => {
+    const now = Date.now();
+    const entries: TrainingLogEntry[] = [
+      {id: 'short', at: now, kindId: holdKind.id, value: 40},
+      {id: 'long', at: now - 86400_000, kindId: holdKind.id, value: 95},
+    ];
+    expect(bestEntry(entries, holdKind.id, holdKind, 7 * 86400_000, now)?.id).toBe('long');
+  });
 
   it('lowest time wins for run kinds', () => {
     const now = Date.now();

@@ -36,24 +36,30 @@ import {
   getMetric,
   loadArchivedMetrics,
   loadMetrics,
+  loadMetricsForElement,
   unarchiveMetric,
   updateEntry,
 } from '../../domain/training/repository';
 import {InputMode, MetricCategory, MetricKind, TrainingLogEntry} from '../../domain/training/types';
+import type {ElementId} from '../../theme/elements';
 import {gradeForRun, formatPace} from '../../domain/training/grading';
 import {NumberPad} from './NumberPad';
 import {CalendarPicker} from './CalendarPicker';
+import {METERS_PER_MILE, MS_PER_DAY} from '../../lib/constants';
 
-const MI_PER_M = 1 / 1609.344;
+const MI_PER_M = 1 / METERS_PER_MILE;
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   /** When set, the sheet edits this entry instead of creating one. */
   editing?: TrainingLogEntry;
+  /** When set, scopes the metric picker to this element + 'any',
+   *  pre-fills the picker, and tags new entries with this element. */
+  defaultElement?: ElementId;
 }
 
-export function TrainingLogSheet({visible, onClose, editing}: Props) {
+export function TrainingLogSheet({visible, onClose, editing, defaultElement}: Props) {
   const {width, height} = useWindowDimensions();
   const accent = useElementAccent();
   // Use 2-column layout whenever width > height (phone landscape too).
@@ -64,7 +70,10 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
   const [tick, setTick] = useState(0);
   const refresh = () => setTick(x => x + 1);
 
-  const metrics = useMemo(loadMetrics, [tick]);
+  const metrics = useMemo(
+    () => (defaultElement ? loadMetricsForElement(defaultElement) : loadMetrics()),
+    [tick, defaultElement],
+  );
   const editingKind = useMemo(
     () => (editing ? getMetric(editing.kindId) : undefined),
     [editing?.id, tick],
@@ -153,7 +162,7 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
         ? undefined
         : selectedKind.defaultDistanceMeters
           ? selectedKind.defaultDistanceMeters
-          : Math.round((distanceCenti / 100) * 1609.344);
+          : Math.round((distanceCenti / 100) * METERS_PER_MILE);
     const trimmedNotes = notes.trim() || undefined;
     if (editing) {
       updateEntry(editing.id, {
@@ -170,6 +179,10 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
         value,
         distanceMeters,
         notes: trimmedNotes,
+        element:
+          selectedKind.element && selectedKind.element !== 'any'
+            ? selectedKind.element
+            : defaultElement,
       });
     }
     onClose();
@@ -187,7 +200,7 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
     if (selectedKind.inputMode === 'mmss' && selectedKind.defaultDistanceMeters)
       return selectedKind.defaultDistanceMeters;
     if (selectedKind.inputMode === 'distance-time')
-      return Math.round((distanceCenti / 100) * 1609.344);
+      return Math.round((distanceCenti / 100) * METERS_PER_MILE);
     return undefined;
   }, [selectedKind, distanceCenti]);
 
@@ -211,6 +224,14 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
         {/* Compact header with inline save/cancel */}
         <View style={styles.header}>
           <Text style={styles.title}>{editing ? 'Edit Entry' : 'New Training Log'}</Text>
+          {isLandscape && liveGrade && livePace ? (
+            <View style={styles.headerGrade}>
+              <Text style={[styles.headerGradeText, {color: accent}]}>
+                {liveGrade.grade}
+              </Text>
+              <Text style={styles.headerPaceText}>{livePace}</Text>
+            </View>
+          ) : null}
           <View style={styles.headerActions}>
             {editing ? (
               <Pressable onPress={handleDelete} style={[styles.btn, styles.btnDanger]}>
@@ -263,7 +284,7 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
                   <Text style={styles.sectionTitle}>When</Text>
                   <View style={styles.dateRow}>
                     {[0, 1, 2, 3].map(i => {
-                      const day = startOfDay(Date.now()) - i * 86_400_000;
+                      const day = startOfDay(Date.now()) - i * MS_PER_DAY;
                       const isSel = startOfDay(atEpoch) === day;
                       return (
                         <Pressable
@@ -321,14 +342,6 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
                           onDistance={setDistanceCenti}
                           accent={accent}
                         />
-                        {liveGrade && livePace ? (
-                          <View style={styles.gradeBadge}>
-                            <Text style={[styles.gradeText, {color: accent}]}>
-                              {liveGrade.grade}
-                            </Text>
-                            <Text style={styles.paceText}>{livePace}</Text>
-                          </View>
-                        ) : null}
                       </View>
                     ) : null}
 
@@ -344,6 +357,16 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
                         style={[styles.notesInput, isLandscape && styles.notesInputLand]}
                         multiline
                       />
+                      {!isLandscape && liveGrade && livePace ? (
+                        <View style={styles.portraitGradeRow}>
+                          <View style={styles.headerGrade}>
+                            <Text style={[styles.headerGradeText, {color: accent}]}>
+                              {liveGrade.grade}
+                            </Text>
+                            <Text style={styles.headerPaceText}>{livePace}</Text>
+                          </View>
+                        </View>
+                      ) : null}
                     </View>
                   </View>
                 </>
@@ -358,6 +381,7 @@ export function TrainingLogSheet({visible, onClose, editing}: Props) {
           onClose={closeManage}
           onChange={refresh}
           accent={accent}
+          defaultElement={defaultElement}
         />
 
         <CalendarPicker
@@ -405,7 +429,14 @@ function FlatMetricList({
   onSelect: (id: string) => void;
   accent: string;
 }) {
-  return <FlatMetricListInner metrics={metrics} selectedId={selectedId} onSelect={onSelect} accent={accent} />;
+  return (
+    <FlatMetricListInner
+      metrics={metrics}
+      selectedId={selectedId}
+      onSelect={onSelect}
+      accent={accent}
+    />
+  );
 }
 
 const FlatMetricListInner = React.memo(function FlatMetricListInner({
@@ -503,12 +534,14 @@ function ManageMetricsSheet({
   onClose,
   onChange,
   accent,
+  defaultElement,
 }: {
   visible: boolean;
   metrics: MetricKind[];
   onClose: () => void;
   onChange: () => void;
   accent: string;
+  defaultElement?: ElementId;
 }) {
   const [showAdd, setShowAdd] = useState(false);
   return (
@@ -555,6 +588,7 @@ function ManageMetricsSheet({
         <AddCustomMetricSheet
           visible={showAdd}
           accent={accent}
+          defaultElement={defaultElement}
           onClose={() => {
             setShowAdd(false);
             onChange();
@@ -592,10 +626,12 @@ function AddCustomMetricSheet({
   visible,
   onClose,
   accent,
+  defaultElement,
 }: {
   visible: boolean;
   onClose: () => void;
   accent: string;
+  defaultElement?: ElementId;
 }) {
   const [label, setLabel] = useState('');
   const [mode, setMode] = useState<InputMode>('integer');
@@ -618,6 +654,7 @@ function AddCustomMetricSheet({
       category,
       unit: mode === 'mmss' ? 'seconds' : mode === 'integer' ? 'reps' : 'misc',
       inputMode: mode,
+      element: defaultElement ?? 'any',
     });
     onClose();
   }
@@ -702,7 +739,7 @@ function isWithinQuickRange(epoch: number): boolean {
   const today = startOfDay(Date.now());
   const sel = startOfDay(epoch);
   const diff = today - sel;
-  return diff >= 0 && diff <= 3 * 86_400_000;
+  return diff >= 0 && diff <= 3 * MS_PER_DAY;
 }
 
 function formatPickedDate(epoch: number): string {
@@ -801,6 +838,31 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: palette.text,
     flex: 1,
+  },
+  headerGrade: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    backgroundColor: palette.surface,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  headerGradeText: {
+    fontSize: 18,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  headerPaceText: {
+    ...t.caption,
+    color: palette.textDim,
+    fontVariant: ['tabular-nums'],
+  },
+  portraitGradeRow: {
+    marginTop: spacing.md,
+    alignItems: 'center',
   },
   headerActions: {
     flexDirection: 'row',

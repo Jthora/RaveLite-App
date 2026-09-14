@@ -1,0 +1,163 @@
+import {MS_PER_DAY} from '../../lib/constants';
+import type {
+  DayPrescription,
+  Phase,
+  ProgramState,
+  Rung,
+  Track,
+  TrackState,
+} from './types';
+
+/**
+ * Progression — pure rules for how much work each track asks for today.
+ *
+ *   Volume  — sets/day climb +1 per build week, and each 4-week block
+ *             starts one set higher than the last. Week 4 of every block
+ *             is a deload at ~60% of the block's peak.
+ *   Load    — set size is ~50% of the tested max. Retesting (best done
+ *             on deload weeks, when fresh) is what raises it.
+ *   Skill   — once the set size reaches the rung's `graduateAt`, the next
+ *             rung (harder variation) is unlocked. Moving up resets the
+ *             max to an estimate until the operator tests it.
+ */
+
+export const BLOCK_WEEKS = 4;
+/** Deload volume relative to the block's peak build week. */
+const DELOAD_FACTOR = 0.6;
+
+/** Parse a local "YYYY-MM-DD" into local midnight. */
+export function parseDayKey(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/** Whole local calendar days from `from` to `to` (DST-safe). */
+function daysBetween(from: Date, to: Date): number {
+  const a = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const b = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+  return Math.round((b.getTime() - a.getTime()) / MS_PER_DAY);
+}
+
+/** 1-based program week containing `date`. Dates before the start are week 1. */
+export function programWeek(startDay: string, date: Date): number {
+  const days = daysBetween(parseDayKey(startDay), date);
+  return days < 0 ? 1 : Math.floor(days / 7) + 1;
+}
+
+export function phaseForWeek(week: number): Phase {
+  return (Math.max(1, week) - 1) % BLOCK_WEEKS === BLOCK_WEEKS - 1
+    ? 'deload'
+    : 'build';
+}
+
+/** Sets per day for a track in a given program week. */
+export function setsForWeek(track: Track, week: number): number {
+  const w = Math.max(1, week);
+  const block = Math.floor((w - 1) / BLOCK_WEEKS);
+  const inBlock = (w - 1) % BLOCK_WEEKS;
+  const build = (i: number) =>
+    Math.min(track.maxSets, track.baseSets + block + i);
+  if (inBlock === BLOCK_WEEKS - 1) {
+    return Math.max(2, Math.round(build(BLOCK_WEEKS - 2) * DELOAD_FACTOR));
+  }
+  return build(inBlock);
+}
+
+/** Per-set amount: ~intensity × max. Holds round to 5 s, minimum 10 s. */
+export function setSizeFor(track: Track, state: TrackState): number {
+  const raw = state.testMax * track.intensity;
+  if (track.unit === 'seconds') {
+    return Math.max(10, Math.round(raw / 5) * 5);
+  }
+  return Math.max(1, Math.round(raw));
+}
+
+function clampRung(track: Track, rung: number): number {
+  return Math.max(0, Math.min(track.ladder.length - 1, rung));
+}
+
+export function currentRung(track: Track, state: TrackState): Rung {
+  return track.ladder[clampRung(track, state.rung)];
+}
+
+export function trainsOn(track: Track, date: Date): boolean {
+  return track.days.includes(date.getDay());
+}
+
+/** Today's work for one track, or `undefined` on a rest day / disabled track. */
+export function prescribeDay(
+  track: Track,
+  state: TrackState,
+  program: ProgramState,
+  date: Date,
+): DayPrescription | undefined {
+  if (!state.enabled || !trainsOn(track, date)) {
+    return undefined;
+  }
+  const rung = currentRung(track, state);
+  const week = programWeek(program.startDay, date);
+  return {
+    trackId: track.id,
+    element: track.element,
+    exerciseId: rung.exerciseId,
+    label: rung.label,
+    unit: track.unit,
+    setSize: setSizeFor(track, state),
+    sets: setsForWeek(track, week),
+    week,
+    phase: phaseForWeek(week),
+  };
+}
+
+/** True once the set size has reached the current rung's graduation mark. */
+export function readyToLevelUp(track: Track, state: TrackState): boolean {
+  const i = clampRung(track, state.rung);
+  return (
+    i < track.ladder.length - 1 &&
+    setSizeFor(track, state) >= track.ladder[i].graduateAt
+  );
+}
+
+/** Record a max test on the current rung. */
+export function applyTest(state: TrackState, max: number, at: number): TrackState {
+  return {...state, testMax: Math.max(1, Math.round(max)), testedAt: at};
+}
+
+/**
+ * Step up to the next rung. A harder variation roughly halves what you
+ * can do, so the max is estimated at 50% until the operator tests it.
+ */
+export function levelUp(track: Track, state: TrackState): TrackState {
+  const i = clampRung(track, state.rung);
+  if (i >= track.ladder.length - 1) {
+    return state;
+  }
+  const floor = track.unit === 'seconds' ? 20 : 2;
+  return {
+    ...state,
+    rung: i + 1,
+    testMax: Math.max(floor, Math.round(state.testMax * 0.5)),
+    testedAt: undefined,
+  };
+}
+
+/**
+ * A max test is due when the current rung has never been tested, or
+ * during a deload week whose start is after the last test.
+ */
+export function isTestDue(
+  program: ProgramState,
+  state: TrackState,
+  date: Date,
+): boolean {
+  if (state.testedAt === undefined) {
+    return true;
+  }
+  const week = programWeek(program.startDay, date);
+  if (phaseForWeek(week) !== 'deload') {
+    return false;
+  }
+  const weekStart = parseDayKey(program.startDay);
+  weekStart.setDate(weekStart.getDate() + (week - 1) * 7);
+  return state.testedAt < weekStart.getTime();
+}

@@ -16,24 +16,27 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import {palette} from './src/theme';
 import {runMigrations} from './src/storage/migrations';
-import {hydratePersistence} from './src/storage/persistence';
+import {ensureHydrated} from './src/storage/persistence';
 import {
   bootstrapHeartVariant,
   subscribeHeartVariant,
 } from './src/theme/heartVariants';
 import {startNotifeeForegroundBridge} from './src/domain/reminders/notifeeScheduler';
 import {registerAmbientForegroundService} from './src/domain/ambient/foregroundService';
+import {startAmbientLifecycle} from './src/domain/ambient/ambientLifecycle';
+import {handleNotificationAction} from './src/domain/ambient/notificationActions';
 import {startPulseRuntime} from './src/domain/ambient/pulseRuntime';
 import {startPlanScheduler} from './src/domain/ambient/planScheduler';
+import {startSetScheduler} from './src/domain/ambient/setScheduler';
 import {ElementShell} from './src/shell/ElementShell';
 
-// Hook Notifee's foreground event listener once at boot so notifications
-// actually present while RaveLite is the active app (the common case for
-// a training companion).
-startNotifeeForegroundBridge();
+// Hook Notifee's foreground events once at boot so notifications actually
+// present while RaveLite is the active app (the common case for a training
+// companion), and so Done / +5 / Skip buttons answer the live pulse.
+startNotifeeForegroundBridge(handleNotificationAction);
 
 // Slice 5 — register the ambient FGS task runner once at app start.
-// The service itself is started/stopped by AlwaysOnPanel based on
+// `startAmbientLifecycle` starts/stops the service itself based on
 // active-hours + manual-pause state.
 registerAmbientForegroundService();
 
@@ -53,7 +56,7 @@ function App(): React.JSX.Element {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await hydratePersistence();
+      await ensureHydrated();
       // Apply the persisted heart variant to the live ELEMENTS map
       // BEFORE the first render so the shell renders with the right
       // colors/glyph from the start (no flash of magenta on Core users).
@@ -63,10 +66,13 @@ function App(): React.JSX.Element {
       runMigrations();
       if (!cancelled) {
         setHydrated(true);
-        // Phase B reminders pipeline: now that the persisted Plan is
-        // available, start the rolling 24h enqueue. Idempotent.
+        // Reminders pipeline: now that persisted state is available,
+        // start the runtime, both producers (Plan cadence + Daily Sets),
+        // and the background service that keeps them alive. Idempotent.
         startPulseRuntime();
         startPlanScheduler();
+        startSetScheduler();
+        startAmbientLifecycle();
       }
     })();
     return () => {

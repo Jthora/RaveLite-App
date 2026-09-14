@@ -2,6 +2,7 @@ import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import {BUILTIN_METRICS, builtinById} from './builtinMetrics';
 import {MetricKind, TrainingLogEntry} from './types';
+import type {ElementId} from '../../theme/elements';
 
 /**
  * Persistence + CRUD for the Training Log.
@@ -96,7 +97,18 @@ export function loadMetrics(): MetricKind[] {
     const ov = blob.builtinOverrides[m.id];
     return ov ? {...m, label: ov.label ?? m.label, notes: ov.notes ?? m.notes} : m;
   });
-  return [...overlaid, ...blob.custom.filter(m => !m.archived)];
+  // Legacy custom entries written before the element field existed
+  // default to 'any' so they appear on every Train surface.
+  const custom = blob.custom
+    .filter(m => !m.archived)
+    .map(m => (m.element ? m : {...m, element: 'any' as const}));
+  return [...overlaid, ...custom];
+}
+
+/** Element-scoped catalog — built-ins / customs whose element matches
+ *  `el` or is `'any'`. Used by per-element Train surfaces. */
+export function loadMetricsForElement(el: ElementId): MetricKind[] {
+  return loadMetrics().filter(m => m.element === el || m.element === 'any');
 }
 
 /**
@@ -206,6 +218,19 @@ export function loadEntries(): TrainingLogEntry[] {
   } catch {
     return [];
   }
+}
+
+/** Entries scoped to one element. Legacy entries without an `element`
+ *  field are resolved via their kind's element ('any' kinds match
+ *  every element). */
+export function loadEntriesForElement(el: ElementId): TrainingLogEntry[] {
+  const entries = loadEntries();
+  return entries.filter(e => {
+    if (e.element) {return e.element === el;}
+    const kind = getMetric(e.kindId);
+    if (!kind) {return false;}
+    return kind.element === el || kind.element === 'any';
+  });
 }
 
 function saveEntries(entries: TrainingLogEntry[]): void {

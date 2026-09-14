@@ -8,12 +8,18 @@ export type Target =
   | 'PFT-Pushups'
   | 'PFT-Situps'
   | 'PFT-Run'
+  | 'Core' // Crunches, leg-ups, side-ups, planks — the gut belt
+  | 'Conditioning' // Heart-rate work that burns fat: rounds, strides, runs
+  | 'Grip' // Porch hangs, brick holds, staff control
+  | 'Agility' // Footwork, jumps, kick-flip groundwork
   | 'Mobility'
   | 'Strength'
   | 'Coordination'
   | 'Flow'
   | 'Breath'
   | 'Presence'
+  | 'Hydration' // Water calls — drink on the chime
+  | 'Fuel' // Meal check-ins — hand portions, no counting
   | 'NoFloor'; // Suitable when no clean floor / mat is available
 
 /** Where the exercise can be performed. */
@@ -22,7 +28,8 @@ export type Venue =
   | 'standing' // Anywhere standing, no floor needed
   | 'yard' // Outside, requires open space
   | 'mat' // Floor work — requires clean surface
-  | 'wall'; // Needs a wall or doorframe
+  | 'wall' // Needs a wall or doorframe
+  | 'porch'; // Hang point on the side of the backyard deck
 
 export interface Exercise {
   id: string;

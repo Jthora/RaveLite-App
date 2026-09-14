@@ -48,6 +48,10 @@ export const KEYS = {
   trainingMetrics: 'training.metrics',
   /** All training-log entries as one JSON blob (newest-first). */
   trainingEntries: 'training.entries',
+
+  // ── Daily Sets program (spread-out submaximal sets) ──────────────
+  /** `ProgramState` JSON — start day, set window, per-track rung + max. */
+  programState: 'program.state',
 } as const;
 
 /** Bump this when a breaking change requires migration logic. */

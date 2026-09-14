@@ -13,18 +13,25 @@ import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import type {Target} from '../domain/exercises/types';
 import {palette, radius, spacing} from '../theme';
 
-/** Targets the operator has medical-context relevance to.
- *  Order matters — these render in this order in the strip. */
+/** Focus areas offered as pills — corrections first, then training
+ *  goals, then daily-care calls. Order matters — these render in this
+ *  order in the strip. PFT-* tags are not offered here. */
 export const FOCUS_TARGETS: ReadonlyArray<Target> = [
   'UCS',
   'Hourglass',
   'APT',
-  'Mobility',
+  'Core',
   'Strength',
+  'Conditioning',
+  'Grip',
+  'Agility',
+  'Mobility',
   'Breath',
   'Coordination',
   'Flow',
   'Presence',
+  'Hydration',
+  'Fuel',
   'NoFloor',
 ];
 

@@ -12,17 +12,47 @@ import {
 } from '../../domain/training/grading';
 import {
   loadEntries,
+  loadEntriesForElement,
   loadMetrics,
+  loadMetricsForElement,
   getMetric,
   subscribeTrainingLog,
 } from '../../domain/training/repository';
 import {MetricKind, TrainingLogEntry} from '../../domain/training/types';
 import {TrainingLogSheet} from './TrainingLogSheet';
+import {MS_PER_DAY} from '../../lib/constants';
+import type {ElementId} from '../../theme/elements';
 
 interface Props {
   /** When true, render in compact one-column mode (e.g. portrait). */
   compact?: boolean;
+  /** When set, the panel scopes to a single element — title becomes
+   *  e.g. "Fire — Training", and the catalog/entries are filtered. */
+  element?: ElementId;
 }
+
+const ELEMENT_EMPTY: Record<ElementId, {title: string; body: string}> = {
+  fire: {
+    title: 'No runs logged yet.',
+    body: 'Burn the cage. The B+ goal is 3 mi ≤ 21:00 (7 min/mi).',
+  },
+  air: {
+    title: 'No breath work logged yet.',
+    body: 'Crack the seal. Hold to first contraction — that’s the read.',
+  },
+  water: {
+    title: 'No flows logged yet.',
+    body: 'Move the water. Every CAR you log is range you keep.',
+  },
+  earth: {
+    title: 'No holds logged yet.',
+    body: 'Set the column. Posture is the first weight.',
+  },
+  heart: {
+    title: 'No entries yet',
+    body: 'Tap “+ Log Entry” to record your first session.',
+  },
+};
 
 /**
  * The Training Log surface — header CTA, headline progress, and the
@@ -35,19 +65,28 @@ interface Props {
  *
  * Falls back to "no runs logged yet" copy when empty.
  */
-export function TrainingLogPanel({compact}: Props) {
+export function TrainingLogPanel({compact, element}: Props) {
   const accent = useElementAccent();
   const [tick, setTick] = useState(0);
   useEffect(() => subscribeTrainingLog(() => setTick(t => t + 1)), []);
 
-  const entries = useMemo(loadEntries, [tick]);
-  const metrics = useMemo(loadMetrics, [tick]);
+  const entries = useMemo(
+    () => (element ? loadEntriesForElement(element) : loadEntries()),
+    [tick, element],
+  );
+  const metrics = useMemo(
+    () => (element ? loadMetricsForElement(element) : loadMetrics()),
+    [tick, element],
+  );
 
   const [showSheet, setShowSheet] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
 
   const headline = useMemo(() => buildHeadline(entries, metrics), [entries, metrics]);
   const grouped = useMemo(() => groupByDay(entries), [entries]);
+  const elName = element ? ELEMENTS[element].name : undefined;
+  const title = elName ? `${elName} — Training` : 'Training Log';
+  const empty = element ? ELEMENT_EMPTY[element] : ELEMENT_EMPTY.heart;
 
   return (
     <ScrollView
@@ -55,7 +94,7 @@ export function TrainingLogPanel({compact}: Props) {
       contentContainerStyle={[styles.root, compact && styles.rootCompact]}
       keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
-        <Text style={styles.title}>Training Log</Text>
+        <Text style={styles.title}>{title}</Text>
         <Pressable
           style={[styles.addBtn, {backgroundColor: accent}]}
           onPress={() => {
@@ -81,14 +120,8 @@ export function TrainingLogPanel({compact}: Props) {
       {/* Empty state */}
       {entries.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No entries yet</Text>
-          <Text style={styles.emptyBody}>
-            Tap “+ Log Entry” to record your first workout. The B+ goal is{' '}
-            <Text style={{color: palette.text, fontWeight: '700'}}>
-              3 mi ≤ 21:00
-            </Text>{' '}
-            (7 min/mi).
-          </Text>
+          <Text style={styles.emptyTitle}>{empty.title}</Text>
+          <Text style={styles.emptyBody}>{empty.body}</Text>
         </View>
       ) : (
         <View style={{gap: spacing.md}}>
@@ -132,6 +165,7 @@ export function TrainingLogPanel({compact}: Props) {
       <TrainingLogSheet
         visible={showSheet}
         editing={editing}
+        defaultElement={element}
         onClose={() => {
           setShowSheet(false);
           setEditing(undefined);
@@ -180,7 +214,7 @@ function buildHeadline(
   metrics: MetricKind[],
 ): Headline | undefined {
   // Find the best run grade in last 30 days across all distance-bearing kinds.
-  const THIRTY = 30 * 86_400_000;
+  const THIRTY = 30 * MS_PER_DAY;
   const cutoff = Date.now() - THIRTY;
   let bestGrade: ReturnType<typeof gradeForRun> | undefined;
   let bestKind: MetricKind | undefined;
@@ -255,7 +289,7 @@ function groupByDay(entries: TrainingLogEntry[]): DayGroup[] {
   }
   const out: DayGroup[] = [];
   const today = localDayKey(Date.now());
-  const yesterday = localDayKey(Date.now() - 86_400_000);
+  const yesterday = localDayKey(Date.now() - MS_PER_DAY);
   for (const [k, list] of map) {
     out.push({
       dayKey: k,

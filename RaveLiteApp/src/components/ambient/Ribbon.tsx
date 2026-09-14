@@ -19,6 +19,7 @@ import {StyleSheet, Text, View, Pressable} from 'react-native';
 import {ELEMENTS, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import type {RibbonRow, RibbonRowKind} from '../../domain/ambient/ribbon';
+import {formatSetAmount} from '../../domain/program/progress';
 
 /** Visible window: how many past + future rows we render. */
 const VISIBLE_PAST = 3;
@@ -29,7 +30,7 @@ export type RetroOutcome = 'sealed' | 'skipped' | 'ignored';
 export interface RibbonProps {
   rows: RibbonRow[];
   now: number;
-  onSeal?: (row: RibbonRow) => void;
+  onSeal?: (row: RibbonRow, amount?: number) => void;
   onSkip?: (row: RibbonRow) => void;
   onSnooze?: (row: RibbonRow) => void;
   onRetroLog?: (row: RibbonRow, outcome: RetroOutcome) => void;
@@ -115,7 +116,7 @@ interface RibbonRowViewProps {
   isNow: boolean;
   now: number;
   expanded: boolean;
-  onSeal?: (row: RibbonRow) => void;
+  onSeal?: (row: RibbonRow, amount?: number) => void;
   onSkip?: (row: RibbonRow) => void;
   onSnooze?: (row: RibbonRow) => void;
   onAbsorbedPress: () => void;
@@ -141,59 +142,14 @@ function RibbonRowView({
   const timeLabel = formatHHMM(row.at);
 
   if (isNow && row.kind === 'now-active' && row.active) {
-    // Hero now-active row: large glyph + drill name + cues + expiry
-    // meter + Seal/Snooze/Skip CTAs. Per Always-On Ribbon plan §7,
-    // this row owns ~40% of the visible ribbon real-estate.
-    const totalMs = Math.max(1, row.active.expiresAt - row.at);
-    const remainingMs = Math.max(0, row.active.expiresAt - now);
-    const meterPct = Math.max(0, Math.min(1, remainingMs / totalMs));
     return (
-      <View style={[styles.row, styles.rowActive, {borderColor: tint}]}>
-        <View style={[styles.timeCol, styles.timeColActive]}>
-          <Text style={[styles.timeText, styles.timeTextActive]}>{timeLabel}</Text>
-          <Text style={[styles.glyphHero, {color: tint}]}>{el.glyph}</Text>
-        </View>
-        <View style={styles.bodyCol}>
-          <Text style={[styles.activeLabel, {color: tint}]} numberOfLines={1}>
-            {row.label.toUpperCase()}
-          </Text>
-          {row.active.cuesShort.slice(0, 4).map((cue, idx) => (
-            <Text
-              key={idx}
-              style={styles.activeCue}
-              numberOfLines={1}>
-              · {cue}
-            </Text>
-          ))}
-          <View style={styles.meterTrack}>
-            <View
-              style={[
-                styles.meterFill,
-                {backgroundColor: tint, width: `${meterPct * 100}%`},
-              ]}
-            />
-          </View>
-          <View style={styles.actionsRow}>
-            <Pressable
-              style={[styles.actionBtnLarge, {backgroundColor: tint}]}
-              onPress={() => onSeal?.(row)}>
-              <Text style={[styles.actionTextLarge, {color: '#000'}]}>
-                {el.verbDone ?? 'Seal'}
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[styles.actionBtnGhost, {borderColor: tint}]}
-              onPress={() => onSnooze?.(row)}>
-              <Text style={[styles.actionText, {color: tint}]}>+5</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.actionBtnGhost, {borderColor: dim}]}
-              onPress={() => onSkip?.(row)}>
-              <Text style={[styles.actionText, {color: dim}]}>Skip</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
+      <ActiveRow
+        row={row}
+        now={now}
+        onSeal={onSeal}
+        onSkip={onSkip}
+        onSnooze={onSnooze}
+      />
     );
   }
 
@@ -282,6 +238,102 @@ function RibbonRowView({
           </Pressable>
         </View>
       ) : null}
+    </View>
+  );
+}
+
+interface ActiveRowProps {
+  row: RibbonRow;
+  now: number;
+  onSeal?: (row: RibbonRow, amount?: number) => void;
+  onSkip?: (row: RibbonRow) => void;
+  onSnooze?: (row: RibbonRow) => void;
+}
+
+/**
+ * Hero now-active row: large glyph + drill name + cues + expiry meter +
+ * Seal/Snooze/Skip CTAs. Per Always-On Ribbon plan §7, this row owns ~40%
+ * of the visible ribbon real-estate. Daily Sets pulses add a −/+ stepper
+ * so the operator seals the amount they actually did.
+ */
+function ActiveRow({row, now, onSeal, onSkip, onSnooze}: ActiveRowProps) {
+  const active = row.active!;
+  const rx = active.prescription;
+  const [amount, setAmount] = useState(rx?.amount ?? 0);
+  const el = ELEMENTS[row.element];
+  const tint = el.color;
+  const dim = el.deep;
+  const totalMs = Math.max(1, active.expiresAt - row.at);
+  const remainingMs = Math.max(0, active.expiresAt - now);
+  const meterPct = Math.max(0, Math.min(1, remainingMs / totalMs));
+  const step = rx?.unit === 'seconds' ? 5 : 1;
+  return (
+    <View style={[styles.row, styles.rowActive, {borderColor: tint}]}>
+      <View style={[styles.timeCol, styles.timeColActive]}>
+        <Text style={[styles.timeText, styles.timeTextActive]}>{formatHHMM(row.at)}</Text>
+        <Text style={[styles.glyphHero, {color: tint}]}>{el.glyph}</Text>
+      </View>
+      <View style={styles.bodyCol}>
+        <Text style={[styles.activeLabel, {color: tint}]} numberOfLines={1}>
+          {row.label.toUpperCase()}
+        </Text>
+        {rx ? (
+          <View style={styles.rxRow}>
+            <Pressable
+              accessibilityLabel="Less"
+              hitSlop={8}
+              style={[styles.stepBtn, {borderColor: dim}]}
+              onPress={() => setAmount(a => Math.max(0, a - step))}>
+              <Text style={[styles.stepText, {color: tint}]}>−</Text>
+            </Pressable>
+            <Text style={[styles.rxAmount, {color: tint}]}>
+              {formatSetAmount(amount, rx.unit)}
+            </Text>
+            <Pressable
+              accessibilityLabel="More"
+              hitSlop={8}
+              style={[styles.stepBtn, {borderColor: dim}]}
+              onPress={() => setAmount(a => a + step)}>
+              <Text style={[styles.stepText, {color: tint}]}>+</Text>
+            </Pressable>
+            <Text style={styles.rxSet}>
+              set {rx.setIndex}/{rx.sets}
+            </Text>
+          </View>
+        ) : null}
+        {active.cuesShort.slice(0, rx ? 3 : 4).map((cue, idx) => (
+          <Text key={idx} style={styles.activeCue} numberOfLines={1}>
+            · {cue}
+          </Text>
+        ))}
+        <View style={styles.meterTrack}>
+          <View
+            style={[
+              styles.meterFill,
+              {backgroundColor: tint, width: `${meterPct * 100}%`},
+            ]}
+          />
+        </View>
+        <View style={styles.actionsRow}>
+          <Pressable
+            style={[styles.actionBtnLarge, {backgroundColor: tint}]}
+            onPress={() => onSeal?.(row, rx ? amount : undefined)}>
+            <Text style={[styles.actionTextLarge, {color: '#000'}]}>
+              {el.verbDone ?? 'Seal'}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.actionBtnGhost, {borderColor: tint}]}
+            onPress={() => onSnooze?.(row)}>
+            <Text style={[styles.actionText, {color: tint}]}>+5</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.actionBtnGhost, {borderColor: dim}]}
+            onPress={() => onSkip?.(row)}>
+            <Text style={[styles.actionText, {color: dim}]}>Skip</Text>
+          </Pressable>
+        </View>
+      </View>
     </View>
   );
 }
@@ -474,6 +526,36 @@ const styles = StyleSheet.create({
   meterFill: {
     height: 3,
     borderRadius: 2,
+  },
+  rxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  stepBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepText: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  rxAmount: {
+    fontSize: 24,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+    minWidth: 96,
+    textAlign: 'center',
+  },
+  rxSet: {
+    ...t.caption,
+    color: palette.textDim,
+    marginLeft: spacing.xs,
   },
   idleLabel: {
     ...t.subtitle,

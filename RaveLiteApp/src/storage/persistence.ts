@@ -19,6 +19,20 @@ import {memoryStore} from './memoryStore';
 
 const PREFIX = 'ravelite.v1.';
 
+let hydration: Promise<void> | null = null;
+
+/**
+ * Hydrate at most once per JS runtime. Entry points that can run without
+ * App mounting (notification buttons pressed in the background) and
+ * App itself both call this, so whichever runs first does the work.
+ */
+export function ensureHydrated(): Promise<void> {
+  if (!hydration) {
+    hydration = hydratePersistence();
+  }
+  return hydration;
+}
+
 /** Seed memoryStore from disk. Safe to call exactly once at boot. */
 export async function hydratePersistence(): Promise<void> {
   try {

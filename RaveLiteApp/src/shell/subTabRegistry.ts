@@ -12,15 +12,15 @@
 import {
   Activity,
   BarChart3,
-  BellRing,
   CalendarClock,
   Dumbbell,
   Gauge,
   GitBranch,
   History,
   ListChecks,
-  Palette,
   Radio,
+  Repeat,
+  Settings,
   SlidersHorizontal,
   Sparkles,
 } from 'lucide-react-native';
@@ -32,38 +32,32 @@ import type {SubTab} from '../components/SubTabStrip';
 
 export type HeartSubSlug =
   | 'dash'
+  | 'sets'
   | 'plan'
   | 'circuits'
-  | 'signal'
-  | 'aos'
+  | 'always-on'
   | 'insights'
-  | 'theme';
+  | 'settings';
 
 const HEART_SUB_TABS: ReadonlyArray<SubTab<HeartSubSlug>> = [
   {slug: 'dash', label: 'Dash', Icon: Gauge},
+  {slug: 'sets', label: 'Sets', Icon: Repeat},
   {slug: 'plan', label: 'Plan', Icon: CalendarClock},
   {slug: 'circuits', label: 'Circuits', Icon: GitBranch},
-  {slug: 'signal', label: 'Signal', Icon: BellRing},
-  {slug: 'aos', label: 'Always-On', Icon: Radio},
+  {slug: 'always-on', label: 'Always-On', Icon: Radio},
   {slug: 'insights', label: 'Insights', Icon: Sparkles},
-  {slug: 'theme', label: 'Theme', Icon: Palette},
+  {slug: 'settings', label: 'Settings', Icon: Settings},
 ];
 
 // ---- Shared element sub-tabs (Fire/Air/Earth/Water) -----------------------
 
 export type ElementSubSlug = 'now' | 'drills' | 'log' | 'stats' | 'tune' | 'train';
 
-const SHARED_ELEMENT_SUB_TABS: ReadonlyArray<SubTab<ElementSubSlug>> = [
-  {slug: 'now', label: 'Now', Icon: Activity},
-  {slug: 'drills', label: 'Drills', Icon: ListChecks},
-  {slug: 'log', label: 'Log', Icon: History},
-  {slug: 'stats', label: 'Stats', Icon: BarChart3},
-  {slug: 'tune', label: 'Tune', Icon: SlidersHorizontal},
-];
-
-// Fire gets an extra 'Train' tab — manual numerical workout log
-// (runs, pushups, plank). Lives alongside the journal-driven 'Log'.
-const FIRE_SUB_TABS: ReadonlyArray<SubTab<ElementSubSlug>> = [
+// All four non-Heart elements share the same six-slot shape, with a
+// 'Train' tab between Drills and Log for manual numerical entries
+// (runs, holds, reps). Per-element catalogs (see
+// `domain/training/builtinMetrics.ts`) decide what shows up inside.
+const WITH_TRAIN_SUB_TABS: ReadonlyArray<SubTab<ElementSubSlug>> = [
   {slug: 'now', label: 'Now', Icon: Activity},
   {slug: 'drills', label: 'Drills', Icon: ListChecks},
   {slug: 'train', label: 'Train', Icon: Dumbbell},
@@ -78,10 +72,10 @@ export const SUB_TABS_BY_ELEMENT: Record<
   ElementId,
   ReadonlyArray<SubTab<string>>
 > = {
-  fire: FIRE_SUB_TABS,
-  air: SHARED_ELEMENT_SUB_TABS,
-  earth: SHARED_ELEMENT_SUB_TABS,
-  water: SHARED_ELEMENT_SUB_TABS,
+  fire: WITH_TRAIN_SUB_TABS,
+  air: WITH_TRAIN_SUB_TABS,
+  earth: WITH_TRAIN_SUB_TABS,
+  water: WITH_TRAIN_SUB_TABS,
   heart: HEART_SUB_TABS,
 };
 

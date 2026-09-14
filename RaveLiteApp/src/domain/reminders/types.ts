@@ -52,6 +52,12 @@ export interface ReminderPayload {
   body: string;
   /** Color used for the notification accent (Android LED, channel color). */
   color: string;
-  /** Vibration pattern in ms intervals — element-themed. */
-  vibration: number[];
+  /** Vibration pattern in ms intervals — element-themed. The element
+   *  channel carries the pattern, so live pulses may omit it. */
+  vibration?: number[];
+  /** Pulse id. When set it becomes the notification id, and the
+   *  notification gets Done / +5 / Skip action buttons. */
+  pulseId?: string;
+  /** Extra string data echoed back to action handlers. */
+  data?: Record<string, string>;
 }

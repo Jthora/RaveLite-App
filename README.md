@@ -23,9 +23,10 @@ this repo should be checked against them:
    music, and presence. Fitness is means, not end. Ecstatic embodiment
    is the end.
 2. **The five elements are a felt vocabulary, not a theme skin.**
-   Upper-body openness lives in **Air**. Pelvic rooting lives in
-   **Earth**. Releasing chronic gripping lives in **Water**. Capacity
-   and output live in **Fire**. **Heart** conducts. Naming the work in
+   Breath and upper-body openness live in **Air**. Core and pelvic
+   rooting live in **Earth**. Flow, fascia and hydration live in
+   **Water** (no pool required). Capacity and output live in **Fire**.
+   **Heart** conducts. Naming the work in
    element-language teaches the body to *know* what it is doing before
    the mind reads the screen.
 3. **Reminders are invocations, not nags.** A pulse every 30 minutes
@@ -69,28 +70,37 @@ To install RaveLite on your device, follow these steps:
 3. Use analog communication methods and enjoy the visualizations synced with the music.
 4. Have fun and enhance your rave experience with RaveLite!
 
-## Notifications (Phase A — live)
+## Chimes, notifications and Daily Sets
 
 Real on-device notifications are implemented via [`@notifee/react-native`](https://notifee.app).
 What works today:
 
-- **Test Pulse** (Heart screen) fires a real notification with the
-  element-themed vibration pattern and accent color.
-- Channels are auto-created per element with versioned IDs
-  (`elem.<element>.v1`). Channel settings are immutable on Android, so
-  a future tweak to a vibration pattern bumps the suffix to `v2` to
-  avoid OS conflicts.
+- **Element cue sounds** — five bundled cues in
+  `RaveLiteApp/android/app/src/main/res/raw/` (Fire: rising beeps, Air:
+  bell ding, Earth: low bloop, Water: bubbly bloops, Heart: lub-dub
+  chime) on channels `elem.<element>.v3`. Channel settings are immutable
+  on Android, so changing a cue or vibration bumps the suffix, and
+  superseded channels are deleted. Sound files are native resources: a
+  change needs `yarn android`, not just a JS reload.
+- **Rolling schedule** — the JS pulse runtime fires the Plan's element
+  cadence (`planScheduler`) and the Daily Sets program (`setScheduler`),
+  one pulse at a time; the rest queue.
+- **Daily Sets** (Heart → Sets) — each movement track prescribes sets at
+  about half your tested max, spread across the day. Sets climb weekly,
+  every 4th week is a deload + max-test week, and a harder variation
+  unlocks once a set size graduates. Push is always balanced by rows and
+  pull-ups.
+- **Answer from anywhere** — every pulse notification has Done / +5 min /
+  Skip buttons that work with the app open or in the background. The
+  Always-On card has a −/+ stepper to log the reps actually done.
+- **Background service** — during active hours a foreground service keeps
+  chimes alive whichever screen is open, or with the app in the background.
 - Permission (Android 13+ `POST_NOTIFICATIONS`) is requested in context
   on first Heart-screen visit, not at cold start.
-- A foreground event bridge runs at app boot so notifications actually
-  buzz/light while RaveLite is the active app.
 
-What's stubbed (Phase B):
-
-- **Apply Plan** currently only logs. The full rolling 24h pre-schedule
-  built from `expandPlanToFires()` (already unit-tested in
-  `src/domain/reminders/__tests__/expandPlan.test.ts`) plus a
-  `BOOT_COMPLETED` re-expansion is the next milestone.
+Not yet: OS-scheduled triggers for when the process is killed outright,
+and cues that sound through the alarm stream regardless of notification
+volume or Do Not Disturb.
 
 OEM caveat: stock Android (Galaxy Tab A7) is friendly. MIUI/HyperOS on
 the Redmi A3 will require Autostart permission to be granted manually

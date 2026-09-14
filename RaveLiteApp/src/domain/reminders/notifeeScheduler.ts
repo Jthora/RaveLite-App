@@ -2,58 +2,72 @@ import notifee, {
   AndroidImportance,
   AndroidVisibility,
   EventType,
+  type Event,
 } from '@notifee/react-native';
 import {ELEMENTS, ElementId} from '../../theme/elements';
-import {ReminderPayload, ReminderScheduler, Plan} from './types';
-import {VIBRATION_PATTERNS} from './scheduler';
+import {ReminderPayload, Plan} from './types';
+import {VIBRATION_PATTERNS, type ReminderScheduler} from './scheduler';
 import {recordPulseFire} from '../journal/lastPulse';
 
 /**
  * Notifee-backed implementation of ReminderScheduler.
  *
- * Phase A scope (this file, today):
- *   - createChannels()   → idempotent; creates one channel per element.
+ * Scope:
+ *   - ensureChannels()    → idempotent; one channel per element, each with
+ *                           its own cue sound + vibration signature.
  *   - requestPermission() → Android 13+ POST_NOTIFICATIONS prompt.
- *   - fireNow()          → real on-device notification (used by Test Pulse).
- *   - clear()            → cancels everything notifee owns.
- *   - applyPlan()        → still a no-op stub. Phase B will replace it
- *                          with a 24h rolling pre-schedule built from
- *                          expandPlanToFires().
+ *   - fireNow()           → real on-device notification. Pulses carry
+ *                           Done / +5 / Skip action buttons so a set can
+ *                           be answered without opening the app.
+ *   - clear()             → cancels everything notifee owns.
+ *   - applyPlan()         → still a no-op stub; the JS pulse runtime owns
+ *                           scheduling while the ambient service is alive.
  *
- * Channels are versioned (`elem.<id>.v1`). Channel settings (importance,
- * vibration pattern) are immutable after creation in Android — so when we
- * change a vibration pattern in the future, bump the suffix to v2 and
- * existing users will receive the updated channel without OS conflict.
+ * Channels are versioned (`elem.<id>.v3`). Channel settings (importance,
+ * sound, vibration pattern) are immutable after creation in Android — so
+ * any change to a cue or pattern bumps the suffix, and the superseded
+ * channels are deleted so they don't linger in system settings.
  */
 
-const CHANNEL_VERSION = 'v2';
+const CHANNEL_VERSION = 'v3';
+const LEGACY_CHANNEL_VERSIONS = ['v1', 'v2'];
 
-function channelId(element: ElementId): string {
-  return `elem.${element}.${CHANNEL_VERSION}`;
+function channelId(element: ElementId, version: string = CHANNEL_VERSION): string {
+  return `elem.${element}.${version}`;
 }
 
 /**
- * Slice 5 — element cue sound resolution.
+ * Element cue sounds — bare filenames of `android/app/src/main/res/raw/*.wav`.
  *
- * Each element channel can carry its own cue tone. Today every channel
- * uses Android's system default notification sound (`'default'`), which
- * gives us audible pulses with zero bundled assets.
+ *   Fire  — three rising staccato beeps  (ignite)
+ *   Air   — one high bell ding           (lift)
+ *   Earth — low bloop that drops         (root)
+ *   Water — two bubbly rising bloops     (flow)
+ *   Heart — lub-dub under a two-note chime (seal)
  *
- * Upgrade path (no code changes required other than this map):
- *   1. Drop `<element>.wav` into `android/app/src/main/res/raw/`
- *      (lowercase ASCII, no extension referenced from JS).
- *   2. Replace the entry below with the bare filename, e.g.
- *      `fire: 'cue_fire'` for `res/raw/cue_fire.wav`.
- *   3. Bump CHANNEL_VERSION to v3 so existing devices receive the new
- *      channel config (Android channels are immutable post-creation).
+ * Changing a file here requires a native rebuild AND a CHANNEL_VERSION bump.
  */
 const CHANNEL_SOUND: Record<ElementId, string> = {
-  air: 'default',
-  fire: 'default',
-  water: 'default',
-  earth: 'default',
-  heart: 'default',
+  air: 'cue_air',
+  fire: 'cue_fire',
+  water: 'cue_water',
+  earth: 'cue_earth',
+  heart: 'cue_heart',
 };
+
+/** Action ids on pulse notifications. */
+export type NotificationActionId = 'seal' | 'snooze' | 'skip';
+
+/** What an action handler receives from a notification button press. */
+export interface NotificationAction {
+  actionId: NotificationActionId;
+  /** The notification's `data` payload (all values are strings). */
+  data: Record<string, string>;
+}
+
+export type NotificationActionHandler = (
+  action: NotificationAction,
+) => void | Promise<void>;
 
 /**
  * Notifee's channel API requires `vibrationPattern` to be an even-length
@@ -74,10 +88,20 @@ async function ensureChannels(): Promise<void> {
   if (channelsReady) {
     return;
   }
+  const ids = Object.keys(ELEMENTS) as ElementId[];
+  // Superseded channels: best-effort delete so settings only show the
+  // live set. Failure is harmless.
+  await Promise.all(
+    ids.flatMap(id =>
+      LEGACY_CHANNEL_VERSIONS.map(v =>
+        notifee.deleteChannel(channelId(id, v)).catch(() => {}),
+      ),
+    ),
+  );
   // Notifee is no-op on iOS for channels; we only ship Android today,
   // but the call is safe regardless.
   await Promise.all(
-    (Object.keys(ELEMENTS) as ElementId[]).map(id => {
+    ids.map(id => {
       const pattern = VIBRATION_PATTERNS[id];
       const valid = isValidVibrationPattern(pattern);
       if (!valid) {
@@ -114,46 +138,96 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 /**
+ * Translate a raw notifee event into a `NotificationAction`, or
+ * `undefined` if it isn't a pulse button press. Shared by the foreground
+ * bridge and the background handler registered in `index.js`.
+ */
+export function toNotificationAction(event: Event): NotificationAction | undefined {
+  if (event.type !== EventType.ACTION_PRESS) {
+    return undefined;
+  }
+  const id = event.detail.pressAction?.id;
+  if (id !== 'seal' && id !== 'snooze' && id !== 'skip') {
+    return undefined;
+  }
+  const raw = event.detail.notification?.data ?? {};
+  const data: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    data[k] = String(v);
+  }
+  return {actionId: id, data};
+}
+
+/**
  * Hook the foreground event so notifications actually buzz/light when
  * RaveLite is the active app — which is the *common* case for a training
- * companion. Without this, Notifee on Android suppresses presentation
- * while the host app is foregrounded.
+ * companion — and so Done / +5 / Skip buttons work while it's open.
  *
  * Idempotent: safe to call once at app start.
  */
 let foregroundHooked = false;
-export function startNotifeeForegroundBridge(): void {
+export function startNotifeeForegroundBridge(
+  onAction?: NotificationActionHandler,
+): void {
   if (foregroundHooked) {
     return;
   }
   foregroundHooked = true;
-  notifee.onForegroundEvent(({type, detail}) => {
-    if (type === EventType.PRESS) {
+  notifee.onForegroundEvent(event => {
+    const action = toNotificationAction(event);
+    if (action && onAction) {
+      Promise.resolve(onAction(action)).catch(err =>
+        // eslint-disable-next-line no-console
+        console.warn('[notifee] action handler failed', err),
+      );
+      return;
+    }
+    if (event.type === EventType.PRESS) {
       // Future: deep-link to the relevant element screen using
       // detail.notification.data.element.
       // eslint-disable-next-line no-console
-      console.log('[notifee] press', detail.notification?.data);
+      console.log('[notifee] press', event.detail.notification?.data);
     }
   });
+}
+
+/** Dismiss a pulse's notification once it's been answered in-app. */
+export async function cancelPulseNotification(pulseId: string): Promise<void> {
+  await notifee.cancelNotification(pulseId);
 }
 
 export const notifeeScheduler: ReminderScheduler = {
   async fireNow(payload: ReminderPayload) {
     await ensureChannels();
+    const el = ELEMENTS[payload.element];
     await notifee.displayNotification({
+      // Pulse id doubles as the notification id so an in-app answer can
+      // cancel the matching notification.
+      ...(payload.pulseId ? {id: payload.pulseId} : {}),
       title: payload.title,
       body: payload.body,
       data: {
         element: payload.element,
         exerciseId: payload.exerciseId,
+        ...(payload.pulseId ? {pulseId: payload.pulseId} : {}),
+        ...(payload.data ?? {}),
       },
       android: {
         channelId: channelId(payload.element),
         color: payload.color,
         colorized: true,
         smallIcon: 'ic_launcher', // TODO: ship a monochrome status-bar icon
-        pressAction: {id: 'default'},
+        pressAction: {id: 'default', launchActivity: 'default'},
         showTimestamp: true,
+        ...(payload.pulseId
+          ? {
+              actions: [
+                {title: el.verbDone, pressAction: {id: 'seal'}},
+                {title: '+5 min', pressAction: {id: 'snooze'}},
+                {title: 'Skip', pressAction: {id: 'skip'}},
+              ],
+            }
+          : {}),
       },
     });
     // Record so NowPanel can show "Pulse fired Nm ago" within the
@@ -167,13 +241,9 @@ export const notifeeScheduler: ReminderScheduler = {
   },
 
   async applyPlan(_plan: Plan) {
-    // Phase B: cancelAll → expandPlanToFires(plan, now, now+24h) →
-    // schedule each as a TimestampTrigger on the matching element channel.
-    // Plus a daily refresh hook + BOOT_COMPLETED re-expansion.
+    // The JS pulse runtime + plan/sets schedulers own firing while the
+    // ambient foreground service keeps the process alive. OS-level
+    // TimestampTriggers (for a killed process) remain future work.
     await ensureChannels();
-    // eslint-disable-next-line no-console
-    console.log(
-      '[notifeeScheduler] applyPlan stub — Phase B will schedule rolling 24h.',
-    );
   },
 };

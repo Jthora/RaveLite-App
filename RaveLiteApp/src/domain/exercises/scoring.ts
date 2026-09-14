@@ -77,20 +77,22 @@ const CIRCADIAN: Record<
     {hours: [6, 10], favored: ['Breath', 'UCS', 'Mobility']},
     {hours: [13, 16], favored: ['Mobility', 'NoFloor']},
   ],
-  // Fire: peak strength + conditioning in the late-afternoon window.
+  // Fire: peak strength + conditioning through the late afternoon and
+  // the backyard session.
   fire: [
-    {hours: [14, 18], favored: ['Strength', 'PFT-Pushups', 'PFT-Situps']},
+    {hours: [14, 19], favored: ['Strength', 'Conditioning', 'PFT-Pushups', 'PFT-Situps']},
     {hours: [10, 12], favored: ['NoFloor']},
   ],
-  // Earth: alignment / hourglass work mid-morning when joints are warm.
+  // Earth: alignment + core work mid-morning when joints are warm.
   earth: [
-    {hours: [9, 12], favored: ['APT', 'Hourglass', 'Mobility']},
+    {hours: [9, 12], favored: ['APT', 'Hourglass', 'Core', 'Mobility']},
     {hours: [19, 22], favored: ['Mobility']},
   ],
-  // Water: flow + coordination evening-leaning, away from heavy fatigue.
+  // Water: flow + coordination evening-leaning, away from heavy fatigue;
+  // water calls + fascia stretches through the working day.
   water: [
     {hours: [16, 21], favored: ['Flow', 'Coordination']},
-    {hours: [11, 14], favored: ['Coordination']},
+    {hours: [8, 16], favored: ['Hydration', 'Mobility']},
   ],
   // Heart: presence work fits anywhere, slight edge at transitions.
   heart: [

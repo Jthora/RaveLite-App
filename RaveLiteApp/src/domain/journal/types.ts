@@ -61,12 +61,18 @@ export interface CompletionEntry extends BaseEntry {
   pulseId?: string;
   /** ms between cue fire and Done tap (Always-On only). */
   respondedAfterMs?: number;
+  /** Daily Sets: the track this set counts toward (`program/types` TrackId). */
+  trackId?: string;
+  /** Daily Sets: reps or seconds actually done, in the track's unit. */
+  amount?: number;
 }
 
 export interface ReminderFiredEntry extends BaseEntry {
   kind: 'reminder.fired';
   exerciseId?: string;
   element: ElementId;
+  /** Daily Sets: track of the set this pulse prescribed. */
+  trackId?: string;
   /** Synthetic id for correlating with the resolution entry. */
   pulseId: string;
   /** Plan window that scheduled the pulse, when known. */
@@ -144,6 +150,11 @@ export interface SessionEndEntry extends BaseEntry {
   /** Total elapsed seconds for the session. */
   durationSec: number;
 }
+
+/** `Omit` that distributes over a union, so each entry kind keeps its own fields. */
+export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
 
 export type JournalEntry =
   | CompletionEntry

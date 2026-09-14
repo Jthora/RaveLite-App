@@ -17,7 +17,7 @@ describe('planMutations', () => {
     const w = makeWindow({label: 'Test', startTime: '12:00', endTime: '13:00'});
     const next = addWindow(DEFAULT_PLAN, w);
     expect(next.windows).toHaveLength(DEFAULT_PLAN.windows.length + 1);
-    expect(DEFAULT_PLAN.windows).toHaveLength(3);
+    expect(DEFAULT_PLAN.windows).toHaveLength(7);
     expect(next.windows[next.windows.length - 1].label).toBe('Test');
   });
 

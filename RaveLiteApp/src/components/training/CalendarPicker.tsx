@@ -69,17 +69,17 @@ export const CalendarPicker = React.memo(function CalendarPicker({visible, selec
       <Pressable style={styles.scrim} onPress={onClose}>
         <Pressable style={styles.card} onPress={() => {}}>
           <View style={styles.header}>
-            <Pressable onPress={() => step(-12)} style={styles.navBtn} hitSlop={8}>
+            <Pressable onPress={() => step(-12)} style={styles.navBtn} hitSlop={12}>
               <Text style={styles.navText}>‹‹</Text>
             </Pressable>
-            <Pressable onPress={() => step(-1)} style={styles.navBtn} hitSlop={8}>
+            <Pressable onPress={() => step(-1)} style={styles.navBtn} hitSlop={12}>
               <Text style={styles.navText}>‹</Text>
             </Pressable>
             <Text style={styles.monthLabel}>{monthLabel}</Text>
-            <Pressable onPress={() => step(1)} style={styles.navBtn} hitSlop={8}>
+            <Pressable onPress={() => step(1)} style={styles.navBtn} hitSlop={12}>
               <Text style={styles.navText}>›</Text>
             </Pressable>
-            <Pressable onPress={() => step(12)} style={styles.navBtn} hitSlop={8}>
+            <Pressable onPress={() => step(12)} style={styles.navBtn} hitSlop={12}>
               <Text style={styles.navText}>››</Text>
             </Pressable>
           </View>
@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 320,
+    maxWidth: '100%',
     backgroundColor: palette.bg,
     borderWidth: 1,
     borderColor: palette.border,
