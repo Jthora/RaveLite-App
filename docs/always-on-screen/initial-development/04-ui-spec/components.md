@@ -2,7 +2,9 @@
 
 > **Amended 2026-09-14.** `NowCard`, `UpcomingStrip`, `ActivityLog` and
 > `AdherenceRings` became `ChimeCard`, `DayList` and `BalanceStrip` in
-> `src/components/today/`; `ActiveHoursChip` now opens `MyDaySheet`. The
+> `src/components/today/`; The status chip (live/paused and My day) and ⚙ Settings live in
+> `StatusLine`; element pages use `DrillCard`, `DayRibbon` and `LibrarySheet`
+> in `src/components/element/`. The
 > PFT goal, attempt and 30-day components below were never built. See
 > [../10-today-home.md](../10-today-home.md).
 

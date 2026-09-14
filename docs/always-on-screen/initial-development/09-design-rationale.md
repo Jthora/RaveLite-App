@@ -195,3 +195,12 @@ times a day as Daily Sets rounds with partner drills from other elements
 (water riding along), keep one editable My day window, say "Done"
 everywhere, and leave the PFT content as it is. Balance now arrives with
 the chimes instead of by navigation. See [10-today-home.md](10-today-home.md).
+
+Using it the same day, the operator found three tabs per element still too
+many, and the strip looked faded (the page's corner vignettes overflowed
+onto it). The tabs also repeated each other: Train and History listed the
+same records, Progress repeated Today's balance, Setup repeated the My day
+chip. So the sub-tabs went. Each element is one page, Today absorbed
+Progress as week dots and set meters, and Settings, Daily Sets and the
+drill Library became sheets opened where they're needed. The only thing
+cut outright was the Daily Sets explainer.

@@ -152,4 +152,9 @@ discipline → 3 expansion).
 | TH-P3 | Heart › Today home; Heart Today · Progress · Setup                    | done   |
 | TH-P4 | Element pages Drills · Train · History                                | done   |
 | TH-P5 | Docs amended; `10-today-home.md`                                      | done   |
+| TH-N0 | Helpers: element day items, 14-day ribbon, week counts, Train headline | done   |
+| TH-N1 | Heart one page: Settings and Daily Sets sheets, week dots, set meters | done   |
+| TH-N2 | Element pages one page: drill card, Library sheet, day ribbon, log    | done   |
+| TH-N3 | Sub-tab strip removed, vignettes clipped, brighter rail, schema v3    | done   |
+| TH-N4 | Docs amended for one page per element                                | done   |
 | TH-V1 | Full-day device pass on the Redmi A3 (chime count, killed-app Done, My day edits, Restore) | open |

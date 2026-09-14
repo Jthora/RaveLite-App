@@ -1,9 +1,10 @@
 # Heart › Today — the home redesign
 
 Decided with the operator on 2026-09-14 and built on branch `today-home`
-(P0–P4). This doc is the current shape of the app; where older docs in
-this folder describe tablet zones, the Always-On ribbon, adherence rings
-or a separate active-hours window, this one takes precedence.
+(P0–P5, then N0–N4 for one page per element the same day). This doc is the
+current shape of the app; where older docs in this folder describe tablet
+zones, the Always-On ribbon, adherence rings, sub-tabs or a separate
+active-hours window, this one takes precedence.
 
 ## Why
 
@@ -26,52 +27,81 @@ fitness." The review found:
 - Only Fire had concrete tracking, and balance required visiting the other
   elements. The operator admitted sticking to Fire work.
 
+A first pass cut the tabs to three per element. Using it, the operator
+found even those too many, and the strip looked faded (the page's corner
+vignettes overflowed onto it). The tabs also repeated each other: Train
+and History showed the same records, Progress repeated Today's balance,
+and Setup repeated the My day chip and the per-element test buttons.
+
 ## Navigation
 
-- The five-element rail stays. The app **always opens on Heart › Today**.
-- Heart: **Today · Progress · Setup**.
-- Fire, Air, Earth, Water: **Drills · Train · History**.
-- Other elements reopen on their last tab; tabs from the old layout map to
-  where their content lives (Now/Tune → Drills, Log/Stats → History).
+- The five-element rail is the only navigation. The app **always opens on
+  Heart**.
+- **No sub-tabs.** Each element is one scrolling page. Anything
+  lower-priority opens in a full-screen sheet from that page.
+- Heart is Today. Fire, Air, Earth and Water each have one page (below).
 
 ## Today (`src/screens/heart/TodayPanel.tsx`)
 
 Top to bottom, one scroll:
 
-1. **Status line** — LIVE or PAUSED (tap to pause 30 min / 2 h / until
-   tomorrow), the My day chip (tap to edit), the clock.
+1. **Status line** — one chip for live or paused and My day (tap: edit My
+   day, pause 30 min / 2 h / until tomorrow, or resume), the clock, and
+   **⚙ Settings**, which carries a yellow dot when notifications are off or
+   a Stay alive check warns.
 2. **Chime card** — while a chime sounds: the round's moves, each with its
    own −/+, its partner drill and any glass of water, a draining answer
    window, and **Done / +5 / Skip**. Otherwise the next chime with **+5**
    and **Skip it**.
-3. **Balance strip** — today's count per element; tap to open the element.
-   Partner drills and glasses count toward their own elements.
+3. **Balance strip** — today's count per element, and seven dots for the
+   last seven days (lit when that element had anything). Tap to open the
+   element. Partner drills and glasses count toward their own elements.
 4. **Water** — glasses today out of 8, with **+1**.
-5. **Daily Sets line** — sets done and per-track amounts; tap for Progress.
-6. **The day's list** — one row per record from every source (chimes and
-   rounds, drill taps, circuit legs, Train log entries, max tests) and the
-   day's chimes as active, upcoming, skipped or missed. Missed and skipped
-   rows are dimmed, never red, never counted.
-7. **+ Log a session** (Train log sheet) and **Practice** (circuits and
-   Heart drills).
+5. **Daily Sets meters** — sets done, then one small meter per track in its
+   element's color. Tap for the Daily Sets sheet.
+6. **Today · N-day streak** and the day's list — one row per record from
+   every source (chimes and rounds, drill taps, circuit legs, Train log
+   entries, max tests) and the day's chimes as active, upcoming, skipped or
+   missed. Missed and skipped rows are dimmed, never red, never counted.
+   Train entries open for edit.
+7. **+ Log a session** (Train log sheet) and **Practice** (circuits, then
+   Heart drills, in one scroll).
 
-## Progress and Setup
+## Sheets
 
-- **Progress** — last 7 days by element, a 14-day trend against the usual
-  day, a streak line that never shames ("A fresh start today"), and Daily
-  Sets (tracks, max tests, level ups, on/off).
-- **Setup** — notification status, My day, chime volumes and Respect DND,
-  Test chime, Stay Alive checklist, the plan editor ("Save plan"), restoring
-  a plan the v2 migration replaced, alive motion, Heart theme.
+- **Settings** (⚙ on Today) — chime volumes with a test per element and
+  Respect DND, the Stay alive checklist, the plan editor ("Save plan"),
+  restoring a plan the v2 migration replaced, alive motion, Heart theme. A
+  notifications-off warning leads when permission is denied. My day is
+  edited from Today's chip.
+- **Daily Sets** (Today's meters) — today's tracks with their rounds, max
+  tests, level ups, and track on/off.
+- **Library** (element pages) — focus areas, saved per element, which also
+  steer the drill card; and the element's whole drill list.
 
-## Element tabs
+Cut outright: Progress's 7-day bars and 14-day trend, History's tiles and
+sparkline, the Train tab's headline card (now one line), Setup's own My day
+row and Test chime button, and the Daily Sets explainer paragraph.
 
-- **Drills** — a drill to try now (Done logs it; Swap always offers a
-  different one), saved focus areas that also steer the pick, the library.
-  A drill that is a Daily Sets track's current rung counts as a set.
-- **Train** — sessions typed in by hand (runs, holds, rep tests), unchanged.
-- **History** — everything done in the element on a chosen day, from every
-  source; day, week and streak tiles; 14-day trend.
+## Element pages (`src/screens/element/ElementPage.tsx`)
+
+One scroll:
+
+1. **Header** — the element's name, "3 today · 12 this week · 4-day
+   streak", the best result of the last 30 days (a run's 3-mile-equivalent
+   grade, otherwise the most-logged kind's best), and **+ Log**.
+2. **Try this now** — name and dose, with the why and the cues folded
+   under How. **Done** logs it (a Daily Sets track's current rung counts as
+   a set), **↻ Swap** offers the next best, **Library** opens the rest.
+3. **Day ribbon** — the last 14 days as bars, today on the right, a dot on
+   days with a Train entry. The whole ribbon is one touch target: a tap
+   picks the day under the finger. The day label opens a calendar for
+   older days.
+4. **That day's log** from every source. Train entries open for edit.
+
+Older Train entries whose kind is custom with no element (`'any'`) appear
+on every element page, as the Train tab showed them, but count once, where
+`trainElement` credits them (`src/domain/activity/elementDay.ts`).
 
 ## Chimes (`src/domain/program/rounds.ts`, `src/domain/ambient/setScheduler.ts`)
 
@@ -106,17 +136,19 @@ the screen and foreground service at once.
 - A skip from Today writes `reminder.skipped`; `handledPulseIds` keeps the
   schedulers from re-queueing it after a restart.
 
-## Migration (schema v2)
+## Migrations
 
-On upgrade, a saved plan that differs from the new default (which dropped
-Desk Hours and Morning Training) is kept under `plan.backup.v1` and
-replaced; Setup › Previous plan restores it. The Daily Sets day window is
-dropped. Fresh installs are untouched.
+- **v2.** On upgrade, a saved plan that differs from the new default
+  (which dropped Desk Hours and Morning Training) is kept under
+  `plan.backup.v1` and replaced; Settings › Previous plan restores it. The
+  Daily Sets day window is dropped. Fresh installs are untouched.
+- **v3.** The stored per-element tab (`settings.shell.subTabByElement`) is
+  dropped; there are no tabs to return to.
 
 ## Verification
 
 Per phase: jest (all suites), `tsc` (non-test error count unchanged),
-eslint on touched files, release build, `adb install -r`, screenshots.
-Still to confirm across a full day on the Redmi A3: chime count, a round's
-Done from a killed-app notification, My day edits re-laying chimes, and
-Restore previous plan.
+eslint on touched files, release build, `adb install -r`, screenshots of
+every page and sheet. Still to confirm across a full day on the Redmi A3:
+chime count, a round's Done from a killed-app notification, My day edits
+re-laying chimes, and Restore previous plan.

@@ -13,7 +13,7 @@ in service of a fixed summer deadline.
 > one editable "My day" window, and "Done" on every button. The docs
 > below still describe the pulse state machine, journal contract and
 > ambient discipline; where they describe tablet zones, the ribbon,
-> adherence rings or a separate active-hours window,
+> adherence rings, sub-tabs or a separate active-hours window,
 > [10-today-home.md](10-today-home.md) takes precedence.
 
 ## Reading order
@@ -55,7 +55,8 @@ in service of a fixed summer deadline.
    the post-critique refactor. Read after the rest if you want
    the why-and-how-we-got-here narrative.
 9. [10-today-home.md](10-today-home.md) — the current app shape after
-   the 2026-09-14 redesign: Heart › Today, rounds, My day.
+   the 2026-09-14 redesign: one page per element (no sub-tabs), Heart ›
+   Today, rounds, My day.
 
 ## Naming
 

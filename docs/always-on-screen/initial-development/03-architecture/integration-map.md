@@ -15,7 +15,7 @@ rebuilding what's already there.
 | Custom circuits  | `src/domain/circuit/`                             | optional pulse payload    |
 | Element identity | `src/theme/elements.ts`                           | colors, glyphs, sounds    |
 | Tap component    | `src/components/Tap.tsx`                          | giant CTA targets         |
-| MiniSparkline    | `src/components/MiniSparkline.tsx`                | trend chips on goal panel |
+| MiniSparkline    | `src/components/MiniSparkline.tsx`                | trend chips on goal panel (removed 2026-09-14) |
 
 ## What gets added
 
@@ -24,6 +24,9 @@ rebuilding what's already there.
 `src/screens/AlwaysOnScreen.tsx` — top-level. Decision pending on
 whether it sits inside Heart's sub-tab strip or earns its own
 primary tab in `subTabRegistry.ts`.
+
+> **2026-09-14:** superseded. There is no sub-tab strip or registry; Heart
+> is one page (Today). See [../10-today-home.md](../10-today-home.md).
 
 ### New domain folders
 

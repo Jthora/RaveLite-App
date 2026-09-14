@@ -1,9 +1,10 @@
 # Layout
 
 > **Superseded 2026-09-14.** The tablet zone layout below is historical.
-> The surface is now Heart › Today on a phone in portrait: status line,
-> chime card, balance strip, water, Daily Sets line, the day's list, then
-> "+ Log a session" and Practice. See [../10-today-home.md](../10-today-home.md).
+> The surface is now one page per element on a phone in portrait, with no
+> sub-tabs. Heart › Today: status line (with ⚙ Settings), chime card,
+> balance strip with week dots, water, Daily Sets meters, the day's list,
+> then "+ Log a session" and Practice. See [../10-today-home.md](../10-today-home.md).
 
 A 7-inch class tablet at landscape orientation, viewed from ~1.5 m.
 The page is **single-screen, no scroll inside the primary zone.**
