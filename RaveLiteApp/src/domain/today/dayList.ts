@@ -31,6 +31,8 @@ export interface DayRow {
   detail?: string;
   /** For done rows: where the record came from. */
   source?: ActivitySource;
+  /** For done rows: the stored record, so a Train entry can be edited. */
+  ref?: ActivityItem['ref'];
 }
 
 /** A chime on today's schedule (plan chime or Daily Sets round). */
@@ -72,6 +74,7 @@ function doneRow(items: ActivityItem[]): DayRow {
     element: first.element,
     status: 'done' as const,
     source: first.source,
+    ref: first.ref,
   };
   if (items.length === 1) {
     return {...base, label: first.label, detail: first.detail};

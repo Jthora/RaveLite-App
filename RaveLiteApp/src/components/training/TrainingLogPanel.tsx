@@ -4,7 +4,6 @@ import {palette, radius, spacing, type as typeTokens} from '../../theme';
 import {ELEMENTS} from '../../theme/elements';
 import {useElementAccent} from '../../theme/elementContext';
 import {
-  bestEntry,
   formatEntryValue,
   formatPace,
   gradeForRun,
@@ -20,6 +19,7 @@ import {
 } from '../../domain/training/repository';
 import {MetricKind, TrainingLogEntry} from '../../domain/training/types';
 import {TrainingLogSheet} from './TrainingLogSheet';
+import {buildHeadline} from '../../domain/training/headline';
 import {MS_PER_DAY} from '../../lib/constants';
 import type {ElementId} from '../../theme/elements';
 
@@ -201,77 +201,6 @@ function renderEntrySub(entry: TrainingLogEntry, kind: MetricKind) {
     );
   }
   return null;
-}
-
-interface Headline {
-  kicker: string;
-  main: string;
-  detail?: string;
-}
-
-function buildHeadline(
-  entries: TrainingLogEntry[],
-  metrics: MetricKind[],
-): Headline | undefined {
-  // Find the best run grade in last 30 days across all distance-bearing kinds.
-  const THIRTY = 30 * MS_PER_DAY;
-  const cutoff = Date.now() - THIRTY;
-  let bestGrade: ReturnType<typeof gradeForRun> | undefined;
-  let bestKind: MetricKind | undefined;
-  let bestEntryRef: TrainingLogEntry | undefined;
-  for (const e of entries) {
-    if (e.at < cutoff) continue;
-    const k = metrics.find(m => m.id === e.kindId) ?? getMetric(e.kindId);
-    if (!k) continue;
-    const dist =
-      k.inputMode === 'mmss' && k.defaultDistanceMeters
-        ? k.defaultDistanceMeters
-        : k.inputMode === 'distance-time'
-          ? e.distanceMeters
-          : undefined;
-    if (!dist) continue;
-    const g = gradeForRun(dist, e.value);
-    if (!g) continue;
-    if (!bestGrade || g.equivalent3MiSeconds < bestGrade.equivalent3MiSeconds) {
-      bestGrade = g;
-      bestKind = k;
-      bestEntryRef = e;
-    }
-  }
-  if (bestGrade && bestKind && bestEntryRef) {
-    return {
-      kicker: 'BEST 3 MI EQUIV (30 D)',
-      main: `${bestGrade.grade} · ${mmss(bestGrade.equivalent3MiSeconds)}`,
-      detail: `from ${bestKind.label} · ${formatEntryValue(bestEntryRef, bestKind)}`,
-    };
-  }
-  // Fallback: most-logged kind's best in 30 d.
-  const counts = new Map<string, number>();
-  for (const e of entries) counts.set(e.kindId, (counts.get(e.kindId) ?? 0) + 1);
-  let topKindId: string | undefined;
-  let topCount = 0;
-  for (const [id, c] of counts) {
-    if (c > topCount) {
-      topCount = c;
-      topKindId = id;
-    }
-  }
-  if (!topKindId) return undefined;
-  const kind = metrics.find(m => m.id === topKindId) ?? getMetric(topKindId);
-  if (!kind) return undefined;
-  const best = bestEntry(entries, topKindId, kind, THIRTY);
-  if (!best) return undefined;
-  return {
-    kicker: `BEST ${kind.label.toUpperCase()} (30 D)`,
-    main: formatEntryValue(best, kind),
-    detail: `${topCount} entr${topCount === 1 ? 'y' : 'ies'} logged`,
-  };
-}
-
-function mmss(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds - m * 60);
-  return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 interface DayGroup {

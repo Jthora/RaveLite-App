@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import {formatHM} from '../ambient/format';
+import {Tap} from '../Tap';
 import type {DayRow, DayRowStatus} from '../../domain/today/dayList';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
@@ -16,15 +17,23 @@ const MARK: Record<DayRowStatus, string> = {
 
 interface Props {
   rows: readonly DayRow[];
+  /** Train entries become pressable (to edit) when this is set. */
+  onRowPress?: (row: DayRow) => void;
+  /** Shown when there are no rows. */
+  emptyText?: string;
 }
 
 /**
  * The whole day in one list. Rows take their natural height inside the
- * Today scroll view. Skipped and missed rows are dimmed, never red.
+ * page's scroll view. Skipped and missed rows are dimmed, never red.
  */
-export function DayList({rows}: Props) {
+export function DayList({
+  rows,
+  onRowPress,
+  emptyText = "Nothing on today's list yet.",
+}: Props) {
   if (rows.length === 0) {
-    return <Text style={styles.empty}>Nothing on today's list yet.</Text>;
+    return <Text style={styles.empty}>{emptyText}</Text>;
   }
   return (
     <View>
@@ -32,8 +41,9 @@ export function DayList({rows}: Props) {
         const el = ELEMENTS[row.element];
         const quiet = row.status === 'skipped' || row.status === 'missed';
         const lit = row.status === 'done' || row.status === 'active';
-        return (
-          <View key={row.id} style={[styles.row, quiet && styles.quiet]}>
+        const editable = onRowPress !== undefined && row.ref?.store === 'train';
+        const body = (
+          <>
             <Text style={styles.time}>{formatHM(row.at)}</Text>
             <Text
               style={[
@@ -58,6 +68,24 @@ export function DayList({rows}: Props) {
                 </Text>
               ) : null}
             </View>
+            {editable ? <Text style={styles.chevron}>›</Text> : null}
+          </>
+        );
+        return editable ? (
+          <Tap
+            key={row.id}
+            testID={`day-row-${row.id}`}
+            variant="plain"
+            color={el.color}
+            onPress={() => onRowPress(row)}
+            accessibilityRole="button"
+            accessibilityLabel={`Edit ${row.label}`}
+            style={[styles.row, styles.rowEditable]}>
+            {body}
+          </Tap>
+        ) : (
+          <View key={row.id} style={[styles.row, quiet && styles.quiet]}>
+            {body}
           </View>
         );
       })}
@@ -80,6 +108,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: palette.border,
+  },
+  rowEditable: {
+    minHeight: 48,
   },
   quiet: {
     opacity: 0.5,
@@ -114,5 +145,10 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.textDim,
     marginTop: 1,
+  },
+  chevron: {
+    ...t.subtitle,
+    color: palette.textDim,
+    paddingHorizontal: spacing.xs,
   },
 });

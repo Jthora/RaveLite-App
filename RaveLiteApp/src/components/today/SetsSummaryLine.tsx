@@ -2,15 +2,9 @@ import React from 'react';
 import {StyleSheet, Text} from 'react-native';
 
 import {Tap} from '../Tap';
+import type {SetsSummary} from '../../domain/program/setsSummary';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
-
-export interface SetsSummary {
-  /** Sets done today, capped per track at its quota. */
-  done: number;
-  total: number;
-  tracks: Array<{trackId: string; name: string; done: number; total: number}>;
-}
 
 interface Props {
   sets: SetsSummary;

@@ -27,26 +27,61 @@ export function hydrationGlasses(items: readonly ActivityItem[]): number {
   return items.filter(i => i.hydration).length;
 }
 
+/** Local midnight that starts the last `n` days ending on `now`'s day. */
+export function windowStart(n: number, now: Date = new Date()): Date {
+  const from = new Date(now);
+  from.setHours(0, 0, 0, 0);
+  from.setDate(from.getDate() - (n - 1));
+  return from;
+}
+
+/** Index of the day `at` falls on, counting from `from` (a local midnight). */
+function dayIndex(at: number, from: Date): number {
+  const day = new Date(at);
+  day.setHours(0, 0, 0, 0);
+  // Round so a 23 or 25 hour DST day still lands on its own index.
+  return Math.round((day.getTime() - from.getTime()) / MS_PER_DAY);
+}
+
 /** Activity counts per day for the last `n` days, oldest → newest. */
 export function countsByDay(
   n: number,
   now: Date = new Date(),
   element?: ElementId,
 ): number[] {
-  const from = new Date(now);
-  from.setHours(0, 0, 0, 0);
-  from.setDate(from.getDate() - (n - 1));
+  const from = windowStart(n, now);
   const out: number[] = new Array(n).fill(0);
   for (const item of activityInRange(from, now)) {
     if (element && item.element !== element) {
       continue;
     }
-    const day = new Date(item.at);
-    day.setHours(0, 0, 0, 0);
-    // Round so a 23 or 25 hour DST day still lands on its own index.
-    const idx = Math.round((day.getTime() - from.getTime()) / MS_PER_DAY);
+    const idx = dayIndex(item.at, from);
     if (idx >= 0 && idx < n) {
       out[idx]++;
+    }
+  }
+  return out;
+}
+
+/**
+ * Pure: per-element counts for the last `n` days, oldest → newest. Pass the
+ * items of that window, e.g. `activityInRange(windowStart(n, now), now)`,
+ * so a whole week costs one read.
+ */
+export function countsByElementByDay(
+  items: readonly ActivityItem[],
+  n: number,
+  now: Date = new Date(),
+): Record<ElementId, number[]> {
+  const from = windowStart(n, now);
+  const out = {} as Record<ElementId, number[]>;
+  for (const id of Object.keys(emptyElementCounts()) as ElementId[]) {
+    out[id] = new Array(n).fill(0);
+  }
+  for (const item of items) {
+    const idx = dayIndex(item.at, from);
+    if (idx >= 0 && idx < n) {
+      out[item.element][idx]++;
     }
   }
   return out;

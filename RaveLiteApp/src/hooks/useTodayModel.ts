@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
-import type {SetsSummary} from '../components/today/SetsSummaryLine';
 import {activityForDay, subscribeActivity} from '../domain/activity/activity';
 import {countsByElement, hydrationGlasses} from '../domain/activity/stats';
 import {
@@ -20,7 +19,7 @@ import {entriesForDay, handledPulseIds} from '../domain/journal/journal';
 import {doneByTrack} from '../domain/program/progress';
 import {subscribeProgram} from '../domain/program/repository';
 import {movesOf} from '../domain/program/rounds';
-import {TRACKS} from '../domain/program/tracks';
+import {summarizeSets, type SetsSummary} from '../domain/program/setsSummary';
 import type {SetFire} from '../domain/program/types';
 import {expandPlanToFires, planPulseId} from '../domain/reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../domain/reminders/repository';
@@ -140,22 +139,7 @@ export function buildTodayModel(now: number): TodayModel {
     rows,
     counts: countsByElement(activity),
     glasses: hydrationGlasses(activity),
-    sets: {
-      done: sets.prescriptions.reduce(
-        (sum, p) => sum + Math.min(p.sets, done[p.trackId]?.sets ?? 0),
-        0,
-      ),
-      total: sets.prescriptions.reduce((sum, p) => sum + p.sets, 0),
-      tracks: sets.prescriptions.map(p => {
-        const total = p.setSize * p.sets;
-        return {
-          trackId: p.trackId,
-          name: TRACKS.find(tr => tr.id === p.trackId)?.name ?? p.label,
-          done: Math.min(total, done[p.trackId]?.amount ?? 0),
-          total,
-        };
-      }),
-    },
+    sets: summarizeSets(sets.prescriptions, done),
   };
 }
 

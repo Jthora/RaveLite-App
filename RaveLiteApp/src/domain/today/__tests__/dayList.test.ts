@@ -82,6 +82,7 @@ describe('buildDayList', () => {
         element: 'fire',
         status: 'done',
         source: 'chime',
+        ref,
         label: 'Push 5 reps + Squat 10 reps',
         detail: 'Doorway Pec Stretch · Glass of water',
       },
