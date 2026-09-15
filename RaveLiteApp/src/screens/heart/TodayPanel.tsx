@@ -269,7 +269,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             onPress={() => setPracticeOpen(true)}
             accessibilityRole="button"
             style={styles.link}>
-            <Text style={styles.linkText}>Practice ›</Text>
+            <Text style={styles.linkText}>Practice</Text>
           </Tap>
           <Tap
             testID="settings-open"
@@ -282,7 +282,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             }
             style={styles.link}>
             <View style={styles.linkRow}>
-              <Settings size={16} color={palette.textDim} strokeWidth={2} />
+              <Settings size={14} color={palette.textDim} strokeWidth={2} />
               <Text style={styles.linkText}>Settings</Text>
               {settingsAlert ? <View style={styles.alert} /> : null}
             </View>
@@ -399,16 +399,17 @@ const styles = StyleSheet.create({
   },
   linkText: {
     ...t.subtitle,
+    fontSize: 15,
     color: palette.text,
   },
   linkRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   alert: {
-    width: 7,
-    height: 7,
+    width: 6,
+    height: 6,
     borderRadius: 4,
     backgroundColor: '#FFD60A',
   },
