@@ -25,6 +25,7 @@ it('leads with the fitness tests, male table first, with the best test and its g
   expect(json).toContain('D+ USMC');
   expect(json).toContain('USMC: D− 5 · B+ 17 · A+ 21');
   expect(json).toContain('Maneuver under fire');
+  expect(json).toContain('ACTIVE TODAY');
   act(() => tree.unmount());
 });
 

@@ -12,6 +12,7 @@ import {
   streakDays,
   windowStart,
 } from '../domain/activity/stats';
+import {activeMinutes} from '../domain/activity/active';
 import {isHarmony} from '../domain/activity/par';
 import {WATER_TARGET} from '../components/today/WaterCounter';
 import {drinkTarget} from '../domain/conditions/heatWater';
@@ -76,6 +77,8 @@ export interface TodayModel {
   sets: SetsSummary;
   /** Today's focus attributes, morning block and any Saturday test. */
   focus: DayFocus;
+  /** Minutes of movement today, toward 150 (see `activity/active.ts`). */
+  activeMinutes: number;
   /** Per element, effort points for each of the last 7 days (today last). */
   week: Record<ElementId, number[]>;
   /** Days in a row, ending today, with anything done. */
@@ -190,6 +193,7 @@ export function buildTodayModel(
     weather: weatherLine(now),
     sets: summarizeSets(sets.prescriptions, done),
     focus: focusFor(date),
+    activeMinutes: activeMinutes(activity),
   };
 }
 

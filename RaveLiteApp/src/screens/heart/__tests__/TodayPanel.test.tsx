@@ -10,6 +10,7 @@ import {store} from '../../../storage';
 import * as runtime from '../../../domain/ambient/pulseRuntime';
 import {DailySetsSheet} from '../DailySetsSheet';
 import {SessionSheet} from '../../../components/today/SessionSheet';
+import {addEntry} from '../../../domain/training/repository';
 import {startSession} from '../../../domain/training/session';
 import {SettingsSheet} from '../SettingsSheet';
 import {TodayPanel} from '../TodayPanel';
@@ -49,6 +50,19 @@ it('shows today with an empty water count', () => {
   const tree = renderToday();
   expect(byTestId(tree, 'water-count').props.children).toEqual([0, '/', 8]);
   expect(byTestId(tree, 'today-header').props.children).toBe('Today');
+  act(() => tree.unmount());
+});
+
+it("today's header counts minutes of movement", () => {
+  addEntry({
+    at: TEN_AM.getTime() - 60 * 60_000,
+    kindId: 'builtin.staff-session',
+    value: 30 * 60,
+  });
+  const tree = renderToday();
+  expect(byTestId(tree, 'today-header').props.children).toBe(
+    'Today · 1-day streak · 30 min active',
+  );
   act(() => tree.unmount());
 });
 

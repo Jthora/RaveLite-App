@@ -22,9 +22,16 @@ import {Tap} from '../../components/Tap';
 import {NumberPad} from '../../components/training/NumberPad';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {
+  ACTIVE_FLOOR_MINUTES,
+  ACTIVE_GOAL_MINUTES,
+  activeMinutes,
+} from '../../domain/activity/active';
+import {
   activityForDay,
+  activityInRange,
   subscribeActivity,
 } from '../../domain/activity/activity';
+import {windowStart} from '../../domain/activity/stats';
 import {setsToday} from '../../domain/ambient/setScheduler';
 import {lastWeekDone} from '../../domain/program/adapt';
 import {PUSHUP_GOAL, pushupDay} from '../../domain/program/pushups';
@@ -199,20 +206,26 @@ export function Goals() {
         ),
       };
     });
+    const date = new Date(now);
+    const today = activityForDay(date);
     return {
       sex,
-      pushups: pushupDay(
-        activityForDay(new Date(now)),
-        setsToday(now).prescriptions,
-      ),
+      pushups: pushupDay(today, setsToday(now).prescriptions),
       rows,
       ramp: pushupRamp(program, now),
+      active: {
+        today: activeMinutes(today),
+        // Today counts as one of the seven, finished or not.
+        week: Math.round(
+          activeMinutes(activityInRange(windowStart(7, date), date)) / 7,
+        ),
+      },
     };
     // `version` is the rebuild trigger; reads go to storage.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version]);
 
-  const {pushups, ramp} = view;
+  const {pushups, ramp, active} = view;
   // Today's sets are the day's target; 200 a day is where the ramp leads.
   const dayTarget = pushups.planned > 0 ? pushups.planned : PUSHUP_GOAL;
 
@@ -253,6 +266,34 @@ export function Goals() {
           </Text>
           <Text testID="pushups-ramp" style={styles.projection}>
             {rampLine(ramp)}
+          </Text>
+        </View>
+
+        <View testID="active-card" style={styles.card}>
+          <Text style={styles.eyebrow}>ACTIVE TODAY</Text>
+          <Text style={styles.big}>
+            {active.today}
+            <Text style={styles.bigGoal}> / {ACTIVE_GOAL_MINUTES} min</Text>
+          </Text>
+          <View style={styles.bar}>
+            <View
+              style={[
+                styles.fill,
+                {
+                  width: `${
+                    Math.min(1, active.today / ACTIVE_GOAL_MINUTES) * 100
+                  }%`,
+                  backgroundColor:
+                    active.today >= ACTIVE_FLOOR_MINUTES ? accent : fire,
+                },
+              ]}
+            />
+          </View>
+          <Text style={styles.caption}>
+            Two and a half hours is the ideal; {ACTIVE_FLOOR_MINUTES} minutes
+            keeps a busy day on track. Sessions, runs, drills and sets count;
+            water, breathing and stillness don't. Last 7 days: {active.week} min
+            a day.
           </Text>
         </View>
 

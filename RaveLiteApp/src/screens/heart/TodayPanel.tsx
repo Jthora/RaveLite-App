@@ -200,7 +200,11 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           <Text testID="today-header" style={styles.section}>
             {(model.streak > 0
               ? `Today · ${model.streak}-day streak`
-              : 'Today') + (model.harmony ? ' · Harmony' : '')}
+              : 'Today') +
+              (model.harmony ? ' · Harmony' : '') +
+              (model.activeMinutes > 0
+                ? ` · ${model.activeMinutes} min active`
+                : '')}
           </Text>
           {missed.length >= 2 ? (
             <Tap

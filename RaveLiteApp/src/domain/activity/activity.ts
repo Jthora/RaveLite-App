@@ -76,6 +76,8 @@ export interface ActivityItem {
   move?: MoveId;
   /** Effort points toward its element's daily par (see `par.ts`). */
   points: number;
+  /** About how long it took, for active minutes (see `active.ts`). */
+  seconds?: number;
   /** For Train entries: the metric kind. */
   kindId?: string;
   /** Where the underlying record lives. */
@@ -112,6 +114,14 @@ const CHECK_INS: ReadonlySet<string> = new Set([
   'heart.fuel-check',
   'heart.morning-intent',
 ]);
+
+/** A set's time: holds as held, reps at about three seconds each. */
+function setSeconds(unit: 'reps' | 'seconds' | undefined, amount: number) {
+  return unit === 'seconds' ? amount : Math.max(20, amount * 3);
+}
+
+/** A test of reps or a max: about a minute of work. */
+const TEST_SECONDS = 60;
 
 /** A point a minute, at least a drill's worth, at most the session cap. */
 export function minutePoints(seconds: number): number {
@@ -226,6 +236,7 @@ function completionItems(
         amount: m.amount,
         move: moveForTrack(m.trackId),
         points: POINTS.set,
+        seconds: setSeconds(track?.unit, m.amount),
       });
     }
   } else {
@@ -240,6 +251,7 @@ function completionItems(
       move: moveForExercise(e.exerciseId),
       hydration: isHydration(ex) || undefined,
       points: drillPoints(ex, e),
+      seconds: e.durationSec ?? ex?.approxSeconds,
     });
   }
 
@@ -257,6 +269,7 @@ function completionItems(
       move: moveForExercise(partner.id),
       hydration: isHydration(partner) || undefined,
       points: POINTS.drill,
+      seconds: e.partnerSec ?? partner.approxSeconds,
     });
   }
   if (e.water) {
@@ -305,6 +318,7 @@ function testItem(e: ProgramTestEntry): ActivityItem {
     amount: e.max,
     move: moveForTrack(e.trackId),
     points: POINTS.test,
+    seconds: TEST_SECONDS,
     ref: {store: 'journal', id: e.id},
   };
 }
@@ -330,6 +344,13 @@ function trainItem(
     kindId: entry.kindId,
     // A rep count, e.g. a 1-minute push-up test.
     amount: kind?.inputMode === 'integer' ? entry.value : undefined,
+    // Timed kinds took as long as they say; a rep test about a minute.
+    seconds:
+      kind?.inputMode === 'mmss' || kind?.inputMode === 'distance-time'
+        ? entry.value
+        : kind?.inputMode === 'integer'
+        ? TEST_SECONDS
+        : undefined,
     ref: {store: 'train', id: entry.id},
   };
 }
