@@ -57,9 +57,11 @@ interface Props {
   /** When set, scopes the metric picker to this element + 'any',
    *  pre-fills the picker, and tags new entries with this element. */
   defaultElement?: ElementId;
+  /** When set, a new entry starts on this metric kind (e.g. a test). */
+  defaultKindId?: string;
 }
 
-export function TrainingLogSheet({visible, onClose, editing, defaultElement}: Props) {
+export function TrainingLogSheet({visible, onClose, editing, defaultElement, defaultKindId}: Props) {
   const {width, height} = useWindowDimensions();
   const accent = useElementAccent();
   // Use 2-column layout whenever width > height (phone landscape too).
@@ -80,7 +82,7 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement}: Pr
   );
 
   const [selectedKindId, setSelectedKindId] = useState<string>(
-    editing?.kindId ?? metrics[0]?.id ?? '',
+    editing?.kindId ?? defaultKindId ?? metrics[0]?.id ?? '',
   );
   const selectedKind = useMemo(
     () => metrics.find(m => m.id === selectedKindId) ?? editingKind,
@@ -137,12 +139,14 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement}: Pr
       setValueReps(0);
       setDistanceCenti(0);
       setNotes('');
-      if (!metrics.find(m => m.id === selectedKindId)) {
+      if (defaultKindId && metrics.find(m => m.id === defaultKindId)) {
+        setSelectedKindId(defaultKindId);
+      } else if (!metrics.find(m => m.id === selectedKindId)) {
         setSelectedKindId(metrics[0]?.id ?? '');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, editing?.id]);
+  }, [visible, editing?.id, defaultKindId]);
 
   const canSave = !!selectedKind && hasValue(selectedKind.inputMode, {
     valueSec,

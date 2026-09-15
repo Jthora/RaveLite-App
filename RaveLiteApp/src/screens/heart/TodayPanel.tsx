@@ -47,6 +47,7 @@ import {ELEMENTS, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {DailySetsSheet} from './DailySetsSheet';
 import {SettingsSheet} from './SettingsSheet';
+import {StandardsSheet} from './StandardsSheet';
 import {WeatherSheet} from './WeatherSheet';
 
 /** +5 on the next chime pushes it back by this much. */
@@ -66,6 +67,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [setsOpen, setSetsOpen] = useState(false);
   const [weatherOpen, setWeatherOpen] = useState(false);
+  const [standardsOpen, setStandardsOpen] = useState(false);
   /** A missed or skipped chime being logged after the fact. */
   const [late, setLate] = useState<DayRow | undefined>();
   /** A logged row being kept or removed. */
@@ -187,7 +189,12 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           target={model.waterTarget}
           onAdd={() => logWaterGlass()}
         />
-        <SetsMeters sets={model.sets} onPress={() => setSetsOpen(true)} />
+        <SetsMeters
+          sets={model.sets}
+          onPress={() => setSetsOpen(true)}
+          pushups={model.pushups}
+          onPushupsPress={() => setStandardsOpen(true)}
+        />
 
         <View style={styles.sectionRow}>
           <Text testID="today-header" style={styles.section}>
@@ -260,6 +267,10 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             setPracticeOpen(false);
             onEngageLegs(legs);
           }}
+        />
+        <StandardsSheet
+          visible={standardsOpen}
+          onClose={() => setStandardsOpen(false)}
         />
         <WeatherSheet
           visible={weatherOpen}

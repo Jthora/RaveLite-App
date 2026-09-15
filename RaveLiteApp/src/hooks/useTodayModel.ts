@@ -42,6 +42,7 @@ import {doneByTrack} from '../domain/program/progress';
 import {subscribeProgram} from '../domain/program/repository';
 import {movesOf} from '../domain/program/rounds';
 import {summarizeSets, type SetsSummary} from '../domain/program/setsSummary';
+import {pushupDay, type PushupDay} from '../domain/program/pushups';
 import type {SetFire} from '../domain/program/types';
 import {expandPlanToFires, planPulseId} from '../domain/reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../domain/reminders/repository';
@@ -73,6 +74,8 @@ export interface TodayModel {
   /** The sun and the weather now; undefined until a place is set. */
   weather?: WeatherLine;
   sets: SetsSummary;
+  /** Push-ups toward today's 200. */
+  pushups: PushupDay;
   /** Per element, effort points for each of the last 7 days (today last). */
   week: Record<ElementId, number[]>;
   /** Days in a row, ending today, with anything done. */
@@ -186,6 +189,7 @@ export function buildTodayModel(
     waterTarget: drinkTarget(WATER_TARGET, hottestToday(now)),
     weather: weatherLine(now),
     sets: summarizeSets(sets.prescriptions, done),
+    pushups: pushupDay(activity, sets.prescriptions),
   };
 }
 

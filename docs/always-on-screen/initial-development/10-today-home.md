@@ -91,8 +91,11 @@ Top to bottom, one scroll:
    own elements.
 4. **Drink** — glasses of water today out of 8 (10 on a hot day, 12 in
    dangerous heat), with **+1**.
-5. **Daily Sets meters** — sets done, then one small meter per track in its
-   element's color. Tap for the Daily Sets sheet.
+5. **Daily Sets meters** — sets done, then **push-ups toward 200** as the
+   lead row (today's count, a mark where today's sets add up to, standard
+   and variants apart, best set; tap for **Standards**), then one small
+   meter per other track in its element's color. Tap the card for the Daily
+   Sets sheet.
 6. **Today · N-day streak** (plus **· Harmony** once all five are at
    par) and the day's list — one row per record from
    every source (chimes and rounds, drill taps, circuit legs, Train log
@@ -116,6 +119,11 @@ Top to bottom, one scroll:
   and Respect DND, the Stay alive checklist, the plan editor, restoring a
   plan the v2 migration replaced, alive motion, and the Core theme. A
   notifications-off warning leads when permission is denied.
+- **Standards** (Today's push-up row) — push-ups today, then each military
+  test event with its target (the top score for ages 35–40, male and female
+  tables, the chosen one first, or a target the operator set on a number
+  pad), the best Train log test with a bar toward the target, and **Log a
+  test**, which opens the log sheet on that event.
 - **Weather** (Today's conditions line, or Settings › Weather & place) —
   the place (type a town, or Use my location), today's first light,
   sunrise, sunset and daylight, the next 12 hours, and switches for Buggy
@@ -221,6 +229,32 @@ Water 13 · Core 5 · Air 2.
   strength tracks rest, and rounds holding an Earth move can't end on an
   Earth partner; one Earth drill makes it up). Week 1 Monday: Fire 29 ·
   Air 26 · Earth 26 · Water 28 · Core 26.
+
+## Fitness standards (`src/domain/standards/`, `src/domain/program/pushups.ts`)
+
+The operator trains toward four tests, and their events are sacred: the
+Air Force and Space Force tests (push-ups and sit-ups in a minute, plank,
+2-mile run), the Marine PFT and combat fitness test (pull-ups, 2-minute
+push-ups, plank, 3-mile run, 880-yard sprint, ammo-can lifts, maneuver under
+fire) and MARSOC's marks. Targets are top scores for ages 35–40 from
+2025–2026 news and calculator sites, because the official charts would not
+load; they are close, not final, and every one can be changed.
+
+- **Push-ups toward 200 a day.** The day's count adds Push and Variants sets
+  (rounds, "+ set", drill taps that count as a set), max tests and push-up
+  tests from the Train log. Standard push-ups count apart from variants.
+- **Push** stays on the tested push-up (incline push-ups are its only
+  easier rung) and runs every day, up to 12 sets. **Variants** (diamond →
+  decline → archer) run every day beside it; their reps count toward 200.
+- **Pull-ups, rows and plank** run every day. **Plank** has one rung, the
+  forearm plank, building toward 3:45. The core track, now **Sit-ups**,
+  ends at the sit-up.
+- Rounds can hold six moves, so the extra sets don't add chimes.
+- **Results** come from Train log tests. A longer run counts at the same
+  pace, so the 3.2-mile loop times the 3-mile event. New log kinds:
+  1-minute push-ups and sit-ups, 880-yard movement to contact, ammo-can
+  lifts (about 6 bricks in a bag), maneuver under fire.
+- **Not tracked yet:** MARSOC's swim and ruck, and waist-to-height ratio.
 
 ## Weather (`src/domain/conditions/`)
 
