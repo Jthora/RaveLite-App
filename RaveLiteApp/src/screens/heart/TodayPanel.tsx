@@ -355,12 +355,15 @@ const styles = StyleSheet.create({
     color: palette.textDim,
     letterSpacing: 1.4,
     textTransform: 'uppercase',
+    // Wraps to a second line rather than pushing Catch up off the screen.
+    flexShrink: 1,
   },
   catchUp: {
     minHeight: 44,
     justifyContent: 'center',
     paddingHorizontal: spacing.sm,
     borderRadius: radius.pill,
+    flexShrink: 0,
   },
   catchUpText: {
     ...t.caption,
