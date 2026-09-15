@@ -1,7 +1,7 @@
 /**
  * DailySetsSheet — Daily Sets in full, opened from Today's set meters:
  * today's tracks with their rounds, max tests, level ups and track on/off,
- * and the fitness standards.
+ * and Goals.
  */
 import React, {useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -11,7 +11,7 @@ import {Tap} from '../../components/Tap';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
 import {DailySetsSection} from './DailySetsSection';
-import {StandardsSheet} from './StandardsSheet';
+import {GoalsSheet} from './GoalsSheet';
 
 interface Props {
   visible: boolean;
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function DailySetsSheet({visible, onClose}: Props) {
-  const [standardsOpen, setStandardsOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(false);
   const accent = ELEMENTS.heart.accent;
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -28,13 +28,13 @@ export function DailySetsSheet({visible, onClose}: Props) {
           <Text style={[styles.title, {color: accent}]}>Daily Sets</Text>
           <View style={styles.actions}>
             <Tap
-              testID="standards-open"
+              testID="goals-open"
               variant="plain"
-              onPress={() => setStandardsOpen(true)}
+              onPress={() => setGoalsOpen(true)}
               accessibilityRole="button"
-              accessibilityLabel="Standards: push-ups today, fitness tests and targets"
+              accessibilityLabel="Goals: push-ups today, the fitness tests and a goal for each element"
               style={styles.close}>
-              <Text style={[styles.closeText, {color: accent}]}>Standards</Text>
+              <Text style={[styles.closeText, {color: accent}]}>Goals</Text>
             </Tap>
             <Tap
               variant="plain"
@@ -50,10 +50,7 @@ export function DailySetsSheet({visible, onClose}: Props) {
           showsVerticalScrollIndicator={false}>
           <DailySetsSection />
         </ScrollView>
-        <StandardsSheet
-          visible={standardsOpen}
-          onClose={() => setStandardsOpen(false)}
-        />
+        <GoalsSheet visible={goalsOpen} onClose={() => setGoalsOpen(false)} />
       </SafeAreaView>
     </Modal>
   );

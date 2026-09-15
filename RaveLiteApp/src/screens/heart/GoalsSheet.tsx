@@ -1,12 +1,14 @@
 /**
- * Standards — today's push-ups and the military fitness tests the operator
- * trains toward (USAF, USSF, USMC, MARSOC). Opened from the push-up row in
- * Today's Daily Sets card.
+ * Goals — today's push-ups, the military fitness tests the operator trains
+ * toward (a B+ on the Space Force, Air Force and Marine tests), then goals
+ * for Air, Core, Earth and Water on RaveLite's own marks. Opened from the
+ * Daily Sets page.
  *
- * Each event shows its target (the operator's own, or a B+ on every test
- * that uses it), the best test from the Train log with its grade on each
- * test and a bar toward the target, each test's D−, B+ and A+ marks for the
- * chosen table, and "Log a test". Tap a target to change it.
+ * Each goal shows its target (the operator's own, or a B+), the best result
+ * from the Train log with its grade and a bar toward the target, its D−, B+
+ * and A+ marks (per test for the fitness tests, on the chosen table), and
+ * "Log a test". Last week's sets done comes from Daily Sets itself. Tap a
+ * target to change it.
  */
 import React, {useEffect, useMemo, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -20,8 +22,12 @@ import {
   subscribeActivity,
 } from '../../domain/activity/activity';
 import {setsToday} from '../../domain/ambient/setScheduler';
+import {lastWeekDone} from '../../domain/program/adapt';
 import {PUSHUP_GOAL, pushupDay} from '../../domain/program/pushups';
+import {loadProgram, subscribeProgram} from '../../domain/program/repository';
 import {
+  GOAL_GROUPS,
+  MARKS_NOTE,
   STANDARDS_NOTE,
   STANDARD_EVENTS,
   TEST_NAMES,
@@ -37,8 +43,10 @@ import {
   setTarget,
   targetFor,
   type EventScale,
+  type GoalGroup,
   type Sex,
   type StandardEvent,
+  type StandardResult,
 } from '../../domain/standards/standards';
 import {formatDuration, type Grade} from '../../domain/training/grading';
 import {
@@ -57,18 +65,21 @@ interface Props {
 const LETTER: Record<Sex, string> = {male: 'M', female: 'F'};
 
 const formatValue = (event: StandardEvent, value: number) =>
-  event.unit === 'seconds' ? formatDuration(value) : String(Math.round(value));
+  event.unit === 'seconds'
+    ? formatDuration(value)
+    : event.unit === 'percent'
+    ? `${Math.round(value)}%`
+    : String(Math.round(value));
 
 const shortDate = (at: number) =>
   new Date(at).toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
 
-/** "USMC: D− 5 · B+ 17 · A+ 21" on the chosen table. */
+/** "USMC: D− 5 · B+ 17 · A+ 21" on the chosen table; RaveLite marks have no test name. */
 function scaleLine(event: StandardEvent, scale: EventScale, sex: Sex): string {
   const mark = (grade: Grade) =>
     formatValue(event, markFor(event, scale, sex, grade));
-  return `${TEST_NAMES[scale.test]}: D− ${mark('D−')} · B+ ${mark(
-    'B+',
-  )} · A+ ${mark('A+')}`;
+  const line = `D− ${mark('D−')} · B+ ${mark('B+')} · A+ ${mark('A+')}`;
+  return scale.test ? `${TEST_NAMES[scale.test]}: ${line}` : line;
 }
 
 /** "M 21 · F 10", the chosen table first. */
@@ -79,13 +90,30 @@ function topScores(event: StandardEvent, first: Sex): string {
   } ${formatValue(event, event.top[second])}`;
 }
 
-export function StandardsSheet({visible, onClose}: Props) {
+const groupTitle = (group: GoalGroup) =>
+  group === 'tests' ? 'Fitness tests' : ELEMENTS[group].name;
+
+const groupColor = (group: GoalGroup) =>
+  group === 'tests' ? ELEMENTS.fire.color : ELEMENTS[group].color;
+
+interface GoalRow {
+  event: StandardEvent;
+  target: number;
+  own: boolean;
+  /** The best logged result, or last week's share for the measured goal. */
+  result?: StandardResult;
+  grades: string;
+  progress: number;
+}
+
+export function GoalsSheet({visible, onClose}: Props) {
   const [version, setVersion] = useState(0);
   const [logKindId, setLogKindId] = useState<string | undefined>();
   const [editing, setEditing] = useState<StandardEvent | undefined>();
   const bump = () => setVersion(v => v + 1);
   useEffect(() => subscribeActivity(bump), []);
   useEffect(() => subscribeTrainingLog(bump), []);
+  useEffect(() => subscribeProgram(() => bump()), []);
 
   const accent = ELEMENTS.heart.accent;
   const fire = ELEMENTS.fire.color;
@@ -94,24 +122,31 @@ export function StandardsSheet({visible, onClose}: Props) {
     const now = Date.now();
     const entries = loadEntries();
     const sex = getPrimarySex();
+    const done = lastWeekDone(Object.values(loadProgram(new Date(now)).tracks));
+    const rows: GoalRow[] = STANDARD_EVENTS.map(event => {
+      const target = targetFor(event);
+      // The one goal without a Train kind is measured from Daily Sets.
+      const result = event.kindId
+        ? bestResult(event, entries, getMetric)
+        : done !== undefined
+        ? {value: Math.round(done * 100), at: now}
+        : undefined;
+      return {
+        event,
+        target,
+        own: hasOwnTarget(event),
+        result,
+        grades: result ? formatGrades(gradesFor(event, sex, result.value)) : '',
+        progress: result ? progressToward(event, result.value, target) : 0,
+      };
+    });
     return {
       sex,
       pushups: pushupDay(
         activityForDay(new Date(now)),
         setsToday(now).prescriptions,
       ),
-      events: STANDARD_EVENTS.map(event => {
-        const target = targetFor(event);
-        const best = bestResult(event, entries, getMetric);
-        return {
-          event,
-          target,
-          own: hasOwnTarget(event),
-          best,
-          grades: best ? formatGrades(gradesFor(event, sex, best.value)) : '',
-          progress: best ? progressToward(event, best.value, target) : 0,
-        };
-      }),
+      rows,
     };
     // `version` and `visible` are the rebuild triggers; reads go to storage.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,7 +160,7 @@ export function StandardsSheet({visible, onClose}: Props) {
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>Standards</Text>
+          <Text style={[styles.title, {color: accent}]}>Goals</Text>
           <Tap
             variant="plain"
             onPress={onClose}
@@ -164,118 +199,62 @@ export function StandardsSheet({visible, onClose}: Props) {
             </Text>
             <Text style={styles.caption}>
               {pushups.planned > 0
-                ? `Today's sets add up to ${pushups.planned}. They grow as the weeks build and your tested max rises, toward ${PUSHUP_GOAL} a day.`
+                ? `Today's sets add up to ${pushups.planned}. They grow as you keep up with them and your tested max rises, toward ${PUSHUP_GOAL} a day.`
                 : `The long-term goal is ${PUSHUP_GOAL} a day.`}
             </Text>
           </View>
 
-          <View style={styles.tableRow}>
-            {(['male', 'female'] as const).map(sex => {
-              const on = view.sex === sex;
-              return (
-                <Tap
-                  key={sex}
-                  testID={`table-${sex}`}
-                  variant="ghost"
-                  color={on ? accent : palette.textDim}
-                  onPress={() => {
-                    setPrimarySex(sex);
-                    bump();
-                  }}
-                  accessibilityRole="radio"
-                  accessibilityState={{selected: on}}
-                  style={styles.pill}>
-                  <Text style={[styles.pillText, on && {color: accent}]}>
-                    {sex === 'male' ? 'Male first' : 'Female first'}
-                  </Text>
-                </Tap>
-              );
-            })}
-          </View>
-          <Text style={styles.note}>{STANDARDS_NOTE}</Text>
-
-          {view.events.map(({event, target, own, best, grades, progress}) => (
-            <View key={event.id} style={styles.card}>
-              <View style={styles.cardTop}>
-                <View style={styles.cardTitle}>
-                  <Text style={styles.eventName}>{event.name}</Text>
-                  <Text style={styles.caption}>{event.tests}</Text>
-                </View>
-                <Tap
-                  testID={`target-${event.id}`}
-                  variant="plain"
-                  color={accent}
-                  onPress={() => setEditing(event)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${event.name} target ${formatValue(
-                    event,
-                    target,
-                  )}. Change`}
-                  style={styles.targetTap}>
-                  <View style={styles.targetBox}>
-                    <Text style={styles.target}>
-                      {formatValue(event, target)}
-                    </Text>
-                    <Text style={styles.caption}>
-                      {own
-                        ? 'your target'
-                        : event.scales
-                        ? 'B+ goal'
-                        : topScores(event, view.sex)}
-                    </Text>
+          {GOAL_GROUPS.map((group, index) => (
+            <View key={group} testID={`goals-${group}`} style={styles.section}>
+              <Text style={[styles.sectionTitle, {color: groupColor(group)}]}>
+                {groupTitle(group)}
+              </Text>
+              {group === 'tests' ? (
+                <>
+                  <View style={styles.tableRow}>
+                    {(['male', 'female'] as const).map(sex => {
+                      const on = view.sex === sex;
+                      return (
+                        <Tap
+                          key={sex}
+                          testID={`table-${sex}`}
+                          variant="ghost"
+                          color={on ? accent : palette.textDim}
+                          onPress={() => {
+                            setPrimarySex(sex);
+                            bump();
+                          }}
+                          accessibilityRole="radio"
+                          accessibilityState={{selected: on}}
+                          style={styles.pill}>
+                          <Text
+                            style={[styles.pillText, on && {color: accent}]}>
+                            {sex === 'male' ? 'Male first' : 'Female first'}
+                          </Text>
+                        </Tap>
+                      );
+                    })}
                   </View>
-                </Tap>
-              </View>
-              <View style={styles.bar}>
-                <View
-                  style={[
-                    styles.fill,
-                    {
-                      width: `${progress * 100}%`,
-                      backgroundColor: progress >= 1 ? accent : fire,
-                    },
-                  ]}
-                />
-              </View>
-              <View style={styles.cardBottom}>
-                <Text style={styles.best} numberOfLines={2}>
-                  {best
-                    ? [
-                        `Best ${formatValue(event, best.value)}`,
-                        shortDate(best.at),
-                        grades || undefined,
-                        best.from ? `from ${best.from}` : undefined,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')
-                    : 'No test yet'}
-                </Text>
-                <Tap
-                  testID={`log-${event.id}`}
-                  variant="ghost"
-                  color={accent}
-                  onPress={() => setLogKindId(event.kindId)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Log a ${event.name} test`}
-                  style={styles.logBtn}>
-                  <Text style={[styles.logText, {color: accent}]}>
-                    Log a test
-                  </Text>
-                </Tap>
-              </View>
-              {(event.scales ?? []).map(scale => (
-                <Text key={scale.test} style={styles.caption}>
-                  {scaleLine(event, scale, view.sex)}
-                </Text>
-              ))}
-              {own && !event.scales ? (
-                <Text style={styles.caption}>
-                  Top score {topScores(event, view.sex)}
-                </Text>
+                  <Text style={styles.note}>{STANDARDS_NOTE}</Text>
+                </>
+              ) : index === 1 ? (
+                <Text style={styles.note}>{MARKS_NOTE}</Text>
               ) : null}
-              {event.note ? (
-                <Text style={styles.caption}>{event.note}</Text>
-              ) : null}
+              {view.rows
+                .filter(row => row.event.group === group)
+                .map(row => (
+                  <GoalCard
+                    key={row.event.id}
+                    row={row}
+                    sex={view.sex}
+                    onEdit={() => setEditing(row.event)}
+                    onLog={
+                      row.event.kindId
+                        ? () => setLogKindId(row.event.kindId)
+                        : undefined
+                    }
+                  />
+                ))}
             </View>
           ))}
         </ScrollView>
@@ -305,7 +284,110 @@ export function StandardsSheet({visible, onClose}: Props) {
   );
 }
 
-/** Change a target on a number pad, or go back to the top score. */
+/** One goal: target, best result and grade, a bar, its marks and Log a test. */
+function GoalCard({
+  row,
+  sex,
+  onEdit,
+  onLog,
+}: {
+  row: GoalRow;
+  sex: Sex;
+  onEdit: () => void;
+  /** Unset for a goal the app measures itself. */
+  onLog?: () => void;
+}) {
+  const {event, target, own, result, grades, progress} = row;
+  const accent = ELEMENTS.heart.accent;
+  const measured = !event.kindId;
+  const resultLine = result
+    ? [
+        `${measured ? 'Last week' : 'Best'} ${formatValue(
+          event,
+          result.value,
+        )}`,
+        measured ? undefined : shortDate(result.at),
+        grades || undefined,
+        result.from ? `from ${result.from}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : measured
+    ? 'After a week of Daily Sets'
+    : 'No test yet';
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardTop}>
+        <View style={styles.cardTitle}>
+          <Text style={styles.eventName}>{event.name}</Text>
+          <Text style={styles.caption}>{event.subtitle}</Text>
+        </View>
+        <Tap
+          testID={`target-${event.id}`}
+          variant="plain"
+          color={accent}
+          onPress={onEdit}
+          accessibilityRole="button"
+          accessibilityLabel={`${event.name} target ${formatValue(
+            event,
+            target,
+          )}. Change`}
+          style={styles.targetTap}>
+          <View style={styles.targetBox}>
+            <Text style={styles.target}>{formatValue(event, target)}</Text>
+            <Text style={styles.caption}>
+              {own
+                ? 'your target'
+                : event.scales
+                ? 'B+ goal'
+                : topScores(event, sex)}
+            </Text>
+          </View>
+        </Tap>
+      </View>
+      <View style={styles.bar}>
+        <View
+          style={[
+            styles.fill,
+            {
+              width: `${progress * 100}%`,
+              backgroundColor: progress >= 1 ? accent : groupColor(event.group),
+            },
+          ]}
+        />
+      </View>
+      <View style={styles.cardBottom}>
+        <Text style={styles.best} numberOfLines={2}>
+          {resultLine}
+        </Text>
+        {onLog ? (
+          <Tap
+            testID={`log-${event.id}`}
+            variant="ghost"
+            color={accent}
+            onPress={onLog}
+            accessibilityRole="button"
+            accessibilityLabel={`Log a ${event.name} test`}
+            style={styles.logBtn}>
+            <Text style={[styles.logText, {color: accent}]}>Log a test</Text>
+          </Tap>
+        ) : null}
+      </View>
+      {(event.scales ?? []).map((scale, i) => (
+        <Text key={scale.test ?? i} style={styles.caption}>
+          {scaleLine(event, scale, sex)}
+        </Text>
+      ))}
+      {own && !event.scales ? (
+        <Text style={styles.caption}>Top score {topScores(event, sex)}</Text>
+      ) : null}
+      {event.note ? <Text style={styles.caption}>{event.note}</Text> : null}
+    </View>
+  );
+}
+
+/** Change a target on a number pad, or go back to the B+ (or top score). */
 function TargetEditor({
   event,
   sex,
@@ -315,7 +397,7 @@ function TargetEditor({
   event?: StandardEvent;
   sex: Sex;
   onClose: () => void;
-  /** `undefined` goes back to the top score. */
+  /** `undefined` goes back to the default target. */
   onSave: (value: number | undefined) => void;
 }) {
   const [value, setValue] = useState(0);
@@ -329,6 +411,19 @@ function TargetEditor({
   }
   const accent = ELEMENTS.heart.accent;
   const goal = goalFor(event, sex);
+  const onTests = event.scales?.some(scale => scale.test) ?? false;
+  const caption =
+    goal === undefined
+      ? `Top score for ages 35–40: ${topScores(event, sex)}`
+      : onTests
+      ? `A B+ on every test: ${formatValue(
+          event,
+          goal,
+        )}. Top score: ${topScores(event, sex)}`
+      : `B+ mark: ${formatValue(event, goal)}. A+: ${formatValue(
+          event,
+          event.top[sex],
+        )}`;
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
@@ -336,14 +431,7 @@ function TargetEditor({
           <Text style={[styles.editorTitle, {color: accent}]}>
             {event.name} target
           </Text>
-          <Text style={styles.caption}>
-            {goal !== undefined
-              ? `A B+ on every test: ${formatValue(
-                  event,
-                  goal,
-                )}. Top score: ${topScores(event, sex)}`
-              : `Top score for ages 35–40: ${topScores(event, sex)}`}
-          </Text>
+          <Text style={styles.caption}>{caption}</Text>
           <NumberPad
             mode={event.unit === 'seconds' ? 'mmss' : 'integer'}
             value={value}
@@ -417,6 +505,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
     gap: spacing.md,
+  },
+  section: {
+    gap: spacing.md,
+  },
+  sectionTitle: {
+    ...t.caption,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginTop: spacing.md,
   },
   card: {
     backgroundColor: palette.surface,
@@ -504,6 +602,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    minHeight: 44,
   },
   best: {
     ...t.body,

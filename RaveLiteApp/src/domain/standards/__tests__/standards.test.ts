@@ -2,6 +2,7 @@ import {METERS_PER_MILE} from '../../../lib/constants';
 import {store} from '../../../storage';
 import {BUILTIN_METRICS} from '../../training/builtinMetrics';
 import {
+  GOAL_GROUPS,
   STANDARD_EVENTS,
   bestResult,
   formatGrades,
@@ -35,10 +36,16 @@ it('leads with the male table, aims for a B+, and a target can be changed and re
   expect(targetFor(pullups)).toBe(17);
 });
 
-it('every event has a Train log kind to hold its tests', () => {
-  for (const e of STANDARD_EVENTS) {
-    expect(metricFor(e.kindId)).toBeDefined();
+it('every logged goal has a Train log kind; only sets done is measured', () => {
+  for (const e of STANDARD_EVENTS.filter(goal => goal.kindId)) {
+    expect(metricFor(e.kindId!)).toBeDefined();
   }
+  expect(STANDARD_EVENTS.filter(e => !e.kindId).map(e => e.id)).toEqual([
+    'sets-done',
+  ]);
+  expect(new Set(STANDARD_EVENTS.map(e => e.group))).toEqual(
+    new Set(GOAL_GROUPS),
+  );
 });
 
 it('grades evenly from the passing minimum (D−) to the max (A+)', () => {
@@ -69,7 +76,10 @@ it('grades evenly from the passing minimum (D−) to the max (A+)', () => {
 
 it('targets the hardest B+ of every test that uses the event', () => {
   const goals = Object.fromEntries(
-    STANDARD_EVENTS.map(e => [e.id, goalFor(e, 'male')]),
+    STANDARD_EVENTS.filter(e => e.group === 'tests').map(e => [
+      e.id,
+      goalFor(e, 'male'),
+    ]),
   );
   expect(goals).toEqual({
     'pushups-1min': 47,
@@ -87,6 +97,30 @@ it('targets the hardest B+ of every test that uses the event', () => {
   });
   // The combat fitness test has no published minimum: its top score.
   expect(targetFor(event('cft-acl'))).toBe(110);
+});
+
+it('grades element goals on RaveLite marks, aiming for a B+', () => {
+  const goals = Object.fromEntries(
+    STANDARD_EVENTS.filter(e => e.group !== 'tests').map(e => [
+      e.id,
+      goalFor(e, 'male'),
+    ]),
+  );
+  expect(goals).toEqual({
+    'breath-hold': 118,
+    'exhale-hold': 48,
+    'rope-skips': 251,
+    'still-sit': 140,
+    'sets-done': 87,
+    squats: 64,
+    'wall-sit': 144,
+    'dead-hang': 96,
+    'side-plank': 96,
+    balance: 47,
+    'deep-squat-hold': 227,
+    'staff-flow': 890,
+  });
+  expect(formatGrades(gradesFor(event('squats'), 'male', 40))).toBe('C−');
 });
 
 it('names the grade on each test, grouping tests that agree', () => {

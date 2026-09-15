@@ -1,7 +1,8 @@
 /**
- * Fitness standards — the military tests the operator trains toward: the
- * Space Force, Air Force and Marine PFT tests, the Marine combat fitness
- * test, and MARSOC's screening marks.
+ * Goals — the military tests the operator trains toward (the Space Force,
+ * Air Force and Marine PFT tests, the Marine combat fitness test, and
+ * MARSOC's screening marks), then a few goals for each other element on
+ * RaveLite's own marks, since no official chart covers them.
  *
  * The goal is a B+ on every test. The services score points, not letters,
  * so grades run evenly along each test's chart for ages 35–40: the passing
@@ -15,10 +16,15 @@
  * The figures come from 2025–2026 calculator and news sites and a Space
  * Force chart dated 4 Feb 2026: the official charts would not load when
  * they were gathered. Treat them as close, not final.
+ *
+ * Element goals grade the same way on marks the operator approved on
+ * 14 Sep 2026: D− a starting point, A+ strong, B+ the goal. Last week's sets
+ * done is measured from Daily Sets rather than logged.
  */
 import {METERS_PER_MILE} from '../../lib/constants';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
+import type {ElementId} from '../../theme/elements';
 import type {Grade} from '../training/grading';
 import type {MetricKind, TrainingLogEntry} from '../training/types';
 
@@ -32,9 +38,22 @@ export const TEST_NAMES: Readonly<Record<TestId, string>> = {
   ussf: 'USSF',
 };
 
-/** One test's chart for an event: the passing minimum and the max, by sex. */
+/** Where a goal sits on the Goals page: the fitness tests, or an element. */
+export type GoalGroup = 'tests' | Exclude<ElementId, 'fire'>;
+
+/** The tests first, then the elements in the balance strip's order. */
+export const GOAL_GROUPS: readonly GoalGroup[] = [
+  'tests',
+  'air',
+  'heart',
+  'earth',
+  'water',
+];
+
+/** One chart for an event: the passing minimum (D−) and the max (A+), by sex. */
 export interface EventScale {
-  test: TestId;
+  /** The test whose chart this is; unset for RaveLite's own marks. */
+  test?: TestId;
   min: Record<Sex, number>;
   max: Record<Sex, number>;
 }
@@ -42,17 +61,18 @@ export interface EventScale {
 export interface StandardEvent {
   id: string;
   name: string;
-  /** Which tests use it, e.g. "USAF · USSF". */
-  tests: string;
-  unit: 'reps' | 'seconds';
+  /** Under the name: which tests use it, or which attributes it trains. */
+  subtitle: string;
+  group: GoalGroup;
+  unit: 'reps' | 'seconds' | 'percent';
   /** A higher count or a lower time scores better. */
   better: 'higher' | 'lower';
   /** The best top score among its tests, ages 35–40. */
   top: Record<Sex, number>;
   /** Charts that grade it; none for events without a published minimum. */
   scales?: readonly EventScale[];
-  /** The Train log kind that holds test results. */
-  kindId: string;
+  /** The Train log kind that holds results; unset for a goal the app measures. */
+  kindId?: string;
   /** For runs: longer runs count at the same pace. */
   distanceMeters?: number;
   note?: string;
@@ -61,16 +81,25 @@ export interface StandardEvent {
 export const STANDARDS_NOTE =
   'Targets are a B+ on every test that uses the event. Grades run evenly from the passing minimum (D−) to the max (A+), ages 35–40, from 2025–2026 calculator and news sites and a Space Force chart: the official charts would not load. Close, not final. Tap a target to change it.';
 
+export const MARKS_NOTE =
+  "No official charts for these: the marks are RaveLite's own. D− is a start, A+ is strong, and B+ is the goal. Tap a target to change it.";
+
 const both = (value: number): Record<Sex, number> => ({
   male: value,
   female: value,
 });
 
+/** RaveLite's own marks, the same for both tables. */
+const ownMarks = (min: number, max: number): EventScale[] => [
+  {min: both(min), max: both(max)},
+];
+
 export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'pushups-1min',
     name: 'Push-ups, 1 min',
-    tests: 'USAF · USSF',
+    group: 'tests',
+    subtitle: 'USAF · USSF',
     unit: 'reps',
     better: 'higher',
     top: {male: 56, female: 42},
@@ -83,7 +112,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'pushups-2min',
     name: 'Push-ups, 2 min',
-    tests: 'USMC',
+    group: 'tests',
+    subtitle: 'USMC',
     unit: 'reps',
     better: 'higher',
     top: {male: 76, female: 43},
@@ -96,7 +126,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'pullups',
     name: 'Pull-ups',
-    tests: 'USMC · MARSOC',
+    group: 'tests',
+    subtitle: 'USMC · MARSOC',
     unit: 'reps',
     better: 'higher',
     top: {male: 21, female: 10},
@@ -109,7 +140,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'plank',
     name: 'Plank',
-    tests: 'USMC · USAF · USSF',
+    group: 'tests',
+    subtitle: 'USMC · USAF · USSF',
     unit: 'seconds',
     better: 'higher',
     top: both(225),
@@ -131,7 +163,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'situps-1min',
     name: 'Sit-ups, 1 min',
-    tests: 'USAF · USSF',
+    group: 'tests',
+    subtitle: 'USAF · USSF',
     unit: 'reps',
     better: 'higher',
     top: {male: 52, female: 43},
@@ -144,7 +177,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'run-2mi',
     name: '2-mile run',
-    tests: 'USAF · USSF',
+    group: 'tests',
+    subtitle: 'USAF · USSF',
     unit: 'seconds',
     better: 'lower',
     top: {male: 836, female: 972},
@@ -167,7 +201,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'run-3mi',
     name: '3-mile run',
-    tests: 'USMC · MARSOC',
+    group: 'tests',
+    subtitle: 'USMC · MARSOC',
     unit: 'seconds',
     better: 'lower',
     top: {male: 1080, female: 1260},
@@ -185,7 +220,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'cft-mtc',
     name: '880-yard sprint',
-    tests: 'USMC CFT',
+    group: 'tests',
+    subtitle: 'USMC CFT',
     unit: 'seconds',
     better: 'lower',
     top: {male: 165, female: 198},
@@ -194,7 +230,8 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'cft-acl',
     name: 'Ammo-can lifts, 2 min',
-    tests: 'USMC CFT',
+    group: 'tests',
+    subtitle: 'USMC CFT',
     unit: 'reps',
     better: 'higher',
     top: {male: 110, female: 70},
@@ -204,11 +241,154 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
     id: 'cft-manuf',
     name: 'Maneuver under fire',
-    tests: 'USMC CFT',
+    group: 'tests',
+    subtitle: 'USMC CFT',
     unit: 'seconds',
     better: 'lower',
     top: both(173),
     kindId: 'builtin.cft-manuf',
+  },
+
+  // ── Air ──
+  {
+    id: 'breath-hold',
+    name: 'Breath hold',
+    group: 'air',
+    subtitle: 'Breath',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(150),
+    scales: ownMarks(30, 150),
+    kindId: 'builtin.breath-hold',
+    note: 'Seated and relaxed. Never in water or while driving.',
+  },
+  {
+    id: 'exhale-hold',
+    name: 'Exhale hold',
+    group: 'air',
+    subtitle: 'Breath',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(60),
+    scales: ownMarks(15, 60),
+    kindId: 'builtin.exhale-hold',
+  },
+  {
+    id: 'rope-skips',
+    name: 'Rope skips, 2 min',
+    group: 'air',
+    subtitle: 'Agility',
+    unit: 'reps',
+    better: 'higher',
+    top: both(300),
+    scales: ownMarks(120, 300),
+    kindId: 'builtin.skipping-2min',
+    note: 'No rope needed: one hop per turn.',
+  },
+
+  // ── Core ──
+  {
+    id: 'still-sit',
+    name: 'Still sit',
+    group: 'heart',
+    subtitle: 'Focus',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(180),
+    scales: ownMarks(30, 180),
+    kindId: 'builtin.still-sit',
+  },
+  {
+    id: 'sets-done',
+    name: "Last week's sets done",
+    group: 'heart',
+    subtitle: 'Resolve',
+    unit: 'percent',
+    better: 'higher',
+    top: both(100),
+    scales: ownMarks(50, 100),
+    note: 'Measured from Daily Sets every day.',
+  },
+
+  // ── Earth ──
+  {
+    id: 'squats',
+    name: 'Squats, one set',
+    group: 'earth',
+    subtitle: 'Strength',
+    unit: 'reps',
+    better: 'higher',
+    top: both(80),
+    scales: ownMarks(20, 80),
+    kindId: 'builtin.squats-amrap',
+  },
+  {
+    id: 'wall-sit',
+    name: 'Wall sit',
+    group: 'earth',
+    subtitle: 'Toughness',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(180),
+    scales: ownMarks(45, 180),
+    kindId: 'builtin.wall-sit',
+  },
+  {
+    id: 'dead-hang',
+    name: 'Dead hang',
+    group: 'earth',
+    subtitle: 'Toughness · grip',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(120),
+    scales: ownMarks(30, 120),
+    kindId: 'builtin.deadhang',
+  },
+  {
+    id: 'side-plank',
+    name: 'Side plank, weaker side',
+    group: 'earth',
+    subtitle: 'Toughness',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(120),
+    scales: ownMarks(30, 120),
+    kindId: 'builtin.side-plank',
+  },
+  {
+    id: 'balance',
+    name: 'One-leg balance, eyes closed',
+    group: 'earth',
+    subtitle: 'Balance',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(60),
+    scales: ownMarks(10, 60),
+    kindId: 'builtin.balance-hold',
+  },
+
+  // ── Water ──
+  {
+    id: 'deep-squat-hold',
+    name: 'Deep squat hold',
+    group: 'water',
+    subtitle: 'Mobility',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(300),
+    scales: ownMarks(30, 300),
+    kindId: 'builtin.deep-squat-hold',
+  },
+  {
+    id: 'staff-flow',
+    name: 'Staff flow, no drops',
+    group: 'water',
+    subtitle: 'Dexterity',
+    unit: 'seconds',
+    better: 'higher',
+    top: both(1200),
+    scales: ownMarks(60, 1200),
+    kindId: 'builtin.flow-no-drop',
   },
 ];
 
@@ -292,7 +472,8 @@ export function goalFor(event: StandardEvent, sex: Sex): number | undefined {
 }
 
 export interface TestGrade {
-  test: TestId;
+  /** Unset for RaveLite's own marks. */
+  test?: TestId;
   grade: Grade;
 }
 
@@ -308,9 +489,9 @@ export function gradesFor(
   }));
 }
 
-/** "B+ USAF · C USSF", or "C+ USAF · USSF" when the grades agree. */
+/** "B+ USAF · C USSF", "C+ USAF · USSF" when the grades agree, or "B+" on RaveLite's marks. */
 export function formatGrades(grades: readonly TestGrade[]): string {
-  const groups: {grade: Grade; tests: TestId[]}[] = [];
+  const groups: {grade: Grade; tests: (TestId | undefined)[]}[] = [];
   for (const g of grades) {
     const group = groups.find(x => x.grade === g.grade);
     if (group) {
@@ -320,7 +501,11 @@ export function formatGrades(grades: readonly TestGrade[]): string {
     }
   }
   return groups
-    .map(g => `${g.grade} ${g.tests.map(t => TEST_NAMES[t]).join(' · ')}`)
+    .map(g =>
+      [g.grade, g.tests.flatMap(t => (t ? [TEST_NAMES[t]] : [])).join(' · ')]
+        .filter(Boolean)
+        .join(' '),
+    )
     .join(' · ');
 }
 
@@ -402,6 +587,9 @@ export function bestResult(
   entries: readonly TrainingLogEntry[],
   metricFor: (kindId: string) => MetricKind | undefined,
 ): StandardResult | undefined {
+  if (!event.kindId) {
+    return undefined;
+  }
   let best: StandardResult | undefined;
   const consider = (result: StandardResult) => {
     const better =

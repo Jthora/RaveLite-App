@@ -185,6 +185,7 @@ const BY_METRIC: Readonly<Record<string, MoveId>> = {
   'builtin.deep-squat-hold': 'hipopener',
   'builtin.shoulder-cars': 'posture',
   'builtin.hip-cars': 'hipopener',
+  'builtin.still-sit': 'pulse',
 };
 
 const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {

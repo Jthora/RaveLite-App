@@ -46,7 +46,7 @@ import {
   subscribeProgram,
 } from '../../domain/program/repository';
 import {TRACKS, trackById} from '../../domain/program/tracks';
-import {UP_AT} from '../../domain/program/adapt';
+import {UP_AT, lastWeekDone} from '../../domain/program/adapt';
 import type {
   DayPrescription,
   Track,
@@ -102,16 +102,7 @@ export function DailySetsSection() {
       program.tracks[tr.id].enabled &&
       !today.prescriptions.some(p => p.trackId === tr.id),
   );
-  // How much of last week's sets got done, across the tracks reviewed.
-  const ratios = TRACKS.flatMap(tr => {
-    const state = program.tracks[tr.id];
-    const ratio = state.lastReview?.ratio;
-    return state.enabled && ratio !== undefined ? [ratio] : [];
-  });
-  const lastWeek =
-    ratios.length > 0
-      ? ratios.reduce((sum, r) => sum + r, 0) / ratios.length
-      : undefined;
+  const lastWeek = lastWeekDone(TRACKS.map(tr => program.tracks[tr.id]));
 
   const logSet = useCallback(
     (p: DayPrescription) => {
@@ -459,7 +450,7 @@ export function reviewLine(review: TrackReview): string {
     case 'rebuild':
       return `Back from a break at ${sets}: a set more after every three good days.`;
     case 'deload':
-      return `Deload week: lighter on purpose. The climb picks up after it.`;
+      return 'Deload week: lighter on purpose. The climb picks up after it.';
     case 'hold':
       if (review.ratio === undefined) {
         return `Holding at ${sets} until there are a few days to go on.`;

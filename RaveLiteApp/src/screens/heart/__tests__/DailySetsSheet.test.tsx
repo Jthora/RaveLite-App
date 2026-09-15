@@ -3,22 +3,22 @@ import renderer, {act} from 'react-test-renderer';
 
 import {store} from '../../../storage';
 import {DailySetsSheet} from '../DailySetsSheet';
-import {StandardsSheet} from '../StandardsSheet';
+import {GoalsSheet} from '../GoalsSheet';
 
 beforeEach(() => store.clearAll());
 
-it('opens the fitness standards', () => {
+it('opens Goals', () => {
   let tree: renderer.ReactTestRenderer | undefined;
   act(() => {
     tree = renderer.create(<DailySetsSheet visible onClose={() => {}} />);
   });
-  const standards = () => tree!.root.findByType(StandardsSheet);
-  expect(standards().props.visible).toBe(false);
+  const goals = () => tree!.root.findByType(GoalsSheet);
+  expect(goals().props.visible).toBe(false);
   act(() => {
     tree!.root
-      .findAll(node => node.props.testID === 'standards-open')[0]
+      .findAll(node => node.props.testID === 'goals-open')[0]
       .props.onPress();
   });
-  expect(standards().props.visible).toBe(true);
+  expect(goals().props.visible).toBe(true);
   act(() => tree!.unmount());
 });

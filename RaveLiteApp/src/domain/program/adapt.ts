@@ -159,3 +159,15 @@ export function reviewTrack(input: ReviewInput): TrackState {
   }
   return review(rebuilding ? 'rebuild' : 'hold');
 }
+
+/** Share of last week's sets done, averaged over enabled tracks with a review; 0–1. */
+export function lastWeekDone(
+  states: readonly TrackState[],
+): number | undefined {
+  const ratios = states.flatMap(s =>
+    s.enabled && s.lastReview?.ratio !== undefined ? [s.lastReview.ratio] : [],
+  );
+  return ratios.length > 0
+    ? ratios.reduce((sum, r) => sum + r, 0) / ratios.length
+    : undefined;
+}

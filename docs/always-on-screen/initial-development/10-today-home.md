@@ -118,20 +118,21 @@ Top to bottom, one scroll:
   and Respect DND, the Stay alive checklist, the plan editor, restoring a
   plan the v2 migration replaced, alive motion, and the Core theme. A
   notifications-off warning leads when permission is denied.
-- **Standards** (Daily Sets › Standards) — push-ups today against today's
+- **Goals** (Daily Sets › Goals) — push-ups today against today's
   sets, with 200 a day as the long-term goal, then each military
   test event with its target (a B+ on every test that uses it, or a target
   the operator set on a number pad), the best Train log test with its grade
   on each test and a bar toward the target, each test's D−, B+ and A+ marks
   for the chosen table (male or female first), and **Log a test**, which
-  opens the log sheet on that event.
+  opens the log sheet on that event. Then a section each for Air, Core,
+  Earth and Water, graded on RaveLite's own marks.
 - **Weather** (Today's conditions line, or Settings › Weather & place) —
   the place (type a town, or Use my location), today's first light,
   sunrise, sunset and daylight, the next 12 hours, and switches for Buggy
   today, moving yard work inside when buggy, running in the dark, and °F.
 - **Daily Sets** (Today's meters) — today's tracks with their rounds, max
   tests, level ups, track on/off, why each track asks for its sets (see
-  Adaptive ramp), how much of last week's sets got done, and **Standards**
+  Adaptive ramp), how much of last week's sets got done, and **Goals**
   in the header.
 - **Library** (element pages) — focus areas, saved per element, which also
   steer the drill card; and the element's whole drill list.
@@ -233,7 +234,7 @@ Water 13 · Core 5 · Air 2.
   Earth partner; one Earth drill makes it up). Week 1 Monday: Fire 29 ·
   Air 26 · Earth 26 · Water 28 · Core 26.
 
-## Fitness standards (`src/domain/standards/`, `src/domain/program/pushups.ts`)
+## Goals and fitness standards (`src/domain/standards/`, `src/domain/program/pushups.ts`)
 
 The operator trains toward four tests, and their events are sacred: the
 Air Force and Space Force tests (push-ups and sit-ups in a minute, plank,
@@ -251,6 +252,18 @@ come from 2025–2026 calculator and news sites and a Space Force chart dated
 4 Feb 2026, because the official charts would not load; they are close, not
 final, and every target can be changed.
 
+- **Element goals** grade the same way on RaveLite's own marks, since no
+  official chart covers them; the operator approved them on 14 Sep 2026.
+  Marks run D− to A+, with the B+ goal in brackets:
+  - Air: breath hold 0:30–2:30 (1:58), exhale hold 0:15–1:00 (0:48), rope
+    skips in 2 minutes 120–300 (251).
+  - Core: still sit 0:30–3:00 (2:20); last week's sets done 50–100% (87%),
+    measured from Daily Sets rather than logged.
+  - Earth: squats in one set 20–80 (64), wall sit 0:45–3:00 (2:24), dead
+    hang and weaker-side side plank 0:30–2:00 (1:36), one-leg balance with
+    eyes closed 0:10–1:00 (0:47).
+  - Water: deep squat hold 0:30–5:00 (3:47), staff flow without a drop
+    1:00–20:00 (14:50).
 - **Push-ups, ramping toward 200 a day.** The day's count adds Push and
   Variants sets (rounds, "+ set", drill taps that count as a set), max tests
   and push-up tests from the Train log; standard push-ups count apart from

@@ -166,7 +166,8 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'air',
-    notes: 'Inhale, then hold. Time to first contraction is the read.',
+    notes:
+      'Seated and relaxed: breathe normally, inhale, then hold while it stays calm. Never in water or while driving.',
   },
   {
     id: 'builtin.exhale-hold',
@@ -176,7 +177,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'air',
-    notes: 'Full exhale, then hold. CO2 tolerance read.',
+    notes: 'Seated: a full exhale, then hold. CO2 tolerance read.',
   },
   {
     id: 'builtin.box-breath-2min',
@@ -307,7 +308,19 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'earth',
-    notes: 'Eyes open, arms folded, single leg.',
+    notes: 'Eyes closed, arms folded, on the weaker leg.',
+  },
+
+  // ─── CORE — focus ────────────────────────────────────────────────
+  {
+    id: 'builtin.still-sit',
+    label: 'Still sit — max',
+    category: 'hold',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'heart',
+    notes: 'Sit still, eyes soft on one point; stop at the first fidget.',
   },
 
   // ─── WATER — flow, fascia, joint glide ───────────────────────────

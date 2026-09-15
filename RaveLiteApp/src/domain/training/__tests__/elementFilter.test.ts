@@ -20,7 +20,8 @@ describe('built-in metric catalog', () => {
 
   it('every built-in has an explicit element (none "any")', () => {
     for (const m of BUILTIN_METRICS) {
-      expect(['fire', 'air', 'water', 'earth']).toContain(m.element);
+      // Core's own page logs its Still sit, a Goals test.
+      expect(['fire', 'air', 'heart', 'water', 'earth']).toContain(m.element);
     }
   });
 });

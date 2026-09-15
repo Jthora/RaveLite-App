@@ -34,7 +34,7 @@ function focusParts(focus: DayFocus): FocusPart[] {
 /**
  * Daily Sets at a glance: sets done today and today's focus, then one small
  * meter per track (amount done against the day's quota) in its element's
- * color. Tap for tracks, max tests, level ups and the fitness standards.
+ * color. Tap for tracks, max tests, level ups and Goals.
  */
 export function SetsMeters({sets, onPress, focus}: Props) {
   const parts = focus ? focusParts(focus) : [];
