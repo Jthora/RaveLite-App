@@ -71,6 +71,10 @@ function candidatesForSlot(slot: CadenceSlot): Exercise[] {
     if (ex.element !== slot.element) {
       return false;
     }
+    // A test belongs to its Saturday, never a random pick.
+    if (ex.targets.includes('Test')) {
+      return false;
+    }
     if (slot.maxSeconds && ex.approxSeconds > slot.maxSeconds) {
       return false;
     }

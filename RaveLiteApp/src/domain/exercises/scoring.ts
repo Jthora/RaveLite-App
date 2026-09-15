@@ -136,6 +136,9 @@ const MORNING_BLOCK_ENDS_HOUR = 8;
 const dryAfterMorning: Scorer = (ex, ctx) =>
   ctx.hour >= MORNING_BLOCK_ENDS_HOUR && isSweaty(ex) ? -6 : 0;
 
+/** A test has its Saturday; it never comes up as "try this now". */
+const notATest: Scorer = ex => (ex.targets.includes('Test') ? -10 : 0);
+
 const SCORERS: ReadonlyArray<Scorer> = [
   fitsTimeWindow,
   matchesPreferredTargets,
@@ -143,6 +146,7 @@ const SCORERS: ReadonlyArray<Scorer> = [
   circadianFit,
   varietyPressure,
   dryAfterMorning,
+  notATest,
 ];
 
 // ─── Public API ─────────────────────────────────────────────────────────

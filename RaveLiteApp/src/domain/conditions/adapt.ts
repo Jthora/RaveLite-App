@@ -112,6 +112,7 @@ export function indoorAlternative(
         o.targets.includes(tag) &&
         !o.targets.includes('Hydration') &&
         !o.targets.includes('Fuel') &&
+        !o.targets.includes('Test') &&
         canGoInside(o),
     );
     // Prefer a stand-in of some substance for a long drill.

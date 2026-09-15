@@ -99,6 +99,24 @@ describe("operator's staple movements", () => {
 });
 
 describe('default plan', () => {
+  it('a slot picked by tags never lands on a fitness test', () => {
+    const tests = new Set(
+      EXERCISE_LIBRARY.filter(ex => ex.targets.includes('Test')).map(
+        ex => ex.id,
+      ),
+    );
+    expect(tests.size).toBeGreaterThan(0);
+    const picked = DEFAULT_PLAN.windows.flatMap(w =>
+      w.slots.flatMap(slot =>
+        Array.from(
+          {length: 60},
+          (_, i) => pickDrillForSlotSeeded(slot, `probe-${i}`)?.id,
+        ),
+      ),
+    );
+    expect(picked.filter(id => id !== undefined && tests.has(id))).toEqual([]);
+  });
+
   it('every slot resolves to at least one drill', () => {
     const empty = DEFAULT_PLAN.windows.flatMap(w =>
       w.slots.flatMap((slot, i) =>

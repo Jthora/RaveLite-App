@@ -77,7 +77,7 @@ export function SetsMeters({sets, onPress, focus}: Props) {
               {parts.flatMap((part, i) => [
                 i > 0 ? (
                   <Text key={`dot-${part.name}`} style={styles.dot}>
-                    {' · '}
+                    {'\u2009·\u2009'}
                   </Text>
                 ) : null,
                 <Text key={part.name} style={{color: part.color}}>
@@ -88,7 +88,6 @@ export function SetsMeters({sets, onPress, focus}: Props) {
           ) : (
             <View style={styles.spacer} />
           )}
-          <Text style={styles.chevron}>›</Text>
         </View>
         {sets.tracks.length > 0 ? (
           <View style={styles.grid}>
@@ -155,8 +154,10 @@ const styles = StyleSheet.create({
     color: palette.text,
     fontWeight: '700',
   },
+  // Smaller than the title so three names fit beside the count.
   focus: {
     ...t.caption,
+    fontSize: 12,
     flex: 1,
     textAlign: 'right',
   },
@@ -165,10 +166,6 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
-  },
-  chevron: {
-    ...t.subtitle,
-    color: palette.textDim,
   },
   grid: {
     flexDirection: 'row',
