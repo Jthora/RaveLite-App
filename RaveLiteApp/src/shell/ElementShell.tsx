@@ -63,7 +63,15 @@ export function ElementShell(): React.JSX.Element {
       style={styles.root}
       edges={['top', 'bottom', 'left', 'right']}>
       <View style={styles.content}>
-        <HeartScreen onElementChange={setPage} />
+        {/* Under an open page, Today keeps its place but takes no touches
+            and is hidden from screen readers. */}
+        <View
+          style={styles.content}
+          pointerEvents={page ? 'none' : 'auto'}
+          importantForAccessibility={page ? 'no-hide-descendants' : 'auto'}
+          accessibilityElementsHidden={page !== undefined}>
+          <HeartScreen onElementChange={setPage} />
+        </View>
         {Page ? (
           <Animated.View style={[styles.page, {opacity: fade}]}>
             <Page onElementChange={setPage} onBack={() => setPage(undefined)} />

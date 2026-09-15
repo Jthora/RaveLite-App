@@ -38,8 +38,9 @@ and Setup repeated the My day chip and the per-element test buttons.
 - **No tab bar.** Today is home and always open underneath. Its balance
   strip is the navigation: tap an element (Fire, Air, Core, Earth or
   Water) for its page, drawn over Today; Back (the page's ‹ or Android's)
-  returns to Today where it was left. The gear at the end of the strip
-  opens Settings. The bar went to give the page its height back.
+  returns to Today where it was left. **Settings** sits at the very bottom
+  of Today, beside + Log a session and Practice, so the strip stays five
+  balanced tiles. The bar went to give the page its height back.
 - **No clock or My day chip.** Android's status bar shows the time; My day
   and pausing live in Settings.
 - **No sub-tabs.** Each element is one scrolling page. Anything
@@ -76,8 +77,7 @@ Top to bottom, one scroll:
    toward par (20), and seven dots for the last seven days: solid on days
    the element made par, faint on days it got something. Tap to open the
    element's page. Partner drills, glasses and eye breaks count toward their
-   own elements. The narrow gear tile at the end opens **Settings**, with a
-   yellow dot when notifications are off or a Stay alive check warns.
+   own elements.
 4. **Drink** — glasses of water today out of 8 (10 on a hot day, 12 in
    dangerous heat), with **+1**.
 5. **Daily Sets meters** — sets done, then one small meter per track in its
@@ -94,12 +94,13 @@ Top to bottom, one scroll:
    (`src/domain/ambient/lateDone.ts`). Other logged rows open to keep or
    remove. With two or more missed chimes the header offers **Catch up N**:
    a tick-list that logs each ticked chime at its own time.
-7. **+ Log a session** (Train log sheet) and **Practice** (circuits, then
-   Heart drills, in one scroll).
+7. At the very bottom: **+ Log** (Train log sheet), **Practice** (circuits,
+   then Heart drills, in one scroll) and **Settings**.
 
 ## Sheets
 
-- **Settings** (the gear at the end of the balance strip) — My day, pause
+- **Settings** (the bottom of Today; a yellow dot when notifications are
+  off or a Stay alive check warns) — My day, pause
   chimes (30 min, 2 hours, till morning, or resume), Weather & place (it
   asks for a place until one is set), chime volumes with a test per element
   and Respect DND, the Stay alive checklist, the plan editor, restoring a

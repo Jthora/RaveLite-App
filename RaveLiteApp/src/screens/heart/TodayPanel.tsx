@@ -3,13 +3,14 @@
  *
  * Top to bottom: the chime to answer (or the next one, or the pause);
  * today's balance with the week behind it, which is also the way to each
- * element's page and, by its gear, to Settings;
+ * element's page;
  * water; Daily Sets meters; and the whole day's list from every source.
  * Settings, Daily Sets in full, logging a session and practice open as
  * sheets, so the page itself stays a glance.
  */
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {AppState, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Settings} from 'lucide-react-native';
 
 import {Tap} from '../../components/Tap';
 import {BalanceStrip} from '../../components/today/BalanceStrip';
@@ -111,6 +112,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [logged, setLogged] = useState<DayRow | undefined>();
   const [catchUpOpen, setCatchUpOpen] = useState(false);
   const next = model.next;
+  const settingsAlert = permission === 'denied' || warnings > 0;
 
   // Sealing writes the completion; the sets scheduler trims later rounds
   // from the journal on its own.
@@ -220,8 +222,6 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           points={model.points}
           week={model.week}
           onElementPress={onElementPress}
-          onSettingsPress={() => setSettingsOpen(true)}
-          settingsAlert={permission === 'denied' || warnings > 0}
         />
         <WaterCounter
           glasses={model.glasses}
@@ -259,10 +259,9 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             color={accent}
             onPress={() => setLogOpen(true)}
             accessibilityRole="button"
+            accessibilityLabel="Log a session"
             style={styles.link}>
-            <Text style={[styles.linkText, {color: accent}]}>
-              + Log a session
-            </Text>
+            <Text style={[styles.linkText, {color: accent}]}>+ Log</Text>
           </Tap>
           <Tap
             variant="ghost"
@@ -271,6 +270,22 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             accessibilityRole="button"
             style={styles.link}>
             <Text style={styles.linkText}>Practice ›</Text>
+          </Tap>
+          <Tap
+            testID="settings-open"
+            variant="ghost"
+            color={palette.textDim}
+            onPress={() => setSettingsOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={
+              settingsAlert ? 'Settings, something needs attention' : 'Settings'
+            }
+            style={styles.link}>
+            <View style={styles.linkRow}>
+              <Settings size={16} color={palette.textDim} strokeWidth={2} />
+              <Text style={styles.linkText}>Settings</Text>
+              {settingsAlert ? <View style={styles.alert} /> : null}
+            </View>
           </Tap>
         </View>
 
@@ -385,5 +400,16 @@ const styles = StyleSheet.create({
   linkText: {
     ...t.subtitle,
     color: palette.text,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  alert: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#FFD60A',
   },
 });
