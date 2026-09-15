@@ -120,16 +120,19 @@ Top to bottom, one scroll:
   notifications-off warning leads when permission is denied.
 - **Standards** (Daily Sets › Standards) — push-ups today against today's
   sets, with 200 a day as the long-term goal, then each military
-  test event with its target (the top score for ages 35–40, male and female
-  tables, the chosen one first, or a target the operator set on a number
-  pad), the best Train log test with a bar toward the target, and **Log a
-  test**, which opens the log sheet on that event.
+  test event with its target (a B+ on every test that uses it, or a target
+  the operator set on a number pad), the best Train log test with its grade
+  on each test and a bar toward the target, each test's D−, B+ and A+ marks
+  for the chosen table (male or female first), and **Log a test**, which
+  opens the log sheet on that event.
 - **Weather** (Today's conditions line, or Settings › Weather & place) —
   the place (type a town, or Use my location), today's first light,
   sunrise, sunset and daylight, the next 12 hours, and switches for Buggy
   today, moving yard work inside when buggy, running in the dark, and °F.
 - **Daily Sets** (Today's meters) — today's tracks with their rounds, max
-  tests, level ups, track on/off, and **Standards** in the header.
+  tests, level ups, track on/off, why each track asks for its sets (see
+  Adaptive ramp), how much of last week's sets got done, and **Standards**
+  in the header.
 - **Library** (element pages) — focus areas, saved per element, which also
   steer the drill card; and the element's whole drill list.
 
@@ -236,9 +239,17 @@ The operator trains toward four tests, and their events are sacred: the
 Air Force and Space Force tests (push-ups and sit-ups in a minute, plank,
 2-mile run), the Marine PFT and combat fitness test (pull-ups, 2-minute
 push-ups, plank, 3-mile run, 880-yard sprint, ammo-can lifts, maneuver under
-fire) and MARSOC's marks. Targets are top scores for ages 35–40 from
-2025–2026 news and calculator sites, because the official charts would not
-load; they are close, not final, and every one can be changed.
+fire) and MARSOC's marks. The goal is **a B+ on the Space Force, Air Force
+and Marine tests**. The services score points, not letters, so grades run
+evenly along each test's chart for ages 35–40 (USMC 36–40, USAF and USSF
+35–39): the passing minimum is a D−, the max an A+. An event on several
+tests targets the hardest B+ (the plank's 3:03 clears all three); the
+combat fitness test, with no published minimum, targets its top score.
+Male B+ marks: push-ups 47 in a minute and 65 in two, 17 pull-ups, a 3:03
+plank, 48 sit-ups in a minute, a 15:56 2-mile and a 20:54 3-mile. The charts
+come from 2025–2026 calculator and news sites and a Space Force chart dated
+4 Feb 2026, because the official charts would not load; they are close, not
+final, and every target can be changed.
 
 - **Push-ups, ramping toward 200 a day.** The day's count adds Push and
   Variants sets (rounds, "+ set", drill taps that count as a set), max tests
@@ -258,6 +269,26 @@ load; they are close, not final, and every one can be changed.
   1-minute push-ups and sit-ups, 880-yard movement to contact, ammo-can
   lifts (about 6 bricks in a bag), maneuver under fire.
 - **Not tracked yet:** MARSOC's swim and ruck, and waist-to-height ratio.
+
+## Adaptive ramp (`src/domain/program/adapt.ts`)
+
+Daily Sets volume follows what gets done, not the calendar. Once a day
+(when the sets scheduler first runs) each track reads its training days in
+the week before, done against what each day asked (recorded daily under
+`program.days`), each day counted at most in full:
+
+- **85% or more:** a set more a day, up to the track's most.
+- **60% to 85%:** hold. **Under 60%:** a set fewer, never below two.
+- **At most one step a week**, so the climb is smooth and one bad day never
+  costs a set. A track's first review starts it at its week-1 base.
+- **A break** (three training days in a row with nothing) brings the track
+  back at 80%, again each week the break lasts; it climbs back a set after
+  every three good days until it's where it was.
+- **Deload weeks hold.** Set size stays at about half the tested max, so
+  growth comes as more small sets across the day, and from max tests.
+- **Within the day**, sets from a round that went by undone roll into
+  later rounds, at most one per round for each track and never past a full
+  round; what doesn't fit is let go rather than crammed into one big set.
 
 ## Focus wheel (`src/domain/program/week.ts`)
 
