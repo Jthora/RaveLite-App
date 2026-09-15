@@ -25,6 +25,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {ELEMENTS} from '../../theme/elements';
 import {useElementAccent} from '../../theme/elementContext';
@@ -224,7 +225,8 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
       onRequestClose={onClose}
       transparent={false}
       statusBarTranslucent>
-      <View style={styles.root}>
+      {/* The window runs under the status bar: keep the header below it. */}
+      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         {/* Compact header with inline save/cancel */}
         <View style={styles.header}>
           <Text style={styles.title}>{editing ? 'Edit Entry' : 'New Training Log'}</Text>
@@ -266,6 +268,15 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
             ]}>
             <View style={styles.colHeader}>
               <Text style={styles.sectionTitle}>Exercises</Text>
+              {/* What's being logged, even when the list is scrolled away from it. */}
+              {selectedKind ? (
+                <Text
+                  testID="log-selected-kind"
+                  style={[styles.selectedKind, {color: accent}]}
+                  numberOfLines={1}>
+                  {selectedKind.label}
+                </Text>
+              ) : null}
               <Pressable onPress={() => setShowManage(true)} hitSlop={8}>
                 <Text style={[styles.sectionAction, {color: accent}]}>Manage</Text>
               </Pressable>
@@ -395,7 +406,7 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
           onClose={closeCalendar}
           accent={accent}
         />
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -896,7 +907,8 @@ const styles = StyleSheet.create({
   leftColPortrait: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    maxHeight: 180,
+    // A fixed height: with only a max, the list inside collapsed to nothing.
+    height: 150,
   },
   rightCol: {
     flex: 1,
@@ -937,6 +949,12 @@ const styles = StyleSheet.create({
   sectionAction: {
     ...t.caption,
     color: ELEMENTS.heart.color,
+  },
+  selectedKind: {
+    ...t.caption,
+    flex: 1,
+    fontWeight: '700',
+    marginHorizontal: spacing.sm,
   },
   // Exercise list
   catHeader: {
