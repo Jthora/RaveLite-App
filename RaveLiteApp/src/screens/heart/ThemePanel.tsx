@@ -1,6 +1,6 @@
 /**
  * ThemePanel — how Core presents itself: a mark (Core, Heart, Æther, Star
- * or Commander) and a color (orange, magenta, violet, cyan or white).
+ * or Starcom) and a color (orange, magenta, violet, cyan or white).
  *
  * Both preview here as you tap. The rest of the app redraws once, when
  * this panel closes with Settings (App.tsx re-keys the shell on

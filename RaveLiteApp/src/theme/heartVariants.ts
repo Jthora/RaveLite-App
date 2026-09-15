@@ -3,8 +3,8 @@
  *
  * Two choices, made in Settings › Theme:
  *   - A mark: Core (⊙), Heart (♡), Æther (a six-pointed star in lines),
- *     Star (a five-pointed star in lines) or Commander (the Star Commander
- *     mark). The mark carries the name, glyph and copy.
+ *     Star (a five-pointed star in lines) or Starcom (the Starcom
+ *     mark, stored as 'commander'). The mark carries the name, glyph and copy.
  *   - A color: one of five that keep clear of the four elements' red,
  *     yellow, green and blue. Until one is chosen, each mark brings its own
  *     (Core orange, Heart magenta, the stars white).
@@ -111,7 +111,7 @@ export interface HeartVariantDef {
  *  ♡  U+2661  WHITE HEART SUIT        — outline heart, geometric
  *  ✶  U+2736  SIX POINTED BLACK STAR  — Æther's text fallback
  *  ☆  U+2606  WHITE STAR              — Star's text fallback
- *  ★  U+2605  BLACK STAR              — Commander's text fallback
+ *  ★  U+2605  BLACK STAR              — Starcom's text fallback
  *
  * Every mark is drawn as SVG (`icon`, see `components/icons/elementMarks`);
  * the Unicode glyph stays for plain text such as notification titles.
@@ -187,12 +187,12 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
     id: 'commander',
     defaultColor: 'white',
     description:
-      'Star Commander — the star with two chevrons: rank earned one set at a time.',
+      'Starcom — the star with two chevrons: rank earned one set at a time.',
     identity: {
-      name: 'Commander',
+      name: 'Starcom',
       domain: 'Command & Cadence',
       ethos:
-        'Star Commander. Schedule, reminders, presence. The call answered, the rank earned one set at a time.',
+        'Starcom. Schedule, reminders, presence. The call answered, the rank earned one set at a time.',
       glyph: '★', // ★
       icon: 'commander',
       emoji: '★',

@@ -16,7 +16,7 @@
  *   heart         Lucide's heart (ISC license)
  *   star5         a regular five-pointed star, in lines
  *   star6         a six-pointed star, in lines
- *   commander     a regular five-pointed star whose lower legs are cut into
+ *   commander     the Starcom mark: a regular five-pointed star whose lower legs are cut into
  *                 two chevrons: below the body, four equal bands parallel to
  *                 the legs' inner edges (gap, chevron, gap, chevron). Traced
  *                 from the CommanderIcon reference; `svg/star-commander.svg`
@@ -181,8 +181,11 @@ export function commanderPolygons(frame: StarFrame): {
 export const STAR5_WIDTH = 22;
 /** The outlined star opens its middle a little, so the line doesn't close it up small. */
 const STAR5_OUTLINE_INNER = 0.42;
-/** The filled Commander mark: its chevrons are thin, so it takes the full width. */
-export const COMMANDER_WIDTH = 22.5;
+/**
+ * The filled Starcom mark is as wide as the outlined Star measures to the
+ * outside of its line, so the two read the same size side by side.
+ */
+export const COMMANDER_WIDTH = STAR5_WIDTH + MARK_STROKE;
 const STAR6_RADIUS = 11.25;
 const STAR6_INNER = 0.55;
 const RING_RADIUS = 9.75;

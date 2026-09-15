@@ -65,12 +65,14 @@ function MoveTile({
 }) {
   if (!move) {
     return (
-      <ElementGlyph
-        element={element}
-        size={idle ? 28 : 32}
-        color={color}
-        style={[styles.glyph, idle && styles.glyphIdle]}
-      />
+      <View style={styles.glyphBox}>
+        <ElementGlyph
+          element={element}
+          size={idle ? 28 : 32}
+          color={color}
+          style={[styles.glyph, idle && styles.glyphIdle]}
+        />
+      </View>
     );
   }
   return (
@@ -381,6 +383,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     marginBottom: spacing.sm,
+  },
+  glyphBox: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   glyph: {
     fontSize: 40,

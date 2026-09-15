@@ -49,12 +49,15 @@ export function BalanceStrip({
             accessibilityRole="button"
             accessibilityLabel={`${el.name}: ${n} of ${par} points today; par on ${parDays} of the last 7 days. Open`}
             style={[styles.cell, lit && {borderColor: el.color}]}>
-            <ElementGlyph
-              element={el}
-              size={20}
-              color={lit ? el.color : palette.textMuted}
-              style={styles.glyph}
-            />
+            {/* Tap's inner view stretches its children; center the mark. */}
+            <View style={styles.mark}>
+              <ElementGlyph
+                element={el}
+                size={20}
+                color={lit ? el.color : palette.textMuted}
+                style={styles.glyph}
+              />
+            </View>
             <Text
               style={[
                 styles.count,
@@ -121,6 +124,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     lineHeight: 24,
     textAlign: 'center',
+  },
+  mark: {
+    alignSelf: 'center',
+    height: 24,
+    justifyContent: 'center',
   },
   count: {
     fontSize: 16,

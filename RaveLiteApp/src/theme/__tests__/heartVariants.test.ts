@@ -28,7 +28,7 @@ it('a mark brings its own color until one is picked; then the color stays', () =
   setHeartColor('violet');
   setHeartVariant('commander');
   expect(ELEMENTS.heart).toMatchObject({
-    name: 'Commander',
+    name: 'Starcom',
     icon: 'commander',
     color: HEART_COLORS.violet.color,
     tint: HEART_COLORS.violet.tint,

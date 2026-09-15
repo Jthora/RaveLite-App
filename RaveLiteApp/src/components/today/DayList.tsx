@@ -69,7 +69,9 @@ export function DayList({
                 <MoveIcon move={row.move} color={el.color} size={18} />
               </View>
             ) : (
-              <ElementGlyph element={el} size={16} style={styles.glyph} />
+              <View style={styles.icon}>
+                <ElementGlyph element={el} size={16} style={styles.glyph} />
+              </View>
             )}
             <View style={styles.body}>
               <Text

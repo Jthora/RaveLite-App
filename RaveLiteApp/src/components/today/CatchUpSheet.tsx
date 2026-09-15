@@ -97,11 +97,13 @@ export function CatchUpSheet({visible, rows, onLog, onClose}: Props) {
                     {row.move ? (
                       <MoveIcon move={row.move} color={el.color} size={18} />
                     ) : (
-                      <ElementGlyph
-                        element={el}
-                        size={18}
-                        style={styles.glyph}
-                      />
+                      <View style={styles.glyphBox}>
+                        <ElementGlyph
+                          element={el}
+                          size={18}
+                          style={styles.glyph}
+                        />
+                      </View>
                     )}
                     <View style={styles.body}>
                       <Text style={styles.label} numberOfLines={1}>
@@ -204,6 +206,10 @@ const styles = StyleSheet.create({
     color: palette.textDim,
     width: 40,
     fontVariant: ['tabular-nums'],
+  },
+  glyphBox: {
+    width: 18,
+    alignItems: 'center',
   },
   glyph: {
     width: 18,
