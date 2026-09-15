@@ -57,6 +57,7 @@ import type {
 } from '../../domain/program/types';
 import {formatDuration} from '../../domain/training/grading';
 import {TodayFocus, WeekFocus} from './FocusWeek';
+import {blockPieces, runFor} from '../../domain/program/morning';
 
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -94,13 +95,15 @@ export function DailySetsSection() {
         const day = new Date(date);
         day.setHours(12, 0, 0, 0);
         day.setDate(day.getDate() + i);
-        return {date: day, focus: focusFor(day)};
+        return {date: day, focus: focusFor(day), run: runFor(day, now)};
       }),
+      pieces: blockPieces(date, now),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
 
-  const {program, today, done, week, phase, date, myDay, focusDays} = view;
+  const {program, today, done, week, phase, date, myDay, focusDays, pieces} =
+    view;
   const accent = ELEMENTS.heart.accent;
   const setsTotal = today.prescriptions.reduce((s, p) => s + p.sets, 0);
   const setsDone = today.prescriptions.reduce(
@@ -148,7 +151,7 @@ export function DailySetsSection() {
         ) : null}
       </View>
 
-      <TodayFocus focus={focusDays[0].focus} />
+      <TodayFocus focus={focusDays[0].focus} pieces={pieces} />
 
       {today.prescriptions.length === 0 ? (
         <Text style={styles.emptyText}>Rest day — no sets scheduled.</Text>

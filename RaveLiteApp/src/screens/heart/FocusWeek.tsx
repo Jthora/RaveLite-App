@@ -6,6 +6,8 @@ import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import {EXERCISE_LIBRARY} from '../../domain/exercises/library';
+import type {BlockPiece} from '../../domain/program/morning';
+import type {RunDay} from '../../domain/run/plan';
 import {
   DAILY_CORE,
   attributeById,
@@ -48,7 +50,15 @@ function Attributes({
 }
 
 /** Today's focus, the morning block piece by piece, and the daily core. */
-export function TodayFocus({focus}: {focus: DayFocus}) {
+export function TodayFocus({
+  focus,
+  pieces,
+}: {
+  focus: DayFocus;
+  /** The block with the run plan's run in place; the plain block otherwise. */
+  pieces?: readonly BlockPiece[];
+}) {
+  const shown = pieces ?? focus.block.pieces.map(id => ({exerciseId: id}));
   return (
     <View testID="today-focus" style={styles.card}>
       <Text style={styles.eyebrow}>Today's focus</Text>
@@ -59,10 +69,15 @@ export function TodayFocus({focus}: {focus: DayFocus}) {
           ? ` · ${focus.test.name}`
           : ''}
       </Text>
-      {focus.block.pieces.map((id, i) => (
-        <Text key={`${id}-${i}`} style={styles.piece}>
-          {i + 1}. {drillName(id)}
-        </Text>
+      {shown.map((piece: BlockPiece, i) => (
+        <View key={`${piece.exerciseId}-${i}`}>
+          <Text style={styles.piece}>
+            {i + 1}. {drillName(piece.exerciseId)}
+          </Text>
+          {piece.run ? (
+            <Text style={styles.runDetail}>{piece.run.detail}</Text>
+          ) : null}
+        </View>
       ))}
       <Text style={styles.caption}>
         Every day's rounds:{' '}
@@ -76,12 +91,12 @@ export function TodayFocus({focus}: {focus: DayFocus}) {
 export function WeekFocus({
   days,
 }: {
-  days: readonly {date: Date; focus: DayFocus}[];
+  days: readonly {date: Date; focus: DayFocus; run?: RunDay}[];
 }) {
   return (
     <View testID="week-focus">
       <Text style={styles.section}>This week</Text>
-      {days.map(({date, focus}, i) => (
+      {days.map(({date, focus, run}, i) => (
         <View
           key={date.toDateString()}
           style={[styles.row, i === 0 && styles.today]}>
@@ -91,7 +106,8 @@ export function WeekFocus({
           <View style={styles.rowBody}>
             <Attributes ids={focus.focus} style={styles.rowFocus} />
             <Text style={styles.caption} numberOfLines={1}>
-              {focus.test ? focus.test.name : focus.block.title}
+              {(focus.test ? focus.test.name : focus.block.title) +
+                (run ? ` · ${run.short}` : '')}
             </Text>
           </View>
         </View>
@@ -129,6 +145,12 @@ const styles = StyleSheet.create({
   piece: {
     ...t.body,
     color: palette.text,
+  },
+  runDetail: {
+    ...t.caption,
+    color: palette.textDim,
+    lineHeight: 17,
+    marginLeft: spacing.md,
   },
   caption: {
     ...t.caption,

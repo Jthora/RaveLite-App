@@ -128,6 +128,8 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'fire.run-3mi': 'run',
   'fire.cft-sprint': 'run',
   'fire.cft-maneuver': 'run',
+  'fire.interval-run': 'run',
+  'fire.tempo-run': 'run',
   // Water
   'water.figure-8': 'staff',
   'water.beat-locks': 'footwork',

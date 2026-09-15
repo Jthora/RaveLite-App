@@ -4,6 +4,7 @@ import {drillForPlanChime} from '../../conditions/weather';
 import {DEFAULT_PLAN} from '../../reminders/defaultPlan';
 import {expandPlanToFires, planPulseId} from '../../reminders/expandPlan';
 import {pickDrillForSlotSeeded} from '../../reminders/scheduler';
+import {addEntry} from '../../training/repository';
 import {plannedDrill} from '../morning';
 import {defaultProgram} from '../repository';
 import {SATURDAY_TESTS} from '../week';
@@ -77,4 +78,17 @@ it('other slots still pick from the library, and the weather keeps the piece', (
       morning,
     ),
   ).toEqual({drill: first.drill, detail: 'Kicks and jumps · 1 of 3'});
+});
+
+it('on a run day the run plan takes the piece, and the chime says the run', () => {
+  // A 25:00 3-mile ten days before program week 5's Tuesday (13 Oct 2026).
+  const tuesday = new Date(2026, 9, 13);
+  addEntry({
+    at: tuesday.getTime() - 10 * 86_400_000,
+    kindId: 'builtin.run-3mi',
+    value: 25 * 60,
+  });
+  const [first] = chimesOn(tuesday);
+  expect(first.drill?.id).toBe('fire.interval-run');
+  expect(first.detail).toBe('6 × 400 m in 1:59 · 1 of 3');
 });

@@ -1296,6 +1296,41 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 480,
   },
 
+  {
+    id: 'fire.interval-run',
+    element: 'fire',
+    name: 'Run Intervals',
+    purpose:
+      'Repeats at the pace of your next checkpoint: the quickest way to a faster 2- and 3-mile run.',
+    dose: 'Reps and times from the run plan',
+    cues: [
+      'Warm up with 10 min of easy jogging first',
+      "Hit each rep's time; even beats fast and then slow",
+      'Jog or walk the recovery; start the next rep when breathing settles',
+      'Stop the session if form falls apart or something hurts',
+    ],
+    targets: ['Conditioning', 'PFT-Run', 'Agility'],
+    venues: ['yard'],
+    approxSeconds: 1800,
+  },
+  {
+    id: 'fire.tempo-run',
+    element: 'fire',
+    name: 'Tempo Run',
+    purpose:
+      'Comfortably hard for 15 to 25 minutes: it teaches the body to hold race pace for longer.',
+    dose: 'Minutes and pace from the run plan',
+    cues: [
+      '10 min of easy jogging first',
+      'Comfortably hard: a few words at a time, never a sprint',
+      'Hold the pace even from start to finish',
+      '5 min easy to finish',
+    ],
+    targets: ['Conditioning', 'PFT-Run'],
+    venues: ['yard'],
+    approxSeconds: 2100,
+  },
+
   // ─── WATER — Flow, Fascia & Hydration ──────────────────────────────────
   {
     id: 'water.figure-8',

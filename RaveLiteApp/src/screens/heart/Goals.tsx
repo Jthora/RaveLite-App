@@ -36,6 +36,14 @@ import {setsToday} from '../../domain/ambient/setScheduler';
 import {lastWeekDone} from '../../domain/program/adapt';
 import {PUSHUP_GOAL, pushupDay} from '../../domain/program/pushups';
 import {pushupRamp, type PushupRamp} from '../../domain/program/ramp';
+import {runFor} from '../../domain/program/morning';
+import {
+  formatPerMile,
+  nextCheckpoint,
+  pacesFor,
+  runFitness,
+  splitTime,
+} from '../../domain/run/plan';
 import {loadProgram, subscribeProgram} from '../../domain/program/repository';
 import {
   GOAL_GROUPS,
@@ -227,12 +235,27 @@ export function Goals() {
           activeMinutes(activityInRange(windowStart(7, date), date)) / 7,
         ),
       },
+      run: (() => {
+        const fitness = runFitness(entries, getMetric, now);
+        const checkpoint = nextCheckpoint(fitness.threeMile);
+        return {
+          fitness,
+          checkpoint,
+          paces: pacesFor(fitness.threeMile, checkpoint),
+          week: Array.from({length: 7}, (_, i) => {
+            const day = new Date(date);
+            day.setHours(6, 0, 0, 0);
+            day.setDate(day.getDate() + i);
+            return {day, run: runFor(day, now)};
+          }).filter(d => d.run),
+        };
+      })(),
     };
     // `version` is the rebuild trigger; reads go to storage.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version]);
 
-  const {pushups, ramp, active} = view;
+  const {pushups, ramp, active, run} = view;
   // Today's sets are the day's target; 200 a day is where the ramp leads.
   const dayTarget = pushups.planned > 0 ? pushups.planned : PUSHUP_GOAL;
 
@@ -302,6 +325,47 @@ export function Goals() {
             water, breathing and stillness don't. Last 7 days: {active.week} min
             a day.
           </Text>
+        </View>
+
+        <View testID="run-card" style={styles.card}>
+          <Text style={styles.eyebrow}>RUNNING</Text>
+          <Text style={styles.big}>
+            {formatDuration(run.fitness.threeMile)}
+            <Text style={styles.bigGoal}> 3-mile estimate</Text>
+          </Text>
+          <Text style={styles.caption}>
+            {run.fitness.from
+              ? `From ${run.fitness.from.label} on ${shortDate(
+                  run.fitness.from.at,
+                )}${
+                  run.fitness.stale
+                    ? ', over four months ago: a run soon updates it.'
+                    : ', carried to 3 miles.'
+                }`
+              : 'Assumed until you log a run of a mile or more.'}
+          </Text>
+          <Text style={styles.projection}>
+            Next: {formatDuration(run.checkpoint.seconds)}
+            {run.checkpoint.label === 'the next checkpoint'
+              ? ', a minute at a time toward B+ (20:54)'
+              : ` for ${run.checkpoint.label}`}
+            . Easy {formatPerMile(run.paces.easy)}, tempo{' '}
+            {formatPerMile(run.paces.tempo)}, 400 m in{' '}
+            {formatDuration(splitTime(run.paces.goal, 400))}.
+          </Text>
+          {run.week.length > 0 ? (
+            <Text style={styles.caption}>
+              This week:{' '}
+              {run.week
+                .map(
+                  d =>
+                    `${d.day.toLocaleDateString(undefined, {
+                      weekday: 'short',
+                    })} ${d.run!.title.toLowerCase()} (${d.run!.short})`,
+                )
+                .join(' · ')}
+            </Text>
+          ) : null}
         </View>
 
         {GOAL_GROUPS.map((group, index) => (

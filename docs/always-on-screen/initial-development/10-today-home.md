@@ -334,6 +334,28 @@ final, and every target can be changed.
 - **Decimal Train kinds** (the waist, the farmer walk distance) take two
   decimals on the pad.
 
+## Run program (`src/domain/run/plan.ts`, since 15 Sep 2026)
+
+- **Fitness** is a 3-mile time: the best run of a mile or more in the last
+  four months, carried to 3 miles with Riegel's formula (t × (3 mi ÷
+  d)^1.06). With nothing recent it uses the best run ever and says so; with
+  no run at all it assumes 27:00.
+- **Checkpoints** step a minute at a time toward B+ (20:54, just under 7:00
+  a mile), then an A (19:00) and an A+ (18:00). **Paces:** easy about 1.25 ×
+  race pace, tempo about 1.08 ×, repeats at the checkpoint's pace.
+- **The week** rides the focus wheel's run pieces and the 4-week block:
+  Tuesday's strides become 400 m repeats, a tempo run, 800 m repeats, then
+  strides on the deload week (reps and tempo minutes grow each block);
+  Wednesday's easy run lengthens each block; Saturday's 2- and 3-mile tests
+  get goal times, and the deload Saturday an easy run. The first block, or
+  two weeks without a run, rebuilds: strides after an easy jog, run/walk,
+  and steady baseline tests.
+- **Where it shows:** the morning chime names the run ("6 × 400 m in 1:59
+  · 1 of 3"); Daily Sets lists the whole session under today's morning
+  block and each day's run in the week; Goals has a Running card with the
+  estimate, the next checkpoint, paces and this week's runs. New drills:
+  Run Intervals and Tempo Run.
+
 ## Adaptive ramp (`src/domain/program/adapt.ts`)
 
 Daily Sets volume follows what gets done, not the calendar. Once a day
