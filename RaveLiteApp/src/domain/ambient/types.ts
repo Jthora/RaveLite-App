@@ -53,6 +53,8 @@ export interface Pulse {
   exerciseId?: string;
   /** Daily Sets: exactly what this chime asks for (set n of m, amount). */
   prescription?: SetPrescription;
+  /** Why the chime changed with the weather, when it did. */
+  note?: string;
   /** Set when state transitions through `snoozed`. */
   snoozedFrom?: number;
   /** Populated once the pulse leaves `active`. */
@@ -98,4 +100,6 @@ export interface ActivePulseSummary {
   durationSec: number;
   cuesShort: string[];
   prescription?: SetPrescription;
+  /** Why the chime changed with the weather, when it did. */
+  note?: string;
 }

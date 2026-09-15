@@ -13,6 +13,7 @@ import {AppState, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Tap} from '../../components/Tap';
 import {BalanceStrip} from '../../components/today/BalanceStrip';
 import {ChimeCard, type DoneAdjust} from '../../components/today/ChimeCard';
+import {ConditionsLine} from '../../components/today/ConditionsLine';
 import {DayList} from '../../components/today/DayList';
 import {CatchUpSheet} from '../../components/today/CatchUpSheet';
 import {LateLogSheet} from '../../components/today/LateLogSheet';
@@ -51,6 +52,7 @@ import {ELEMENTS, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {DailySetsSheet} from './DailySetsSheet';
 import {SettingsSheet} from './SettingsSheet';
+import {WeatherSheet} from './WeatherSheet';
 
 /** +5 on the next chime pushes it back by this much. */
 const PLUS_FIVE_MS = 5 * 60_000;
@@ -105,6 +107,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [setsOpen, setSetsOpen] = useState(false);
+  const [weatherOpen, setWeatherOpen] = useState(false);
   /** A missed or skipped chime being logged after the fact. */
   const [late, setLate] = useState<DayRow | undefined>();
   /** A logged row being kept or removed. */
@@ -207,6 +210,10 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           onOpenSettings={() => setSettingsOpen(true)}
           settingsAlert={permission === 'denied' || warnings > 0}
         />
+        <ConditionsLine
+          weather={model.weather}
+          onPress={() => setWeatherOpen(true)}
+        />
         <ChimeCard
           now={model.now}
           active={model.active}
@@ -222,7 +229,11 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           week={model.week}
           onElementPress={onElementPress}
         />
-        <WaterCounter glasses={model.glasses} onAdd={() => logWaterGlass()} />
+        <WaterCounter
+          glasses={model.glasses}
+          target={model.waterTarget}
+          onAdd={() => logWaterGlass()}
+        />
         <SetsMeters sets={model.sets} onPress={() => setSetsOpen(true)} />
 
         <View style={styles.sectionRow}>
@@ -293,6 +304,10 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             setPracticeOpen(false);
             onEngageLegs(legs);
           }}
+        />
+        <WeatherSheet
+          visible={weatherOpen}
+          onClose={() => setWeatherOpen(false)}
         />
         <SettingsSheet
           visible={settingsOpen}

@@ -42,8 +42,15 @@ export function pickDrillForSlotSeeded(
   slot: CadenceSlot,
   seed: string,
 ): Exercise | undefined {
-  const candidates = candidatesForSlot(slot);
-  if (candidates.length === 0) {
+  return seededPick(candidatesForSlot(slot), seed);
+}
+
+/** Same `seed`, same item: a stable pick without randomness. */
+export function seededPick<T>(
+  items: readonly T[],
+  seed: string,
+): T | undefined {
+  if (items.length === 0) {
     return undefined;
   }
   // FNV-1a 32-bit — cheap, stable, non-cryptographic.
@@ -52,8 +59,7 @@ export function pickDrillForSlotSeeded(
     h ^= seed.charCodeAt(i);
     h = Math.imul(h, 0x01000193);
   }
-  const idx = (h >>> 0) % candidates.length;
-  return candidates[idx];
+  return items[(h >>> 0) % items.length];
 }
 
 function candidatesForSlot(slot: CadenceSlot): Exercise[] {

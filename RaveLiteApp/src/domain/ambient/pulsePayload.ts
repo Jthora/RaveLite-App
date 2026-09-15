@@ -21,11 +21,17 @@ import {ELEMENTS, type ElementId} from '../../theme/elements';
  * moves as a JSON string; the lead move's fields stay alongside, so a
  * notification scheduled before rounds existed still parses.
  */
+/** A weather note leads the body when the chime changed for it. */
+const withNote = (note: string | undefined, body: string) =>
+  note ? `${note} · ${body}` : body;
+
 export function pulsePayload(input: {
   pulseId: string;
   element: ElementId;
   exerciseId?: string;
   prescription?: SetPrescription;
+  /** Why the chime changed with the weather; leads the body. */
+  note?: string;
 }): ReminderPayload {
   const el = ELEMENTS[input.element];
   const drill = input.exerciseId
@@ -37,11 +43,16 @@ export function pulsePayload(input: {
     element: input.element,
     color: el.color,
     title: rx ? prescriptionTitle(rx) : drill?.name ?? `${el.name} pulse`,
-    body: rx
-      ? prescriptionBody(rx, cue)
-      : drill?.targets.includes('Hydration')
-      ? `${cue ?? 'Drink a glass'} · then ${EYE_BREAK_SECONDS} s eyes far away`
-      : cue ?? `Time for ${el.name}.`,
+    body: withNote(
+      input.note,
+      rx
+        ? prescriptionBody(rx, cue)
+        : drill?.targets.includes('Hydration')
+        ? `${
+            cue ?? 'Drink a glass'
+          } · then ${EYE_BREAK_SECONDS} s eyes far away`
+        : cue ?? `Time for ${el.name}.`,
+    ),
     exerciseId: drill?.id ?? 'unknown',
     pulseId: input.pulseId,
     data: rx ? prescriptionData(rx) : undefined,

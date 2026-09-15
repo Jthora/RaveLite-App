@@ -28,13 +28,17 @@
  *   - GC's enqueued IDs whose ts is older than `now - retainMs` so the
  *     set doesn't grow unbounded across an all-day session.
  */
+import {
+  drillForPlanChime,
+  planWithWeather,
+  subscribeWeather,
+} from '../conditions/weather';
 import {entriesForDay, handledPulseIds} from '../journal/journal';
 import {
   expandPlanToFires,
   planPulseId,
   type FireSpec,
 } from '../reminders/expandPlan';
-import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import {loadPlan, subscribePlan} from '../reminders/repository';
 import type {Plan} from '../reminders/types';
 import {
@@ -160,13 +164,14 @@ function parsePlanIdTs(id: string): number | null {
 let enqueuedIds = new Set<string>();
 let timer: ReturnType<typeof setInterval> | null = null;
 let planUnsub: (() => void) | null = null;
+let weatherUnsub: (() => void) | null = null;
 
 /**
  * Reconcile-and-enqueue once. Safe to call frequently; the dedup set
  * makes repeated calls cheap.
  */
 export function reconcileNow(now: number = Date.now()): void {
-  const plan = loadPlan();
+  const plan = planWithWeather(loadPlan(), now);
   const queuedPlanIds = new Set(
     queuedPulses()
       .map(p => p.id)
@@ -188,13 +193,47 @@ export function reconcileNow(now: number = Date.now()): void {
     const window = plan.windows.find(w => w.id === fire.windowId);
     const slot = window?.slots[fire.slotIndex];
     const id = planPulseId(fire);
-    const drill = slot ? pickDrillForSlotSeeded(slot, id) : undefined;
+    const {drill, note} = drillForPlanChime(slot, id, fire.ts);
     runtimeEnqueue({
       id,
       fireAt: fire.ts,
       element: fire.element,
       windowId: fire.windowId,
       exerciseId: drill?.id,
+      note,
+    });
+  }
+
+  // The forecast moved on: a waiting chime whose weather call changed is
+  // queued again with its new drill, keeping any +5 it was given.
+  const fresh = new Set(toEnqueue.map(planPulseId));
+  for (const pulse of queuedPulses()) {
+    if (
+      !pulse.id.startsWith('plan:') ||
+      fresh.has(pulse.id) ||
+      pulse.fireAt < now
+    ) {
+      continue;
+    }
+    const [, windowId, slotIndex] = pulse.id.split(':');
+    const slot = plan.windows.find(w => w.id === windowId)?.slots[
+      Number(slotIndex)
+    ];
+    if (!slot) {
+      continue;
+    }
+    const {drill, note} = drillForPlanChime(slot, pulse.id, pulse.fireAt);
+    if (drill?.id === pulse.exerciseId && note === pulse.note) {
+      continue;
+    }
+    cancelQueued([pulse.id]);
+    runtimeEnqueue({
+      id: pulse.id,
+      fireAt: pulse.fireAt,
+      element: pulse.element,
+      windowId: pulse.windowId,
+      exerciseId: drill?.id,
+      note,
     });
   }
 }
@@ -211,6 +250,7 @@ export function startPlanScheduler(): void {
   reconcileNow();
   timer = setInterval(() => reconcileNow(), DEFAULT_RECONCILE_MS);
   planUnsub = subscribePlan(() => reconcileNow());
+  weatherUnsub = subscribeWeather(() => reconcileNow());
 }
 
 /** Stop the scheduler. Useful for tests + hot-reload. */
@@ -222,6 +262,10 @@ export function stopPlanScheduler(): void {
   if (planUnsub !== null) {
     planUnsub();
     planUnsub = null;
+  }
+  if (weatherUnsub !== null) {
+    weatherUnsub();
+    weatherUnsub = null;
   }
 }
 

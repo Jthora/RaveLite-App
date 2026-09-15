@@ -145,6 +145,9 @@ function ActiveCard({
         </View>
       </View>
 
+      {active.note ? (
+        <Text style={[styles.note, {color: el.color}]}>{active.note}</Text>
+      ) : null}
       {moves ? (
         moves.map(m => (
           <AmountRow
@@ -329,6 +332,11 @@ const styles = StyleSheet.create({
   },
   idle: {
     borderColor: palette.border,
+  },
+  note: {
+    ...t.caption,
+    fontSize: 13,
+    marginBottom: spacing.sm,
   },
   accent: {
     ...StyleSheet.absoluteFillObject,

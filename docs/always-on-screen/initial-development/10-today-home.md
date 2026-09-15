@@ -48,17 +48,22 @@ Top to bottom, one scroll:
 1. **Status line** — one chip for live or paused and My day (tap: edit My
    day, pause 30 min / 2 h / until tomorrow, or resume), the clock, and
    **⚙ Settings**, which carries a yellow dot when notifications are off or
-   a Stay alive check warns.
+   a Stay alive check warns. Under it, the **conditions line**: the next
+   sunrise or sunset and, with a forecast, the temperature, rain chance and
+   bug estimate now (before a place is set, it asks for one). Tap for the
+   Weather sheet.
 2. **Chime card** — while a chime sounds: the round's moves, each with its
    own −/+, its partner drill and any glass of water, a draining answer
    window, and **Done / +5 / Skip**. Otherwise the next chime with **+5**
-   and **Skip it**.
+   and **Skip it**. A chime the weather changed says why, e.g. "Rain 80% —
+   Fire Rounds inside instead".
 3. **Balance strip** — today's points per element with a bar filling
    toward par (20), and seven dots for the last seven days: solid on days
    the element made par, faint on days it got something. Tap to open the
    element. Partner drills, glasses and eye breaks count toward their own
    elements.
-4. **Drink** — glasses of water today out of 8, with **+1**.
+4. **Drink** — glasses of water today out of 8 (10 on a hot day, 12 in
+   dangerous heat), with **+1**.
 5. **Daily Sets meters** — sets done, then one small meter per track in its
    element's color. Tap for the Daily Sets sheet.
 6. **Today · N-day streak** (plus **· Harmony** once all five are at
@@ -83,6 +88,10 @@ Top to bottom, one scroll:
   restoring a plan the v2 migration replaced, alive motion, Heart theme. A
   notifications-off warning leads when permission is denied. My day is
   edited from Today's chip.
+- **Weather** (Today's conditions line, or Settings › Weather & place) —
+  the place (type a town, or Use my location), today's first light,
+  sunrise, sunset and daylight, the next 12 hours, and switches for Buggy
+  today, moving yard work inside when buggy, running in the dark, and °F.
 - **Daily Sets** (Today's meters) — today's tracks with their rounds, max
   tests, level ups, and track on/off.
 - **Library** (element pages) — focus areas, saved per element, which also
@@ -181,6 +190,49 @@ Water 13 · Core 5 · Air 2.
   strength tracks rest, and rounds holding an Earth move can't end on an
   Earth partner; one Earth drill makes it up). Week 1 Monday: Fire 29 ·
   Air 26 · Earth 26 · Water 28 · Core 26.
+
+## Weather (`src/domain/conditions/`)
+
+- **Place.** Typed as a town (Open-Meteo's place search) or detected once
+  with coarse location (Android's last-known or a single network fix; the
+  town name comes from Android's geocoder). Stored rounded to 0.1° (about
+  10 km) and only sent to Open-Meteo.
+- **Sun** (`sun.ts`). First light, sunrise, sunset and day length from the
+  sunrise equation, on the phone, with no network. Checked against
+  Open-Meteo for New York: within 2 minutes.
+- **Forecast** (`forecast.ts`, `weather.ts`). Hourly temperature,
+  feels-like, humidity, rain chance and amount, weather code and wind for
+  48 hours, plus 10 days of past rain. Fetched when over 3 hours old:
+  checked every 15 minutes while the app runs, when it comes to the front,
+  and when the place changes. Offline, the last forecast stays in use.
+- **Conditions** (`conditions.ts`). Dark before civil dawn; rain at 50%
+  chance or rain falling; heat caution at feels-like 32 °C and danger at
+  39 °C; cold at 0 °C, icy with snow or freezing-rain codes. Bugs are an
+  estimate (warm, humid, still air, within 90 minutes of sunrise or
+  sunset, 5 mm of rain in the last 10 days); Buggy today overrides it.
+- **What changes** (`adapt.ts`). Only drills that can happen in the yard
+  adapt; porch, mat and desk work stays. Indoors is a low basement, so
+  running, walking laps, jumping, kicking, carries and staff flow or dance
+  never move inside; Fire Rounds and most standing, mat and wall work do.
+  - Rain, ice or dangerous heat: a drill that fits inside moves inside;
+    one that doesn't swaps for an indoor drill of its element (a run
+    becomes Fire Rounds, staff flow becomes a Water mobility drill).
+  - Dark: a run swaps for indoor Fire work until first light, unless Run
+    in the dark is on (then: headlamp and reflective gear).
+  - Bugs likely: static work moves inside; the run and staff flow stay out,
+    with repellent first.
+  - Hot: easy pace, drink first. Cold: warm up inside first.
+- **Where it shows.** The plan scheduler queues the adapted drill with its
+  note; when a new forecast changes a waiting chime, it's queued again
+  (keeping any +5). OS backup notifications lead with the note, and
+  Today's list shows it as the row detail.
+- **Hot days** (`heatWater.ts`). An extra water call halfway between the
+  plan's own, in each hot hour (`heat-water` windows for today and
+  tomorrow), so water calls come hourly, and the Drink target rises by 2
+  (caution) or 4 (danger).
+- **Not built yet:** moving the run to a dry hour before 09:00 or the
+  warmest hour, winter's lean toward strength and mobility, and learning
+  the yard from Buggy today taps.
 
 ## Chimes (`src/domain/program/rounds.ts`, `src/domain/ambient/setScheduler.ts`)
 

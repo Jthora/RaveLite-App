@@ -56,6 +56,16 @@ export const KEYS = {
   // ── Daily Sets program (spread-out submaximal sets) ──────────────
   /** `ProgramState` JSON — start day and per-track rung + max. */
   programState: 'program.state',
+
+  // ── Weather: sunrise, the forecast, conditions ────────────────────
+  /** `Place` JSON — the operator's town, rounded to about 10 km. */
+  weatherPlace: 'weather.place',
+  /** `Forecast` JSON — the last Open-Meteo forecast for that place. */
+  weatherForecast: 'weather.forecast',
+  /** `WeatherPrefs` JSON — units, running in the dark, bugs move inside. */
+  weatherPrefs: 'weather.prefs',
+  /** Local day key the operator marked as buggy. */
+  weatherBuggyDay: 'weather.buggyDay',
 } as const;
 
 /**

@@ -47,6 +47,8 @@ export interface PulseSpec {
   windowId?: string;
   exerciseId?: string;
   prescription?: SetPrescription;
+  /** Why the chime changed with the weather, when it did. */
+  note?: string;
 }
 
 /**
@@ -112,6 +114,7 @@ export function enqueue(state: QueueState, spec: PulseSpec): QueueResult {
     windowId: spec.windowId,
     exerciseId: spec.exerciseId,
     prescription: spec.prescription,
+    note: spec.note,
   };
   return {state: withPulses([...state.pulses, pulse]), writes: []};
 }
@@ -240,10 +243,7 @@ export function resolve(
     return {state, writes: []};
   }
   const target = clonePulse(state.pulses[idx]);
-  const respondedAfterMs = Math.max(
-    0,
-    now - timeOfFireFor(target),
-  );
+  const respondedAfterMs = Math.max(0, now - timeOfFireFor(target));
   target.state = 'resolved';
   target.resolution = {
     outcome,

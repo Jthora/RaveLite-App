@@ -108,6 +108,7 @@ export function getActivePulseSummary(): ActivePulseSummary | undefined {
     durationSec: drill?.approxSeconds ?? 60,
     cuesShort: drill?.cues?.slice(0, 4) ?? [],
     prescription: active.prescription,
+    note: active.note,
   };
 }
 
@@ -164,16 +165,16 @@ function commit(writes: ReturnType<typeof queueTick>['writes']): void {
         exerciseId: w.exerciseId,
         prescription: rx,
       }),
-    ).catch(err =>
-      // eslint-disable-next-line no-console
-      console.warn('[pulseRuntime] chime failed', err),
-    );
-    const event: PulseFiredEvent = {pulseId: w.pulseId, element, prescription: rx};
+    ).catch(err => console.warn('[pulseRuntime] chime failed', err));
+    const event: PulseFiredEvent = {
+      pulseId: w.pulseId,
+      element,
+      prescription: rx,
+    };
     for (const listener of firedListeners) {
       try {
         listener(event);
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.warn('[pulseRuntime] pulse-fired listener threw', e);
       }
     }
@@ -275,9 +276,7 @@ function disarmDueBackups(now: number): void {
 /** Drive the reducer one step at the given epoch ms. */
 export function tickNow(now: number = Date.now()): void {
   disarmDueBackups(now);
-  const result = queueTick(state, now, t =>
-    pagingAllowedAt(new Date(t)),
-  );
+  const result = queueTick(state, now, t => pagingAllowedAt(new Date(t)));
   if (result.writes.length === 0 && result.state === state) {
     return;
   }

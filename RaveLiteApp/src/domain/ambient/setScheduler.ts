@@ -16,6 +16,7 @@
 import type {ElementId} from '../../theme/elements';
 import {activityInRange, chimePoints} from '../activity/activity';
 import {averageShortfall} from '../activity/par';
+import {planWithWeather} from '../conditions/weather';
 import {
   emptyElementCounts,
   pointsByElementByDay,
@@ -143,7 +144,7 @@ function partnerBalance(
 export function setsToday(now: number = Date.now()): SetsToday {
   const date = new Date(now);
   const program = loadProgram(date);
-  const plan = loadPlan();
+  const plan = planWithWeather(loadPlan(), now);
   const myDay = getActiveHours();
   const prescriptions = prescriptionsFor(program, date);
   const midnight = new Date(date);

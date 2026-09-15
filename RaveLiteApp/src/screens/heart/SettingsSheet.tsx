@@ -15,6 +15,7 @@ import {
   savePlan,
   subscribePlan,
 } from '../../domain/reminders/repository';
+import {getPlace} from '../../domain/conditions/weather';
 import type {Plan} from '../../domain/reminders/types';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
@@ -25,6 +26,7 @@ import {ChimesPanel} from './ChimesPanel';
 import {PlanPanel} from './PlanPanel';
 import {StayAlivePanel} from './StayAlivePanel';
 import {ThemePanel} from './ThemePanel';
+import {WeatherSheet} from './WeatherSheet';
 
 const WARN = '#FFD60A';
 
@@ -45,6 +47,8 @@ function replacedPlanAt(): number | undefined {
 export function SettingsSheet({visible, onClose, permission}: Props) {
   const [plan, setPlan] = useState(loadPlan);
   const [planOpen, setPlanOpen] = useState(false);
+  const [weatherOpen, setWeatherOpen] = useState(false);
+  const place = getPlace();
   const [replacedAt, setReplacedAt] = useState(replacedPlanAt);
   const [confirmRestore, setConfirmRestore] = useState(false);
 
@@ -101,6 +105,27 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
 
           <View style={styles.row}>
             <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>Weather & place</Text>
+              <Text style={styles.rowValue}>
+                {place
+                  ? `${place.name}: sunrise, rain, heat and bugs`
+                  : 'Not set: chimes ignore the weather'}
+              </Text>
+            </View>
+            <Tap
+              testID="weather-open"
+              variant="ghost"
+              color={palette.textDim}
+              onPress={() => setWeatherOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Open weather and place"
+              style={styles.rowBtn}>
+              <Text style={styles.rowBtnText}>Open</Text>
+            </Tap>
+          </View>
+
+          <View style={styles.row}>
+            <View style={styles.rowText}>
               <Text style={styles.rowTitle}>Plan</Text>
               <Text style={styles.rowValue}>
                 {plan.windows.map(w => w.label).join(' · ') || 'no windows'}
@@ -147,6 +172,10 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
           <ThemePanel />
         </ScrollView>
 
+        <WeatherSheet
+          visible={weatherOpen}
+          onClose={() => setWeatherOpen(false)}
+        />
         <Modal
           visible={planOpen}
           animationType="slide"

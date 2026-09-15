@@ -8,6 +8,7 @@
  * changes. Runs are serialized: a request during a run queues one
  * follow-up run.
  */
+import {drillForPlanChime, planWithWeather} from '../conditions/weather';
 import {entriesForDay, handledPulseIds} from '../journal/journal';
 import {subscribeProgram} from '../program/repository';
 import {expandPlanToFires, planPulseId} from '../reminders/expandPlan';
@@ -18,7 +19,6 @@ import {
   scheduleBackupChime,
 } from '../reminders/notifeeScheduler';
 import {loadPlan, subscribePlan} from '../reminders/repository';
-import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import type {ReminderPayload} from '../reminders/types';
 import {
   getActiveHours,
@@ -47,7 +47,7 @@ export function backupCandidates(
 ): BackupCandidate<ReminderPayload>[] {
   const out: BackupCandidate<ReminderPayload>[] = [];
 
-  const plan = loadPlan();
+  const plan = planWithWeather(loadPlan(), now);
   const riding = absorbedWaterCalls(now);
   for (const fire of expandPlanToFires(plan, now, now + BACKUP_HORIZON_MS)) {
     const pulseId = planPulseId(fire);
@@ -57,11 +57,16 @@ export function backupCandidates(
     const slot = plan.windows.find(w => w.id === fire.windowId)?.slots[
       fire.slotIndex
     ];
-    const drill = slot ? pickDrillForSlotSeeded(slot, pulseId) : undefined;
+    const {drill, note} = drillForPlanChime(slot, pulseId, fire.ts);
     out.push({
       pulseId,
       dueAt: fire.ts,
-      payload: pulsePayload({pulseId, element: fire.element, exerciseId: drill?.id}),
+      payload: pulsePayload({
+        pulseId,
+        element: fire.element,
+        exerciseId: drill?.id,
+        note,
+      }),
     });
   }
 
@@ -93,6 +98,7 @@ export function backupCandidates(
         element: pulse.element,
         exerciseId: pulse.exerciseId,
         prescription: pulse.prescription,
+        note: pulse.note,
       }),
     });
   }
@@ -120,7 +126,6 @@ async function run(now: number): Promise<void> {
       exact,
       kind: 'backup',
     }).catch(err =>
-      // eslint-disable-next-line no-console
       console.warn('[backupScheduler] schedule failed', spec.pulseId, err),
     );
   }
@@ -136,10 +141,7 @@ export function reconcileBackupsNow(now: number = Date.now()): Promise<void> {
     return inFlight;
   }
   inFlight = run(now)
-    .catch(err =>
-      // eslint-disable-next-line no-console
-      console.warn('[backupScheduler] reconcile failed', err),
-    )
+    .catch(err => console.warn('[backupScheduler] reconcile failed', err))
     .finally(() => {
       inFlight = null;
       if (rerun) {

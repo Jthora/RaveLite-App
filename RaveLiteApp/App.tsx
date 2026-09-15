@@ -29,6 +29,7 @@ import {startPulseRuntime} from './src/domain/ambient/pulseRuntime';
 import {startPlanScheduler} from './src/domain/ambient/planScheduler';
 import {startSetScheduler} from './src/domain/ambient/setScheduler';
 import {startBackupScheduler} from './src/domain/ambient/backupScheduler';
+import {startWeather} from './src/domain/conditions/weather';
 import {ElementShell} from './src/shell/ElementShell';
 import {NightVeil} from './src/components/alive/NightVeil';
 import {CueWash} from './src/components/alive/CueWash';
@@ -85,6 +86,8 @@ function App(): React.JSX.Element {
         startPlanScheduler();
         startSetScheduler();
         startBackupScheduler();
+        // Sunrise needs no network; the forecast refreshes every few hours.
+        startWeather();
         startAmbientLifecycle();
         startAliveBridge();
       }

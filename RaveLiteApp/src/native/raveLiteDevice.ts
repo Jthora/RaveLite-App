@@ -12,11 +12,20 @@ import type {ElementId} from '../theme/elements';
  * sound, and the readers resolve null ("unknown").
  */
 
+export interface CoarseLocation {
+  latitude: number;
+  longitude: number;
+  /** The town, when Android's geocoder knows it. */
+  place?: string;
+}
+
 interface RaveLiteDeviceNative {
   playCue(element: string, volume: number): Promise<boolean>;
   getAlarmVolume(): Promise<{current: number; max: number}>;
   getInterruptionFilter(): Promise<number>;
   setWindowBrightness(level: number): Promise<boolean>;
+  /** Missing on APKs built before location support. */
+  getCoarseLocation?(): Promise<CoarseLocation | null>;
 }
 
 const native: RaveLiteDeviceNative | undefined =
@@ -79,6 +88,21 @@ export async function getInterruptionFilter(): Promise<number | null> {
   }
   try {
     return await native.getInterruptionFilter();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The phone's rough location, once (the permission must already be
+ * granted). Null when location is off, unavailable or not permitted.
+ */
+export async function getCoarseLocation(): Promise<CoarseLocation | null> {
+  if (!native?.getCoarseLocation) {
+    return null;
+  }
+  try {
+    return await native.getCoarseLocation();
   } catch {
     return null;
   }

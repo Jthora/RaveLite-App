@@ -1,12 +1,19 @@
 package com.raveliteapp.device
 
+import android.Manifest
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
@@ -16,6 +23,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.raveliteapp.R
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * RaveLite device bridge — the native capabilities JS can't reach.
@@ -28,6 +37,7 @@ import com.raveliteapp.R
  *    settings and the "Respect Do Not Disturb" toggle.
  *  - Window backlight override for night mode: the screen stays on
  *    (FLAG_KEEP_SCREEN_ON) but barely lit outside active hours.
+ *  - A rough location, once, for sunrise and the forecast.
  *
  * Old-architecture module (newArchEnabled=false), registered manually in
  * MainApplication via [RaveLiteDevicePackage].
@@ -147,6 +157,114 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * The phone's rough location, once. Resolves `{latitude, longitude, place?}`
+   * from the freshest last-known fix under a day old, else a single network
+   * (or GPS) fix, or null when location is off, not permitted, or nothing
+   * arrives within 20 s. `place` is the town from Android's geocoder when it
+   * has one.
+   */
+  @ReactMethod
+  fun getCoarseLocation(promise: Promise) {
+    val permitted =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+            reactContext.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
+    if (!permitted) {
+      promise.resolve(null)
+      return
+    }
+    val manager = reactContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val settled = AtomicBoolean(false)
+    fun settle(location: Location?) {
+      if (!settled.compareAndSet(false, true)) {
+        return
+      }
+      if (location == null) {
+        promise.resolve(null)
+        return
+      }
+      // The geocoder may go to the network: keep it off the calling thread.
+      Thread {
+            val result = Arguments.createMap()
+            result.putDouble("latitude", location.latitude)
+            result.putDouble("longitude", location.longitude)
+            placeName(location)?.let { result.putString("place", it) }
+            promise.resolve(result)
+          }
+          .start()
+    }
+
+    val lastKnown =
+        manager.allProviders
+            .mapNotNull { provider ->
+              try {
+                manager.getLastKnownLocation(provider)
+              } catch (e: Exception) {
+                null
+              }
+            }
+            .maxByOrNull { it.time }
+    if (lastKnown != null && System.currentTimeMillis() - lastKnown.time < LAST_FIX_MAX_AGE_MS) {
+      settle(lastKnown)
+      return
+    }
+    val provider =
+        listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER).firstOrNull {
+          try {
+            manager.isProviderEnabled(it)
+          } catch (e: Exception) {
+            false
+          }
+        }
+    if (provider == null) {
+      settle(lastKnown)
+      return
+    }
+    mainHandler.postDelayed({ settle(lastKnown) }, FIX_TIMEOUT_MS)
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        manager.getCurrentLocation(provider, null, reactContext.mainExecutor) { location ->
+          settle(location ?: lastKnown)
+        }
+      } else {
+        val listener =
+            object : LocationListener {
+              override fun onLocationChanged(location: Location) {
+                settle(location)
+              }
+
+              @Deprecated("Deprecated in Java")
+              override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
+              override fun onProviderEnabled(provider: String) {}
+
+              override fun onProviderDisabled(provider: String) {}
+            }
+        @Suppress("DEPRECATION")
+        manager.requestSingleUpdate(provider, listener, Looper.getMainLooper())
+      }
+    } catch (e: SecurityException) {
+      settle(lastKnown)
+    }
+  }
+
+  private fun placeName(location: Location): String? {
+    if (!Geocoder.isPresent()) {
+      return null
+    }
+    return try {
+      @Suppress("DEPRECATION")
+      val address =
+          Geocoder(reactContext, Locale.getDefault())
+              .getFromLocation(location.latitude, location.longitude, 1)
+              ?.firstOrNull()
+      address?.locality ?: address?.subAdminArea ?: address?.adminArea
+    } catch (e: Exception) {
+      null
+    }
+  }
+
   private fun requestFocus() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       val request =
@@ -183,5 +301,8 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     private const val INTERRUPTION_FILTER_ALL = 1
     /** Longest cue is ~1.2 s; hold ducking a little past it. */
     private const val FOCUS_HOLD_MS = 1500L
+    /** A last-known fix younger than this is good enough for the weather. */
+    private const val LAST_FIX_MAX_AGE_MS = 24L * 60 * 60 * 1000
+    private const val FIX_TIMEOUT_MS = 20_000L
   }
 }

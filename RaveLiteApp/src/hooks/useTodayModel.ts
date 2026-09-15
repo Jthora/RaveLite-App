@@ -13,6 +13,16 @@ import {
   windowStart,
 } from '../domain/activity/stats';
 import {isHarmony} from '../domain/activity/par';
+import {WATER_TARGET} from '../components/today/WaterCounter';
+import {drinkTarget} from '../domain/conditions/heatWater';
+import {
+  drillForPlanChime,
+  hottestToday,
+  planWithWeather,
+  subscribeWeather,
+  weatherLine,
+  type WeatherLine,
+} from '../domain/conditions/weather';
 import {
   getActiveHours,
   readPauseUntil,
@@ -35,7 +45,6 @@ import {summarizeSets, type SetsSummary} from '../domain/program/setsSummary';
 import type {SetFire} from '../domain/program/types';
 import {expandPlanToFires, planPulseId} from '../domain/reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../domain/reminders/repository';
-import {pickDrillForSlotSeeded} from '../domain/reminders/scheduler';
 import {
   buildDayList,
   type DayRow,
@@ -59,6 +68,10 @@ export interface TodayModel {
   /** Every element reached par today. */
   harmony: boolean;
   glasses: number;
+  /** Glasses to aim for today: more on hot days. */
+  waterTarget: number;
+  /** The sun and the weather now; undefined until a place is set. */
+  weather?: WeatherLine;
   sets: SetsSummary;
   /** Per element, effort points for each of the last 7 days (today last). */
   week: Record<ElementId, number[]>;
@@ -96,7 +109,7 @@ export function buildTodayModel(
   const date = new Date(now);
   const journal = entriesForDay(date);
   const activity = activityForDay(date);
-  const plan = loadPlan();
+  const plan = planWithWeather(loadPlan(), now);
   const myDay = getActiveHours();
   const sets = setsToday(now);
   const handled = handledPulseIds(journal);
@@ -116,13 +129,13 @@ export function buildTodayModel(
     }
     const window = plan.windows.find(w => w.id === fire.windowId);
     const slot = window?.slots[fire.slotIndex];
-    const drill = slot ? pickDrillForSlotSeeded(slot, id) : undefined;
+    const {drill, note} = drillForPlanChime(slot, id, fire.ts);
     planChimes.push({
       id,
       ts: fire.ts,
       element: fire.element,
       label: drill?.name ?? ELEMENTS[fire.element].name,
-      detail: window?.label,
+      detail: note ?? window?.label,
       move: moveForExercise(drill?.id),
       exerciseId: drill?.id,
     });
@@ -170,6 +183,8 @@ export function buildTodayModel(
     points,
     harmony: isHarmony(points),
     glasses: hydrationGlasses(activity),
+    waterTarget: drinkTarget(WATER_TARGET, hottestToday(now)),
+    weather: weatherLine(now),
     sets: summarizeSets(sets.prescriptions, done),
   };
 }
@@ -211,6 +226,7 @@ export function useTodayModel(): TodayModel {
       subscribeProgram(refresh),
       subscribePlan(refresh),
       subscribeActiveHours(refresh),
+      subscribeWeather(refresh),
     ];
     const timer = setInterval(refresh, DATA_REFRESH_MS);
     return () => {
