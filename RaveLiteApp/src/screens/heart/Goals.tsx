@@ -484,9 +484,13 @@ function GoalCard({
             color={accent}
             onPress={onLog}
             accessibilityRole="button"
-            accessibilityLabel={`Log a ${event.name} test`}
+            accessibilityLabel={
+              event.perHeight ? 'Log your waist' : `Log a ${event.name} test`
+            }
             style={styles.logBtn}>
-            <Text style={[styles.logText, {color: accent}]}>Log a test</Text>
+            <Text style={[styles.logText, {color: accent}]}>
+              {event.perHeight ? 'Log waist' : 'Log a test'}
+            </Text>
           </Tap>
         ) : null}
       </View>
