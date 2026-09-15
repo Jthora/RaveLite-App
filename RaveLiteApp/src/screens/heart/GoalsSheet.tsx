@@ -9,6 +9,10 @@
  * and A+ marks (per test for the fitness tests, on the chosen table), and
  * "Log a test". Last week's sets done comes from Daily Sets itself. Tap a
  * target to change it.
+ *
+ * Dates are projections: each goal's straight-line trend through recent
+ * tests (`standards/projection.ts`), and for push-ups how soon today's
+ * sets could reach 200 a day keeping up every week (`program/ramp.ts`).
  */
 import React, {useEffect, useMemo, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -24,6 +28,7 @@ import {
 import {setsToday} from '../../domain/ambient/setScheduler';
 import {lastWeekDone} from '../../domain/program/adapt';
 import {PUSHUP_GOAL, pushupDay} from '../../domain/program/pushups';
+import {pushupRamp, type PushupRamp} from '../../domain/program/ramp';
 import {loadProgram, subscribeProgram} from '../../domain/program/repository';
 import {
   GOAL_GROUPS,
@@ -39,6 +44,7 @@ import {
   hasOwnTarget,
   markFor,
   progressToward,
+  resultsFor,
   setPrimarySex,
   setTarget,
   targetFor,
@@ -48,6 +54,7 @@ import {
   type StandardEvent,
   type StandardResult,
 } from '../../domain/standards/standards';
+import {projectGoal, type Projection} from '../../domain/standards/projection';
 import {formatDuration, type Grade} from '../../domain/training/grading';
 import {
   getMetric,
@@ -74,6 +81,32 @@ const formatValue = (event: StandardEvent, value: number) =>
 const shortDate = (at: number) =>
   new Date(at).toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
 
+/** "Nov 20", with the year when it isn't this year's. */
+function futureDate(at: number): string {
+  const date = new Date(at);
+  const thisYear = date.getFullYear() === new Date().getFullYear();
+  return date.toLocaleDateString(
+    undefined,
+    thisYear
+      ? {month: 'short', day: 'numeric'}
+      : {month: 'short', day: 'numeric', year: 'numeric'},
+  );
+}
+
+/** How soon today's push-up sets could reach 200 a day. */
+function rampLine(ramp: PushupRamp): string {
+  switch (ramp.kind) {
+    case 'reached':
+      return `Today's sets already reach ${PUSHUP_GOAL} a day.`;
+    case 'on-pace':
+      return `Keeping up every week, the sets reach ${PUSHUP_GOAL} a day around ${futureDate(
+        ramp.at,
+      )} (${ramp.weeks} weeks).`;
+    case 'capped':
+      return `At today's push-up max the sets top out at ${ramp.most} a day; a tested max of ${ramp.needMax} reaches ${PUSHUP_GOAL}.`;
+  }
+}
+
 /** "USMC: D− 5 · B+ 17 · A+ 21" on the chosen table; RaveLite marks have no test name. */
 function scaleLine(event: StandardEvent, scale: EventScale, sex: Sex): string {
   const mark = (grade: Grade) =>
@@ -93,6 +126,9 @@ function topScores(event: StandardEvent, first: Sex): string {
 const groupTitle = (group: GoalGroup) =>
   group === 'tests' ? 'Fitness tests' : ELEMENTS[group].name;
 
+/** A goal the app measures itself rather than one that's logged. */
+const measured = (event: StandardEvent) => !event.kindId;
+
 const groupColor = (group: GoalGroup) =>
   group === 'tests' ? ELEMENTS.fire.color : ELEMENTS[group].color;
 
@@ -104,6 +140,27 @@ interface GoalRow {
   result?: StandardResult;
   grades: string;
   progress: number;
+  /** Where recent tests are heading. */
+  projection: Projection;
+}
+
+/** Where a goal's tests are heading, in a sentence; nothing before a first test. */
+function projectionLine(row: GoalRow): string | undefined {
+  const goal = row.own ? 'your target' : 'the B+';
+  switch (row.projection.kind) {
+    case 'reached':
+      return `Reached ${goal}.`;
+    case 'on-pace':
+      return `On pace for ${goal} around ${futureDate(row.projection.at)}.`;
+    case 'close':
+      return `The trend is at ${goal}: test again to make it count.`;
+    case 'not-yet':
+      return `Not on pace for ${goal} yet: keep testing every week or two.`;
+    case 'need-more':
+      return row.result
+        ? 'Test again in a week or more to see a date.'
+        : undefined;
+  }
 }
 
 export function GoalsSheet({visible, onClose}: Props) {
@@ -122,7 +179,8 @@ export function GoalsSheet({visible, onClose}: Props) {
     const now = Date.now();
     const entries = loadEntries();
     const sex = getPrimarySex();
-    const done = lastWeekDone(Object.values(loadProgram(new Date(now)).tracks));
+    const program = loadProgram(new Date(now));
+    const done = lastWeekDone(Object.values(program.tracks));
     const rows: GoalRow[] = STANDARD_EVENTS.map(event => {
       const target = targetFor(event);
       // The one goal without a Train kind is measured from Daily Sets.
@@ -138,6 +196,12 @@ export function GoalsSheet({visible, onClose}: Props) {
         result,
         grades: result ? formatGrades(gradesFor(event, sex, result.value)) : '',
         progress: result ? progressToward(event, result.value, target) : 0,
+        projection: projectGoal(
+          event,
+          resultsFor(event, entries, getMetric),
+          target,
+          now,
+        ),
       };
     });
     return {
@@ -147,12 +211,13 @@ export function GoalsSheet({visible, onClose}: Props) {
         setsToday(now).prescriptions,
       ),
       rows,
+      ramp: pushupRamp(program, now),
     };
     // `version` and `visible` are the rebuild triggers; reads go to storage.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version, visible]);
 
-  const {pushups} = view;
+  const {pushups, ramp} = view;
   // Today's sets are the day's target; 200 a day is where the ramp leads.
   const dayTarget = pushups.planned > 0 ? pushups.planned : PUSHUP_GOAL;
 
@@ -201,6 +266,9 @@ export function GoalsSheet({visible, onClose}: Props) {
               {pushups.planned > 0
                 ? `Today's sets add up to ${pushups.planned}. They grow as you keep up with them and your tested max rises, toward ${PUSHUP_GOAL} a day.`
                 : `The long-term goal is ${PUSHUP_GOAL} a day.`}
+            </Text>
+            <Text testID="pushups-ramp" style={styles.projection}>
+              {rampLine(ramp)}
             </Text>
           </View>
 
@@ -298,21 +366,22 @@ function GoalCard({
   onLog?: () => void;
 }) {
   const {event, target, own, result, grades, progress} = row;
+  const projection = measured(event) ? undefined : projectionLine(row);
   const accent = ELEMENTS.heart.accent;
-  const measured = !event.kindId;
+  const isMeasured = measured(event);
   const resultLine = result
     ? [
-        `${measured ? 'Last week' : 'Best'} ${formatValue(
+        `${isMeasured ? 'Last week' : 'Best'} ${formatValue(
           event,
           result.value,
         )}`,
-        measured ? undefined : shortDate(result.at),
+        isMeasured ? undefined : shortDate(result.at),
         grades || undefined,
         result.from ? `from ${result.from}` : undefined,
       ]
         .filter(Boolean)
         .join(' · ')
-    : measured
+    : isMeasured
     ? 'After a week of Daily Sets'
     : 'No test yet';
 
@@ -374,6 +443,7 @@ function GoalCard({
           </Tap>
         ) : null}
       </View>
+      {projection ? <Text style={styles.projection}>{projection}</Text> : null}
       {(event.scales ?? []).map((scale, i) => (
         <Text key={scale.test ?? i} style={styles.caption}>
           {scaleLine(event, scale, sex)}
@@ -555,6 +625,11 @@ const styles = StyleSheet.create({
   note: {
     ...t.caption,
     color: palette.textMuted,
+    lineHeight: 17,
+  },
+  projection: {
+    ...t.caption,
+    color: palette.text,
     lineHeight: 17,
   },
   tableRow: {

@@ -69,3 +69,20 @@ it('has a section for each other element, graded on RaveLite marks', () => {
   ).toHaveLength(0);
   act(() => tree.unmount());
 });
+
+it('dates a goal from two tests a week or more apart, and says how soon push-ups reach 200', () => {
+  const day = 86_400_000;
+  addEntry({
+    at: Date.now() - 14 * day,
+    kindId: 'builtin.pullups-amrap',
+    value: 6,
+  });
+  addEntry({at: Date.now(), kindId: 'builtin.pullups-amrap', value: 8});
+  const tree = render();
+  const json = JSON.stringify(tree.toJSON());
+  expect(json).toContain('On pace for the B+ around');
+  // At the assumed push-up max of 10, sets top out at 84 a day.
+  expect(json).toContain('top out at 84 a day');
+  expect(json).toContain('a tested max of 29 reaches 200');
+  act(() => tree.unmount());
+});

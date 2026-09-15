@@ -579,34 +579,24 @@ export interface StandardResult {
 }
 
 /**
- * The best test result for an event. Runs also count any longer run at the
- * same pace, scaled to the event's distance.
+ * Every test result for an event, oldest first. Runs also count any longer
+ * run at the same pace, scaled to the event's distance.
  */
-export function bestResult(
+export function resultsFor(
   event: StandardEvent,
   entries: readonly TrainingLogEntry[],
   metricFor: (kindId: string) => MetricKind | undefined,
-): StandardResult | undefined {
+): StandardResult[] {
   if (!event.kindId) {
-    return undefined;
+    return [];
   }
-  let best: StandardResult | undefined;
-  const consider = (result: StandardResult) => {
-    const better =
-      !best ||
-      (event.better === 'higher'
-        ? result.value > best.value
-        : result.value < best.value);
-    if (better) {
-      best = result;
-    }
-  };
+  const out: StandardResult[] = [];
   for (const entry of entries) {
     if (entry.value <= 0) {
       continue;
     }
     if (entry.kindId === event.kindId) {
-      consider({value: entry.value, at: entry.at});
+      out.push({value: entry.value, at: entry.at});
       continue;
     }
     if (!event.distanceMeters) {
@@ -624,11 +614,31 @@ export function bestResult(
     if (!distance || distance < event.distanceMeters) {
       continue;
     }
-    consider({
+    out.push({
       value: (entry.value / distance) * event.distanceMeters,
       at: entry.at,
       from: kind.label,
     });
+  }
+  return out.sort((a, b) => a.at - b.at);
+}
+
+/** The best test result for an event (see `resultsFor`). */
+export function bestResult(
+  event: StandardEvent,
+  entries: readonly TrainingLogEntry[],
+  metricFor: (kindId: string) => MetricKind | undefined,
+): StandardResult | undefined {
+  let best: StandardResult | undefined;
+  for (const result of resultsFor(event, entries, metricFor)) {
+    const better =
+      !best ||
+      (event.better === 'higher'
+        ? result.value > best.value
+        : result.value < best.value);
+    if (better) {
+      best = result;
+    }
   }
   return best;
 }
