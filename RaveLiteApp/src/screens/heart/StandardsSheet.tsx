@@ -101,6 +101,8 @@ export function StandardsSheet({visible, onClose}: Props) {
   }, [version, visible]);
 
   const {pushups} = view;
+  // Today's sets are the day's target; 200 a day is where the ramp leads.
+  const dayTarget = pushups.planned > 0 ? pushups.planned : PUSHUP_GOAL;
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -122,14 +124,18 @@ export function StandardsSheet({visible, onClose}: Props) {
             <Text style={styles.eyebrow}>PUSH-UPS TODAY</Text>
             <Text style={styles.big}>
               {pushups.total}
-              <Text style={styles.bigGoal}> / {PUSHUP_GOAL}</Text>
+              <Text style={styles.bigGoal}>
+                {' '}
+                / {dayTarget}
+                {pushups.planned > 0 ? ' today' : ''}
+              </Text>
             </Text>
             <View style={styles.bar}>
               <View
                 style={[
                   styles.fill,
                   {
-                    width: `${Math.min(1, pushups.total / PUSHUP_GOAL) * 100}%`,
+                    width: `${Math.min(1, pushups.total / dayTarget) * 100}%`,
                     backgroundColor: fire,
                   },
                 ]}
@@ -138,9 +144,11 @@ export function StandardsSheet({visible, onClose}: Props) {
             <Text style={styles.caption}>
               {pushups.standard} standard · {pushups.variants} variants
               {pushups.bestSet > 0 ? ` · best set ${pushups.bestSet}` : ''}
+            </Text>
+            <Text style={styles.caption}>
               {pushups.planned > 0
-                ? ` · today's sets add up to ${pushups.planned}`
-                : ''}
+                ? `Today's sets add up to ${pushups.planned}. They grow as the weeks build and your tested max rises, toward ${PUSHUP_GOAL} a day.`
+                : `The long-term goal is ${PUSHUP_GOAL} a day.`}
             </Text>
           </View>
 

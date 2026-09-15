@@ -3,8 +3,9 @@ import {KEYS} from '../../storage/keys';
 import {append} from '../journal/journal';
 import {localDayKey} from '../training/grading';
 import {TRACKS, trackById} from './tracks';
-import {applyTest, levelUp, prescribeDay} from './progression';
+import {applyTest, levelUp, prescribeDay, programWeek} from './progression';
 import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
+import {dayFocus, type DayFocus} from './week';
 
 /**
  * Daily Sets persistence. One `ProgramState` blob. The program starts
@@ -120,4 +121,10 @@ export function prescriptionsFor(
     }
   }
   return out;
+}
+
+/** `date`'s focus, morning block and any Saturday test, in its program week. */
+export function focusFor(date: Date = new Date()): DayFocus {
+  const program = loadProgram(date);
+  return dayFocus(date, programWeek(program.startDay, date));
 }

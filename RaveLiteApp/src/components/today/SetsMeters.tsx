@@ -3,63 +3,63 @@ import {StyleSheet, Text, View} from 'react-native';
 
 import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
-import {PUSHUP_GOAL, type PushupDay} from '../../domain/program/pushups';
 import type {SetsSummary} from '../../domain/program/setsSummary';
+import {attributeById, type DayFocus} from '../../domain/program/week';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 interface Props {
   sets: SetsSummary;
   onPress: () => void;
-  /** Push-ups toward today's 200, shown as the card's lead row. */
-  pushups?: PushupDay;
-  onPushupsPress?: () => void;
+  /** Today's focus, beside the count; a Saturday shows its test. */
+  focus?: DayFocus;
 }
 
-/** Tracks the push-up row stands in for. */
-const PUSH_TRACKS: ReadonlySet<string> = new Set(['push', 'push-variants']);
+interface FocusPart {
+  name: string;
+  color: string;
+}
 
-/** "120 standard · 16 variants · best 18 · 150 planned", skipping zeros. */
-function pushupDetail(p: PushupDay): string {
-  return [
-    `${p.standard} standard`,
-    p.variants > 0 ? `${p.variants} variants` : undefined,
-    p.bestSet > 0 ? `best ${p.bestSet}` : undefined,
-    p.planned > 0 ? `${p.planned} planned` : undefined,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+/** "Power · Mobility · Presence" in element colors, or Saturday's test. */
+function focusParts(focus: DayFocus): FocusPart[] {
+  if (focus.test) {
+    return [{name: focus.test.name, color: ELEMENTS.fire.color}];
+  }
+  return focus.focus.map(id => {
+    const attribute = attributeById(id);
+    return {name: attribute.name, color: ELEMENTS[attribute.element].color};
+  });
 }
 
 /**
- * Daily Sets at a glance: sets done today; push-ups toward 200 as the lead
- * row (tap for the fitness standards); then one small meter per other track
- * (amount done against the day's quota) in its element's color. The header
- * and the meters open the Daily Sets sheet. Each is its own touch target,
- * so the push-up row isn't swallowed by the card.
+ * Daily Sets at a glance: sets done today and today's focus, then one small
+ * meter per track (amount done against the day's quota) in its element's
+ * color. Tap for tracks, max tests, level ups and the fitness standards.
  */
-export function SetsMeters({sets, onPress, pushups, onPushupsPress}: Props) {
-  const fire = ELEMENTS.fire.color;
-  const accent = ELEMENTS.heart.accent;
-  const tracks = pushups
-    ? sets.tracks.filter(tr => !PUSH_TRACKS.has(tr.trackId))
-    : sets.tracks;
-  const detail = pushups ? pushupDetail(pushups) : '';
-  const openLabel =
+export function SetsMeters({sets, onPress, focus}: Props) {
+  const parts = focus ? focusParts(focus) : [];
+  const label = [
     sets.total === 0
-      ? 'Daily Sets, rest day. Open'
-      : `Daily Sets, ${sets.done} of ${sets.total} sets. Open`;
+      ? 'Daily Sets, rest day'
+      : `Daily Sets, ${sets.done} of ${sets.total} sets`,
+    parts.length > 0
+      ? `Today: ${parts.map(p => p.name).join(', ')}`
+      : undefined,
+    'Open',
+  ]
+    .filter(Boolean)
+    .join('. ');
 
   return (
-    <View style={styles.card}>
-      <Tap
-        testID="sets-open"
-        variant="plain"
-        color={accent}
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={openLabel}
-        style={styles.headerTap}>
+    <Tap
+      testID="sets-open"
+      variant="plain"
+      color={ELEMENTS.heart.accent}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={styles.card}>
+      <View style={styles.body}>
         <View style={styles.header}>
           <Text style={styles.title}>
             Daily Sets
@@ -72,68 +72,27 @@ export function SetsMeters({sets, onPress, pushups, onPushupsPress}: Props) {
               </Text>
             )}
           </Text>
+          {parts.length > 0 ? (
+            <Text testID="sets-focus" style={styles.focus} numberOfLines={1}>
+              {parts.flatMap((part, i) => [
+                i > 0 ? (
+                  <Text key={`dot-${part.name}`} style={styles.dot}>
+                    {' · '}
+                  </Text>
+                ) : null,
+                <Text key={part.name} style={{color: part.color}}>
+                  {part.name}
+                </Text>,
+              ])}
+            </Text>
+          ) : (
+            <View style={styles.spacer} />
+          )}
           <Text style={styles.chevron}>›</Text>
         </View>
-      </Tap>
-      {pushups ? (
-        <Tap
-          testID="pushups-open"
-          variant="plain"
-          color={fire}
-          onPress={onPushupsPress ?? onPress}
-          accessibilityRole="button"
-          accessibilityLabel={`Push-ups: ${pushups.total} of ${PUSHUP_GOAL} today, ${detail}. Open standards`}
-          style={styles.hero}>
-          <View style={styles.heroTop}>
-            <MoveIcon move="push" color={fire} size={16} />
-            <Text style={styles.heroLabel}>Push-ups</Text>
-            <View style={styles.spacer} />
-            <Text
-              testID="pushups-count"
-              style={[
-                styles.heroTotal,
-                pushups.total >= PUSHUP_GOAL && {color: fire},
-              ]}>
-              {pushups.total}
-              <Text style={styles.heroGoal}> / {PUSHUP_GOAL}</Text>
-            </Text>
-          </View>
-          <View style={styles.heroBar}>
-            <View
-              style={[
-                styles.heroFill,
-                {
-                  width: `${Math.min(1, pushups.total / PUSHUP_GOAL) * 100}%`,
-                  backgroundColor: fire,
-                },
-              ]}
-            />
-            {pushups.planned > 0 && pushups.planned < PUSHUP_GOAL ? (
-              // Where today's sets add up to.
-              <View
-                style={[
-                  styles.planned,
-                  {left: `${(pushups.planned / PUSHUP_GOAL) * 100}%`},
-                ]}
-              />
-            ) : null}
-          </View>
-          <Text style={styles.heroDetail} numberOfLines={1}>
-            {detail}
-          </Text>
-        </Tap>
-      ) : null}
-      {tracks.length > 0 ? (
-        <Tap
-          testID="sets-meters"
-          variant="plain"
-          color={accent}
-          onPress={onPress}
-          accessibilityRole="button"
-          accessibilityLabel={openLabel}
-          style={styles.gridTap}>
+        {sets.tracks.length > 0 ? (
           <View style={styles.grid}>
-            {tracks.map(tr => {
+            {sets.tracks.map(tr => {
               const color = ELEMENTS[tr.element].color;
               return (
                 <View key={tr.trackId} style={styles.meter}>
@@ -163,29 +122,28 @@ export function SetsMeters({sets, onPress, pushups, onPushupsPress}: Props) {
               );
             })}
           </View>
-        </Tap>
-      ) : null}
-    </View>
+        ) : null}
+      </View>
+    </Tap>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
+    minHeight: 48,
     backgroundColor: palette.surface,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    gap: spacing.xs,
+    paddingVertical: spacing.sm,
   },
-  headerTap: {
-    minHeight: 40,
-    justifyContent: 'center',
-    borderRadius: radius.sm,
+  // Tap wraps its children in one view; the gap lives inside it.
+  body: {
+    gap: spacing.sm,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   title: {
     ...t.caption,
@@ -197,65 +155,20 @@ const styles = StyleSheet.create({
     color: palette.text,
     fontWeight: '700',
   },
-  chevron: {
-    ...t.subtitle,
+  focus: {
+    ...t.caption,
+    flex: 1,
+    textAlign: 'right',
+  },
+  dot: {
     color: palette.textDim,
-  },
-  hero: {
-    minHeight: 48,
-    borderRadius: radius.sm,
-    justifyContent: 'center',
-  },
-  heroTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  heroLabel: {
-    ...t.subtitle,
-    fontSize: 15,
-    color: palette.text,
   },
   spacer: {
     flex: 1,
   },
-  heroTotal: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: palette.text,
-    fontVariant: ['tabular-nums'],
-  },
-  heroGoal: {
-    fontSize: 13,
-    fontWeight: '500',
+  chevron: {
+    ...t.subtitle,
     color: palette.textDim,
-  },
-  heroBar: {
-    height: 5,
-    borderRadius: 3,
-    marginTop: 4,
-    backgroundColor: palette.border,
-    overflow: 'hidden',
-  },
-  heroFill: {
-    height: 5,
-  },
-  planned: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 2,
-    marginLeft: -1,
-    backgroundColor: palette.textDim,
-  },
-  heroDetail: {
-    ...t.caption,
-    color: palette.textDim,
-    marginTop: 3,
-  },
-  gridTap: {
-    borderRadius: radius.sm,
-    paddingVertical: spacing.xs,
   },
   grid: {
     flexDirection: 'row',
