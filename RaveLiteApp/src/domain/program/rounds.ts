@@ -114,7 +114,13 @@ export interface Round {
 
 const orderOf = (id: TrackId) => ROUND_ORDER.indexOf(id);
 
-function moveFor(p: DayPrescription): SetMove {
+/** Moves in round order, so elements alternate and stillness comes last. */
+export function orderMoves(moves: readonly SetMove[]): SetMove[] {
+  return [...moves].sort((a, b) => orderOf(a.trackId) - orderOf(b.trackId));
+}
+
+/** One set of a prescription as a round move; numbered when placed. */
+export function moveFor(p: DayPrescription): SetMove {
   return {
     trackId: p.trackId,
     exerciseId: p.exerciseId,

@@ -12,9 +12,9 @@ import {dayFocus, focusBonus} from './week';
 /**
  * Progression — pure rules for how much work each track asks for today.
  *
- *   Volume  — sets/day climb +1 per build week, and each 4-week block
- *             starts one set higher than the last. Week 4 of every block
- *             is a deload at ~60% of the block's peak.
+ *   Volume  — sets/day follow what gets done (`adapt.ts`): a set more
+ *             after a week at 85%+, a set fewer under 60%. Week 4 of
+ *             every block is a deload at ~60%.
  *   Focus   — a focus day adds one set to its dry track (Mobility,
  *             Stillness or Breath); see `week.ts`.
  *   Load    — set size is ~50% of the tested max. Retesting (best done
@@ -53,17 +53,15 @@ export function phaseForWeek(week: number): Phase {
     : 'build';
 }
 
-/** Sets per day for a track in a given program week. */
-export function setsForWeek(track: Track, week: number): number {
-  const w = Math.max(1, week);
-  const block = Math.floor((w - 1) / BLOCK_WEEKS);
-  const inBlock = (w - 1) % BLOCK_WEEKS;
-  const build = (i: number) =>
-    Math.min(track.maxSets, track.baseSets + block + i);
-  if (inBlock === BLOCK_WEEKS - 1) {
-    return Math.max(2, Math.round(build(BLOCK_WEEKS - 2) * DELOAD_FACTOR));
-  }
-  return build(inBlock);
+/**
+ * Sets a day for a track: what it has earned (see `adapt.ts`), or its week-1
+ * base before its first review; a deload week asks for about 60%.
+ */
+export function setsFor(track: Track, state: TrackState, phase: Phase): number {
+  const earned = Math.min(track.maxSets, state.sets ?? track.baseSets);
+  return phase === 'deload'
+    ? Math.max(2, Math.round(earned * DELOAD_FACTOR))
+    : earned;
 }
 
 /** Per-set amount: ~intensity × max. Holds round to 5 s, minimum 10 s. */
@@ -107,7 +105,10 @@ export function prescribeDay(
     label: rung.label,
     unit: track.unit,
     setSize: setSizeFor(track, state),
-    sets: Math.min(track.maxSets, setsForWeek(track, week) + bonus),
+    sets: Math.min(
+      track.maxSets,
+      setsFor(track, state, phaseForWeek(week)) + bonus,
+    ),
     week,
     phase: phaseForWeek(week),
   };

@@ -1,6 +1,5 @@
 import {EXERCISE_LIBRARY} from '../../exercises/library';
 import {doneFields} from '../../ambient/pulsePayload';
-import {setsForWeek} from '../progression';
 import {defaultProgram, prescriptionsFor} from '../repository';
 import {
   MAX_MOVES_PER_ROUND,
@@ -23,9 +22,13 @@ const monday = prescriptionsFor(defaultProgram(MONDAY), MONDAY);
 const totalSets = (ps: DayPrescription[]) => ps.reduce((s, p) => s + p.sets, 0);
 const trackOf = (id: TrackId) => TRACKS.find(t => t.id === id)!;
 
-/** Monday's tracks at a later program week. */
+/** Monday's tracks after `week - 1` weeks of a set more each week. */
 const mondayInWeek = (week: number): DayPrescription[] =>
-  monday.map(p => ({...p, week, sets: setsForWeek(trackOf(p.trackId), week)}));
+  monday.map(p => ({
+    ...p,
+    week,
+    sets: Math.min(trackOf(p.trackId).maxSets, p.sets + week - 1),
+  }));
 
 describe('track partners', () => {
   it('every partner is a library drill from another element', () => {
@@ -175,6 +178,35 @@ describe('selectUpcomingRounds', () => {
     const r = selectUpcomingRounds({...base, doneByTrack: doneAll});
     expect(r.keep).toEqual([]);
     expect(r.drop).toHaveLength(fires.length);
+  });
+
+  it('rolls sets from a missed round into later rounds, one per round', () => {
+    const r = selectUpcomingRounds({
+      ...base,
+      doneByTrack: {},
+      firedIds: new Set([fires[0].id]),
+    });
+    const moves = r.keep.flatMap(f => f.prescription.moves!);
+    expect(moves).toHaveLength(totalSets(monday));
+    for (const f of r.keep) {
+      const ids = f.prescription.moves!.map(m => m.trackId);
+      expect(new Set(ids).size).toBe(ids.length);
+      expect(ids.length).toBeLessThanOrEqual(MAX_MOVES_PER_ROUND);
+    }
+    for (const p of monday) {
+      expect(
+        moves.filter(m => m.trackId === p.trackId).map(m => m.setIndex),
+      ).toEqual(Array.from({length: p.sets}, (_, i) => i + 1));
+    }
+  });
+
+  it('lets go of what no later round has room for', () => {
+    const late = new Set(fires.slice(0, -1).map(f => f.id));
+    const r = selectUpcomingRounds({...base, doneByTrack: {}, firedIds: late});
+    expect(r.keep).toHaveLength(1);
+    expect(r.keep[0].prescription.moves!.length).toBeLessThanOrEqual(
+      MAX_MOVES_PER_ROUND,
+    );
   });
 
   it('never counts a round that already fired', () => {

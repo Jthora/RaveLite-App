@@ -35,6 +35,8 @@ import {doneByTrack, firedSetIds} from '../program/progress';
 import {
   loadProgram,
   prescriptionsFor,
+  recordPrescribed,
+  reviewProgram,
   subscribeProgram,
 } from '../program/repository';
 import {programWeek} from '../program/progression';
@@ -235,7 +237,11 @@ export function reconcileSetsNow(now: number = Date.now()): void {
     enqueuedDay = day;
     enqueuedIds = new Set();
   }
-  const {upcoming, redundant} = setsToday(now);
+  // Once a day each track's sets move by what got done (`program/adapt.ts`);
+  // today's asks are kept for tomorrow's review.
+  reviewProgram(now);
+  const {upcoming, redundant, prescriptions} = setsToday(now);
+  recordPrescribed(day, prescriptions);
   const waiting = new Map(queuedPulses().map(p => [p.id, p]));
   for (const fire of upcoming) {
     const queued = waiting.get(fire.id);

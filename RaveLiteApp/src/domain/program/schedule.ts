@@ -1,5 +1,11 @@
 import {localDayKey} from '../training/grading';
-import {roundPrescription, type Round} from './rounds';
+import {
+  MAX_MOVES_PER_ROUND,
+  moveFor,
+  orderMoves,
+  roundPrescription,
+  type Round,
+} from './rounds';
 import type {DayPrescription, SetFire, TrackId} from './types';
 
 /**
@@ -119,51 +125,92 @@ export interface SelectResult {
  * filled earliest first, so sets logged ahead of time retire the latest
  * moves; a round left with no moves is dropped. Already-fired rounds are
  * never counted as upcoming.
+ *
+ * Falling behind: sets from rounds that went by undone roll into rounds
+ * still to come, at most one per round for each track and never past a
+ * full round, spread across the rest of the day. What doesn't fit is let
+ * go rather than crammed into one big set; the daily review (`adapt.ts`)
+ * reads the shortfall.
  */
 export function selectUpcomingRounds(input: SelectInput): SelectResult {
   const {fires, prescriptions, doneByTrack, firedIds, now, graceMs} = input;
   const owed = new Map<TrackId, number>();
+  const doneSets = new Map<TrackId, number>();
   for (const p of prescriptions) {
-    const total = p.setSize * p.sets;
+    const size = Math.max(1, p.setSize);
     const done = doneByTrack[p.trackId]?.amount ?? 0;
-    const sets = Math.ceil(Math.max(0, total - done) / Math.max(1, p.setSize));
-    owed.set(p.trackId, sets);
+    owed.set(
+      p.trackId,
+      Math.ceil(Math.max(0, p.setSize * p.sets - done) / size),
+    );
+    doneSets.set(p.trackId, Math.min(p.sets, Math.floor(done / size)));
   }
 
+  // Earliest first, each upcoming round keeps the moves still owed.
+  const rounds = fires
+    .filter(f => !firedIds.has(f.id) && f.ts >= now - graceMs)
+    .sort((a, b) => a.ts - b.ts)
+    .map(fire => ({
+      fire,
+      moves: (fire.prescription.moves ?? []).filter(m => {
+        const left = owed.get(m.trackId) ?? 0;
+        if (left <= 0) {
+          return false;
+        }
+        owed.set(m.trackId, left - 1);
+        return true;
+      }),
+    }));
+
+  // Sets whose rounds went by roll forward into rounds that still chime.
+  for (const p of prescriptions) {
+    const left = owed.get(p.trackId) ?? 0;
+    const hosts = rounds.filter(
+      r =>
+        r.moves.length > 0 &&
+        r.moves.length < MAX_MOVES_PER_ROUND &&
+        !r.moves.some(m => m.trackId === p.trackId),
+    );
+    const count = Math.min(left, hosts.length);
+    for (let k = 0; k < count; k++) {
+      hosts[Math.floor(((k + 0.5) * hosts.length) / count)].moves.push(
+        moveFor(p),
+      );
+    }
+  }
+
+  // Number each track's sets on from those already done, in time order.
+  const numbered = new Map<TrackId, number>();
   const keep: SetFire[] = [];
   const drop: string[] = [];
-  const upcoming = fires
-    .filter(f => !firedIds.has(f.id) && f.ts >= now - graceMs)
-    .sort((a, b) => a.ts - b.ts);
-  for (const fire of upcoming) {
-    const rx = fire.prescription;
-    const all = rx.moves ?? [];
-    const moves = all.filter(m => {
-      const left = owed.get(m.trackId) ?? 0;
-      if (left <= 0) {
-        return false;
-      }
-      owed.set(m.trackId, left - 1);
-      return true;
-    });
+  for (const {fire, moves} of rounds) {
     if (moves.length === 0) {
       drop.push(fire.id);
-    } else if (moves.length === all.length) {
-      keep.push(fire);
-    } else {
-      keep.push({
-        ...fire,
-        element: moves[0].element,
-        exerciseId: moves[0].exerciseId,
-        prescription: roundPrescription(
-          moves,
-          rx.roundIndex ?? 1,
-          rx.rounds ?? 1,
-          rx.partner,
-          rx.water,
-        ),
-      });
+      continue;
     }
+    const ordered = orderMoves(moves).map(m => {
+      const setIndex =
+        (numbered.get(m.trackId) ?? doneSets.get(m.trackId) ?? 0) + 1;
+      numbered.set(m.trackId, setIndex);
+      return {...m, setIndex};
+    });
+    const rx = fire.prescription;
+    if (JSON.stringify(ordered) === JSON.stringify(rx.moves)) {
+      keep.push(fire);
+      continue;
+    }
+    keep.push({
+      ...fire,
+      element: ordered[0].element,
+      exerciseId: ordered[0].exerciseId,
+      prescription: roundPrescription(
+        ordered,
+        rx.roundIndex ?? 1,
+        rx.rounds ?? 1,
+        rx.partner,
+        rx.water,
+      ),
+    });
   }
   return {keep, drop};
 }

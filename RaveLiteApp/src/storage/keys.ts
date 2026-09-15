@@ -56,6 +56,8 @@ export const KEYS = {
   // ── Daily Sets program (spread-out submaximal sets) ──────────────
   /** `ProgramState` JSON — start day and per-track rung + max. */
   programState: 'program.state',
+  /** `{day: {trackId: amount}}` JSON — what each recent day asked, read by the daily review. */
+  programDays: 'program.days',
 
   // ── Weather: sunrise, the forecast, conditions ────────────────────
   /** `Place` JSON — the operator's town, rounded to about 10 km. */

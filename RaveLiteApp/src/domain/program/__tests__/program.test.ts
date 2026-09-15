@@ -10,7 +10,7 @@ import {
   programWeek,
   readyToLevelUp,
   setSizeFor,
-  setsForWeek,
+  setsFor,
 } from '../progression';
 import {doneByTrack, firedSetIds} from '../progress';
 import {
@@ -81,11 +81,12 @@ describe('progression', () => {
     ]);
   });
 
-  it('ramps sets one per build week, deloads, and caps at maxSets', () => {
-    expect([1, 2, 3, 4, 5, 6, 7, 8].map(w => setsForWeek(push, w))).toEqual([
-      4, 5, 6, 4, 5, 6, 7, 4,
-    ]);
-    expect(setsForWeek(push, 200)).toBeLessThanOrEqual(push.maxSets);
+  it('asks for the sets a track has earned, and about 60% on a deload week', () => {
+    const state = {enabled: true, rung: 1, testMax: 20};
+    expect(setsFor(push, state, 'build')).toBe(push.baseSets);
+    expect(setsFor(push, {...state, sets: 10}, 'build')).toBe(10);
+    expect(setsFor(push, {...state, sets: 10}, 'deload')).toBe(6);
+    expect(setsFor(push, {...state, sets: 40}, 'build')).toBe(push.maxSets);
   });
 
   it('sets are about half the tested max', () => {

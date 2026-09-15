@@ -1,9 +1,18 @@
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
-import {append} from '../journal/journal';
+import {append, entriesForDay} from '../journal/journal';
 import {localDayKey} from '../training/grading';
 import {TRACKS, trackById} from './tracks';
-import {applyTest, levelUp, prescribeDay, programWeek} from './progression';
+import {WINDOW_DAYS, reviewTrack, type DayWork} from './adapt';
+import {
+  applyTest,
+  levelUp,
+  phaseForWeek,
+  prescribeDay,
+  programWeek,
+  trainsOn,
+} from './progression';
+import {doneByTrack} from './progress';
 import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
 import {dayFocus, type DayFocus} from './week';
 
@@ -53,7 +62,6 @@ export function saveProgram(program: ProgramState): void {
     try {
       l(program);
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.warn('[program] listener threw', e);
     }
   }
@@ -127,4 +135,106 @@ export function prescriptionsFor(
 export function focusFor(date: Date = new Date()): DayFocus {
   const program = loadProgram(date);
   return dayFocus(date, programWeek(program.startDay, date));
+}
+
+/** Days of asks kept for the daily review. */
+const DAY_HISTORY_DAYS = 35;
+
+type DayHistory = Record<string, Partial<Record<TrackId, number>>>;
+
+function loadDayHistory(): DayHistory {
+  const raw = store.getString(KEYS.programDays);
+  if (!raw) {
+    return {};
+  }
+  try {
+    return JSON.parse(raw) as DayHistory;
+  } catch {
+    return {};
+  }
+}
+
+/** Keep what `day` asked of each track (reps or seconds), for its review. */
+export function recordPrescribed(
+  day: string,
+  prescriptions: readonly DayPrescription[],
+): void {
+  const history = loadDayHistory();
+  const asked = Object.fromEntries(
+    prescriptions.map(p => [p.trackId, p.setSize * p.sets]),
+  );
+  if (JSON.stringify(history[day]) === JSON.stringify(asked)) {
+    return;
+  }
+  const kept = Object.keys(history)
+    .filter(k => k !== day)
+    .sort()
+    .slice(-(DAY_HISTORY_DAYS - 1));
+  const next: DayHistory = Object.fromEntries(kept.map(k => [k, history[k]]));
+  next[day] = asked;
+  store.set(KEYS.programDays, JSON.stringify(next));
+}
+
+/**
+ * Once a day, move each track's sets by what got done over the week before
+ * today (see `adapt.ts`). Reads the journal and each day's recorded asks;
+ * a day with no record counts what the track would have asked. Returns the
+ * program, reviewed.
+ */
+export function reviewProgram(now: number = Date.now()): ProgramState {
+  const date = new Date(now);
+  const program = loadProgram(date);
+  const yesterday = new Date(date);
+  yesterday.setHours(12, 0, 0, 0);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const through = localDayKey(yesterday.getTime());
+  if (
+    program.reviewedThrough !== undefined &&
+    program.reviewedThrough >= through
+  ) {
+    return program;
+  }
+
+  const window: Date[] = [];
+  for (let back = WINDOW_DAYS; back >= 1; back--) {
+    const day = new Date(date);
+    day.setHours(12, 0, 0, 0);
+    day.setDate(day.getDate() - back);
+    if (localDayKey(day.getTime()) >= program.startDay) {
+      window.push(day);
+    }
+  }
+  const history = loadDayHistory();
+  const done = window.map(day => doneByTrack(entriesForDay(day)));
+  const deload =
+    phaseForWeek(programWeek(program.startDay, yesterday)) === 'deload';
+  const today = localDayKey(now);
+
+  const tracks = {...program.tracks};
+  for (const track of TRACKS) {
+    const state = tracks[track.id];
+    if (!state.enabled) {
+      continue;
+    }
+    const days: DayWork[] = window.flatMap((day, i) => {
+      if (!trainsOn(track, day)) {
+        return [];
+      }
+      const key = localDayKey(day.getTime());
+      const would = prescribeDay(track, state, program, day);
+      return [
+        {
+          day: key,
+          prescribed:
+            history[key]?.[track.id] ??
+            (would ? would.setSize * would.sets : 0),
+          done: done[i][track.id]?.amount ?? 0,
+        },
+      ];
+    });
+    tracks[track.id] = reviewTrack({track, state, days, today, deload});
+  }
+  const next: ProgramState = {...program, tracks, reviewedThrough: through};
+  saveProgram(next);
+  return next;
 }

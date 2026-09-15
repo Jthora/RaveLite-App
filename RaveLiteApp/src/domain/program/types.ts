@@ -78,6 +78,26 @@ export interface Track {
   partners: TrackPartner[];
 }
 
+export type ReviewChange =
+  | 'new'
+  | 'up'
+  | 'hold'
+  | 'top'
+  | 'down'
+  | 'rebuild'
+  | 'deload';
+
+/** A track's daily look back at the last week (see `adapt.ts`). */
+export interface TrackReview {
+  /** Local YYYY-MM-DD the review ran. */
+  day: string;
+  /** Done ÷ asked over the track's training days in the last week. */
+  ratio?: number;
+  change: ReviewChange;
+  /** Sets a day after the review. */
+  sets: number;
+}
+
 export interface TrackState {
   enabled: boolean;
   rung: number;
@@ -85,6 +105,13 @@ export interface TrackState {
   testMax: number;
   /** Epoch ms of the last max test on this rung; unset = assumed max. */
   testedAt?: number;
+  /** Sets a day the track has earned; the week-1 base until its first review. */
+  sets?: number;
+  /** Sets a day before a break, while climbing back to them. */
+  peakSets?: number;
+  /** Local YYYY-MM-DD of the last step up or down. */
+  steppedOn?: string;
+  lastReview?: TrackReview;
 }
 
 /** Rounds spread across My day (the ambient active hours), not a window of their own. */
@@ -93,6 +120,8 @@ export interface ProgramState {
   /** Local YYYY-MM-DD — day 1 of week 1. */
   startDay: string;
   tracks: Record<TrackId, TrackState>;
+  /** Local YYYY-MM-DD through which the daily reviews have run. */
+  reviewedThrough?: string;
 }
 
 export type Phase = 'build' | 'deload';
