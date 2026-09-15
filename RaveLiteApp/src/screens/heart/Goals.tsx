@@ -1,8 +1,9 @@
 /**
  * Goals — today's push-ups, the military fitness tests the operator trains
  * toward (a B+ on the Space Force, Air Force and Marine tests), then goals
- * for Air, Core, Earth and Water on RaveLite's own marks. Opened from the
- * Daily Sets page.
+ * for Air, Core, Earth and Water on RaveLite's own marks. Shown inside the
+ * Daily Sets page rather than as a sheet of its own: on Android, Back stops
+ * reaching a sheet opened over another once it has been touched.
  *
  * Each goal shows its target (the operator's own, or a B+), the best result
  * from the Train log with its grade and a bar toward the target, its D−, B+
@@ -16,7 +17,6 @@
  */
 import React, {useEffect, useMemo, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {Tap} from '../../components/Tap';
 import {NumberPad} from '../../components/training/NumberPad';
@@ -63,11 +63,6 @@ import {
 } from '../../domain/training/repository';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
-
-interface Props {
-  visible: boolean;
-  onClose: () => void;
-}
 
 const LETTER: Record<Sex, string> = {male: 'M', female: 'F'};
 
@@ -163,7 +158,7 @@ function projectionLine(row: GoalRow): string | undefined {
   }
 }
 
-export function GoalsSheet({visible, onClose}: Props) {
+export function Goals() {
   const [version, setVersion] = useState(0);
   const [logKindId, setLogKindId] = useState<string | undefined>();
   const [editing, setEditing] = useState<StandardEvent | undefined>();
@@ -213,142 +208,129 @@ export function GoalsSheet({visible, onClose}: Props) {
       rows,
       ramp: pushupRamp(program, now),
     };
-    // `version` and `visible` are the rebuild triggers; reads go to storage.
+    // `version` is the rebuild trigger; reads go to storage.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [version, visible]);
+  }, [version]);
 
   const {pushups, ramp} = view;
   // Today's sets are the day's target; 200 a day is where the ramp leads.
   const dayTarget = pushups.planned > 0 ? pushups.planned : PUSHUP_GOAL;
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-        <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>Goals</Text>
-          <Tap
-            variant="plain"
-            onPress={onClose}
-            accessibilityRole="button"
-            style={styles.close}>
-            <Text style={styles.closeText}>Close</Text>
-          </Tap>
-        </View>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.card}>
-            <Text style={styles.eyebrow}>PUSH-UPS TODAY</Text>
-            <Text style={styles.big}>
-              {pushups.total}
-              <Text style={styles.bigGoal}>
-                {' '}
-                / {dayTarget}
-                {pushups.planned > 0 ? ' today' : ''}
-              </Text>
+    <>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.card}>
+          <Text style={styles.eyebrow}>PUSH-UPS TODAY</Text>
+          <Text style={styles.big}>
+            {pushups.total}
+            <Text style={styles.bigGoal}>
+              {' '}
+              / {dayTarget}
+              {pushups.planned > 0 ? ' today' : ''}
             </Text>
-            <View style={styles.bar}>
-              <View
-                style={[
-                  styles.fill,
-                  {
-                    width: `${Math.min(1, pushups.total / dayTarget) * 100}%`,
-                    backgroundColor: fire,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={styles.caption}>
-              {pushups.standard} standard · {pushups.variants} variants
-              {pushups.bestSet > 0 ? ` · best set ${pushups.bestSet}` : ''}
-            </Text>
-            <Text style={styles.caption}>
-              {pushups.planned > 0
-                ? `Today's sets add up to ${pushups.planned}. They grow as you keep up with them and your tested max rises, toward ${PUSHUP_GOAL} a day.`
-                : `The long-term goal is ${PUSHUP_GOAL} a day.`}
-            </Text>
-            <Text testID="pushups-ramp" style={styles.projection}>
-              {rampLine(ramp)}
-            </Text>
+          </Text>
+          <View style={styles.bar}>
+            <View
+              style={[
+                styles.fill,
+                {
+                  width: `${Math.min(1, pushups.total / dayTarget) * 100}%`,
+                  backgroundColor: fire,
+                },
+              ]}
+            />
           </View>
+          <Text style={styles.caption}>
+            {pushups.standard} standard · {pushups.variants} variants
+            {pushups.bestSet > 0 ? ` · best set ${pushups.bestSet}` : ''}
+          </Text>
+          <Text style={styles.caption}>
+            {pushups.planned > 0
+              ? `Today's sets add up to ${pushups.planned}. They grow as you keep up with them and your tested max rises, toward ${PUSHUP_GOAL} a day.`
+              : `The long-term goal is ${PUSHUP_GOAL} a day.`}
+          </Text>
+          <Text testID="pushups-ramp" style={styles.projection}>
+            {rampLine(ramp)}
+          </Text>
+        </View>
 
-          {GOAL_GROUPS.map((group, index) => (
-            <View key={group} testID={`goals-${group}`} style={styles.section}>
-              <Text style={[styles.sectionTitle, {color: groupColor(group)}]}>
-                {groupTitle(group)}
-              </Text>
-              {group === 'tests' ? (
-                <>
-                  <View style={styles.tableRow}>
-                    {(['male', 'female'] as const).map(sex => {
-                      const on = view.sex === sex;
-                      return (
-                        <Tap
-                          key={sex}
-                          testID={`table-${sex}`}
-                          variant="ghost"
-                          color={on ? accent : palette.textDim}
-                          onPress={() => {
-                            setPrimarySex(sex);
-                            bump();
-                          }}
-                          accessibilityRole="radio"
-                          accessibilityState={{selected: on}}
-                          style={styles.pill}>
-                          <Text
-                            style={[styles.pillText, on && {color: accent}]}>
-                            {sex === 'male' ? 'Male first' : 'Female first'}
-                          </Text>
-                        </Tap>
-                      );
-                    })}
-                  </View>
-                  <Text style={styles.note}>{STANDARDS_NOTE}</Text>
-                </>
-              ) : index === 1 ? (
-                <Text style={styles.note}>{MARKS_NOTE}</Text>
-              ) : null}
-              {view.rows
-                .filter(row => row.event.group === group)
-                .map(row => (
-                  <GoalCard
-                    key={row.event.id}
-                    row={row}
-                    sex={view.sex}
-                    onEdit={() => setEditing(row.event)}
-                    onLog={
-                      row.event.kindId
-                        ? () => setLogKindId(row.event.kindId)
-                        : undefined
-                    }
-                  />
-                ))}
-            </View>
-          ))}
-        </ScrollView>
+        {GOAL_GROUPS.map((group, index) => (
+          <View key={group} testID={`goals-${group}`} style={styles.section}>
+            <Text style={[styles.sectionTitle, {color: groupColor(group)}]}>
+              {groupTitle(group)}
+            </Text>
+            {group === 'tests' ? (
+              <>
+                <View style={styles.tableRow}>
+                  {(['male', 'female'] as const).map(sex => {
+                    const on = view.sex === sex;
+                    return (
+                      <Tap
+                        key={sex}
+                        testID={`table-${sex}`}
+                        variant="ghost"
+                        color={on ? accent : palette.textDim}
+                        onPress={() => {
+                          setPrimarySex(sex);
+                          bump();
+                        }}
+                        accessibilityRole="radio"
+                        accessibilityState={{selected: on}}
+                        style={styles.pill}>
+                        <Text style={[styles.pillText, on && {color: accent}]}>
+                          {sex === 'male' ? 'Male first' : 'Female first'}
+                        </Text>
+                      </Tap>
+                    );
+                  })}
+                </View>
+                <Text style={styles.note}>{STANDARDS_NOTE}</Text>
+              </>
+            ) : index === 1 ? (
+              <Text style={styles.note}>{MARKS_NOTE}</Text>
+            ) : null}
+            {view.rows
+              .filter(row => row.event.group === group)
+              .map(row => (
+                <GoalCard
+                  key={row.event.id}
+                  row={row}
+                  sex={view.sex}
+                  onEdit={() => setEditing(row.event)}
+                  onLog={
+                    row.event.kindId
+                      ? () => setLogKindId(row.event.kindId)
+                      : undefined
+                  }
+                />
+              ))}
+          </View>
+        ))}
+      </ScrollView>
 
-        <TargetEditor
-          event={editing}
-          sex={view.sex}
-          onClose={() => setEditing(undefined)}
-          onSave={value => {
-            if (editing) {
-              setTarget(editing.id, value);
-            }
-            setEditing(undefined);
-            bump();
-          }}
-        />
-        <TrainingLogSheet
-          visible={logKindId !== undefined}
-          defaultKindId={logKindId}
-          onClose={() => {
-            setLogKindId(undefined);
-            bump();
-          }}
-        />
-      </SafeAreaView>
-    </Modal>
+      <TargetEditor
+        event={editing}
+        sex={view.sex}
+        onClose={() => setEditing(undefined)}
+        onSave={value => {
+          if (editing) {
+            setTarget(editing.id, value);
+          }
+          setEditing(undefined);
+          bump();
+        }}
+      />
+      <TrainingLogSheet
+        visible={logKindId !== undefined}
+        defaultKindId={logKindId}
+        onClose={() => {
+          setLogKindId(undefined);
+          bump();
+        }}
+      />
+    </>
   );
 }
 
@@ -547,30 +529,6 @@ function TargetEditor({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: palette.bg,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  title: {
-    ...t.title,
-  },
-  close: {
-    minHeight: 48,
-    minWidth: 64,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeText: {
-    ...t.subtitle,
-    color: palette.textDim,
-  },
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,

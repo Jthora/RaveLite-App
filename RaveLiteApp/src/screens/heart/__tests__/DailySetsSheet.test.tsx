@@ -1,25 +1,33 @@
 import React from 'react';
+import {Modal} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
 
 import {store} from '../../../storage';
 import {DailySetsSheet} from '../DailySetsSheet';
-import {GoalsSheet} from '../GoalsSheet';
+import {Goals} from '../Goals';
 
 beforeEach(() => store.clearAll());
 
-it('opens Goals', () => {
+it('shows Goals in the same sheet; Back returns to Daily Sets, then closes', () => {
+  const onClose = jest.fn();
   let tree: renderer.ReactTestRenderer | undefined;
   act(() => {
-    tree = renderer.create(<DailySetsSheet visible onClose={() => {}} />);
+    tree = renderer.create(<DailySetsSheet visible onClose={onClose} />);
   });
-  const goals = () => tree!.root.findByType(GoalsSheet);
-  expect(goals().props.visible).toBe(false);
+  const goalsShown = () => tree!.root.findAllByType(Goals).length > 0;
+  const back = () => tree!.root.findAllByType(Modal)[0].props.onRequestClose();
+  expect(goalsShown()).toBe(false);
   act(() => {
     tree!.root
       .findAll(node => node.props.testID === 'goals-open')[0]
       .props.onPress();
   });
-  expect(goals().props.visible).toBe(true);
+  expect(goalsShown()).toBe(true);
+  act(() => back());
+  expect(goalsShown()).toBe(false);
+  expect(onClose).not.toHaveBeenCalled();
+  act(() => back());
+  expect(onClose).toHaveBeenCalledTimes(1);
   act(() => tree!.unmount());
 });
 

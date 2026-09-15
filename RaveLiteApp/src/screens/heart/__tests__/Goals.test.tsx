@@ -4,14 +4,14 @@ import renderer, {act} from 'react-test-renderer';
 import {store} from '../../../storage';
 import {addEntry} from '../../../domain/training/repository';
 import {ELEMENTS} from '../../../theme/elements';
-import {GoalsSheet} from '../GoalsSheet';
+import {Goals} from '../Goals';
 
 beforeEach(() => store.clearAll());
 
 function render() {
   let tree: renderer.ReactTestRenderer | undefined;
   act(() => {
-    tree = renderer.create(<GoalsSheet visible onClose={() => {}} />);
+    tree = renderer.create(<Goals />);
   });
   return tree!;
 }
