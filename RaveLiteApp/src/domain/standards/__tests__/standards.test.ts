@@ -6,12 +6,15 @@ import {
   STANDARD_EVENTS,
   bestResult,
   formatGrades,
+  getHeightInches,
   getPrimarySex,
   goalFor,
   gradeOn,
   gradesFor,
   hasOwnTarget,
   progressToward,
+  resultsFor,
+  setHeightInches,
   setPrimarySex,
   setTarget,
   targetFor,
@@ -94,6 +97,7 @@ it('targets the hardest B+ of every test that uses the event', () => {
     'cft-mtc': undefined,
     'cft-acl': undefined,
     'cft-manuf': undefined,
+    'waist-height': undefined,
   });
   // The combat fitness test has no published minimum: its top score.
   expect(targetFor(event('cft-acl'))).toBe(110);
@@ -121,6 +125,23 @@ it('grades element goals on RaveLite marks, aiming for a B+', () => {
     'staff-flow': 890,
   });
   expect(formatGrades(gradesFor(event('squats'), 'male', 40))).toBe('C−');
+});
+
+it('turns waist into waist-to-height once the height is set', () => {
+  const waist = event('waist-height');
+  const entries = [
+    {id: 'w1', at: 1, kindId: 'builtin.waist', value: 36},
+    {id: 'w2', at: 2, kindId: 'builtin.waist', value: 35},
+  ];
+  expect(getHeightInches()).toBeUndefined();
+  expect(resultsFor(waist, entries, metricFor)).toEqual([]);
+  setHeightInches(70);
+  const height = getHeightInches();
+  expect(bestResult(waist, entries, metricFor, height)).toEqual({
+    value: 0.5,
+    at: 2,
+  });
+  expect(targetFor(waist)).toBe(0.49);
 });
 
 it('names the grade on each test, grouping tests that agree', () => {

@@ -131,7 +131,8 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
           setValueReps(0);
           break;
         case 'decimal':
-          setValueReps(editing.value);
+          // The pad works in hundredths: 36.5 in is 3650.
+          setValueReps(Math.round(editing.value * 100));
           break;
       }
     } else {
@@ -161,7 +162,9 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
     const value =
       selectedKind.inputMode === 'mmss' || selectedKind.inputMode === 'distance-time'
         ? valueSec
-        : valueReps;
+        : selectedKind.inputMode === 'decimal'
+          ? valueReps / 100
+          : valueReps;
     const distanceMeters =
       selectedKind.inputMode !== 'distance-time'
         ? undefined
@@ -524,7 +527,8 @@ function ValueInput({
     case 'integer':
       return <NumberPad mode="integer" value={valueReps} onChange={onReps} accent={accent} max={999} compact />;
     case 'decimal':
-      return <NumberPad mode="integer" value={valueReps} onChange={onReps} accent={accent} max={9999} compact />;
+      // Hundredths, e.g. a waist of 36.50 in.
+      return <NumberPad mode="decimal-2dp" value={valueReps} onChange={onReps} accent={accent} compact />;
     case 'distance-time': {
       const hasFixed = !!kind.defaultDistanceMeters;
       return (

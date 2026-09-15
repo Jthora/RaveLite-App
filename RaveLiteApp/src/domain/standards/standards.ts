@@ -64,7 +64,7 @@ export interface StandardEvent {
   /** Under the name: which tests use it, or which attributes it trains. */
   subtitle: string;
   group: GoalGroup;
-  unit: 'reps' | 'seconds' | 'percent';
+  unit: 'reps' | 'seconds' | 'percent' | 'ratio';
   /** A higher count or a lower time scores better. */
   better: 'higher' | 'lower';
   /** The best top score among its tests, ages 35–40. */
@@ -75,6 +75,10 @@ export interface StandardEvent {
   kindId?: string;
   /** For runs: longer runs count at the same pace. */
   distanceMeters?: number;
+  /** Results are the logged value divided by the operator's height. */
+  perHeight?: boolean;
+  /** Under a default target, in place of "B+ goal" or the top scores. */
+  targetCaption?: string;
   note?: string;
 }
 
@@ -247,6 +251,19 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     better: 'lower',
     top: both(173),
     kindId: 'builtin.cft-manuf',
+  },
+  {
+    id: 'waist-height',
+    name: 'Waist-to-height',
+    group: 'tests',
+    subtitle: 'USAF · USSF',
+    unit: 'ratio',
+    better: 'lower',
+    top: both(0.49),
+    kindId: 'builtin.waist',
+    perHeight: true,
+    targetCaption: 'USAF full points',
+    note: 'Waist ÷ height. The Air Force gives full points at 0.49 or under; the Space Force measures it without scoring.',
   },
 
   // ── Air ──
@@ -569,6 +586,22 @@ export function setTarget(eventId: string, value: number | undefined): void {
   store.set(KEYS.standardsTargets, JSON.stringify(targets));
 }
 
+const HEIGHT_KEY = KEYS.setting('body.heightInches');
+
+/** The operator's height in inches, for waist-to-height; unset until entered. */
+export function getHeightInches(): number | undefined {
+  const inches = store.getNumber(HEIGHT_KEY);
+  return typeof inches === 'number' && inches > 0 ? inches : undefined;
+}
+
+export function setHeightInches(inches: number | undefined): void {
+  if (inches === undefined) {
+    store.delete(HEIGHT_KEY);
+  } else {
+    store.set(HEIGHT_KEY, inches);
+  }
+}
+
 // ── Results ──────────────────────────────────────────────────────────
 
 export interface StandardResult {
@@ -586,9 +619,19 @@ export function resultsFor(
   event: StandardEvent,
   entries: readonly TrainingLogEntry[],
   metricFor: (kindId: string) => MetricKind | undefined,
+  heightInches?: number,
 ): StandardResult[] {
   if (!event.kindId) {
     return [];
+  }
+  if (event.perHeight) {
+    const kindId = event.kindId;
+    return heightInches
+      ? entries
+          .filter(e => e.kindId === kindId && e.value > 0)
+          .map(e => ({value: e.value / heightInches, at: e.at}))
+          .sort((a, b) => a.at - b.at)
+      : [];
   }
   const out: StandardResult[] = [];
   for (const entry of entries) {
@@ -628,9 +671,10 @@ export function bestResult(
   event: StandardEvent,
   entries: readonly TrainingLogEntry[],
   metricFor: (kindId: string) => MetricKind | undefined,
+  heightInches?: number,
 ): StandardResult | undefined {
   let best: StandardResult | undefined;
-  for (const result of resultsFor(event, entries, metricFor)) {
+  for (const result of resultsFor(event, entries, metricFor, heightInches)) {
     const better =
       !best ||
       (event.better === 'higher'

@@ -45,6 +45,7 @@ import {
   TEST_NAMES,
   bestResult,
   formatGrades,
+  getHeightInches,
   getPrimarySex,
   goalFor,
   gradesFor,
@@ -52,6 +53,7 @@ import {
   markFor,
   progressToward,
   resultsFor,
+  setHeightInches,
   setPrimarySex,
   setTarget,
   targetFor,
@@ -78,6 +80,8 @@ const formatValue = (event: StandardEvent, value: number) =>
     ? formatDuration(value)
     : event.unit === 'percent'
     ? `${Math.round(value)}%`
+    : event.unit === 'ratio'
+    ? value.toFixed(2)
     : String(Math.round(value));
 
 const shortDate = (at: number) =>
@@ -169,6 +173,7 @@ export function Goals() {
   const [version, setVersion] = useState(0);
   const [logKindId, setLogKindId] = useState<string | undefined>();
   const [editing, setEditing] = useState<StandardEvent | undefined>();
+  const [heightOpen, setHeightOpen] = useState(false);
   const bump = () => setVersion(v => v + 1);
   useEffect(() => subscribeActivity(bump), []);
   useEffect(() => subscribeTrainingLog(bump), []);
@@ -183,11 +188,12 @@ export function Goals() {
     const sex = getPrimarySex();
     const program = loadProgram(new Date(now));
     const done = lastWeekDone(Object.values(program.tracks));
+    const height = getHeightInches();
     const rows: GoalRow[] = STANDARD_EVENTS.map(event => {
       const target = targetFor(event);
       // The one goal without a Train kind is measured from Daily Sets.
       const result = event.kindId
-        ? bestResult(event, entries, getMetric)
+        ? bestResult(event, entries, getMetric, height)
         : done !== undefined
         ? {value: Math.round(done * 100), at: now}
         : undefined;
@@ -200,7 +206,7 @@ export function Goals() {
         progress: result ? progressToward(event, result.value, target) : 0,
         projection: projectGoal(
           event,
-          resultsFor(event, entries, getMetric),
+          resultsFor(event, entries, getMetric, height),
           target,
           now,
         ),
@@ -212,6 +218,7 @@ export function Goals() {
       sex,
       pushups: pushupDay(today, setsToday(now).prescriptions),
       rows,
+      height,
       ramp: pushupRamp(program, now),
       active: {
         today: activeMinutes(today),
@@ -340,6 +347,8 @@ export function Goals() {
                   row={row}
                   sex={view.sex}
                   onEdit={() => setEditing(row.event)}
+                  height={view.height}
+                  onHeight={() => setHeightOpen(true)}
                   onLog={
                     row.event.kindId
                       ? () => setLogKindId(row.event.kindId)
@@ -363,6 +372,15 @@ export function Goals() {
           bump();
         }}
       />
+      <HeightEditor
+        visible={heightOpen}
+        onClose={() => setHeightOpen(false)}
+        onSave={inches => {
+          setHeightInches(inches);
+          setHeightOpen(false);
+          bump();
+        }}
+      />
       <TrainingLogSheet
         visible={logKindId !== undefined}
         defaultKindId={logKindId}
@@ -381,12 +399,17 @@ function GoalCard({
   sex,
   onEdit,
   onLog,
+  height,
+  onHeight,
 }: {
   row: GoalRow;
   sex: Sex;
   onEdit: () => void;
   /** Unset for a goal the app measures itself. */
   onLog?: () => void;
+  /** The operator's height in inches, for a per-height goal. */
+  height?: number;
+  onHeight?: () => void;
 }) {
   const {event, target, own, result, grades, progress} = row;
   const projection = measured(event) ? undefined : projectionLine(row);
@@ -406,6 +429,8 @@ function GoalCard({
         .join(' · ')
     : isMeasured
     ? 'After a week of Daily Sets'
+    : event.perHeight && !height
+    ? 'Set your height to see the ratio'
     : 'No test yet';
 
   return (
@@ -431,9 +456,8 @@ function GoalCard({
             <Text style={styles.caption}>
               {own
                 ? 'your target'
-                : event.scales
-                ? 'B+ goal'
-                : topScores(event, sex)}
+                : event.targetCaption ??
+                  (event.scales ? 'B+ goal' : topScores(event, sex))}
             </Text>
           </View>
         </Tap>
@@ -472,10 +496,23 @@ function GoalCard({
           {scaleLine(event, scale, sex)}
         </Text>
       ))}
-      {own && !event.scales ? (
+      {own && !event.scales && !event.targetCaption ? (
         <Text style={styles.caption}>Top score {topScores(event, sex)}</Text>
       ) : null}
       {event.note ? <Text style={styles.caption}>{event.note}</Text> : null}
+      {event.perHeight && onHeight ? (
+        <Tap
+          testID="height-open"
+          variant="plain"
+          color={accent}
+          onPress={onHeight}
+          accessibilityRole="button"
+          style={styles.heightTap}>
+          <Text style={[styles.caption, {color: accent}]}>
+            {height ? `Height ${height} in · change` : 'Set your height'}
+          </Text>
+        </Tap>
+      ) : null}
     </View>
   );
 }
@@ -496,7 +533,12 @@ function TargetEditor({
   const [value, setValue] = useState(0);
   useEffect(() => {
     if (event) {
-      setValue(targetFor(event));
+      // Ratios work in hundredths on the pad: 0.49 is 49.
+      setValue(
+        event.unit === 'ratio'
+          ? Math.round(targetFor(event) * 100)
+          : targetFor(event),
+      );
     }
   }, [event]);
   if (!event) {
@@ -526,7 +568,13 @@ function TargetEditor({
           </Text>
           <Text style={styles.caption}>{caption}</Text>
           <NumberPad
-            mode={event.unit === 'seconds' ? 'mmss' : 'integer'}
+            mode={
+              event.unit === 'seconds'
+                ? 'mmss'
+                : event.unit === 'ratio'
+                ? 'decimal-2dp'
+                : 'integer'
+            }
             value={value}
             onChange={setValue}
             accent={accent}
@@ -557,7 +605,77 @@ function TargetEditor({
               testID="target-save"
               variant="solid"
               color={accent}
-              onPress={() => onSave(value > 0 ? value : undefined)}
+              onPress={() =>
+                onSave(
+                  value > 0
+                    ? event.unit === 'ratio'
+                      ? value / 100
+                      : value
+                    : undefined,
+                )
+              }
+              accessibilityRole="button"
+              style={styles.editorBtn}>
+              <Text style={styles.saveText}>Save</Text>
+            </Tap>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+/** The operator's height in inches, for waist-to-height. */
+function HeightEditor({
+  visible,
+  onClose,
+  onSave,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onSave: (inches: number) => void;
+}) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (visible) {
+      setValue(getHeightInches() ?? 0);
+    }
+  }, [visible]);
+  if (!visible) {
+    return null;
+  }
+  const accent = ELEMENTS.heart.accent;
+  const valid = value >= 36;
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.scrim}>
+        <View style={[styles.editor, {borderColor: accent}]}>
+          <Text style={[styles.editorTitle, {color: accent}]}>Your height</Text>
+          <Text style={styles.caption}>
+            In inches, for waist-to-height: 5 ft 10 in is 70.
+          </Text>
+          <NumberPad
+            mode="integer"
+            value={value}
+            onChange={setValue}
+            accent={accent}
+            compact
+          />
+          <View style={styles.editorActions}>
+            <Tap
+              variant="ghost"
+              color={palette.textDim}
+              onPress={onClose}
+              accessibilityRole="button"
+              style={styles.editorBtn}>
+              <Text style={styles.pillText}>Cancel</Text>
+            </Tap>
+            <Tap
+              testID="height-save"
+              variant="solid"
+              color={valid ? accent : palette.textMuted}
+              disabled={!valid}
+              onPress={() => onSave(value)}
               accessibilityRole="button"
               style={styles.editorBtn}>
               <Text style={styles.saveText}>Save</Text>
@@ -570,6 +688,11 @@ function TargetEditor({
 }
 
 const styles = StyleSheet.create({
+  heightTap: {
+    minHeight: 44,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,

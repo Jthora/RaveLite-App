@@ -2,6 +2,7 @@ import React from 'react';
 import renderer, {act} from 'react-test-renderer';
 
 import {store} from '../../../storage';
+import {setHeightInches} from '../../../domain/standards/standards';
 import {addEntry} from '../../../domain/training/repository';
 import {ELEMENTS} from '../../../theme/elements';
 import {Goals} from '../Goals';
@@ -86,4 +87,21 @@ it('dates a goal from two tests a week or more apart, and says how soon push-ups
   expect(json).toContain('top out at 84 a day');
   expect(json).toContain('a tested max of 29 reaches 200');
   act(() => tree.unmount());
+});
+
+it('asks for a height, then shows waist-to-height from the waist logged', () => {
+  const tree = render();
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'Set your height to see the ratio',
+  );
+  act(() => tree.unmount());
+
+  setHeightInches(70);
+  addEntry({at: Date.now(), kindId: 'builtin.waist', value: 35});
+  const again = render();
+  const json = JSON.stringify(again.toJSON());
+  expect(json).toContain('Best 0.50');
+  expect(json).toContain('USAF full points');
+  expect(json).toContain('Height 70 in · change');
+  act(() => again.unmount());
 });

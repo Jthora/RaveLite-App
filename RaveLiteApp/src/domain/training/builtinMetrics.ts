@@ -447,6 +447,19 @@ export const BUILTIN_METRICS: MetricKind[] = [
     element: 'fire',
     notes: 'Low-ceiling, no-jump cardio played on your other device.',
   },
+
+  // ─── BODY — measurements ─────────────────────────────────────────────
+  {
+    id: 'builtin.waist',
+    label: 'Waist (inches)',
+    category: 'custom',
+    unit: 'misc',
+    inputMode: 'decimal',
+    builtIn: true,
+    element: 'earth',
+    notes:
+      'Around the navel, relaxed, after a normal breath out. Goals turns it into waist-to-height.',
+  },
 ];
 
 export function builtinById(id: string): MetricKind | undefined {
