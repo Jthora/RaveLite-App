@@ -99,8 +99,7 @@ Top to bottom, one scroll:
 
 ## Sheets
 
-- **Settings** (the bottom of Today; a yellow dot when notifications are
-  off or a Stay alive check warns) — My day, pause
+- **Settings** (the bottom of Today) — My day, pause
   chimes (30 min, 2 hours, till morning, or resume), Weather & place (it
   asks for a place until one is set), chime volumes with a test per element
   and Respect DND, the Stay alive checklist, the plan editor, restoring a

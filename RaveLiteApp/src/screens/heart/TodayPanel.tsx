@@ -8,8 +8,8 @@
  * Settings, Daily Sets in full, logging a session and practice open as
  * sheets, so the page itself stays a glance.
  */
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {AppState, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {useCallback, useMemo, useState} from 'react';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Settings} from 'lucide-react-native';
 
 import {Tap} from '../../components/Tap';
@@ -26,10 +26,6 @@ import {WaterCounter} from '../../components/today/WaterCounter';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {takeBack} from '../../domain/activity/corrections';
 import {logWaterGlass} from '../../domain/activity/record';
-import {
-  gatherHealthInputs,
-  summarizeHealth,
-} from '../../domain/ambient/healthChecks';
 import {logMissedChime} from '../../domain/ambient/lateDone';
 import {setPause} from '../../domain/ambient/pause';
 import {
@@ -62,44 +58,8 @@ interface Props {
   onEngageLegs: (legs: CircuitLeg[]) => void;
 }
 
-/**
- * How many Stay alive checks warn, re-read when the app comes back to the
- * front (after a trip to system settings) or on demand.
- */
-function useHealthWarnings(): [number, () => void] {
-  const [warnings, setWarnings] = useState(0);
-  const [asked, setAsked] = useState(0);
-  const recheck = useCallback(() => setAsked(n => n + 1), []);
-
-  useEffect(() => {
-    let live = true;
-    gatherHealthInputs()
-      .then(inputs => {
-        if (live) {
-          setWarnings(summarizeHealth(inputs).warnings);
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      live = false;
-    };
-  }, [asked]);
-
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', state => {
-      if (state === 'active') {
-        recheck();
-      }
-    });
-    return () => sub.remove();
-  }, [recheck]);
-
-  return [warnings, recheck];
-}
-
 export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const model = useTodayModel();
-  const [warnings, recheckHealth] = useHealthWarnings();
   const [logOpen, setLogOpen] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
   const [practiceOpen, setPracticeOpen] = useState(false);
@@ -112,7 +72,6 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [logged, setLogged] = useState<DayRow | undefined>();
   const [catchUpOpen, setCatchUpOpen] = useState(false);
   const next = model.next;
-  const settingsAlert = permission === 'denied' || warnings > 0;
 
   // Sealing writes the completion; the sets scheduler trims later rounds
   // from the journal on its own.
@@ -277,14 +236,11 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             color={palette.textDim}
             onPress={() => setSettingsOpen(true)}
             accessibilityRole="button"
-            accessibilityLabel={
-              settingsAlert ? 'Settings, something needs attention' : 'Settings'
-            }
+            accessibilityLabel="Settings"
             style={styles.link}>
             <View style={styles.linkRow}>
               <Settings size={14} color={palette.textDim} strokeWidth={2} />
               <Text style={styles.linkText}>Settings</Text>
-              {settingsAlert ? <View style={styles.alert} /> : null}
             </View>
           </Tap>
         </View>
@@ -314,7 +270,6 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           permission={permission}
           onClose={() => {
             setSettingsOpen(false);
-            recheckHealth();
           }}
         />
         <DailySetsSheet visible={setsOpen} onClose={() => setSetsOpen(false)} />
@@ -406,11 +361,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  alert: {
-    width: 6,
-    height: 6,
-    borderRadius: 4,
-    backgroundColor: '#FFD60A',
   },
 });
