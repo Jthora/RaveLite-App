@@ -1,9 +1,9 @@
 /**
  * ElementGlyph — an element's mark, tinted by the caller: its Unicode glyph,
- * or for the white Core themes an SVG shape on a 100-unit grid.
+ * or for some Core themes an SVG shape on a 100-unit grid.
  *
- *   star5      a regular five-pointed star (Star)
- *   star6      a six-pointed star (Æther)
+ *   star5      a regular five-pointed star, drawn in lines (Star)
+ *   star6      a six-pointed star, drawn in lines (Æther)
  *   commander  the Star Commander mark: a regular five-pointed star whose
  *              lower legs are cut into two chevrons. The line under the
  *              star's body runs through its two lower inner corners, and
@@ -26,6 +26,13 @@ const STAR5_INNER = 0.381966;
 /** A star's lower legs meet the ground at 36°. */
 const LEG_SLOPE = Math.tan(36 * DEG);
 const STAR6_INNER = 0.5;
+/** Marks drawn as an outline rather than filled. */
+const OUTLINED: ReadonlySet<GlyphIconId> = new Set<GlyphIconId>([
+  'star5',
+  'star6',
+]);
+/** Line weight on the 100-unit grid, close to a Lucide icon's. */
+const LINE_WIDTH = 7;
 
 const at = (x: number, y: number): Point => [x, y];
 const polar = (cx: number, cy: number, radius: number, deg: number): Point =>
@@ -147,6 +154,20 @@ export const ElementGlyph = memo(function ElementGlyph({
   style,
 }: Props) {
   if (element.icon) {
+    if (OUTLINED.has(element.icon)) {
+      // A little margin so the line's outer half isn't clipped at the points.
+      return (
+        <Svg width={size} height={size} viewBox="-5 -5 110 110">
+          <Path
+            d={GLYPH_PATHS[element.icon]}
+            fill="none"
+            stroke={color}
+            strokeWidth={LINE_WIDTH}
+            strokeLinejoin="round"
+          />
+        </Svg>
+      );
+    }
     return (
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Path d={GLYPH_PATHS[element.icon]} fill={color} />

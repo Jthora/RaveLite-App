@@ -48,10 +48,15 @@ and Setup repeated the My day chip and the per-element test buttons.
 
 ## Core themes (`src/theme/heartVariants.ts`, `src/components/icons/ElementGlyph.tsx`)
 
-Settings › Theme swaps how Core presents itself, in one row of tiles:
-**Core** (⊙, orange), **Heart** (♡, magenta), **Æther** (six-pointed star,
-white), **Star** (five-pointed star, white) or **Commander** (the Star
-Commander mark, white). The white marks are SVG on a 100-unit grid. The
+Settings › Theme sets how Core presents itself, in two choices. A mark:
+**Core** (⊙), **Heart** (♡), **Æther** (a six-pointed star in lines),
+**Star** (a five-pointed star in lines) or **Commander** (the Star
+Commander mark, filled). And a color, one of five that keep clear of the
+four elements' red, yellow, green and blue: orange, magenta, violet, cyan or
+white. Until a color is picked, each mark brings its own (Core orange,
+Heart magenta, the stars white); once picked, it stays across marks. The
+picker previews both, and the app redraws when Settings closes. The star
+marks are SVG on a 100-unit grid. The
 Commander mark is a regular five-pointed star whose lower legs are cut into
 two chevrons: below the body, four equal bands parallel to the legs' inner
 edges (gap, chevron, gap, chevron). It was traced from the CommanderIcon
