@@ -29,7 +29,6 @@ import {
   type FireSpec,
 } from '../reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../reminders/repository';
-import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import type {Plan} from '../reminders/types';
 import {doneByTrack, firedSetIds} from '../program/progress';
 import {
@@ -39,6 +38,7 @@ import {
   reviewProgram,
   subscribeProgram,
 } from '../program/repository';
+import {plannedDrill} from '../program/morning';
 import {programWeek} from '../program/progression';
 import {groupIntoRounds} from '../program/rounds';
 import {placeRounds, selectUpcomingRounds} from '../program/schedule';
@@ -125,12 +125,13 @@ function partnerBalance(
       if (!withinActiveHours(new Date(fire.ts), myDay)) {
         continue;
       }
-      const slot = plan.windows.find(w => w.id === fire.windowId)?.slots[
-        fire.slotIndex
-      ];
-      const drill = slot
-        ? pickDrillForSlotSeeded(slot, planPulseId(fire))
-        : undefined;
+      const window = plan.windows.find(w => w.id === fire.windowId);
+      const {drill} = plannedDrill(
+        window?.slots[fire.slotIndex],
+        window,
+        planPulseId(fire),
+        fire.ts,
+      );
       const points = drill ? chimePoints(drill) : {};
       for (const id of Object.keys(points) as ElementId[]) {
         balance[id] += points[id] ?? 0;

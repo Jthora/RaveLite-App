@@ -193,14 +193,15 @@ export function reconcileNow(now: number = Date.now()): void {
     const window = plan.windows.find(w => w.id === fire.windowId);
     const slot = window?.slots[fire.slotIndex];
     const id = planPulseId(fire);
-    const {drill, note} = drillForPlanChime(slot, id, fire.ts);
+    const {drill, note, detail} = drillForPlanChime(slot, id, fire.ts, window);
     runtimeEnqueue({
       id,
       fireAt: fire.ts,
-      element: fire.element,
+      // A morning block piece chimes in its own element.
+      element: drill?.element ?? fire.element,
       windowId: fire.windowId,
       exerciseId: drill?.id,
-      note,
+      note: note ?? detail,
     });
   }
 
@@ -216,23 +217,23 @@ export function reconcileNow(now: number = Date.now()): void {
       continue;
     }
     const [, windowId, slotIndex] = pulse.id.split(':');
-    const slot = plan.windows.find(w => w.id === windowId)?.slots[
-      Number(slotIndex)
-    ];
+    const window = plan.windows.find(w => w.id === windowId);
+    const slot = window?.slots[Number(slotIndex)];
     if (!slot) {
       continue;
     }
-    const {drill, note} = drillForPlanChime(slot, pulse.id, pulse.fireAt);
-    if (drill?.id === pulse.exerciseId && note === pulse.note) {
+    const planned = drillForPlanChime(slot, pulse.id, pulse.fireAt, window);
+    const note = planned.note ?? planned.detail;
+    if (planned.drill?.id === pulse.exerciseId && note === pulse.note) {
       continue;
     }
     cancelQueued([pulse.id]);
     runtimeEnqueue({
       id: pulse.id,
       fireAt: pulse.fireAt,
-      element: pulse.element,
+      element: planned.drill?.element ?? pulse.element,
       windowId: pulse.windowId,
-      exerciseId: drill?.id,
+      exerciseId: planned.drill?.id,
       note,
     });
   }

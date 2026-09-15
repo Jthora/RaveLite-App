@@ -18,10 +18,9 @@ import {Plan} from './types';
  *     A call within 20 min of a round rides along with it instead of
  *     chiming alone.
  *
- *   Morning session (daily 05:45-07:00) — the run and flow work that needs
- *   fresh legs and cool air, before the desk day:
- *     Fire every 45 min  — easy run, strides, conditioning
- *     Water every 40 min — a few minutes of staff flow
+ *   Morning session (daily 05:45-07:00) — the day's morning block from the
+ *   focus wheel (`program/week.ts`), the sweaty work before the shower and
+ *   the desk day: a piece every 25 min, at 05:45, 06:10 and 06:35.
  *
  *   Every water call also asks for a 20 s eye break (Air).
  *
@@ -81,15 +80,7 @@ export const DEFAULT_PLAN: Plan = {
       startTime: '05:45',
       endTime: '07:00',
       daysOfWeek: ALL_DAYS,
-      slots: [
-        {element: 'fire', everyMinutes: 45, requiredTags: ['Conditioning']},
-        {
-          element: 'water',
-          everyMinutes: 40,
-          maxSeconds: 600,
-          requiredTags: ['Flow', 'Coordination'],
-        },
-      ],
+      slots: [{element: 'fire', everyMinutes: 25, block: 'morning'}],
     },
     {
       id: 'fuel-lunch',

@@ -21,6 +21,8 @@ export interface CadenceSlot {
   requiredTags?: Exercise['targets'];
   /** Optional: this exact drill every time (e.g. the Evening Review). */
   exerciseId?: string;
+  /** Optional: chime the day's morning block piece by piece (`program/morning.ts`). */
+  block?: 'morning';
 }
 
 /** A named period of the day with its own cadence rules. */

@@ -14,8 +14,8 @@ import {getCoarseLocation} from '../../native/raveLiteDevice';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import type {Exercise} from '../exercises/types';
-import {pickDrillForSlotSeeded} from '../reminders/scheduler';
-import type {CadenceSlot, Plan} from '../reminders/types';
+import {plannedDrill} from '../program/morning';
+import type {CadenceSlot, Plan, Window} from '../reminders/types';
 import {localDayKey} from '../training/grading';
 import {DEFAULT_WEATHER_PREFS, adaptDrill, type WeatherPrefs} from './adapt';
 import {
@@ -294,19 +294,25 @@ export function conditionsFor(ts: number): Conditions | undefined {
   });
 }
 
-/** A plan chime's drill, bent to the conditions at its time, with why. */
+/**
+ * A plan chime's drill, bent to the conditions at its time, with why. With
+ * its window, a Morning Session chime takes its piece of the day's block,
+ * and `detail` says which.
+ */
 export function drillForPlanChime(
   slot: CadenceSlot | undefined,
   pulseId: string,
   ts: number,
-): {drill?: Exercise; note?: string} {
+  window?: Window,
+): {drill?: Exercise; note?: string; detail?: string} {
   if (!slot) {
     return {};
   }
-  const planned = pickDrillForSlotSeeded(slot, pulseId);
+  const {drill: planned, detail} = plannedDrill(slot, window, pulseId, ts);
+  const withDetail = detail ? {detail} : {};
   const conditions = planned ? conditionsFor(ts) : undefined;
   if (!planned || !conditions) {
-    return {drill: planned};
+    return {drill: planned, ...withDetail};
   }
   const {drill, note} = adaptDrill(
     planned,
@@ -314,7 +320,7 @@ export function drillForPlanChime(
     getWeatherPrefs(),
     pulseId,
   );
-  return {drill, note};
+  return {drill, note, ...withDetail};
 }
 
 /** The plan with hot-day water calls for today and tomorrow. */

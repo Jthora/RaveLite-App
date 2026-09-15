@@ -6,6 +6,7 @@ import {
   V3_DEFAULT_PLAN,
   V4_DEFAULT_PLAN,
   V5_DEFAULT_PLAN,
+  V6_DEFAULT_PLAN,
   runMigrations,
 } from '../migrations';
 import {DEFAULT_ACTIVE_HOURS} from '../../domain/ambient/types';
@@ -175,5 +176,23 @@ describe('v6', () => {
     store.set(KEYS.activeHours, JSON.stringify(mine));
     runMigrations(NOW);
     expect(json(KEYS.activeHours)).toEqual(mine);
+  });
+});
+
+describe('v7', () => {
+  it('gives an untouched v6 plan the morning blocks', () => {
+    store.set(KEYS.schemaVersion, 6);
+    store.set(KEYS.planCurrent, JSON.stringify(V6_DEFAULT_PLAN));
+    runMigrations(NOW);
+    expect(json(KEYS.planCurrent)).toEqual(DEFAULT_PLAN);
+    expect(store.getNumber(KEYS.schemaVersion)).toBe(CURRENT_SCHEMA_VERSION);
+  });
+
+  it('leaves a plan the operator changed', () => {
+    const mine = {...V6_DEFAULT_PLAN, name: 'Mine'};
+    store.set(KEYS.schemaVersion, 6);
+    store.set(KEYS.planCurrent, JSON.stringify(mine));
+    runMigrations(NOW);
+    expect(json(KEYS.planCurrent)).toEqual(mine);
   });
 });

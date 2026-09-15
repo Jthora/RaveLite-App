@@ -47,6 +47,9 @@ export function runMigrations(now: number = Date.now()): void {
   if (from < 6) {
     windDownAtNine();
   }
+  if (from < 7) {
+    morningBlocks();
+  }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
 }
@@ -377,6 +380,95 @@ function windDownAtNine(): void {
   }
   const rawPlan = store.getString(KEYS.planCurrent);
   if (rawPlan !== undefined && isPlan(rawPlan, V5_DEFAULT_PLAN)) {
+    store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
+  }
+}
+
+/** The default plan as it stood in v6, before morning blocks. */
+export const V6_DEFAULT_PLAN: Plan = {
+  id: 'default',
+  name: 'Operator Baseline',
+  windows: [
+    {
+      id: 'hydration',
+      label: 'Water Calls',
+      startTime: '05:30',
+      endTime: '20:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {
+          element: 'water',
+          everyMinutes: 120,
+          maxSeconds: 60,
+          requiredTags: ['Hydration'],
+        },
+      ],
+    },
+    {
+      id: 'morning-intent',
+      label: 'Morning Intent',
+      startTime: '05:05',
+      endTime: '05:06',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'heart', everyMinutes: 1, exerciseId: 'heart.morning-intent'},
+      ],
+    },
+    {
+      // Id kept from the evening "Backyard Session" so migrations and
+      // stored pulse ids line up.
+      id: 'backyard-session',
+      label: 'Morning Session',
+      startTime: '05:45',
+      endTime: '07:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'fire', everyMinutes: 45, requiredTags: ['Conditioning']},
+        {
+          element: 'water',
+          everyMinutes: 40,
+          maxSeconds: 600,
+          requiredTags: ['Flow', 'Coordination'],
+        },
+      ],
+    },
+    {
+      id: 'fuel-lunch',
+      label: 'Fuel Check — Lunch',
+      startTime: '11:55',
+      endTime: '11:56',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'fuel-dinner',
+      label: 'Fuel Check — Dinner',
+      startTime: '19:05',
+      endTime: '19:06',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'evening-close',
+      label: 'Evening Review',
+      startTime: '20:45',
+      endTime: '20:46',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'heart', everyMinutes: 1, exerciseId: 'heart.evening-review'},
+      ],
+    },
+  ],
+};
+
+/**
+ * v7 — the Morning Session chimes the day's morning block piece by piece
+ * (a piece every 25 minutes) instead of a random conditioning drill and a
+ * flow drill. Only an untouched default plan moves.
+ */
+function morningBlocks(): void {
+  const rawPlan = store.getString(KEYS.planCurrent);
+  if (rawPlan !== undefined && isPlan(rawPlan, V6_DEFAULT_PLAN)) {
     store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
   }
 }

@@ -54,18 +54,21 @@ export function backupCandidates(
     if (riding.has(pulseId)) {
       continue;
     }
-    const slot = plan.windows.find(w => w.id === fire.windowId)?.slots[
-      fire.slotIndex
-    ];
-    const {drill, note} = drillForPlanChime(slot, pulseId, fire.ts);
+    const window = plan.windows.find(w => w.id === fire.windowId);
+    const {drill, note, detail} = drillForPlanChime(
+      window?.slots[fire.slotIndex],
+      pulseId,
+      fire.ts,
+      window,
+    );
     out.push({
       pulseId,
       dueAt: fire.ts,
       payload: pulsePayload({
         pulseId,
-        element: fire.element,
+        element: drill?.element ?? fire.element,
         exerciseId: drill?.id,
-        note,
+        note: note ?? detail,
       }),
     });
   }

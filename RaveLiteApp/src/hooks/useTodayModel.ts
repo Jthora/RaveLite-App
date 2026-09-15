@@ -132,13 +132,13 @@ export function buildTodayModel(
     }
     const window = plan.windows.find(w => w.id === fire.windowId);
     const slot = window?.slots[fire.slotIndex];
-    const {drill, note} = drillForPlanChime(slot, id, fire.ts);
+    const {drill, note, detail} = drillForPlanChime(slot, id, fire.ts, window);
     planChimes.push({
       id,
       ts: fire.ts,
-      element: fire.element,
+      element: drill?.element ?? fire.element,
       label: drill?.name ?? ELEMENTS[fire.element].name,
-      detail: note ?? window?.label,
+      detail: note ?? detail ?? window?.label,
       move: moveForExercise(drill?.id),
       exerciseId: drill?.id,
     });
