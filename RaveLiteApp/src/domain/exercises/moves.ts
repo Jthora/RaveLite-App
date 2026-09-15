@@ -191,6 +191,13 @@ const BY_METRIC: Readonly<Record<string, MoveId>> = {
   'builtin.shoulder-cars': 'posture',
   'builtin.hip-cars': 'hipopener',
   'builtin.still-sit': 'pulse',
+  'builtin.staff-session': 'staff',
+  'builtin.bike-ride': 'activity',
+  'builtin.ruck': 'carry',
+  'builtin.walk-session': 'walk',
+  'builtin.yoga-video': 'stretch',
+  'builtin.tai-chi-video': 'presence',
+  'builtin.quiet-cardio-video': 'footwork',
 };
 
 const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {

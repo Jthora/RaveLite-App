@@ -21,6 +21,7 @@ import {CatchUpSheet} from '../../components/today/CatchUpSheet';
 import {LateLogSheet} from '../../components/today/LateLogSheet';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
+import {SessionBanner, SessionSheet} from '../../components/today/SessionSheet';
 import {SetsMeters} from '../../components/today/SetsMeters';
 import {WaterCounter} from '../../components/today/WaterCounter';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
@@ -63,6 +64,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [logOpen, setLogOpen] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
   const [practiceOpen, setPracticeOpen] = useState(false);
+  const [sessionOpen, setSessionOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [setsOpen, setSetsOpen] = useState(false);
   const [weatherOpen, setWeatherOpen] = useState(false);
@@ -165,6 +167,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             onPress={() => setWeatherOpen(true)}
           />
         ) : null}
+        <SessionBanner onPress={() => setSessionOpen(true)} />
         <ChimeCard
           now={model.now}
           active={model.active}
@@ -227,6 +230,16 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             <Text style={[styles.linkText, {color: accent}]}>+ Log</Text>
           </Tap>
           <Tap
+            testID="session-open"
+            variant="ghost"
+            color={accent}
+            onPress={() => setSessionOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Time a session"
+            style={styles.link}>
+            <Text style={[styles.linkText, {color: accent}]}>Session</Text>
+          </Tap>
+          <Tap
             variant="ghost"
             color={palette.textDim}
             onPress={() => setPracticeOpen(true)}
@@ -249,6 +262,10 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           </Tap>
         </View>
 
+        <SessionSheet
+          visible={sessionOpen}
+          onClose={() => setSessionOpen(false)}
+        />
         <TrainingLogSheet
           visible={logOpen || editing !== undefined}
           editing={editing}
@@ -356,9 +373,10 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderRadius: radius.md,
   },
+  // Four links share the row.
   linkText: {
     ...t.subtitle,
-    fontSize: 15,
+    fontSize: 14,
     color: palette.text,
   },
   linkRow: {

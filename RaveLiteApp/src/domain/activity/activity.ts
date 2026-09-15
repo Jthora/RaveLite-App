@@ -147,7 +147,7 @@ export function chimePoints(
   return {[drill.element]: drillPoints(drill, {exerciseId: drill.id})};
 }
 
-/** A Train entry: runs and timed custom sessions by the minute; maxes as tests. */
+/** A Train entry: runs, sessions and timed custom kinds by the minute; maxes as tests. */
 export function trainPoints(
   entry: TrainingLogEntry,
   kind: MetricKind | undefined,
@@ -156,7 +156,11 @@ export function trainPoints(
     return POINTS.drill;
   }
   const timed = kind.inputMode === 'mmss' || kind.inputMode === 'distance-time';
-  if (kind.category === 'run' || (kind.category === 'custom' && timed)) {
+  if (
+    kind.category === 'run' ||
+    kind.category === 'session' ||
+    (kind.category === 'custom' && timed)
+  ) {
     return minutePoints(entry.value);
   }
   return kind.category === 'custom' ? POINTS.drill : POINTS.test;

@@ -466,7 +466,7 @@ const FlatMetricListInner = React.memo(function FlatMetricListInner({
   accent: string;
 }) {
   const grouped = groupByCategory(metrics);
-  const cats: MetricCategory[] = ['run', 'reps', 'hold', 'custom'];
+  const cats: MetricCategory[] = ['run', 'session', 'reps', 'hold', 'custom'];
   return (
     <View>
       {cats.map(cat => {
@@ -773,6 +773,8 @@ function categoryLabel(c: MetricCategory): string {
       return 'Reps';
     case 'hold':
       return 'Holds';
+    case 'session':
+      return 'Sessions';
     case 'custom':
       return 'Custom';
   }

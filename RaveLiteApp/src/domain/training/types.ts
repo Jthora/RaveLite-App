@@ -29,7 +29,7 @@ import type {ElementId} from '../../theme/elements';
 export type MetricElement = ElementId | 'any';
 
 /** Coarse grouping for the picker — drives section headers. */
-export type MetricCategory = 'run' | 'reps' | 'hold' | 'custom';
+export type MetricCategory = 'run' | 'reps' | 'hold' | 'session' | 'custom';
 
 /**
  * What a metric measures. Stored as a unit hint for display formatters

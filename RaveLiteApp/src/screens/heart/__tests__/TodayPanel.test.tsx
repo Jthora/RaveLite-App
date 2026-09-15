@@ -9,6 +9,8 @@ import {activityForDay} from '../../../domain/activity/activity';
 import {store} from '../../../storage';
 import * as runtime from '../../../domain/ambient/pulseRuntime';
 import {DailySetsSheet} from '../DailySetsSheet';
+import {SessionSheet} from '../../../components/today/SessionSheet';
+import {startSession} from '../../../domain/training/session';
 import {SettingsSheet} from '../SettingsSheet';
 import {TodayPanel} from '../TodayPanel';
 
@@ -95,6 +97,21 @@ it('the gear opens Settings and the meters open Daily Sets', () => {
     byTestId(tree, 'sets-open').props.onPress();
   });
   expect(tree.root.findByType(DailySetsSheet).props.visible).toBe(true);
+  act(() => tree.unmount());
+});
+
+it('Session opens the timer, and a running session shows at the top', () => {
+  const tree = renderToday();
+  expect(tree.root.findByType(SessionSheet).props.visible).toBe(false);
+  expect(byTestId(tree, 'session-banner')).toBeUndefined();
+  act(() => {
+    byTestId(tree, 'session-open').props.onPress();
+  });
+  expect(tree.root.findByType(SessionSheet).props.visible).toBe(true);
+  act(() => {
+    startSession('builtin.staff-session', TEN_AM.getTime() - 20 * 60_000);
+  });
+  expect(byTestId(tree, 'session-banner')).toBeDefined();
   act(() => tree.unmount());
 });
 
