@@ -38,7 +38,7 @@ import type {
 /** Rounds a day aims for. */
 export const TARGET_ROUNDS = 9;
 /** A round never asks for more moves than this back to back. */
-export const MAX_MOVES_PER_ROUND = 5;
+export const MAX_MOVES_PER_ROUND = 6;
 
 /** Move order inside a round. */
 const ROUND_ORDER: readonly TrackId[] = [
@@ -54,6 +54,7 @@ const ROUND_ORDER: readonly TrackId[] = [
   'plank',
   'side',
   'breath',
+  'push-variants',
   'stillness',
 ];
 const GRIP: ReadonlySet<TrackId> = new Set<TrackId>(['row', 'pull', 'hang']);

@@ -76,6 +76,8 @@ export interface ActivityItem {
   move?: MoveId;
   /** Effort points toward its element's daily par (see `par.ts`). */
   points: number;
+  /** For Train entries: the metric kind. */
+  kindId?: string;
   /** Where the underlying record lives. */
   ref: {store: 'journal' | 'train'; id: string};
 }
@@ -321,6 +323,9 @@ function trainItem(
     detail: kind ? formatEntryValue(entry, kind) : undefined,
     move: moveForMetric(kind),
     points: trainPoints(entry, kind),
+    kindId: entry.kindId,
+    // A rep count, e.g. a 1-minute push-up test.
+    amount: kind?.inputMode === 'integer' ? entry.value : undefined,
     ref: {store: 'train', id: entry.id},
   };
 }

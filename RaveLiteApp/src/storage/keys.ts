@@ -66,6 +66,12 @@ export const KEYS = {
   weatherPrefs: 'weather.prefs',
   /** Local day key the operator marked as buggy. */
   weatherBuggyDay: 'weather.buggyDay',
+
+  // ── Fitness standards (USAF, USSF, USMC, MARSOC) ──────────────────
+  /** `{eventId: value}` JSON — targets the operator changed. */
+  standardsTargets: 'standards.targets',
+  /** 'male' | 'female' — which table leads. */
+  standardsPrimary: 'standards.primary',
 } as const;
 
 /**

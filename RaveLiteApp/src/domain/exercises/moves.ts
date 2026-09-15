@@ -193,6 +193,7 @@ const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {
   breath: 'breath',
   mobility: 'hipopener',
   stillness: 'pulse',
+  'push-variants': 'push',
 };
 
 export function moveForExercise(id: string | undefined): MoveId | undefined {

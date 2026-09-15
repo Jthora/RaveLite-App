@@ -99,10 +99,14 @@ describe('progression', () => {
   it('prescribes nothing on rest days or for disabled tracks', () => {
     const program = startProgram();
     const crunch = trackById('crunch');
-    expect(prescribeDay(crunch, program.tracks.crunch, program, TUESDAY)).toBeUndefined();
+    expect(
+      prescribeDay(crunch, program.tracks.crunch, program, TUESDAY),
+    ).toBeUndefined();
     const off = {...program.tracks.push, enabled: false};
     expect(prescribeDay(push, off, program, MONDAY)).toBeUndefined();
-    expect(prescribeDay(push, program.tracks.push, program, MONDAY)).toMatchObject({
+    expect(
+      prescribeDay(push, program.tracks.push, program, MONDAY),
+    ).toMatchObject({
       label: 'Push-ups',
       setSize: 5,
       sets: 4,
@@ -112,12 +116,26 @@ describe('progression', () => {
   });
 
   it('unlocks the next rung at graduateAt and halves the max on level-up', () => {
-    const strong = {enabled: true, rung: 1, testMax: 30, testedAt: 1};
-    expect(readyToLevelUp(push, strong)).toBe(true);
-    expect(readyToLevelUp(push, {...strong, testMax: 20})).toBe(false);
-    expect(levelUp(push, strong)).toEqual({enabled: true, rung: 2, testMax: 15});
-    const top = {...strong, rung: push.ladder.length - 1};
-    expect(levelUp(push, top)).toBe(top);
+    const variants = trackById('push-variants');
+    const strong = {enabled: true, rung: 0, testMax: 24, testedAt: 1};
+    expect(readyToLevelUp(variants, strong)).toBe(true);
+    expect(readyToLevelUp(variants, {...strong, testMax: 20})).toBe(false);
+    expect(levelUp(variants, strong)).toEqual({
+      enabled: true,
+      rung: 1,
+      testMax: 12,
+    });
+    const top = {...strong, rung: variants.ladder.length - 1};
+    expect(levelUp(variants, top)).toBe(top);
+  });
+
+  it('keeps Push on the tested push-up however strong the sets get', () => {
+    const standard = {enabled: true, rung: 1, testMax: 60, testedAt: 1};
+    expect(push.ladder[push.ladder.length - 1].exerciseId).toBe(
+      'fire.pushup-groove',
+    );
+    expect(readyToLevelUp(push, standard)).toBe(false);
+    expect(levelUp(push, standard)).toBe(standard);
   });
 
   it('a test is due when untested, or on a deload week after an old test', () => {
@@ -135,11 +153,50 @@ describe('progression', () => {
 
 describe('progress from the journal', () => {
   const entries: JournalEntry[] = [
-    {id: 'a', at: 1, kind: 'reminder.fired', pulseId: 'sets:x:push:1', element: 'fire', windowId: SETS_WINDOW_ID},
-    {id: 'b', at: 2, kind: 'completion', exerciseId: 'fire.pushup-groove', element: 'fire', source: 'always-on', trackId: 'push', amount: 10},
-    {id: 'c', at: 3, kind: 'completion', exerciseId: 'fire.pushup-groove', element: 'fire', source: 'manual', trackId: 'push', amount: 8},
-    {id: 'd', at: 4, kind: 'completion', exerciseId: 'air.chin-tuck', element: 'air', source: 'manual'},
-    {id: 'e', at: 5, kind: 'reminder.fired', pulseId: 'plan:desk:0:1', element: 'air', windowId: 'desk-hours'},
+    {
+      id: 'a',
+      at: 1,
+      kind: 'reminder.fired',
+      pulseId: 'sets:x:push:1',
+      element: 'fire',
+      windowId: SETS_WINDOW_ID,
+    },
+    {
+      id: 'b',
+      at: 2,
+      kind: 'completion',
+      exerciseId: 'fire.pushup-groove',
+      element: 'fire',
+      source: 'always-on',
+      trackId: 'push',
+      amount: 10,
+    },
+    {
+      id: 'c',
+      at: 3,
+      kind: 'completion',
+      exerciseId: 'fire.pushup-groove',
+      element: 'fire',
+      source: 'manual',
+      trackId: 'push',
+      amount: 8,
+    },
+    {
+      id: 'd',
+      at: 4,
+      kind: 'completion',
+      exerciseId: 'air.chin-tuck',
+      element: 'air',
+      source: 'manual',
+    },
+    {
+      id: 'e',
+      at: 5,
+      kind: 'reminder.fired',
+      pulseId: 'plan:desk:0:1',
+      element: 'air',
+      windowId: 'desk-hours',
+    },
   ];
 
   it('sums amount and sets per track', () => {
@@ -164,10 +221,18 @@ describe('program repository', () => {
   it('records tests, toggles tracks and levels up', () => {
     loadProgram(MONDAY);
     recordMaxTest('push', 30, 123);
-    expect(loadProgram().tracks.push).toMatchObject({testMax: 30, testedAt: 123});
+    expect(loadProgram().tracks.push).toMatchObject({
+      testMax: 30,
+      testedAt: 123,
+    });
     setTrackEnabled('crunch', false);
     expect(loadProgram().tracks.crunch.enabled).toBe(false);
-    levelUpTrack('push');
-    expect(loadProgram().tracks.push).toEqual({enabled: true, rung: 2, testMax: 15});
+    recordMaxTest('push-variants', 24, 456);
+    levelUpTrack('push-variants');
+    expect(loadProgram().tracks['push-variants']).toEqual({
+      enabled: true,
+      rung: 1,
+      testMax: 12,
+    });
   });
 });

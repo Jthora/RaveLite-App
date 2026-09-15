@@ -75,6 +75,16 @@ export const BUILTIN_METRICS: MetricKind[] = [
     element: 'fire',
   },
   {
+    id: 'builtin.pushups-1min',
+    label: 'Pushups — 1 min',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'fire',
+    notes: 'Air Force and Space Force test: one minute, full range.',
+  },
+  {
     id: 'builtin.situps-2min',
     label: 'Sit-ups — 2 min',
     category: 'reps',
@@ -82,6 +92,16 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'integer',
     builtIn: true,
     element: 'fire',
+  },
+  {
+    id: 'builtin.situps-1min',
+    label: 'Sit-ups — 1 min',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'fire',
+    notes: 'Air Force and Space Force test: one minute.',
   },
   {
     id: 'builtin.pullups-amrap',
@@ -102,6 +122,39 @@ export const BUILTIN_METRICS: MetricKind[] = [
     builtIn: true,
     element: 'fire',
     notes: 'Step-back burpees count. Smooth reps over sloppy speed.',
+  },
+  {
+    id: 'builtin.cft-mtc',
+    label: 'Movement to contact — 880 yd',
+    category: 'run',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    defaultDistanceMeters: 805,
+    builtIn: true,
+    element: 'fire',
+    notes: 'Marine combat fitness test: an 880-yard sprint.',
+  },
+  {
+    id: 'builtin.cft-acl',
+    label: 'Ammo-can lifts — 2 min (30 lb bricks)',
+    category: 'reps',
+    unit: 'reps',
+    inputMode: 'integer',
+    builtIn: true,
+    element: 'fire',
+    notes:
+      'Marine combat fitness test: from shoulder height to arms locked overhead for 2 min. About 6 bricks in a bag makes 30 lb.',
+  },
+  {
+    id: 'builtin.cft-manuf',
+    label: 'Maneuver under fire',
+    category: 'custom',
+    unit: 'seconds',
+    inputMode: 'mmss',
+    builtIn: true,
+    element: 'fire',
+    notes:
+      'Marine combat fitness test: a 300-yard course of sprints, crawls, a drag and carries, a throw and push-ups, in the yard.',
   },
 
   // ─── AIR — breath, cadence, lightness ────────────────────────────
