@@ -91,11 +91,10 @@ Top to bottom, one scroll:
    own elements.
 4. **Drink** — glasses of water today out of 8 (10 on a hot day, 12 in
    dangerous heat), with **+1**.
-5. **Daily Sets meters** — sets done, then **push-ups toward 200** as the
-   lead row (today's count, a mark where today's sets add up to, standard
-   and variants apart, best set; tap for **Standards**), then one small
-   meter per other track in its element's color. Tap the card for the Daily
-   Sets sheet.
+5. **Daily Sets meters** — sets done and today's focus (the day's
+   attributes in their element colors, or Saturday's test), then one small
+   meter per track in its element's color; push-ups get no row of their
+   own. Tap the card for the Daily Sets sheet.
 6. **Today · N-day streak** (plus **· Harmony** once all five are at
    par) and the day's list — one row per record from
    every source (chimes and rounds, drill taps, circuit legs, Train log
@@ -119,7 +118,8 @@ Top to bottom, one scroll:
   and Respect DND, the Stay alive checklist, the plan editor, restoring a
   plan the v2 migration replaced, alive motion, and the Core theme. A
   notifications-off warning leads when permission is denied.
-- **Standards** (Today's push-up row) — push-ups today, then each military
+- **Standards** (Daily Sets › Standards) — push-ups today against today's
+  sets, with 200 a day as the long-term goal, then each military
   test event with its target (the top score for ages 35–40, male and female
   tables, the chosen one first, or a target the operator set on a number
   pad), the best Train log test with a bar toward the target, and **Log a
@@ -129,7 +129,7 @@ Top to bottom, one scroll:
   sunrise, sunset and daylight, the next 12 hours, and switches for Buggy
   today, moving yard work inside when buggy, running in the dark, and °F.
 - **Daily Sets** (Today's meters) — today's tracks with their rounds, max
-  tests, level ups, and track on/off.
+  tests, level ups, track on/off, and **Standards** in the header.
 - **Library** (element pages) — focus areas, saved per element, which also
   steer the drill card; and the element's whole drill list.
 
@@ -240,9 +240,12 @@ fire) and MARSOC's marks. Targets are top scores for ages 35–40 from
 2025–2026 news and calculator sites, because the official charts would not
 load; they are close, not final, and every one can be changed.
 
-- **Push-ups toward 200 a day.** The day's count adds Push and Variants sets
-  (rounds, "+ set", drill taps that count as a set), max tests and push-up
-  tests from the Train log. Standard push-ups count apart from variants.
+- **Push-ups, ramping toward 200 a day.** The day's count adds Push and
+  Variants sets (rounds, "+ set", drill taps that count as a set), max tests
+  and push-up tests from the Train log; standard push-ups count apart from
+  variants. Today's target is what today's sets add up to, which grows as
+  the weeks build and the tested max rises: a push-up max of 25 comes to
+  about 60 a day in week 1.
 - **Push** stays on the tested push-up (incline push-ups are its only
   easier rung) and runs every day, up to 12 sets. **Variants** (diamond →
   decline → archer) run every day beside it; their reps count toward 200.
@@ -255,6 +258,38 @@ load; they are close, not final, and every one can be changed.
   1-minute push-ups and sit-ups, 880-yard movement to contact, ammo-can
   lifts (about 6 bricks in a bag), maneuver under fire.
 - **Not tracked yet:** MARSOC's swim and ruck, and waist-to-height ratio.
+
+## Focus wheel (`src/domain/program/week.ts`)
+
+Fifteen attributes, three per element. Six are the **daily core**, trained
+by every day's rounds: Strength, Toughness, Breath, Awareness, Focus and
+Resolve. The other nine rotate as the day's **focus**, each twice a week and
+never more than four days apart:
+
+| Day | Focus | Morning block |
+|---|---|---|
+| Sun | Recovery · Agility | Long walk and light skips |
+| Mon | Power · Mobility · Presence | Kicks and jumps |
+| Tue | Speed · Dexterity · Balance | Strides and staff |
+| Wed | Stamina · Recovery | Easy run |
+| Thu | Agility · Mobility · Presence | Footwork and flow |
+| Fri | Power · Dexterity · Balance | Bricks and staff |
+| Sat | Stamina · Speed | The week's test |
+
+- **Saturday tests** rotate with the 4-week block: the Air Force test
+  (1-minute push-ups and sit-ups, 2-mile run), the Marine PFT (pull-ups,
+  plank, 3-mile run), the Marine combat fitness test (880-yard sprint,
+  ammo-can lifts, maneuver under fire), then max tests on the deload week.
+- **Sweat stays in the morning** (laundry is limited). A focus day adds one
+  set to its dry track (Mobility, Stillness or Breath) and ends every second
+  round with a dry focus partner (a hip opener, a balance, a presence
+  drill). A guard keeps every rung and partner free of sweaty drills
+  (`src/domain/exercises/sweat.ts`), and Try this now sinks them after 08:00.
+- **Tests are tagged `Test`**, so random plan picks, indoor weather swaps and
+  Try this now never choose one.
+- **Not built yet:** morning chimes that follow the day's block (the Morning
+  Session still picks a conditioning drill and a flow drill), and the week's
+  wheel on the Daily Sets page.
 
 ## Weather (`src/domain/conditions/`)
 
