@@ -1,23 +1,43 @@
 /**
  * Fitness standards — the military tests the operator trains toward: the
- * Air Force and Space Force tests, the Marine PFT and combat fitness test,
- * and MARSOC's screening marks.
+ * Space Force, Air Force and Marine PFT tests, the Marine combat fitness
+ * test, and MARSOC's screening marks.
  *
- * Each event's target is its top score for ages 35–40, by sex; the table
- * the operator chose leads and the other shows beside it, and any target
- * can be changed. Results come from Train log tests. A longer run counts at
- * the same pace, so the 3.2-mile loop times the 3-mile event.
+ * The goal is a B+ on every test. The services score points, not letters,
+ * so grades run evenly along each test's chart for ages 35–40: the passing
+ * minimum is a D−, the max is an A+, with A, A−, B+ … D between. An event
+ * several tests use (the plank is on all three) targets the hardest B+ of
+ * them, so one result clears every test. Events without a published
+ * minimum (the combat fitness test) target their top score. Any target can
+ * be changed. Results come from Train log tests; a longer run counts at the
+ * same pace, so the 3.2-mile loop times the 3-mile event.
  *
- * The figures come from 2025–2026 news and calculator sites: the official
- * manuals would not load when they were gathered, and Space Force doesn't
- * publish its charts. Treat them as close, not final.
+ * The figures come from 2025–2026 calculator and news sites and a Space
+ * Force chart dated 4 Feb 2026: the official charts would not load when
+ * they were gathered. Treat them as close, not final.
  */
 import {METERS_PER_MILE} from '../../lib/constants';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
+import type {Grade} from '../training/grading';
 import type {MetricKind, TrainingLogEntry} from '../training/types';
 
 export type Sex = 'male' | 'female';
+
+export type TestId = 'usmc' | 'usaf' | 'ussf';
+
+export const TEST_NAMES: Readonly<Record<TestId, string>> = {
+  usmc: 'USMC',
+  usaf: 'USAF',
+  ussf: 'USSF',
+};
+
+/** One test's chart for an event: the passing minimum and the max, by sex. */
+export interface EventScale {
+  test: TestId;
+  min: Record<Sex, number>;
+  max: Record<Sex, number>;
+}
 
 export interface StandardEvent {
   id: string;
@@ -27,8 +47,10 @@ export interface StandardEvent {
   unit: 'reps' | 'seconds';
   /** A higher count or a lower time scores better. */
   better: 'higher' | 'lower';
-  /** Top score for ages 35–40. */
+  /** The best top score among its tests, ages 35–40. */
   top: Record<Sex, number>;
+  /** Charts that grade it; none for events without a published minimum. */
+  scales?: readonly EventScale[];
   /** The Train log kind that holds test results. */
   kindId: string;
   /** For runs: longer runs count at the same pace. */
@@ -37,7 +59,12 @@ export interface StandardEvent {
 }
 
 export const STANDARDS_NOTE =
-  'Top scores for ages 35–40, from 2025–2026 news and calculator sites: the official charts would not load, and Space Force does not publish its own. Close, not final. Tap a target to change it.';
+  'Targets are a B+ on every test that uses the event. Grades run evenly from the passing minimum (D−) to the max (A+), ages 35–40, from 2025–2026 calculator and news sites and a Space Force chart: the official charts would not load. Close, not final. Tap a target to change it.';
+
+const both = (value: number): Record<Sex, number> => ({
+  male: value,
+  female: value,
+});
 
 export const STANDARD_EVENTS: readonly StandardEvent[] = [
   {
@@ -47,6 +74,10 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     unit: 'reps',
     better: 'higher',
     top: {male: 56, female: 42},
+    scales: [
+      {test: 'usaf', min: {male: 23, female: 11}, max: {male: 56, female: 42}},
+      {test: 'ussf', min: {male: 21, female: 10}, max: {male: 51, female: 42}},
+    ],
     kindId: 'builtin.pushups-1min',
   },
   {
@@ -56,6 +87,9 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     unit: 'reps',
     better: 'higher',
     top: {male: 76, female: 43},
+    scales: [
+      {test: 'usmc', min: {male: 34, female: 14}, max: {male: 76, female: 43}},
+    ],
     kindId: 'builtin.pushups-2min',
     note: 'Scores at most 70 of 100 points; pull-ups can score 100.',
   },
@@ -66,18 +100,33 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     unit: 'reps',
     better: 'higher',
     top: {male: 21, female: 10},
+    scales: [
+      {test: 'usmc', min: {male: 5, female: 3}, max: {male: 21, female: 10}},
+    ],
     kindId: 'builtin.pullups-amrap',
     note: 'MARSOC competitive: 17.',
   },
   {
     id: 'plank',
     name: 'Plank',
-    tests: 'USMC · USAF',
+    tests: 'USMC · USAF · USSF',
     unit: 'seconds',
     better: 'higher',
-    top: {male: 225, female: 225},
+    top: both(225),
+    scales: [
+      {test: 'usmc', min: both(70), max: both(225)},
+      {
+        test: 'usaf',
+        min: {male: 80, female: 75},
+        max: {male: 205, female: 200},
+      },
+      {
+        test: 'ussf',
+        min: {male: 50, female: 45},
+        max: {male: 200, female: 195},
+      },
+    ],
     kindId: 'builtin.plank',
-    note: 'Air Force top score: 3:25 (M) / 3:20 (F).',
   },
   {
     id: 'situps-1min',
@@ -86,6 +135,10 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     unit: 'reps',
     better: 'higher',
     top: {male: 52, female: 43},
+    scales: [
+      {test: 'usaf', min: {male: 27, female: 18}, max: {male: 52, female: 43}},
+      {test: 'ussf', min: {male: 34, female: 24}, max: {male: 52, female: 43}},
+    ],
     kindId: 'builtin.situps-1min',
   },
   {
@@ -95,6 +148,18 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     unit: 'seconds',
     better: 'lower',
     top: {male: 836, female: 972},
+    scales: [
+      {
+        test: 'usaf',
+        min: {male: 1276, female: 1590},
+        max: {male: 836, female: 972},
+      },
+      {
+        test: 'ussf',
+        min: {male: 1276, female: 1590},
+        max: {male: 836, female: 972},
+      },
+    ],
     kindId: 'builtin.run-2mi',
     distanceMeters: 2 * METERS_PER_MILE,
     note: 'Or the 20 m shuttle run: 82 (M) / 63 (F).',
@@ -106,6 +171,13 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     unit: 'seconds',
     better: 'lower',
     top: {male: 1080, female: 1260},
+    scales: [
+      {
+        test: 'usmc',
+        min: {male: 1720, female: 1910},
+        max: {male: 1080, female: 1260},
+      },
+    ],
     kindId: 'builtin.run-3mi',
     distanceMeters: 3 * METERS_PER_MILE,
     note: 'MARSOC competitive: 20:50.',
@@ -135,10 +207,134 @@ export const STANDARD_EVENTS: readonly StandardEvent[] = [
     tests: 'USMC CFT',
     unit: 'seconds',
     better: 'lower',
-    top: {male: 173, female: 173},
+    top: both(173),
     kindId: 'builtin.cft-manuf',
   },
 ];
+
+// ── Grades ───────────────────────────────────────────────────────────
+
+/** Best first: A+ at a chart's max, D− at its passing minimum. */
+export const GRADE_STEPS: readonly Grade[] = [
+  'A+',
+  'A',
+  'A−',
+  'B+',
+  'B',
+  'B−',
+  'C+',
+  'C',
+  'C−',
+  'D+',
+  'D',
+  'D−',
+];
+
+/** The grade the operator aims for on every test. */
+export const GOAL_GRADE: Grade = 'B+';
+
+const meets = (event: StandardEvent, value: number, mark: number) =>
+  event.better === 'higher' ? value >= mark : value <= mark;
+
+/**
+ * What a grade needs on one chart, in whole reps or seconds rounded toward
+ * the harder side. `steps` past D− give the F+ mark.
+ */
+function markAt(
+  event: StandardEvent,
+  scale: EventScale,
+  sex: Sex,
+  steps: number,
+): number {
+  const max = scale.max[sex];
+  const step = (max - scale.min[sex]) / (GRADE_STEPS.length - 1);
+  const raw = max - steps * step;
+  return event.better === 'higher'
+    ? Math.ceil(raw - 1e-9)
+    : Math.floor(raw + 1e-9);
+}
+
+/** What `grade` needs on a chart (A+ to D−). */
+export function markFor(
+  event: StandardEvent,
+  scale: EventScale,
+  sex: Sex,
+  grade: Grade,
+): number {
+  const steps = GRADE_STEPS.indexOf(grade);
+  return markAt(event, scale, sex, steps < 0 ? GRADE_STEPS.length : steps);
+}
+
+/** The grade a result earns on a chart: A+ to D−, F+ within a step under the minimum, else F. */
+export function gradeOn(
+  event: StandardEvent,
+  scale: EventScale,
+  sex: Sex,
+  value: number,
+): Grade {
+  for (let i = 0; i < GRADE_STEPS.length; i++) {
+    if (meets(event, value, markAt(event, scale, sex, i))) {
+      return GRADE_STEPS[i];
+    }
+  }
+  return meets(event, value, markAt(event, scale, sex, GRADE_STEPS.length))
+    ? 'F+'
+    : 'F';
+}
+
+/** A B+ on every chart the event is on: the hardest of their marks. */
+export function goalFor(event: StandardEvent, sex: Sex): number | undefined {
+  if (!event.scales || event.scales.length === 0) {
+    return undefined;
+  }
+  const marks = event.scales.map(s => markFor(event, s, sex, GOAL_GRADE));
+  return event.better === 'higher' ? Math.max(...marks) : Math.min(...marks);
+}
+
+export interface TestGrade {
+  test: TestId;
+  grade: Grade;
+}
+
+/** A result's grade on each chart the event is on. */
+export function gradesFor(
+  event: StandardEvent,
+  sex: Sex,
+  value: number,
+): TestGrade[] {
+  return (event.scales ?? []).map(scale => ({
+    test: scale.test,
+    grade: gradeOn(event, scale, sex, value),
+  }));
+}
+
+/** "B+ USAF · C USSF", or "C+ USAF · USSF" when the grades agree. */
+export function formatGrades(grades: readonly TestGrade[]): string {
+  const groups: {grade: Grade; tests: TestId[]}[] = [];
+  for (const g of grades) {
+    const group = groups.find(x => x.grade === g.grade);
+    if (group) {
+      group.tests.push(g.test);
+    } else {
+      groups.push({grade: g.grade, tests: [g.test]});
+    }
+  }
+  return groups
+    .map(g => `${g.grade} ${g.tests.map(t => TEST_NAMES[t]).join(' · ')}`)
+    .join(' · ');
+}
+
+/** True when a result reaches the goal grade on every chart. */
+export function meetsGoal(
+  event: StandardEvent,
+  sex: Sex,
+  value: number,
+): boolean {
+  const goal = goalFor(event, sex);
+  return goal !== undefined && meets(event, value, goal);
+}
+
+// ── Targets ──────────────────────────────────────────────────────────
 
 function readTargets(): Record<string, number> {
   const raw = store.getString(KEYS.standardsTargets);
@@ -163,9 +359,13 @@ export function setPrimarySex(sex: Sex): void {
   store.set(KEYS.standardsPrimary, sex);
 }
 
-/** The operator's target for the leading table: their own, or the top score. */
+/**
+ * The operator's target for the leading table: their own, else a B+ on
+ * every test, else the top score.
+ */
 export function targetFor(event: StandardEvent): number {
-  return readTargets()[event.id] ?? event.top[getPrimarySex()];
+  const sex = getPrimarySex();
+  return readTargets()[event.id] ?? goalFor(event, sex) ?? event.top[sex];
 }
 
 /** True when the operator set their own target. */
@@ -173,7 +373,7 @@ export function hasOwnTarget(event: StandardEvent): boolean {
   return readTargets()[event.id] !== undefined;
 }
 
-/** Set a target, or pass undefined to go back to the top score. */
+/** Set a target, or pass undefined to go back to the default. */
 export function setTarget(eventId: string, value: number | undefined): void {
   const targets = readTargets();
   if (value === undefined) {
@@ -183,6 +383,8 @@ export function setTarget(eventId: string, value: number | undefined): void {
   }
   store.set(KEYS.standardsTargets, JSON.stringify(targets));
 }
+
+// ── Results ──────────────────────────────────────────────────────────
 
 export interface StandardResult {
   value: number;

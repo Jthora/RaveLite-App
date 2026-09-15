@@ -3,10 +3,10 @@
  * trains toward (USAF, USSF, USMC, MARSOC). Opened from the push-up row in
  * Today's Daily Sets card.
  *
- * Each event shows its target (the operator's own, or the top score for
- * ages 35–40, both tables with the chosen one first), the best test from
- * the Train log with a bar toward the target, and "Log a test". Tap a
- * target to change it.
+ * Each event shows its target (the operator's own, or a B+ on every test
+ * that uses it), the best test from the Train log with its grade on each
+ * test and a bar toward the target, each test's D−, B+ and A+ marks for the
+ * chosen table, and "Log a test". Tap a target to change it.
  */
 import React, {useEffect, useMemo, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -24,17 +24,23 @@ import {PUSHUP_GOAL, pushupDay} from '../../domain/program/pushups';
 import {
   STANDARDS_NOTE,
   STANDARD_EVENTS,
+  TEST_NAMES,
   bestResult,
+  formatGrades,
   getPrimarySex,
+  goalFor,
+  gradesFor,
   hasOwnTarget,
+  markFor,
   progressToward,
   setPrimarySex,
   setTarget,
   targetFor,
+  type EventScale,
   type Sex,
   type StandardEvent,
 } from '../../domain/standards/standards';
-import {formatDuration} from '../../domain/training/grading';
+import {formatDuration, type Grade} from '../../domain/training/grading';
 import {
   getMetric,
   loadEntries,
@@ -55,6 +61,15 @@ const formatValue = (event: StandardEvent, value: number) =>
 
 const shortDate = (at: number) =>
   new Date(at).toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
+
+/** "USMC: D− 5 · B+ 17 · A+ 21" on the chosen table. */
+function scaleLine(event: StandardEvent, scale: EventScale, sex: Sex): string {
+  const mark = (grade: Grade) =>
+    formatValue(event, markFor(event, scale, sex, grade));
+  return `${TEST_NAMES[scale.test]}: D− ${mark('D−')} · B+ ${mark(
+    'B+',
+  )} · A+ ${mark('A+')}`;
+}
 
 /** "M 21 · F 10", the chosen table first. */
 function topScores(event: StandardEvent, first: Sex): string {
@@ -78,8 +93,9 @@ export function StandardsSheet({visible, onClose}: Props) {
   const view = useMemo(() => {
     const now = Date.now();
     const entries = loadEntries();
+    const sex = getPrimarySex();
     return {
-      sex: getPrimarySex(),
+      sex,
       pushups: pushupDay(
         activityForDay(new Date(now)),
         setsToday(now).prescriptions,
@@ -92,6 +108,7 @@ export function StandardsSheet({visible, onClose}: Props) {
           target,
           own: hasOwnTarget(event),
           best,
+          grades: best ? formatGrades(gradesFor(event, sex, best.value)) : '',
           progress: best ? progressToward(event, best.value, target) : 0,
         };
       }),
@@ -177,7 +194,7 @@ export function StandardsSheet({visible, onClose}: Props) {
           </View>
           <Text style={styles.note}>{STANDARDS_NOTE}</Text>
 
-          {view.events.map(({event, target, own, best, progress}) => (
+          {view.events.map(({event, target, own, best, grades, progress}) => (
             <View key={event.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <View style={styles.cardTitle}>
@@ -200,7 +217,11 @@ export function StandardsSheet({visible, onClose}: Props) {
                       {formatValue(event, target)}
                     </Text>
                     <Text style={styles.caption}>
-                      {own ? 'your target' : topScores(event, view.sex)}
+                      {own
+                        ? 'your target'
+                        : event.scales
+                        ? 'B+ goal'
+                        : topScores(event, view.sex)}
                     </Text>
                   </View>
                 </Tap>
@@ -219,9 +240,14 @@ export function StandardsSheet({visible, onClose}: Props) {
               <View style={styles.cardBottom}>
                 <Text style={styles.best} numberOfLines={2}>
                   {best
-                    ? `Best ${formatValue(event, best.value)} · ${shortDate(
-                        best.at,
-                      )}${best.from ? ` · from ${best.from}` : ''}`
+                    ? [
+                        `Best ${formatValue(event, best.value)}`,
+                        shortDate(best.at),
+                        grades || undefined,
+                        best.from ? `from ${best.from}` : undefined,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')
                     : 'No test yet'}
                 </Text>
                 <Tap
@@ -237,7 +263,12 @@ export function StandardsSheet({visible, onClose}: Props) {
                   </Text>
                 </Tap>
               </View>
-              {own ? (
+              {(event.scales ?? []).map(scale => (
+                <Text key={scale.test} style={styles.caption}>
+                  {scaleLine(event, scale, view.sex)}
+                </Text>
+              ))}
+              {own && !event.scales ? (
                 <Text style={styles.caption}>
                   Top score {topScores(event, view.sex)}
                 </Text>
@@ -297,6 +328,7 @@ function TargetEditor({
     return null;
   }
   const accent = ELEMENTS.heart.accent;
+  const goal = goalFor(event, sex);
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
@@ -305,7 +337,12 @@ function TargetEditor({
             {event.name} target
           </Text>
           <Text style={styles.caption}>
-            Top score for ages 35–40: {topScores(event, sex)}
+            {goal !== undefined
+              ? `A B+ on every test: ${formatValue(
+                  event,
+                  goal,
+                )}. Top score: ${topScores(event, sex)}`
+              : `Top score for ages 35–40: ${topScores(event, sex)}`}
           </Text>
           <NumberPad
             mode={event.unit === 'seconds' ? 'mmss' : 'integer'}
@@ -330,7 +367,9 @@ function TargetEditor({
                 onPress={() => onSave(undefined)}
                 accessibilityRole="button"
                 style={styles.editorBtn}>
-                <Text style={styles.pillText}>Top score</Text>
+                <Text style={styles.pillText}>
+                  {event.scales ? 'B+ goal' : 'Top score'}
+                </Text>
               </Tap>
             ) : null}
             <Tap

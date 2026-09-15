@@ -4,7 +4,11 @@ import {BUILTIN_METRICS} from '../../training/builtinMetrics';
 import {
   STANDARD_EVENTS,
   bestResult,
+  formatGrades,
   getPrimarySex,
+  goalFor,
+  gradeOn,
+  gradesFor,
   hasOwnTarget,
   progressToward,
   setPrimarySex,
@@ -17,24 +21,81 @@ const metricFor = (id: string) => BUILTIN_METRICS.find(m => m.id === id);
 
 beforeEach(() => store.clearAll());
 
-it('leads with the male table, and a target can be changed and reset', () => {
+it('leads with the male table, aims for a B+, and a target can be changed and reset', () => {
   const pullups = event('pullups');
   expect(getPrimarySex()).toBe('male');
-  expect(targetFor(pullups)).toBe(21);
-  setPrimarySex('female');
-  expect(targetFor(pullups)).toBe(10);
-  setPrimarySex('male');
-  setTarget('pullups', 17);
   expect(targetFor(pullups)).toBe(17);
+  setPrimarySex('female');
+  expect(targetFor(pullups)).toBe(9);
+  setPrimarySex('male');
+  setTarget('pullups', 20);
+  expect(targetFor(pullups)).toBe(20);
   expect(hasOwnTarget(pullups)).toBe(true);
   setTarget('pullups', undefined);
-  expect(targetFor(pullups)).toBe(21);
+  expect(targetFor(pullups)).toBe(17);
 });
 
 it('every event has a Train log kind to hold its tests', () => {
   for (const e of STANDARD_EVENTS) {
     expect(metricFor(e.kindId)).toBeDefined();
   }
+});
+
+it('grades evenly from the passing minimum (D−) to the max (A+)', () => {
+  const pullups = event('pullups');
+  const usmc = pullups.scales![0];
+  const grade = (value: number) => gradeOn(pullups, usmc, 'male', value);
+  expect([21, 17, 16, 5, 4, 3].map(grade)).toEqual([
+    'A+',
+    'B+',
+    'B',
+    'D−',
+    'F+',
+    'F',
+  ]);
+
+  const run = event('run-3mi');
+  const time = (m: number, s = 0) =>
+    gradeOn(run, run.scales![0], 'male', m * 60 + s);
+  expect([
+    time(18),
+    time(20, 54),
+    time(20, 55),
+    time(28, 40),
+    time(29, 30),
+    time(30),
+  ]).toEqual(['A+', 'B+', 'B', 'D−', 'F+', 'F']);
+});
+
+it('targets the hardest B+ of every test that uses the event', () => {
+  const goals = Object.fromEntries(
+    STANDARD_EVENTS.map(e => [e.id, goalFor(e, 'male')]),
+  );
+  expect(goals).toEqual({
+    'pushups-1min': 47,
+    'pushups-2min': 65,
+    pullups: 17,
+    // USMC 3:03 beats USAF 2:51 and USSF 2:40.
+    plank: 183,
+    // USSF 48 beats USAF 46.
+    'situps-1min': 48,
+    'run-2mi': 15 * 60 + 56,
+    'run-3mi': 20 * 60 + 54,
+    'cft-mtc': undefined,
+    'cft-acl': undefined,
+    'cft-manuf': undefined,
+  });
+  // The combat fitness test has no published minimum: its top score.
+  expect(targetFor(event('cft-acl'))).toBe(110);
+});
+
+it('names the grade on each test, grouping tests that agree', () => {
+  expect(formatGrades(gradesFor(event('run-2mi'), 'male', 17 * 60 + 20))).toBe(
+    'C+ USAF · USSF',
+  );
+  expect(formatGrades(gradesFor(event('plank'), 'male', 150))).toBe(
+    'C+ USMC · B− USAF · B USSF',
+  );
 });
 
 it('picks the most reps, or the fastest time counting longer runs at the same pace', () => {

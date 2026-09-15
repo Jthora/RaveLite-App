@@ -7,6 +7,8 @@
  *   - max test (NumberPad) — the only thing that raises set size
  *   - level up to the next variation once the set size graduates
  *   - track on/off
+ *   - why each track asks for the sets it does: the daily review reads
+ *     the last week and adds a set, holds, or eases off (`program/adapt.ts`)
  *
  * Renders as a plain section; the sheet owns the scroll. Rounds
  * spread across My day. All writes go through the program repository or
@@ -44,7 +46,13 @@ import {
   subscribeProgram,
 } from '../../domain/program/repository';
 import {TRACKS, trackById} from '../../domain/program/tracks';
-import type {DayPrescription, Track, TrackId} from '../../domain/program/types';
+import {UP_AT} from '../../domain/program/adapt';
+import type {
+  DayPrescription,
+  Track,
+  TrackId,
+  TrackReview,
+} from '../../domain/program/types';
 import {formatDuration} from '../../domain/training/grading';
 
 import {ELEMENTS} from '../../theme/elements';
@@ -94,6 +102,16 @@ export function DailySetsSection() {
       program.tracks[tr.id].enabled &&
       !today.prescriptions.some(p => p.trackId === tr.id),
   );
+  // How much of last week's sets got done, across the tracks reviewed.
+  const ratios = TRACKS.flatMap(tr => {
+    const state = program.tracks[tr.id];
+    const ratio = state.lastReview?.ratio;
+    return state.enabled && ratio !== undefined ? [ratio] : [];
+  });
+  const lastWeek =
+    ratios.length > 0
+      ? ratios.reduce((sum, r) => sum + r, 0) / ratios.length
+      : undefined;
 
   const logSet = useCallback(
     (p: DayPrescription) => {
@@ -122,6 +140,11 @@ export function DailySetsSection() {
         <Text style={styles.subtitle}>
           {setsDone} of {setsTotal} sets · My day {myDay.start}–{myDay.end}
         </Text>
+        {lastWeek !== undefined ? (
+          <Text testID="sets-last-week" style={styles.lastWeek}>
+            Last week: {Math.round(lastWeek * 100)}% of sets done
+          </Text>
+        ) : null}
       </View>
 
       {today.prescriptions.length === 0 ? (
@@ -147,6 +170,7 @@ export function DailySetsSection() {
               testMax={state.testMax}
               canLevelUp={readyToLevelUp(track, state)}
               nextRungLabel={track.ladder[state.rung + 1]?.label}
+              review={state.lastReview}
               onLogSet={() => logSet(p)}
               onTest={() => setTesting(p.trackId)}
               onLevelUp={() => levelUpTrack(p.trackId)}
@@ -232,6 +256,8 @@ interface TrackCardProps {
   testMax: number;
   canLevelUp: boolean;
   nextRungLabel?: string;
+  /** Why today asks for these sets. */
+  review?: TrackReview;
   onLogSet: () => void;
   onTest: () => void;
   onLevelUp: () => void;
@@ -248,6 +274,7 @@ function TrackCard({
   testMax,
   canLevelUp,
   nextRungLabel,
+  review,
   onLogSet,
   onTest,
   onLevelUp,
@@ -292,6 +319,9 @@ function TrackCard({
         {formatSetAmount(p.setSize, p.unit)} each
         {complete ? ' · done ✓' : nextAt ? ` · next ${formatHHMM(nextAt)}` : ''}
       </Text>
+      {review ? (
+        <Text style={styles.cardReview}>{reviewLine(review)}</Text>
+      ) : null}
       {untested ? (
         <Text style={styles.cardNote}>
           Not tested yet — assuming a max of {formatMax(track, testMax)}.
@@ -411,6 +441,35 @@ function formatMax(track: Track, max: number): string {
   return track.unit === 'seconds' ? formatDuration(max) : `${max} reps`;
 }
 
+/** Why a track asks for its sets, from its latest daily review. */
+export function reviewLine(review: TrackReview): string {
+  const pct =
+    review.ratio !== undefined ? `${Math.round(review.ratio * 100)}%` : '';
+  const upAt = `${Math.round(UP_AT * 100)}%`;
+  const sets = `${review.sets} ${review.sets === 1 ? 'set' : 'sets'} a day`;
+  switch (review.change) {
+    case 'new':
+      return `Starting at ${sets}. After a week at ${upAt} or more, a set more.`;
+    case 'up':
+      return `Up to ${sets}: ${pct} of last week's sets done.`;
+    case 'down':
+      return `Eased to ${sets}: ${pct} of last week's sets done. ${upAt} for a week brings a set back.`;
+    case 'top':
+      return `At the most, ${sets}. A new max test makes each set bigger.`;
+    case 'rebuild':
+      return `Back from a break at ${sets}: a set more after every three good days.`;
+    case 'deload':
+      return `Deload week: lighter on purpose. The climb picks up after it.`;
+    case 'hold':
+      if (review.ratio === undefined) {
+        return `Holding at ${sets} until there are a few days to go on.`;
+      }
+      return review.ratio >= UP_AT
+        ? `Holding at ${sets}: ${pct} last week. A set more comes a week after the last step.`
+        : `Holding at ${sets}: ${pct} of last week's sets done. ${upAt} adds a set.`;
+  }
+}
+
 function formatHHMM(ts: number): string {
   const d = new Date(ts);
   const hh = String(d.getHours()).padStart(2, '0');
@@ -497,6 +556,16 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.text,
     marginTop: spacing.xs,
+  },
+  cardReview: {
+    ...t.caption,
+    color: palette.textDim,
+    marginTop: spacing.xs,
+  },
+  lastWeek: {
+    ...t.caption,
+    color: palette.textDim,
+    marginTop: 2,
   },
   cardActions: {
     flexDirection: 'row',
