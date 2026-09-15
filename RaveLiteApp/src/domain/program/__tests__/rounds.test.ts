@@ -70,13 +70,13 @@ describe('groupIntoRounds', () => {
     },
   );
 
-  it('turns week 1 Monday into nine rounds of three or four moves', () => {
-    expect(totalSets(monday)).toBe(35);
+  it('turns week 1 Monday into nine rounds of three to five moves', () => {
+    expect(totalSets(monday)).toBe(38);
     const rounds = groupIntoRounds(monday);
     expect(rounds).toHaveLength(TARGET_ROUNDS);
     for (const r of rounds) {
       expect(r.moves.length).toBeGreaterThanOrEqual(3);
-      expect(r.moves.length).toBeLessThanOrEqual(4);
+      expect(r.moves.length).toBeLessThanOrEqual(5);
     }
   });
 

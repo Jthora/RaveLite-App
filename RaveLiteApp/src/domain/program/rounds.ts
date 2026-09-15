@@ -26,7 +26,7 @@ import type {
  *   - Each track's sets spread evenly across the rounds, and rounds fill
  *     evenly.
  *   - Moves run push, posture, row, squat, mobility, pull, crunch, leg-ups,
- *     hang, plank, side and breath last, so elements alternate; grip-heavy row, pull and hang
+ *     hang, plank, side, breath and stillness last, so elements alternate; grip-heavy row, pull and hang
  *     are kept in separate rounds when there's room.
  *
  * Smart partners: given the week's work per element, each round's partner
@@ -54,6 +54,7 @@ const ROUND_ORDER: readonly TrackId[] = [
   'plank',
   'side',
   'breath',
+  'stillness',
 ];
 const GRIP: ReadonlySet<TrackId> = new Set<TrackId>(['row', 'pull', 'hang']);
 

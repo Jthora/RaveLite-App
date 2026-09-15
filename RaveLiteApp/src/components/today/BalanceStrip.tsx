@@ -1,6 +1,8 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+import {Settings} from 'lucide-react-native';
 
+import {ElementGlyph} from '../icons/ElementGlyph';
 import {Tap} from '../Tap';
 import {DAILY_PAR} from '../../domain/activity/par';
 import {ELEMENTS, ELEMENT_ORDER, type ElementId} from '../../theme/elements';
@@ -13,20 +15,27 @@ interface Props {
   /** Per element, points for each of the last 7 days (today last). */
   week?: Record<ElementId, readonly number[]>;
   onElementPress?: (id: ElementId) => void;
+  /** The gear at the end of the strip. */
+  onSettingsPress?: () => void;
+  /** Something in Settings needs attention (notifications off, a warning). */
+  settingsAlert?: boolean;
 }
 
 /**
- * Today's balance: each element's effort points with a bar filling toward
- * par, and a dot for each of the last seven days — solid on days it reached
- * par, faint on days it got something. A partner drill or a glass of water
- * counts toward its own element, so Fire work lifts the others too. Tap an
- * element to open it.
+ * Today's balance, and the way around the app: each element's effort
+ * points with a bar filling toward par, and a dot for each of the last
+ * seven days — solid on days it reached par, faint on days it got
+ * something. A partner drill or a glass of water counts toward its own
+ * element, so Fire work lifts the others too. Tap an element for its page;
+ * the gear at the end opens Settings.
  */
 export function BalanceStrip({
   points,
   par = DAILY_PAR,
   week,
   onElementPress,
+  onSettingsPress,
+  settingsAlert = false,
 }: Props) {
   return (
     <View style={styles.row}>
@@ -40,19 +49,19 @@ export function BalanceStrip({
         return (
           <Tap
             key={id}
+            testID={`strip-${id}`}
             variant="plain"
             color={el.color}
             onPress={() => onElementPress?.(id)}
             accessibilityRole="button"
-            accessibilityLabel={`${el.name}: ${n} of ${par} points today; par on ${parDays} of the last 7 days`}
+            accessibilityLabel={`${el.name}: ${n} of ${par} points today; par on ${parDays} of the last 7 days. Open`}
             style={[styles.cell, lit && {borderColor: el.color}]}>
-            <Text
-              style={[
-                styles.glyph,
-                {color: lit ? el.color : palette.textMuted},
-              ]}>
-              {el.glyph}
-            </Text>
+            <ElementGlyph
+              element={el}
+              size={20}
+              color={lit ? el.color : palette.textMuted}
+              style={styles.glyph}
+            />
             <Text
               style={[
                 styles.count,
@@ -95,6 +104,21 @@ export function BalanceStrip({
           </Tap>
         );
       })}
+      {onSettingsPress ? (
+        <Tap
+          testID="settings-open"
+          variant="plain"
+          color={palette.textDim}
+          onPress={onSettingsPress}
+          accessibilityRole="button"
+          accessibilityLabel={
+            settingsAlert ? 'Settings, something needs attention' : 'Settings'
+          }
+          style={styles.gear}>
+          <Settings size={20} color={palette.textDim} strokeWidth={2} />
+          {settingsAlert ? <View style={styles.alert} /> : null}
+        </Tap>
+      ) : null}
     </View>
   );
 }
@@ -102,7 +126,7 @@ export function BalanceStrip({
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.sm - 2,
   },
   cell: {
     flex: 1,
@@ -151,5 +175,24 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
+  },
+  gear: {
+    width: 40,
+    minHeight: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface,
+  },
+  alert: {
+    position: 'absolute',
+    top: -3,
+    right: -4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FFD60A',
   },
 });

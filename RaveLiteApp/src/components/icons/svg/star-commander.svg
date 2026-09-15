@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Star Commander: a regular five-pointed star whose lower legs are cut into two chevrons.
+       Traced from CommanderIcon.png. Fill is black; set fill to white (or any color) to tint. -->
+  <path fill="#000000" d="M50.00 6.25L60.86 39.67L96.00 39.67L67.57 60.33L50.00 47.56L32.43 60.33L4.00 39.67L39.14 39.67ZM29.71 68.68L50.00 53.94L70.29 68.68L73.00 77.04L50.00 60.33L27.00 77.04ZM24.29 85.39L50.00 66.71L75.71 85.39L78.43 93.75L50.00 73.09L21.57 93.75Z"/>
+</svg>

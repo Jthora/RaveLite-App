@@ -35,33 +35,49 @@ and Setup repeated the My day chip and the per-element test buttons.
 
 ## Navigation
 
-- The five-element rail is the only navigation. The app **always opens on
-  Heart**.
+- **No tab bar.** Today is home and always open underneath. Its balance
+  strip is the navigation: tap an element (Fire, Air, Core, Earth or
+  Water) for its page, drawn over Today; Back (the page's ‹ or Android's)
+  returns to Today where it was left. The gear at the end of the strip
+  opens Settings. The bar went to give the page its height back.
+- **No clock or My day chip.** Android's status bar shows the time; My day
+  and pausing live in Settings.
 - **No sub-tabs.** Each element is one scrolling page. Anything
   lower-priority opens in a full-screen sheet from that page.
-- Heart is Today. Fire, Air, Earth and Water each have one page (below).
+
+## Core themes (`src/theme/heartVariants.ts`, `src/components/icons/ElementGlyph.tsx`)
+
+Settings › Theme swaps how Core presents itself, in one row of tiles:
+**Core** (⊙, orange), **Heart** (♡, magenta), **Æther** (six-pointed star,
+white), **Star** (five-pointed star, white) or **Commander** (the Star
+Commander mark, white). The white marks are SVG on a 100-unit grid. The
+Commander mark is a regular five-pointed star whose lower legs are cut into
+two chevrons: below the body, four equal bands parallel to the legs' inner
+edges (gap, chevron, gap, chevron). It was traced from the CommanderIcon
+reference (98% pixel overlap) and is also saved as
+`src/components/icons/svg/star-commander.svg`. Storage keeps `heart` as the
+element id whatever the theme.
 
 ## Today (`src/screens/heart/TodayPanel.tsx`)
 
 Top to bottom, one scroll:
 
-1. **Status line** — one chip for live or paused and My day (tap: edit My
-   day, pause 30 min / 2 h / until tomorrow, or resume), the clock, and
-   **⚙ Settings**, which carries a yellow dot when notifications are off or
-   a Stay alive check warns. Under it, the **conditions line**: the next
-   sunrise or sunset and, with a forecast, the temperature, rain chance and
-   bug estimate now (before a place is set, it asks for one). Tap for the
-   Weather sheet.
+1. **Conditions line**, once a place is set — the next sunrise or sunset
+   and, with a forecast, the temperature, rain chance and bug estimate now.
+   Tap for the Weather sheet. Before a place is set it doesn't show;
+   Settings asks for one.
 2. **Chime card** — while a chime sounds: the round's moves, each with its
    own −/+, its partner drill and any glass of water, a draining answer
    window, and **Done / +5 / Skip**. Otherwise the next chime with **+5**
    and **Skip it**. A chime the weather changed says why, e.g. "Rain 80% —
-   Fire Rounds inside instead".
+   Fire Rounds inside instead". While chimes are paused, the card says until
+   when, with **Resume now**.
 3. **Balance strip** — today's points per element with a bar filling
    toward par (20), and seven dots for the last seven days: solid on days
    the element made par, faint on days it got something. Tap to open the
-   element. Partner drills, glasses and eye breaks count toward their own
-   elements.
+   element's page. Partner drills, glasses and eye breaks count toward their
+   own elements. The narrow gear tile at the end opens **Settings**, with a
+   yellow dot when notifications are off or a Stay alive check warns.
 4. **Drink** — glasses of water today out of 8 (10 on a hot day, 12 in
    dangerous heat), with **+1**.
 5. **Daily Sets meters** — sets done, then one small meter per track in its
@@ -83,11 +99,12 @@ Top to bottom, one scroll:
 
 ## Sheets
 
-- **Settings** (⚙ on Today) — chime volumes with a test per element and
-  Respect DND, the Stay alive checklist, the plan editor ("Save plan"),
-  restoring a plan the v2 migration replaced, alive motion, Heart theme. A
-  notifications-off warning leads when permission is denied. My day is
-  edited from Today's chip.
+- **Settings** (the gear at the end of the balance strip) — My day, pause
+  chimes (30 min, 2 hours, till morning, or resume), Weather & place (it
+  asks for a place until one is set), chime volumes with a test per element
+  and Respect DND, the Stay alive checklist, the plan editor, restoring a
+  plan the v2 migration replaced, alive motion, and the Core theme. A
+  notifications-off warning leads when permission is denied.
 - **Weather** (Today's conditions line, or Settings › Weather & place) —
   the place (type a town, or Use my location), today's first light,
   sunrise, sunset and daylight, the next 12 hours, and switches for Buggy
@@ -103,9 +120,10 @@ row and Test chime button, and the Daily Sets explainer paragraph.
 
 ## Element pages (`src/screens/element/ElementPage.tsx`)
 
-One scroll:
+Fire, Air, Core, Earth and Water each have one, opened over Today from the
+balance strip. One scroll:
 
-1. **Header** — the element's name, "14/20 today · 62 this week · 4-day
+1. **Header** — ‹ back to Today, the element's glyph and name, "14/20 today · 62 this week · 4-day
    streak" in points, the best result of the last 30 days (a run's 3-mile-equivalent
    grade, otherwise the most-logged kind's best), and **+ Log**.
 2. **Try this now** — name and dose, with the why and the cues folded
@@ -182,9 +200,11 @@ Water 13 · Core 5 · Air 2.
 - **Water** gets **Mobility** every day (hamstring floss → deep squat hold
   → front split progression), and the morning session's Water slot is
   always a few minutes of staff flow (Flow + Coordination, at most 10 min).
-- **Core** gets a **Morning Intent** check-in at 05:05, and the Evening
-  Review always chimes as itself (a slot can name its drill with
-  `exerciseId`); it now opens with a three-minute still sit.
+- **Core** gets its own Daily Sets track, **Stillness** (pulse check →
+  still sit → single-point focus, small timed sets every day), a **Morning
+  Intent** check-in at 05:05, and the Evening Review at 20:45, which always
+  chimes as itself (a slot can name its drill with `exerciseId`) and opens
+  with a three-minute still sit.
 - **Check.** Answering every chime for eight days from Monday 14 September
   put every element at par every day except Sunday's Earth (18: most
   strength tracks rest, and rounds holding an Earth move can't end on an
@@ -262,8 +282,8 @@ Water 13 · Core 5 · Air 2.
 
 ## My day
 
-`ambient.activeHours`, default **05:00–22:00**, all days (moved from 09:00 on
-2026-09-14: the operator runs in the morning). The one window
+`ambient.activeHours`, default **05:00–21:00**, all days (it was
+09:00–22:00; the operator runs in the morning and winds down at 21:00). The one window
 for paging, for spreading rounds (they stop 90 minutes before the end) and
 for night dimming. Saving it re-lays chimes, re-plans backups and re-checks
 the screen and foreground service at once.
@@ -293,6 +313,8 @@ the screen and foreground service at once.
   Evening Review pinned to its own drill, and staff flow in the morning
   session. The Posture, Breath and Mobility tracks need no migration: a
   stored program fills in tracks it doesn't know.
+- **v6.** An untouched My day (05:00–22:00) ends at 21:00, and an untouched
+  v5 default plan moves the Evening Review from 21:30 to 20:45, inside it.
 
 ## Verification
 

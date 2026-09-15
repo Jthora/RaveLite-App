@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 
+import {ElementGlyph} from '../icons/ElementGlyph';
+
 import {formatHM} from '../ambient/format';
 import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
@@ -95,9 +97,11 @@ export function CatchUpSheet({visible, rows, onLog, onClose}: Props) {
                     {row.move ? (
                       <MoveIcon move={row.move} color={el.color} size={18} />
                     ) : (
-                      <Text style={[styles.glyph, {color: el.color}]}>
-                        {el.glyph}
-                      </Text>
+                      <ElementGlyph
+                        element={el}
+                        size={18}
+                        style={styles.glyph}
+                      />
                     )}
                     <View style={styles.body}>
                       <Text style={styles.label} numberOfLines={1}>

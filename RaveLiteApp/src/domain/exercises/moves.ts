@@ -141,6 +141,8 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'heart.mirror-presence': 'presence',
   'heart.evening-review': 'evening',
   'heart.pulse-check': 'pulse',
+  'heart.still-sit': 'pulse',
+  'heart.single-point-focus': 'presence',
   'heart.fuel-check': 'fuel',
   'heart.rave-vision': 'presence',
 };
@@ -190,6 +192,7 @@ const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {
   posture: 'posture',
   breath: 'breath',
   mobility: 'hipopener',
+  stillness: 'pulse',
 };
 
 export function moveForExercise(id: string | undefined): MoveId | undefined {

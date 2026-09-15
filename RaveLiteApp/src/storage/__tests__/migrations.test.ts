@@ -2,7 +2,12 @@ import {DEFAULT_PLAN} from '../../domain/reminders/defaultPlan';
 import type {Plan} from '../../domain/reminders/types';
 import {store} from '../index';
 import {CURRENT_SCHEMA_VERSION, KEYS} from '../keys';
-import {V3_DEFAULT_PLAN, V4_DEFAULT_PLAN, runMigrations} from '../migrations';
+import {
+  V3_DEFAULT_PLAN,
+  V4_DEFAULT_PLAN,
+  V5_DEFAULT_PLAN,
+  runMigrations,
+} from '../migrations';
 import {DEFAULT_ACTIVE_HOURS} from '../../domain/ambient/types';
 
 const NOW = 1_700_000_000_000;
@@ -148,5 +153,27 @@ describe('v5', () => {
     expect(
       json(KEYS.planCurrent).windows.map((w: {id: string}) => w.id),
     ).toContain('morning-intent');
+  });
+});
+
+describe('v6', () => {
+  it('ends an untouched My day at 21:00 and moves the Evening Review inside it', () => {
+    store.set(KEYS.schemaVersion, 5);
+    store.set(
+      KEYS.activeHours,
+      JSON.stringify({start: '05:00', end: '22:00', daysMask: 0b1111111}),
+    );
+    store.set(KEYS.planCurrent, JSON.stringify(V5_DEFAULT_PLAN));
+    runMigrations(NOW);
+    expect(json(KEYS.activeHours)).toEqual(DEFAULT_ACTIVE_HOURS);
+    expect(json(KEYS.planCurrent)).toEqual(DEFAULT_PLAN);
+  });
+
+  it('leaves a My day the operator set', () => {
+    const mine = {start: '06:00', end: '22:00', daysMask: 0b1111111};
+    store.set(KEYS.schemaVersion, 5);
+    store.set(KEYS.activeHours, JSON.stringify(mine));
+    runMigrations(NOW);
+    expect(json(KEYS.activeHours)).toEqual(mine);
   });
 });

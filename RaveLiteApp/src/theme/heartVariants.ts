@@ -24,7 +24,16 @@ import {ELEMENTS, type ElementIdentity} from './elements';
 import {store} from '../storage';
 import {KEYS} from '../storage/keys';
 
-export type HeartVariantId = 'heart' | 'core';
+export type HeartVariantId = 'core' | 'heart' | 'aether' | 'star' | 'commander';
+
+/** The order the theme picker shows them in. */
+export const HEART_VARIANT_ORDER: readonly HeartVariantId[] = [
+  'core',
+  'heart',
+  'aether',
+  'star',
+  'commander',
+];
 
 export interface HeartVariantDef {
   id: HeartVariantId;
@@ -38,6 +47,11 @@ export interface HeartVariantDef {
  * Geometric / abstract symbols only. No cultural or religious glyphs.
  *  ⊙  U+2299  CIRCLED DOT OPERATOR    — circle with a point in the center
  *  ♡  U+2661  WHITE HEART SUIT        — outline heart, geometric
+ *  ✶  U+2736  SIX POINTED BLACK STAR  — Æther, drawn as an SVG star
+ *  ★  U+2605  BLACK STAR              — Star and Commander, drawn as SVG
+ *
+ * The three white variants draw their glyph as SVG (`icon`); the Unicode
+ * glyph stays as the fallback for plain text such as notification titles.
  *
  * Color palette for `core`:
  *   Hue ~32° — orange that sits between yellow (~60°) and red (~0°).
@@ -79,6 +93,62 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
       verbDone: 'Center',
     },
   },
+  aether: {
+    id: 'aether',
+    description:
+      'White six-pointed star — the quintessence, the fifth that holds the four.',
+    identity: {
+      name: 'Æther',
+      domain: 'Spirit & Cadence',
+      ethos:
+        'The quintessence. Schedule, reminders, presence. The fifth that holds the four; the still light the rave rises from.',
+      glyph: '\u2736', // ✶
+      icon: 'star6',
+      emoji: '✶',
+      color: '#F5F7FA',
+      tint: '#F5F7FA1F',
+      deep: '#5C6475',
+      accent: '#C6FF00',
+      verbDone: 'Still',
+    },
+  },
+  star: {
+    id: 'star',
+    description: 'White five-pointed star — a fixed point to steer the day by.',
+    identity: {
+      name: 'Star',
+      domain: 'Aim & Cadence',
+      ethos:
+        'The guiding star. Schedule, reminders, presence. The fixed point the day steers by.',
+      glyph: '\u2605', // ★
+      icon: 'star5',
+      emoji: '★',
+      color: '#F5F7FA',
+      tint: '#F5F7FA1F',
+      deep: '#5C6475',
+      accent: '#C6FF00',
+      verbDone: 'Shine',
+    },
+  },
+  commander: {
+    id: 'commander',
+    description:
+      'Star Commander — the star with two chevrons: rank earned one set at a time.',
+    identity: {
+      name: 'Commander',
+      domain: 'Command & Cadence',
+      ethos:
+        'Star Commander. Schedule, reminders, presence. The call answered, the rank earned one set at a time.',
+      glyph: '\u2605', // ★
+      icon: 'commander',
+      emoji: '★',
+      color: '#F5F7FA',
+      tint: '#F5F7FA1F',
+      deep: '#5C6475',
+      accent: '#C6FF00',
+      verbDone: 'Command',
+    },
+  },
 };
 
 const STORAGE_KEY = KEYS.setting('heart.variant');
@@ -89,8 +159,8 @@ const STORAGE_KEY = KEYS.setting('heart.variant');
  */
 export function getHeartVariant(): HeartVariantId {
   const raw = store.getString(STORAGE_KEY);
-  if (raw === 'heart' || raw === 'core') {
-    return raw;
+  if (raw !== undefined && raw in HEART_VARIANTS) {
+    return raw as HeartVariantId;
   }
   return 'heart';
 }
@@ -109,6 +179,7 @@ export function applyHeartVariant(id: HeartVariantId): void {
   target.domain = def.identity.domain;
   target.ethos = def.identity.ethos;
   target.glyph = def.identity.glyph;
+  target.icon = def.identity.icon;
   target.emoji = def.identity.emoji;
   target.color = def.identity.color;
   target.tint = def.identity.tint;

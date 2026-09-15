@@ -1,5 +1,6 @@
 /**
- * ElementPage — Fire, Air, Earth or Water on one page.
+ * ElementPage — Fire, Air, Core, Earth or Water on one page, opened over
+ * Today from its balance strip.
  *
  * Under the element's name: the day in numbers and the best result of the
  * last 30 days. Then a drill to try now (Done logs it, Swap offers the
@@ -11,9 +12,12 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 
+import {ChevronLeft} from 'lucide-react-native';
+
 import {DayRibbon} from '../../components/element/DayRibbon';
 import {DrillCard} from '../../components/element/DrillCard';
 import {LibrarySheet} from '../../components/element/LibrarySheet';
+import {ElementGlyph} from '../../components/icons/ElementGlyph';
 import {Tap} from '../../components/Tap';
 import {DayList} from '../../components/today/DayList';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
@@ -49,6 +53,8 @@ const RIBBON_DAYS = 14;
 
 interface Props {
   element: ElementIdentity;
+  /** Back to Today. */
+  onBack?: () => void;
 }
 
 function startOfDay(ms: number): number {
@@ -57,7 +63,7 @@ function startOfDay(ms: number): number {
   return d.getTime();
 }
 
-export function ElementPage({element}: Props) {
+export function ElementPage({element, onBack}: Props) {
   const [version, setVersion] = useState(0);
   useEffect(() => subscribeActivity(() => setVersion(v => v + 1)), []);
 
@@ -161,9 +167,30 @@ export function ElementPage({element}: Props) {
       showsVerticalScrollIndicator={false}>
       <View>
         <View style={styles.header}>
-          <Text style={[styles.name, {color: element.color}]}>
-            {element.glyph} {element.name}
-          </Text>
+          <View style={styles.titleRow}>
+            {onBack ? (
+              <Tap
+                testID="page-back"
+                variant="plain"
+                color={element.accent}
+                onPress={onBack}
+                accessibilityRole="button"
+                accessibilityLabel="Back to Today"
+                style={styles.back}>
+                <ChevronLeft
+                  size={26}
+                  color={palette.textDim}
+                  strokeWidth={2.2}
+                />
+              </Tap>
+            ) : null}
+            <ElementGlyph element={element} size={24} />
+            <Text
+              style={[styles.name, {color: element.color}]}
+              numberOfLines={1}>
+              {element.name}
+            </Text>
+          </View>
           <Tap
             testID="log-open"
             variant="ghost"
@@ -285,6 +312,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.md,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flexShrink: 1,
+  },
+  back: {
+    width: 40,
+    minHeight: 48,
+    justifyContent: 'center',
+    marginLeft: -spacing.sm,
   },
   name: {
     ...t.title,

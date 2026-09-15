@@ -31,10 +31,10 @@ import {Plan} from './types';
  *   Fuel checks (11:55 and 19:05 daily):
  *     Heart 1× — hand-portion plate check before lunch and dinner
  *
- *   Evening (21:30):
+ *   Evening (20:45, before the 21:00 wind-down):
  *     Heart 1× — Evening Review: a still sit, then the review
  *
- * Everything sits inside the default My day (05:00-22:00); a weekday comes
+ * Everything sits inside the default My day (05:00-21:00); a weekday comes
  * to roughly twenty chimes.
  *
  * Keep this file the single source of "factory settings". A persisted plan
@@ -110,8 +110,8 @@ export const DEFAULT_PLAN: Plan = {
     {
       id: 'evening-close',
       label: 'Evening Review',
-      startTime: '21:30',
-      endTime: '21:31',
+      startTime: '20:45',
+      endTime: '20:46',
       daysOfWeek: ALL_DAYS,
       slots: [
         {element: 'heart', everyMinutes: 1, exerciseId: 'heart.evening-review'},

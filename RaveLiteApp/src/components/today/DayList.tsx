@@ -1,6 +1,8 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+import {ElementGlyph} from '../icons/ElementGlyph';
+
 import {formatHM} from '../ambient/format';
 import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
@@ -67,7 +69,7 @@ export function DayList({
                 <MoveIcon move={row.move} color={el.color} size={18} />
               </View>
             ) : (
-              <Text style={[styles.glyph, {color: el.color}]}>{el.glyph}</Text>
+              <ElementGlyph element={el} size={16} style={styles.glyph} />
             )}
             <View style={styles.body}>
               <Text

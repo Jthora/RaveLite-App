@@ -11,6 +11,9 @@
 
 export type ElementId = 'fire' | 'air' | 'earth' | 'water' | 'heart';
 
+/** SVG glyph shapes, drawn by `components/icons/ElementGlyph`. */
+export type GlyphIconId = 'star5' | 'star6' | 'commander';
+
 export interface ElementIdentity {
   id: ElementId;
   /** Display name. */
@@ -19,8 +22,10 @@ export interface ElementIdentity {
   domain: string;
   /** Long-form purpose — drives copy and onboarding. */
   ethos: string;
-  /** Alchemical glyph (unicode). */
+  /** Alchemical glyph (unicode); also the text fallback for `icon`. */
   glyph: string;
+  /** An SVG shape drawn in place of `glyph` wherever the UI can. */
+  icon?: GlyphIconId;
   /** Emoji fallback if alchemical glyph fails to render. */
   emoji: string;
   /** Primary brand color for this element. */

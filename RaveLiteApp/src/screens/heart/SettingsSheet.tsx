@@ -9,7 +9,15 @@ import React, {useEffect, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {formatHM} from '../../components/ambient/format';
 import {Tap} from '../../components/Tap';
+import {MyDaySheet} from '../../components/today/MyDaySheet';
+import {
+  getActiveHours,
+  readPauseUntil,
+  setActiveHours,
+} from '../../domain/ambient/activeHours';
+import {setPause, type PauseDurationKey} from '../../domain/ambient/pause';
 import {
   loadPlan,
   savePlan,
@@ -37,6 +45,20 @@ interface Props {
 }
 
 /** When the v2 migration replaced a saved plan, and the backup still exists. */
+const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+const PAUSES: {key: PauseDurationKey; label: string}[] = [
+  {key: 'p30', label: '30 min'},
+  {key: 'p2h', label: '2 hours'},
+  {key: 'tonight', label: 'Till morning'},
+];
+
+function daysLabel(mask: number): string {
+  return mask === 0b1111111
+    ? 'every day'
+    : DAY_LETTERS.filter((_, i) => (mask & (1 << i)) !== 0).join(' ');
+}
+
 function replacedPlanAt(): number | undefined {
   const at = store.getNumber(KEYS.planReplacedAt);
   return at !== undefined && store.getString(KEYS.planBackupV1)
@@ -49,6 +71,15 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
   const [planOpen, setPlanOpen] = useState(false);
   const [weatherOpen, setWeatherOpen] = useState(false);
   const place = getPlace();
+  const [myDayOpen, setMyDayOpen] = useState(false);
+  const [, setVersion] = useState(0);
+  const myDay = getActiveHours();
+  const pauseUntil = readPauseUntil();
+  const paused = pauseUntil !== undefined && pauseUntil > Date.now();
+  const pause = (key: PauseDurationKey) => {
+    setPause(key);
+    setVersion(v => v + 1);
+  };
   const [replacedAt, setReplacedAt] = useState(replacedPlanAt);
   const [confirmRestore, setConfirmRestore] = useState(false);
 
@@ -100,8 +131,60 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
             </View>
           ) : null}
 
-          <ChimesPanel />
-          <StayAlivePanel />
+          <View style={styles.row}>
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>My day</Text>
+              <Text style={styles.rowValue}>
+                {myDay.start}–{myDay.end} · {daysLabel(myDay.daysMask)} · chimes
+                and a bright screen
+              </Text>
+            </View>
+            <Tap
+              testID="myday-edit"
+              variant="ghost"
+              color={palette.textDim}
+              onPress={() => setMyDayOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Edit My day"
+              style={styles.rowBtn}>
+              <Text style={styles.rowBtnText}>Edit</Text>
+            </Tap>
+          </View>
+
+          <View style={styles.stack}>
+            <Text style={styles.rowTitle}>
+              {paused && pauseUntil !== undefined
+                ? `Chimes paused until ${formatHM(pauseUntil)}`
+                : 'Pause chimes'}
+            </Text>
+            <View style={styles.pills}>
+              {paused ? (
+                <Tap
+                  testID="pause-off"
+                  variant="ghost"
+                  color={palette.textDim}
+                  onPress={() => pause('off')}
+                  accessibilityRole="button"
+                  style={styles.pill}>
+                  <Text style={styles.rowBtnText}>Resume</Text>
+                </Tap>
+              ) : (
+                PAUSES.map(option => (
+                  <Tap
+                    key={option.key}
+                    testID={`pause-${option.key}`}
+                    variant="ghost"
+                    color={palette.textDim}
+                    onPress={() => pause(option.key)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Pause chimes for ${option.label}`}
+                    style={styles.pill}>
+                    <Text style={styles.rowBtnText}>{option.label}</Text>
+                  </Tap>
+                ))
+              )}
+            </View>
+          </View>
 
           <View style={styles.row}>
             <View style={styles.rowText}>
@@ -109,7 +192,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
               <Text style={styles.rowValue}>
                 {place
                   ? `${place.name}: sunrise, rain, heat and bugs`
-                  : 'Not set: chimes ignore the weather'}
+                  : 'Set your place for sunrise and weather'}
               </Text>
             </View>
             <Tap
@@ -120,9 +203,12 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
               accessibilityRole="button"
               accessibilityLabel="Open weather and place"
               style={styles.rowBtn}>
-              <Text style={styles.rowBtnText}>Open</Text>
+              <Text style={styles.rowBtnText}>{place ? 'Open' : 'Set'}</Text>
             </Tap>
           </View>
+
+          <ChimesPanel />
+          <StayAlivePanel />
 
           <View style={styles.row}>
             <View style={styles.rowText}>
@@ -175,6 +261,15 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
         <WeatherSheet
           visible={weatherOpen}
           onClose={() => setWeatherOpen(false)}
+        />
+        <MyDaySheet
+          visible={myDayOpen}
+          value={myDay}
+          onClose={() => setMyDayOpen(false)}
+          onSave={value => {
+            setActiveHours(value);
+            setMyDayOpen(false);
+          }}
         />
         <Modal
           visible={planOpen}
@@ -275,5 +370,21 @@ const styles = StyleSheet.create({
   rowBtnText: {
     ...t.subtitle,
     color: palette.text,
+  },
+  stack: {
+    gap: spacing.sm,
+    backgroundColor: palette.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  pills: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  pill: {
+    minHeight: 44,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
   },
 });

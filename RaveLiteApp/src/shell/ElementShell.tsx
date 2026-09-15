@@ -1,110 +1,82 @@
 /**
- * ElementShell — the orientation-adaptive root of RaveLite's UX.
+ * ElementShell — the root: Today, with element pages opened over it.
  *
- * Replaces React Navigation's BottomTab.Navigator with a hand-rolled
- * shell that places the 5-element rail by orientation. Each element is one
- * page; lower-priority content opens in sheets from the page itself, so
- * there is no second row of tabs.
- *
- *   Portrait ───────────────┐   Landscape ──────────────────┐
- *   ┌─────────────────────┐ │   ┌─────────────────────┬───┐ │
- *   │                     │ │   │                     │ E │ │
- *   │  <ElementScreen />  │ │   │  <ElementScreen />  │ l │ │
- *   │                     │ │   │                     │ R │ │
- *   ├─────────────────────┤ │   │                     │ a │ │
- *   │     ElementRail     │ │   │                     │ i │ │
- *   └─────────────────────┘ │   └─────────────────────┴───┘ │
- *
- * The app always opens on Heart, the home screen.
+ * Today (Core's home) is always mounted. Its balance strip opens an
+ * element's page — Fire, Air, Core, Earth or Water — drawn over Today, and
+ * Back (the page's ‹ or Android's) returns to Today where it was left.
+ * There's no tab bar: the strip is the navigation and its gear opens
+ * Settings, so the whole height goes to content.
  */
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, StyleSheet, View} from 'react-native';
+import {Animated, BackHandler, StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-import {ElementRail} from './ElementRail';
-import {useOrientation} from './useOrientation';
 import {UndoBar} from '../components/UndoBar';
-
 import type {ElementId} from '../theme/elements';
 import {palette} from '../theme';
 
 import {makeElementScreen} from '../screens/ElementScreen';
 import HeartScreen from '../screens/HeartScreen';
 
-/** The contract every element screen satisfies. */
+/** The contract every screen satisfies. */
 export interface ElementScreenProps {
-  /** Cross-element jump, e.g. Today's balance strip opening an element. */
+  /** Open an element's page, e.g. from Today's balance strip. */
   onElementChange: (next: ElementId) => void;
+  /** Back to Today, for pages opened over it. */
+  onBack?: () => void;
 }
 
-const SCREENS: Record<ElementId, React.ComponentType<ElementScreenProps>> = {
+const PAGES: Record<ElementId, React.ComponentType<ElementScreenProps>> = {
   fire: makeElementScreen('fire'),
   air: makeElementScreen('air'),
-  heart: HeartScreen,
+  heart: makeElementScreen('heart'),
   earth: makeElementScreen('earth'),
   water: makeElementScreen('water'),
 };
 
 export function ElementShell(): React.JSX.Element {
-  const {orientation, isTablet} = useOrientation();
-  const isLandscape = orientation === 'landscape';
-
-  const [activeElement, setActiveElement] = useState<ElementId>('heart');
-
-  // Fade in on each element switch so it feels intentional rather than
-  // abrupt. 120ms is short enough not to delay interaction; long enough to
-  // register as a transition.
+  const [page, setPage] = useState<ElementId | undefined>();
   const fade = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
+    if (page === undefined) {
+      return;
+    }
+    // A short fade so opening a page reads as a step, not a jump.
     fade.setValue(0);
     Animated.timing(fade, {
       toValue: 1,
       duration: 120,
       useNativeDriver: true,
     }).start();
-  }, [activeElement, fade]);
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      setPage(undefined);
+      return true;
+    });
+    return () => sub.remove();
+  }, [page, fade]);
 
-  const Screen = SCREENS[activeElement];
-
-  const elementRail = (
-    <ElementRail
-      active={activeElement}
-      onChange={setActiveElement}
-      axis={isLandscape ? 'vertical' : 'horizontal'}
-      isTablet={isTablet}
-    />
-  );
-
-  const screen = (
-    <Animated.View style={[styles.content, {opacity: fade}]}>
-      <Screen onElementChange={setActiveElement} />
-      <UndoBar />
-    </Animated.View>
-  );
-
-  if (isLandscape) {
-    return (
-      <SafeAreaView
-        style={styles.root}
-        edges={['top', 'bottom', 'left', 'right']}>
-        <View style={styles.row}>
-          {screen}
-          {elementRail}
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const Page = page ? PAGES[page] : undefined;
 
   return (
-    <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
-      {screen}
-      {elementRail}
+    <SafeAreaView
+      style={styles.root}
+      edges={['top', 'bottom', 'left', 'right']}>
+      <View style={styles.content}>
+        <HeartScreen onElementChange={setPage} />
+        {Page ? (
+          <Animated.View style={[styles.page, {opacity: fade}]}>
+            <Page onElementChange={setPage} onBack={() => setPage(undefined)} />
+          </Animated.View>
+        ) : null}
+        <UndoBar />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   root: {flex: 1, backgroundColor: palette.bg},
-  row: {flex: 1, flexDirection: 'row'},
   content: {flex: 1},
+  page: {...StyleSheet.absoluteFillObject, backgroundColor: palette.bg},
 });

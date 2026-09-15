@@ -2,7 +2,7 @@
  * Daily Sets at a glance: sets done against today's total, and a meter per
  * track (amount done against the day's quota).
  */
-import type {ElementId} from '../../theme/elements';
+import {ELEMENT_ORDER, type ElementId} from '../../theme/elements';
 import {moveForTrack, type MoveId} from '../exercises/moves';
 import type {doneByTrack} from './progress';
 import {TRACKS} from './tracks';
@@ -32,6 +32,13 @@ export function meterFill(done: number, total: number): number {
   return total > 0 ? Math.min(1, Math.max(0, done / total)) : 0;
 }
 
+/** Tracks grouped by element, in the balance strip's order. */
+const byElement = (prescriptions: readonly DayPrescription[]) =>
+  [...prescriptions].sort(
+    (a, b) =>
+      ELEMENT_ORDER.indexOf(a.element) - ELEMENT_ORDER.indexOf(b.element),
+  );
+
 export function summarizeSets(
   prescriptions: readonly DayPrescription[],
   done: ReturnType<typeof doneByTrack>,
@@ -42,7 +49,7 @@ export function summarizeSets(
       0,
     ),
     total: prescriptions.reduce((sum, p) => sum + p.sets, 0),
-    tracks: prescriptions.map(p => {
+    tracks: byElement(prescriptions).map(p => {
       const total = p.setSize * p.sets;
       const amount = Math.min(total, done[p.trackId]?.amount ?? 0);
       return {

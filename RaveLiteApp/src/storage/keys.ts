@@ -74,4 +74,4 @@ export const KEYS = {
  *       Training (a different saved plan is kept under `planBackupV1`),
  *       and Daily Sets lose their own day window.
  */
-export const CURRENT_SCHEMA_VERSION = 5;
+export const CURRENT_SCHEMA_VERSION = 6;

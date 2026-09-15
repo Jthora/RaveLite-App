@@ -1,8 +1,7 @@
 /**
- * Element screens — Fire, Air, Earth and Water share one page: a drill to
- * try now, the last 14 days and a day's log (see `element/ElementPage`).
- *
- * Heart is different (it is home) and lives in `HeartScreen.tsx`.
+ * Element screens — Fire, Air, Core, Earth and Water share one page: the
+ * day in points, a drill to try now, the last 14 days and a day's log (see
+ * `element/ElementPage`). They open over Today from its balance strip.
  */
 import React from 'react';
 
@@ -12,19 +11,18 @@ import {ElementProvider} from '../theme/elementContext';
 import {ELEMENTS, type ElementId} from '../theme/elements';
 import {ElementPage} from './element/ElementPage';
 
-export function makeElementScreen(
-  id: Exclude<ElementId, 'heart'>,
-): React.FC<ElementScreenProps> {
-  const ElementScreen: React.FC<ElementScreenProps> = () => {
+export function makeElementScreen(id: ElementId): React.FC<ElementScreenProps> {
+  const ElementScreen: React.FC<ElementScreenProps> = ({onBack}) => {
+    // Read at render: Core's name and colors follow the theme.
     const element = ELEMENTS[id];
     return (
       <ScreenScaffold element={element}>
         <ElementProvider element={element}>
-          <ElementPage element={element} />
+          <ElementPage element={element} onBack={onBack} />
         </ElementProvider>
       </ScreenScaffold>
     );
   };
-  ElementScreen.displayName = `${ELEMENTS[id].name}Screen`;
+  ElementScreen.displayName = `ElementScreen(${id})`;
   return ElementScreen;
 }

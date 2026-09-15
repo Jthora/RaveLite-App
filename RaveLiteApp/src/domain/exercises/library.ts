@@ -1443,6 +1443,37 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 300,
   },
   {
+    id: 'heart.still-sit',
+    element: 'heart',
+    name: 'Still Sit',
+    purpose:
+      'Attention held: stay still and let the noise settle, without fixing anything.',
+    dose: '60 sec',
+    cues: [
+      'Sit or stand tall, hands resting, eyes soft or closed',
+      'Breathe low and slow; let the exhale run longer',
+      'When the mind wanders, notice and come back: the return is the rep',
+    ],
+    targets: ['Presence', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'heart.single-point-focus',
+    element: 'heart',
+    name: 'Single-Point Focus',
+    purpose: 'Focus on purpose: one point, held a little longer each time.',
+    dose: '90 sec',
+    cues: [
+      'Pick one small point at eye level, a metre or two away',
+      'Rest your gaze on it; blink when you need to',
+      'Each time attention drifts, bring it back to the point',
+    ],
+    targets: ['Presence', 'NoFloor'],
+    venues: ['desk', 'standing'],
+    approxSeconds: 90,
+  },
+  {
     id: 'heart.pulse-check',
     element: 'heart',
     name: 'Pulse Check',

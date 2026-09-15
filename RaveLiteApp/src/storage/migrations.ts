@@ -44,6 +44,9 @@ export function runMigrations(now: number = Date.now()): void {
   if (from < 5) {
     addCoreCheckIns();
   }
+  if (from < 6) {
+    windDownAtNine();
+  }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
 }
@@ -263,6 +266,117 @@ export const V4_DEFAULT_PLAN: Plan = {
 function addCoreCheckIns(): void {
   const rawPlan = store.getString(KEYS.planCurrent);
   if (rawPlan !== undefined && isPlan(rawPlan, V4_DEFAULT_PLAN)) {
+    store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
+  }
+}
+
+/** My day as the factory set it in v4 and v5. */
+const V5_DEFAULT_HOURS: ActiveHours = {
+  start: '05:00',
+  end: '22:00',
+  daysMask: 0b1111111,
+};
+
+/** The default plan as it stood in v5, before the 21:00 wind-down. */
+export const V5_DEFAULT_PLAN: Plan = {
+  id: 'default',
+  name: 'Operator Baseline',
+  windows: [
+    {
+      id: 'hydration',
+      label: 'Water Calls',
+      startTime: '05:30',
+      endTime: '20:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {
+          element: 'water',
+          everyMinutes: 120,
+          maxSeconds: 60,
+          requiredTags: ['Hydration'],
+        },
+      ],
+    },
+    {
+      id: 'morning-intent',
+      label: 'Morning Intent',
+      startTime: '05:05',
+      endTime: '05:06',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'heart', everyMinutes: 1, exerciseId: 'heart.morning-intent'},
+      ],
+    },
+    {
+      // Id kept from the evening "Backyard Session" so migrations and
+      // stored pulse ids line up.
+      id: 'backyard-session',
+      label: 'Morning Session',
+      startTime: '05:45',
+      endTime: '07:00',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'fire', everyMinutes: 45, requiredTags: ['Conditioning']},
+        {
+          element: 'water',
+          everyMinutes: 40,
+          maxSeconds: 600,
+          requiredTags: ['Flow', 'Coordination'],
+        },
+      ],
+    },
+    {
+      id: 'fuel-lunch',
+      label: 'Fuel Check — Lunch',
+      startTime: '11:55',
+      endTime: '11:56',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'fuel-dinner',
+      label: 'Fuel Check — Dinner',
+      startTime: '19:05',
+      endTime: '19:06',
+      daysOfWeek: EVERY_DAY,
+      slots: [{element: 'heart', everyMinutes: 1, requiredTags: ['Fuel']}],
+    },
+    {
+      id: 'evening-close',
+      label: 'Evening Review',
+      startTime: '21:30',
+      endTime: '21:31',
+      daysOfWeek: EVERY_DAY,
+      slots: [
+        {element: 'heart', everyMinutes: 1, exerciseId: 'heart.evening-review'},
+      ],
+    },
+  ],
+};
+
+/**
+ * v6 — the day winds down at 21:00: an untouched My day ends at 21:00
+ * instead of 22:00, and an untouched default plan moves the Evening Review
+ * to 20:45, inside it.
+ */
+function windDownAtNine(): void {
+  const rawHours = store.getString(KEYS.activeHours);
+  if (rawHours !== undefined) {
+    try {
+      const hours = JSON.parse(rawHours) as ActiveHours;
+      if (
+        hours.start === V5_DEFAULT_HOURS.start &&
+        hours.end === V5_DEFAULT_HOURS.end &&
+        hours.daysMask === V5_DEFAULT_HOURS.daysMask
+      ) {
+        store.set(KEYS.activeHours, JSON.stringify(DEFAULT_ACTIVE_HOURS));
+      }
+    } catch {
+      // Corrupt: getActiveHours already falls back to the default.
+    }
+  }
+  const rawPlan = store.getString(KEYS.planCurrent);
+  if (rawPlan !== undefined && isPlan(rawPlan, V5_DEFAULT_PLAN)) {
     store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
   }
 }

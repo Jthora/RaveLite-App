@@ -2,6 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {Animated, StyleSheet, Text, View} from 'react-native';
 
 import {formatEta, formatHM} from '../ambient/format';
+import {ElementGlyph} from '../icons/ElementGlyph';
 import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {useAliveBreath} from '../../hooks/useAlive';
@@ -19,7 +20,7 @@ import {
 import {formatSetAmount} from '../../domain/program/progress';
 import type {SetUnit, TrackId} from '../../domain/program/types';
 import type {DayRow} from '../../domain/today/dayList';
-import {ELEMENTS} from '../../theme/elements';
+import {ELEMENTS, type ElementIdentity} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 export interface DoneAdjust {
@@ -40,6 +41,9 @@ export interface ChimeCardProps {
   onSkip: () => void;
   onDeferNext: () => void;
   onSkipNext: () => void;
+  /** Chimes are paused until then. */
+  pauseUntil?: number;
+  onResume?: () => void;
 }
 
 /**
@@ -51,19 +55,22 @@ export interface ChimeCardProps {
 function MoveTile({
   move,
   color,
-  glyph,
+  element,
   idle,
 }: {
   move?: MoveId;
   color: string;
-  glyph: string;
+  element: ElementIdentity;
   idle?: boolean;
 }) {
   if (!move) {
     return (
-      <Text style={[styles.glyph, idle && styles.glyphIdle, {color}]}>
-        {glyph}
-      </Text>
+      <ElementGlyph
+        element={element}
+        size={idle ? 28 : 32}
+        color={color}
+        style={[styles.glyph, idle && styles.glyphIdle]}
+      />
     );
   }
   return (
@@ -133,7 +140,7 @@ function ActiveCard({
             moveForExercise(active.drillId)
           }
           color={el.color}
-          glyph={el.glyph}
+          element={el}
         />
         <View style={styles.headText}>
           <Text style={[styles.eyebrow, {color: el.color}]}>
@@ -269,7 +276,33 @@ export function AmountRow({
   );
 }
 
-function NextCard({now, next, onDeferNext, onSkipNext}: ChimeCardProps) {
+function NextCard({
+  now,
+  next,
+  pauseUntil,
+  onDeferNext,
+  onSkipNext,
+  onResume,
+}: ChimeCardProps) {
+  if (pauseUntil !== undefined && pauseUntil > now) {
+    return (
+      <View style={[styles.card, styles.idle]}>
+        <Text style={styles.eyebrowIdle}>CHIMES PAUSED</Text>
+        <Text style={styles.titleIdle}>Back at {formatHM(pauseUntil)}</Text>
+        <View style={styles.actions}>
+          <Tap
+            testID="chime-resume"
+            variant="ghost"
+            color={palette.textDim}
+            onPress={onResume}
+            accessibilityRole="button"
+            style={styles.secondaryWide}>
+            <Text style={styles.secondaryText}>Resume now</Text>
+          </Tap>
+        </View>
+      </View>
+    );
+  }
   if (!next) {
     return (
       <View style={[styles.card, styles.idle]}>
@@ -284,7 +317,7 @@ function NextCard({now, next, onDeferNext, onSkipNext}: ChimeCardProps) {
   return (
     <View style={[styles.card, styles.idle]}>
       <View style={styles.head}>
-        <MoveTile move={next.move} color={el.color} glyph={el.glyph} idle />
+        <MoveTile move={next.move} color={el.color} element={el} idle />
         <View style={styles.headText}>
           <Text style={styles.eyebrowIdle}>
             NEXT · {formatHM(next.at)} · {formatEta(next.at - now)}

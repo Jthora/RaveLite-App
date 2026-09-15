@@ -1,8 +1,9 @@
 /**
  * TodayPanel — Heart, the home screen, on one page.
  *
- * Top to bottom: live status with My day, the clock and Settings; the chime
- * to answer (or the next one); today's balance with the week behind it;
+ * Top to bottom: the chime to answer (or the next one, or the pause);
+ * today's balance with the week behind it, which is also the way to each
+ * element's page and, by its gear, to Settings;
  * water; Daily Sets meters; and the whole day's list from every source.
  * Settings, Daily Sets in full, logging a session and practice open as
  * sheets, so the page itself stays a glance.
@@ -18,15 +19,12 @@ import {DayList} from '../../components/today/DayList';
 import {CatchUpSheet} from '../../components/today/CatchUpSheet';
 import {LateLogSheet} from '../../components/today/LateLogSheet';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
-import {MyDaySheet} from '../../components/today/MyDaySheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
 import {SetsMeters} from '../../components/today/SetsMeters';
-import {StatusLine} from '../../components/today/StatusLine';
 import {WaterCounter} from '../../components/today/WaterCounter';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {takeBack} from '../../domain/activity/corrections';
 import {logWaterGlass} from '../../domain/activity/record';
-import {setActiveHours} from '../../domain/ambient/activeHours';
 import {
   gatherHealthInputs,
   summarizeHealth,
@@ -101,7 +99,6 @@ function useHealthWarnings(): [number, () => void] {
 export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const model = useTodayModel();
   const [warnings, recheckHealth] = useHealthWarnings();
-  const [myDayOpen, setMyDayOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
   const [practiceOpen, setPracticeOpen] = useState(false);
@@ -201,22 +198,17 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
-        <StatusLine
-          now={model.now}
-          myDay={model.myDay}
-          pauseUntil={model.pauseUntil}
-          onEditMyDay={() => setMyDayOpen(true)}
-          onPause={key => setPause(key)}
-          onOpenSettings={() => setSettingsOpen(true)}
-          settingsAlert={permission === 'denied' || warnings > 0}
-        />
-        <ConditionsLine
-          weather={model.weather}
-          onPress={() => setWeatherOpen(true)}
-        />
+        {model.weather ? (
+          <ConditionsLine
+            weather={model.weather}
+            onPress={() => setWeatherOpen(true)}
+          />
+        ) : null}
         <ChimeCard
           now={model.now}
           active={model.active}
+          pauseUntil={model.pauseUntil}
+          onResume={() => setPause('off')}
           next={next}
           onDone={onDone}
           onSnooze={() => snoozeActive()}
@@ -228,6 +220,8 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           points={model.points}
           week={model.week}
           onElementPress={onElementPress}
+          onSettingsPress={() => setSettingsOpen(true)}
+          settingsAlert={permission === 'denied' || warnings > 0}
         />
         <WaterCounter
           glasses={model.glasses}
@@ -280,15 +274,6 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           </Tap>
         </View>
 
-        <MyDaySheet
-          visible={myDayOpen}
-          value={model.myDay}
-          onClose={() => setMyDayOpen(false)}
-          onSave={value => {
-            setActiveHours(value);
-            setMyDayOpen(false);
-          }}
-        />
         <TrainingLogSheet
           visible={logOpen || editing !== undefined}
           editing={editing}

@@ -14,9 +14,9 @@ import type {Track, TrackId} from './types';
  *   - Explosive work (jumps, sprints, kicks) is NOT a track. It needs a
  *     warm-up and fresh legs, so it lives in the backyard session.
  *   - Sets start at ~50% of max: never to failure, always crisp.
- *   - Posture and Breath (Air) and Mobility (Water) run every day in small
- *     sets, so those elements get real volume in the rounds, not just a
- *     partner drill now and then.
+ *   - Posture and Breath (Air), Mobility (Water) and Stillness (Core) run
+ *     every day in small sets, so every element gets real volume in the
+ *     rounds, not just a partner drill now and then.
  *   - Each round ends with a partner from another element — a chest
  *     opener after pushing, a hip opener after squats, a breath after
  *     trunk work — so Air, Water and Heart ride along with the strength.
@@ -395,6 +395,33 @@ export const TRACKS: Track[] = [
     partners: [
       {exerciseId: 'air.physiological-sigh', seconds: 30},
       {exerciseId: 'earth.single-leg-balance', seconds: 30},
+    ],
+  },
+  {
+    id: 'stillness',
+    name: 'Stillness',
+    element: 'heart',
+    unit: 'seconds',
+    ladder: [
+      {exerciseId: 'heart.pulse-check', label: 'Pulse check', graduateAt: 45},
+      {exerciseId: 'heart.still-sit', label: 'Still sit', graduateAt: 90},
+      {
+        exerciseId: 'heart.single-point-focus',
+        label: 'Single-point focus',
+        graduateAt: 120,
+      },
+    ],
+    defaultRung: 1,
+    defaultMax: 60,
+    intensity: 0.5,
+    days: ALL_DAYS,
+    baseSets: 3,
+    maxSets: 6,
+    enabledByDefault: true,
+    why: 'Focus trained like a muscle: attention held still for half a minute between the other sets.',
+    partners: [
+      {exerciseId: 'air.physiological-sigh', seconds: 30},
+      {exerciseId: 'water.side-line-stretch', seconds: 30},
     ],
   },
 ];

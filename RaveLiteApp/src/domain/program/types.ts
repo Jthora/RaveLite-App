@@ -27,7 +27,8 @@ export type TrackId =
   | 'hang'
   | 'posture'
   | 'breath'
-  | 'mobility';
+  | 'mobility'
+  | 'stillness';
 
 export type SetUnit = 'reps' | 'seconds';
 
