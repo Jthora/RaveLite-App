@@ -107,8 +107,10 @@ Top to bottom, one scroll:
    (`src/domain/ambient/lateDone.ts`). Other logged rows open to keep or
    remove. With two or more missed chimes the header offers **Catch up N**:
    a tick-list that logs each ticked chime at its own time.
-7. At the very bottom: **+ Log** (Train log sheet), **Practice** (circuits,
-   then Heart drills, in one scroll) and **Settings**.
+7. At the very bottom: **+ Log** (Train log sheet), **Session** (the
+   session timer), **Practice** (circuits, then Heart drills, in one
+   scroll) and **Settings**. While a session runs, a slim line at the top
+   of Today shows it with its clock.
 
 ## Sheets
 
@@ -290,6 +292,10 @@ final, and every target can be changed.
   out. Today's push-ups add how soon the sets could reach 200 a day keeping
   up every week (`src/domain/program/ramp.ts`), or, when the sets top out at
   today's max, the tested max that gets there.
+- **Waist-to-height** sits with the fitness tests: the Waist (inches) Train
+  kind divided by the operator's height (set once from the card), with a
+  0.49 target, where the Air Force gives full points; the Space Force
+  measures it without scoring.
 - **Push-ups, ramping toward 200 a day.** The day's count adds Push and
   Variants sets (rounds, "+ set", drill taps that count as a set), max tests
   and push-up tests from the Train log; standard push-ups count apart from
@@ -308,6 +314,25 @@ final, and every target can be changed.
   1-minute push-ups and sit-ups, 880-yard movement to contact, ammo-can
   lifts (about 6 bricks in a bag), maneuver under fire.
 - **Not tracked yet:** MARSOC's swim and ruck, and waist-to-height ratio.
+
+## Sessions and active minutes (since 15 Sep 2026)
+
+- **Session kinds** (Train log, a Sessions group): staff session, bike ride,
+  ruck (bricks in a pack), walk, and yoga, tai chi and quiet cardio videos
+  played on another device. Each earns a point a minute like a run.
+- **Session timer** (`src/domain/training/session.ts`, Today › Session):
+  pick what you're doing, Start, then Stop and log. Only the start time is
+  stored, so the clock keeps running if the app closes; the entry is dated
+  when the session began, and under a minute isn't logged.
+- **Active minutes** (`src/domain/activity/active.ts`): activity items carry
+  about how long they took (sessions and timed entries as logged, drills by
+  duration, sets as held or about three seconds a rep, partners by their
+  seconds, a test about a minute). Sessions and movement count; water, eye
+  breaks, breathing, stillness and check-ins don't. Today's header adds
+  "· N min active"; Goals shows today against 150 minutes, with a 45-minute
+  floor and the last seven days' daily average.
+- **Decimal Train kinds** (the waist, the farmer walk distance) take two
+  decimals on the pad.
 
 ## Adaptive ramp (`src/domain/program/adapt.ts`)
 
