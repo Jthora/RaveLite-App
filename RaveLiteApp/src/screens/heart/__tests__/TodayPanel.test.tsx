@@ -10,6 +10,7 @@ import {store} from '../../../storage';
 import * as runtime from '../../../domain/ambient/pulseRuntime';
 import {DailySetsSheet} from '../DailySetsSheet';
 import {SettingsSheet} from '../SettingsSheet';
+import {StandardsSheet} from '../StandardsSheet';
 import {TodayPanel} from '../TodayPanel';
 
 // Monday 14 Sep 2026, 10:00 — inside My day, so a chime can sound.
@@ -87,6 +88,23 @@ it('the gear opens Settings and the meters open Daily Sets', () => {
     byTestId(tree, 'sets-open').props.onPress();
   });
   expect(tree.root.findByType(DailySetsSheet).props.visible).toBe(true);
+  act(() => tree.unmount());
+});
+
+it('the push-up row opens Standards, apart from the Daily Sets card', () => {
+  const tree = renderToday();
+  const row = byTestId(tree, 'pushups-open');
+  // Its own button, not nested in the card's (a nested one loses the tap).
+  expect(
+    tree.root
+      .findAll((node: ReactTestInstance) => node.props.testID === 'sets-open')
+      .some(card => card.findAll(n => n === row).length > 0),
+  ).toBe(false);
+  act(() => {
+    row.props.onPress();
+  });
+  expect(tree.root.findByType(StandardsSheet).props.visible).toBe(true);
+  expect(tree.root.findByType(DailySetsSheet).props.visible).toBe(false);
   act(() => tree.unmount());
 });
 

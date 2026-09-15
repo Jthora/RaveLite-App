@@ -19,42 +19,47 @@ interface Props {
 /** Tracks the push-up row stands in for. */
 const PUSH_TRACKS: ReadonlySet<string> = new Set(['push', 'push-variants']);
 
+/** "120 standard · 16 variants · best 18 · 150 planned", skipping zeros. */
+function pushupDetail(p: PushupDay): string {
+  return [
+    `${p.standard} standard`,
+    p.variants > 0 ? `${p.variants} variants` : undefined,
+    p.bestSet > 0 ? `best ${p.bestSet}` : undefined,
+    p.planned > 0 ? `${p.planned} planned` : undefined,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
 /**
  * Daily Sets at a glance: sets done today; push-ups toward 200 as the lead
  * row (tap for the fitness standards); then one small meter per other track
- * (amount done against the day's quota) in its element's color. Tap the
- * card for tracks, max tests and level ups.
+ * (amount done against the day's quota) in its element's color. The header
+ * and the meters open the Daily Sets sheet. Each is its own touch target,
+ * so the push-up row isn't swallowed by the card.
  */
 export function SetsMeters({sets, onPress, pushups, onPushupsPress}: Props) {
   const fire = ELEMENTS.fire.color;
+  const accent = ELEMENTS.heart.accent;
   const tracks = pushups
     ? sets.tracks.filter(tr => !PUSH_TRACKS.has(tr.trackId))
     : sets.tracks;
-  const detail = pushups
-    ? [
-        `${pushups.standard} standard`,
-        `${pushups.variants} variants`,
-        pushups.bestSet > 0 ? `best set ${pushups.bestSet}` : undefined,
-        pushups.planned > 0 ? `${pushups.planned} planned` : undefined,
-      ]
-        .filter(Boolean)
-        .join(' · ')
-    : '';
+  const detail = pushups ? pushupDetail(pushups) : '';
+  const openLabel =
+    sets.total === 0
+      ? 'Daily Sets, rest day. Open'
+      : `Daily Sets, ${sets.done} of ${sets.total} sets. Open`;
 
   return (
-    <Tap
-      testID="sets-open"
-      variant="plain"
-      color={ELEMENTS.heart.accent}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={
-        sets.total === 0
-          ? 'Daily Sets, rest day. Open'
-          : `Daily Sets, ${sets.done} of ${sets.total} sets. Open`
-      }
-      style={styles.card}>
-      <View style={styles.body}>
+    <View style={styles.card}>
+      <Tap
+        testID="sets-open"
+        variant="plain"
+        color={accent}
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={openLabel}
+        style={styles.headerTap}>
         <View style={styles.header}>
           <Text style={styles.title}>
             Daily Sets
@@ -69,55 +74,64 @@ export function SetsMeters({sets, onPress, pushups, onPushupsPress}: Props) {
           </Text>
           <Text style={styles.chevron}>›</Text>
         </View>
-        {pushups ? (
-          <Tap
-            testID="pushups-open"
-            variant="plain"
-            color={fire}
-            onPress={onPushupsPress ?? onPress}
-            accessibilityRole="button"
-            accessibilityLabel={`Push-ups: ${pushups.total} of ${PUSHUP_GOAL} today, ${detail}. Open standards`}
-            style={styles.hero}>
-            <View style={styles.heroTop}>
-              <MoveIcon move="push" color={fire} size={16} />
-              <Text style={styles.heroLabel}>Push-ups</Text>
-              <View style={styles.spacer} />
-              <Text
-                testID="pushups-count"
-                style={[
-                  styles.heroTotal,
-                  pushups.total >= PUSHUP_GOAL && {color: fire},
-                ]}>
-                {pushups.total}
-                <Text style={styles.heroGoal}> / {PUSHUP_GOAL}</Text>
-              </Text>
-            </View>
-            <View style={styles.heroBar}>
+      </Tap>
+      {pushups ? (
+        <Tap
+          testID="pushups-open"
+          variant="plain"
+          color={fire}
+          onPress={onPushupsPress ?? onPress}
+          accessibilityRole="button"
+          accessibilityLabel={`Push-ups: ${pushups.total} of ${PUSHUP_GOAL} today, ${detail}. Open standards`}
+          style={styles.hero}>
+          <View style={styles.heroTop}>
+            <MoveIcon move="push" color={fire} size={16} />
+            <Text style={styles.heroLabel}>Push-ups</Text>
+            <View style={styles.spacer} />
+            <Text
+              testID="pushups-count"
+              style={[
+                styles.heroTotal,
+                pushups.total >= PUSHUP_GOAL && {color: fire},
+              ]}>
+              {pushups.total}
+              <Text style={styles.heroGoal}> / {PUSHUP_GOAL}</Text>
+            </Text>
+          </View>
+          <View style={styles.heroBar}>
+            <View
+              style={[
+                styles.heroFill,
+                {
+                  width: `${Math.min(1, pushups.total / PUSHUP_GOAL) * 100}%`,
+                  backgroundColor: fire,
+                },
+              ]}
+            />
+            {pushups.planned > 0 && pushups.planned < PUSHUP_GOAL ? (
+              // Where today's sets add up to.
               <View
                 style={[
-                  styles.heroFill,
-                  {
-                    width: `${Math.min(1, pushups.total / PUSHUP_GOAL) * 100}%`,
-                    backgroundColor: fire,
-                  },
+                  styles.planned,
+                  {left: `${(pushups.planned / PUSHUP_GOAL) * 100}%`},
                 ]}
               />
-              {pushups.planned > 0 && pushups.planned < PUSHUP_GOAL ? (
-                // Where today's sets add up to.
-                <View
-                  style={[
-                    styles.planned,
-                    {left: `${(pushups.planned / PUSHUP_GOAL) * 100}%`},
-                  ]}
-                />
-              ) : null}
-            </View>
-            <Text style={styles.heroDetail} numberOfLines={1}>
-              {detail}
-            </Text>
-          </Tap>
-        ) : null}
-        {tracks.length > 0 ? (
+            ) : null}
+          </View>
+          <Text style={styles.heroDetail} numberOfLines={1}>
+            {detail}
+          </Text>
+        </Tap>
+      ) : null}
+      {tracks.length > 0 ? (
+        <Tap
+          testID="sets-meters"
+          variant="plain"
+          color={accent}
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={openLabel}
+          style={styles.gridTap}>
           <View style={styles.grid}>
             {tracks.map(tr => {
               const color = ELEMENTS[tr.element].color;
@@ -149,23 +163,24 @@ export function SetsMeters({sets, onPress, pushups, onPushupsPress}: Props) {
               );
             })}
           </View>
-        ) : null}
-      </View>
-    </Tap>
+        </Tap>
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 48,
     backgroundColor: palette.surface,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
+    gap: spacing.xs,
   },
-  // Tap wraps its children in one view; the gap lives inside it.
-  body: {
-    gap: spacing.sm,
+  headerTap: {
+    minHeight: 40,
+    justifyContent: 'center',
+    borderRadius: radius.sm,
   },
   header: {
     flexDirection: 'row',
@@ -237,6 +252,10 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.textDim,
     marginTop: 3,
+  },
+  gridTap: {
+    borderRadius: radius.sm,
+    paddingVertical: spacing.xs,
   },
   grid: {
     flexDirection: 'row',
