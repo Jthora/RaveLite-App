@@ -73,7 +73,12 @@ export function SetsMeters({sets, onPress, focus}: Props) {
             )}
           </Text>
           {parts.length > 0 ? (
-            <Text testID="sets-focus" style={styles.focus} numberOfLines={1}>
+            <Text
+              testID="sets-focus"
+              style={styles.focus}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}>
               {parts.flatMap((part, i) => [
                 i > 0 ? (
                   <Text key={`dot-${part.name}`} style={styles.dot}>
@@ -142,7 +147,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   title: {
     ...t.caption,
@@ -154,10 +159,11 @@ const styles = StyleSheet.create({
     color: palette.text,
     fontWeight: '700',
   },
-  // Smaller than the title so three names fit beside the count.
+  // Smaller than the title so three names fit beside the count
+  // ("Agility · Mobility · Presence" is the longest).
   focus: {
     ...t.caption,
-    fontSize: 12,
+    fontSize: 11,
     flex: 1,
     textAlign: 'right',
   },
