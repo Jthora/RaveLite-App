@@ -232,6 +232,7 @@ export const FOCUS_PARTNERS: Readonly<
   balance: [
     {exerciseId: 'earth.single-leg-balance', seconds: 30},
     {exerciseId: 'earth.standing-hip-airplane', seconds: 30},
+    {exerciseId: 'earth.horse-stance', seconds: 45},
   ],
   presence: [
     {exerciseId: 'heart.rave-vision', seconds: 30},

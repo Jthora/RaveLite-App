@@ -22,7 +22,6 @@ import type {Track, TrackId} from './types';
  *     trunk work — so Air, Water and Heart ride along with the strength.
  */
 
-const WEEKDAYS = [1, 2, 3, 4, 5, 6];
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 export const TRACKS: Track[] = [
@@ -440,6 +439,73 @@ export const TRACKS: Track[] = [
     partners: [
       {exerciseId: 'air.physiological-sigh', seconds: 30},
       {exerciseId: 'water.side-line-stretch', seconds: 30},
+    ],
+  },
+  {
+    id: 'pelvis',
+    name: 'Pelvis',
+    element: 'earth',
+    unit: 'reps',
+    // Corrective work for the tilted pelvis and the desk back.
+    ladder: [
+      {
+        exerciseId: 'earth.posterior-pelvic-tilt',
+        label: 'Posterior pelvic tilts',
+        graduateAt: 20,
+      },
+      {
+        exerciseId: 'earth.glute-bridge',
+        label: 'Glute bridges',
+        graduateAt: 20,
+      },
+      {
+        exerciseId: 'earth.single-leg-glute-bridge',
+        label: 'Single-leg glute bridges (each leg)',
+        graduateAt: 12,
+      },
+    ],
+    defaultRung: 1,
+    defaultMax: 20,
+    intensity: 0.5,
+    days: ALL_DAYS,
+    baseSets: 3,
+    maxSets: 6,
+    enabledByDefault: true,
+    why: 'For the tilted pelvis and desk back: glutes pull the pelvis level, then a hip-flexor or upper-back stretch.',
+    partners: [
+      {exerciseId: 'water.hip-flexor-stretch', seconds: 60},
+      {exerciseId: 'air.thread-the-needle', seconds: 60},
+    ],
+  },
+  {
+    id: 'kicks',
+    name: 'Kick range',
+    element: 'water',
+    unit: 'seconds',
+    ladder: [
+      {exerciseId: 'water.pigeon', label: 'Pigeon (each side)', graduateAt: 90},
+      {
+        exerciseId: 'water.frog-stretch',
+        label: 'Frog stretch',
+        graduateAt: 120,
+      },
+      {
+        exerciseId: 'water.side-split-progression',
+        label: 'Side split progression',
+        graduateAt: 120,
+      },
+    ],
+    defaultRung: 0,
+    defaultMax: 60,
+    intensity: 0.5,
+    days: ALL_DAYS,
+    baseSets: 2,
+    maxSets: 5,
+    enabledByDefault: true,
+    why: 'Hip range for high kicks, a little every day, with leg swings or a horse stance after.',
+    partners: [
+      {exerciseId: 'air.leg-swings', seconds: 60},
+      {exerciseId: 'earth.horse-stance', seconds: 45},
     ],
   },
 ];

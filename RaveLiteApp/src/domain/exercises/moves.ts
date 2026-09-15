@@ -62,6 +62,7 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'air.nasal-recovery-walk': 'walk',
   'air.shadow-rope': 'jump',
   'air.long-walk': 'walk',
+  'air.leg-swings': 'hamstring',
   // Earth
   'earth.posterior-pelvic-tilt': 'bridge',
   'earth.glute-bridge': 'bridge',
@@ -95,6 +96,8 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'earth.one-arm-assisted-hang': 'hang',
   'earth.plank-test': 'plank',
   'earth.cft-brick-lifts': 'carry',
+  'earth.single-leg-glute-bridge': 'bridge',
+  'earth.horse-stance': 'wallsit',
   // Fire
   'fire.pushups': 'push',
   'fire.situps': 'crunch',
@@ -144,6 +147,8 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'water.front-split-progression': 'lunge',
   'water.beat-step': 'footwork',
   'water.staff-combat-rounds': 'staff',
+  'water.hip-flexor-stretch': 'hipopener',
+  'water.side-split-progression': 'hipopener',
   // Heart
   'heart.morning-intent': 'intent',
   'heart.mirror-presence': 'presence',
@@ -203,6 +208,8 @@ const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {
   mobility: 'hipopener',
   stillness: 'pulse',
   'push-variants': 'push',
+  pelvis: 'bridge',
+  kicks: 'hipopener',
 };
 
 export function moveForExercise(id: string | undefined): MoveId | undefined {

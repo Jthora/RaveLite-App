@@ -26,9 +26,9 @@ import type {
  *     for more than MAX_MOVES_PER_ROUND moves; otherwise TARGET_ROUNDS.
  *   - Each track's sets spread evenly across the rounds, and rounds fill
  *     evenly.
- *   - Moves run push, posture, row, squat, mobility, pull, crunch, leg-ups,
- *     hang, plank, side, breath and stillness last, so elements alternate; grip-heavy row, pull and hang
- *     are kept in separate rounds when there's room.
+ *   - Moves run in ROUND_ORDER, so elements alternate and stillness comes
+ *     last; grip-heavy row, pull and hang are kept in separate rounds when
+ *     there's room.
  *
  * Smart partners: given the week's work per element, each round's partner
  * comes from the least-worked element not already in the round (the lead
@@ -53,10 +53,12 @@ const ROUND_ORDER: readonly TrackId[] = [
   'squat',
   'mobility',
   'pull',
+  'kicks',
   'crunch',
   'legs-up',
   'hang',
   'plank',
+  'pelvis',
   'side',
   'breath',
   'push-variants',
@@ -88,6 +90,7 @@ export const PARTNER_POOL: Readonly<
     {exerciseId: 'earth.posterior-pelvic-tilt', seconds: 30},
     {exerciseId: 'earth.single-leg-balance', seconds: 30},
     {exerciseId: 'earth.wall-sit', seconds: 30},
+    {exerciseId: 'earth.horse-stance', seconds: 45},
   ],
   fire: [{exerciseId: 'fire.wall-pushups', seconds: 20}],
 };
@@ -209,21 +212,12 @@ export function focusPartner(
     : undefined;
 }
 
-export function groupIntoRounds(
-  prescriptions: readonly DayPrescription[],
-  opts: {balance?: ElementBalance; focus?: readonly AttributeId[]} = {},
-): Round[] {
-  const active = prescriptions.filter(p => p.sets > 0);
+/** Spread every set across `count` rounds (see the grouping rules above). */
+function placeSets(
+  active: readonly DayPrescription[],
+  count: number,
+): SetMove[][] {
   const total = active.reduce((sum, p) => sum + p.sets, 0);
-  if (total === 0) {
-    return [];
-  }
-  const most = Math.max(...active.map(p => p.sets));
-  const count = Math.max(
-    most,
-    Math.min(TARGET_ROUNDS, total),
-    Math.ceil(total / MAX_MOVES_PER_ROUND),
-  );
   const cap = Math.ceil(total / count);
   const slots: SetMove[][] = Array.from({length: count}, () => []);
 
@@ -260,6 +254,31 @@ export function groupIntoRounds(
       const ideal = Math.floor(((k + 0.5) * count) / p.sets);
       slots[pickRound(ideal, p.trackId)].push(moveFor(p));
     }
+  }
+  return slots;
+}
+
+export function groupIntoRounds(
+  prescriptions: readonly DayPrescription[],
+  opts: {balance?: ElementBalance; focus?: readonly AttributeId[]} = {},
+): Round[] {
+  const active = prescriptions.filter(p => p.sets > 0);
+  const total = active.reduce((sum, p) => sum + p.sets, 0);
+  if (total === 0) {
+    return [];
+  }
+  const most = Math.max(...active.map(p => p.sets));
+  let count = Math.max(
+    most,
+    Math.min(TARGET_ROUNDS, total),
+    Math.ceil(total / MAX_MOVES_PER_ROUND),
+  );
+  let slots = placeSets(active, count);
+  // A tight day can leave a round over the limit, since a track can't
+  // repeat within a round; one more round spreads the sets out.
+  while (slots.some(round => round.length > MAX_MOVES_PER_ROUND)) {
+    count += 1;
+    slots = placeSets(active, count);
   }
 
   // Number each track's sets in the order the rounds come.

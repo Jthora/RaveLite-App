@@ -249,6 +249,24 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 2700,
   },
 
+  {
+    id: 'air.leg-swings',
+    element: 'air',
+    name: 'Leg Swings',
+    purpose:
+      'Loose, controlled range for kicks: each leg swings front to back, then across the body.',
+    dose: '10 each way, each leg',
+    cues: [
+      'A hand on the wall or desk for balance',
+      'Front to back first, then across and out to the side',
+      'Let each swing grow a little; never kick hard',
+      'Tall spine, hips square, standing knee soft',
+    ],
+    targets: ['Mobility', 'Agility', 'NoFloor'],
+    venues: ['standing', 'wall'],
+    approxSeconds: 60,
+  },
+
   // ─── EARTH — Foundation & Core ─────────────────────────────────────────
   {
     id: 'earth.posterior-pelvic-tilt',
@@ -764,6 +782,41 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     targets: ['Test', 'Strength', 'Conditioning'],
     venues: ['yard'],
     approxSeconds: 300,
+  },
+
+  {
+    id: 'earth.single-leg-glute-bridge',
+    element: 'earth',
+    name: 'Single-Leg Glute Bridge',
+    purpose:
+      'One glute at a time lifts the hips and levels the pelvis: the next step for a tilted pelvis once bridges come easy.',
+    dose: '1 set each leg at about half your max',
+    cues: [
+      'On your back, one foot flat, the other knee hugged to the chest',
+      'Tuck the tailbone, then drive through the heel until hip and knee line up',
+      'Squeeze the glute at the top; the lower back stays out of it',
+      'Pain spreading down a leg, or numbness: stop and see a physio',
+    ],
+    targets: ['APT', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'earth.horse-stance',
+    element: 'earth',
+    name: 'Horse Stance',
+    purpose:
+      'The martial-arts base: wide, low and steady, for kicking legs, open hips and balance.',
+    dose: '30–60 sec',
+    cues: [
+      'Feet about twice shoulder width, toes forward',
+      'Sit down as if onto a low stool, knees pushed out over the toes',
+      'Tailbone tucked and chest up: no arch in the lower back',
+      'Breathe low and slow; stand up before the form goes',
+    ],
+    targets: ['Strength', 'Coordination', 'NoFloor'],
+    venues: ['standing', 'yard'],
+    approxSeconds: 60,
   },
 
   // ─── FIRE — Power & Conditioning ───────────────────────────────────────
@@ -1528,6 +1581,41 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     targets: ['Flow', 'Coordination', 'Conditioning', 'Agility'],
     venues: ['yard'],
     approxSeconds: 540,
+  },
+
+  {
+    id: 'water.hip-flexor-stretch',
+    element: 'water',
+    name: 'Half-Kneeling Hip Flexor Stretch',
+    purpose:
+      'Lengthens the hip flexors a day of sitting shortens, the main pull behind a tilted pelvis.',
+    dose: '30 sec each side',
+    cues: [
+      'Kneel on one knee on the mat, the other foot forward',
+      'Tuck the tailbone and squeeze the back glute before leaning at all',
+      'Shift forward only until the front of the hip stretches',
+      'Reach the arm on the kneeling side up and a little over',
+    ],
+    targets: ['Mobility', 'APT'],
+    venues: ['mat'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'water.side-split-progression',
+    element: 'water',
+    name: 'Side Split Progression',
+    purpose:
+      'Long-game straddle range for side and round kicks. Gentle, frequent, never forced.',
+    dose: '60 sec',
+    cues: [
+      'Wide straddle on the mat, hands on bricks in front for support',
+      'Toes up, knees pointing at the ceiling',
+      'Sink the hips a little on each breath out; stop at a 6/10 stretch',
+      'Progress comes weekly, not daily',
+    ],
+    targets: ['Mobility', 'Agility'],
+    venues: ['mat'],
+    approxSeconds: 90,
   },
 
   // ─── HEART — Integration & Cadence ─────────────────────────────────────

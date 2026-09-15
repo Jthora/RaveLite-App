@@ -29,7 +29,9 @@ export type TrackId =
   | 'breath'
   | 'mobility'
   | 'stillness'
-  | 'push-variants';
+  | 'push-variants'
+  | 'pelvis'
+  | 'kicks';
 
 export type SetUnit = 'reps' | 'seconds';
 

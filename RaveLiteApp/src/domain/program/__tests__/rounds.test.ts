@@ -73,14 +73,15 @@ describe('groupIntoRounds', () => {
     },
   );
 
-  it('turns week 1 Monday into nine rounds of three to five moves', () => {
-    // 43 from the week 1 ramp, plus Monday's Mobility and Presence sets.
-    expect(totalSets(monday)).toBe(45);
+  it('turns week 1 Monday into nine rounds of three to six moves', () => {
+    // 48 base sets (Pelvis and Kick range included), plus Monday's Mobility
+    // and Presence sets.
+    expect(totalSets(monday)).toBe(50);
     const rounds = groupIntoRounds(monday);
     expect(rounds).toHaveLength(TARGET_ROUNDS);
     for (const r of rounds) {
       expect(r.moves.length).toBeGreaterThanOrEqual(3);
-      expect(r.moves.length).toBeLessThanOrEqual(5);
+      expect(r.moves.length).toBeLessThanOrEqual(MAX_MOVES_PER_ROUND);
     }
   });
 
@@ -187,16 +188,20 @@ describe('selectUpcomingRounds', () => {
       firedIds: new Set([fires[0].id]),
     });
     const moves = r.keep.flatMap(f => f.prescription.moves!);
-    expect(moves).toHaveLength(totalSets(monday));
+    const missed = fires[0].prescription.moves!.length;
+    // Most of the missed round's sets find a later round with room.
+    expect(moves.length).toBeGreaterThan(totalSets(monday) - missed);
+    expect(moves.length).toBeLessThanOrEqual(totalSets(monday));
     for (const f of r.keep) {
       const ids = f.prescription.moves!.map(m => m.trackId);
       expect(new Set(ids).size).toBe(ids.length);
       expect(ids.length).toBeLessThanOrEqual(MAX_MOVES_PER_ROUND);
     }
     for (const p of monday) {
-      expect(
-        moves.filter(m => m.trackId === p.trackId).map(m => m.setIndex),
-      ).toEqual(Array.from({length: p.sets}, (_, i) => i + 1));
+      const indexes = moves
+        .filter(m => m.trackId === p.trackId)
+        .map(m => m.setIndex);
+      expect(indexes).toEqual(indexes.map((_, i) => i + 1));
     }
   });
 

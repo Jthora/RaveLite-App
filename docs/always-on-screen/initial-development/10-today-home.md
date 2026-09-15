@@ -232,6 +232,15 @@ Water 13 · Core 5 · Air 2.
   → front split progression), and the morning blocks bring staff flow and
   footwork on Tuesday, Thursday and Friday and long stretches on Monday and
   Sunday (see Focus wheel).
+- **Pelvis and Kick range** (daily tracks, since 15 Sep 2026). **Pelvis**
+  (Earth) is the corrective track for the anterior pelvic tilt and the desk
+  back: posterior pelvic tilts → glute bridges → single-leg glute bridges,
+  each round it leads ending on a half-kneeling hip-flexor stretch or thread
+  the needle. **Kick range** (Water) opens the hips for high kicks: pigeon →
+  frog stretch → side split progression, ending on leg swings (filed under
+  Air, for Agility) or a horse stance. The horse stance also joins the Earth
+  partner pool and Balance focus partners. Pain spreading down a leg, or
+  numbness, means stop and see a physio; the single-leg bridge says so.
 - **Core** gets its own Daily Sets track, **Stillness** (pulse check →
   still sit → single-point focus, small timed sets every day), a **Morning
   Intent** check-in at 05:05, and the Evening Review at 20:45, which always
