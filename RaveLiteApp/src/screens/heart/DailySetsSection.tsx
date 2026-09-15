@@ -7,6 +7,7 @@
  *   - max test (NumberPad) — the only thing that raises set size
  *   - level up to the next variation once the set size graduates
  *   - track on/off
+ *   - today's focus and morning block, and the week ahead (`FocusWeek`)
  *   - why each track asks for the sets it does: the daily review reads
  *     the last week and adds a set, holds, or eases off (`program/adapt.ts`)
  *
@@ -39,6 +40,7 @@ import {
   readyToLevelUp,
 } from '../../domain/program/progression';
 import {
+  focusFor,
   levelUpTrack,
   loadProgram,
   recordMaxTest,
@@ -54,6 +56,7 @@ import type {
   TrackReview,
 } from '../../domain/program/types';
 import {formatDuration} from '../../domain/training/grading';
+import {TodayFocus, WeekFocus} from './FocusWeek';
 
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -86,11 +89,18 @@ export function DailySetsSection() {
       myDay: getActiveHours(),
       today: setsToday(now),
       done: doneByTrack(entriesForDay(date)),
+      // Today and the six days after it, for the focus wheel.
+      focusDays: Array.from({length: 7}, (_, i) => {
+        const day = new Date(date);
+        day.setHours(12, 0, 0, 0);
+        day.setDate(day.getDate() + i);
+        return {date: day, focus: focusFor(day)};
+      }),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
 
-  const {program, today, done, week, phase, date, myDay} = view;
+  const {program, today, done, week, phase, date, myDay, focusDays} = view;
   const accent = ELEMENTS.heart.accent;
   const setsTotal = today.prescriptions.reduce((s, p) => s + p.sets, 0);
   const setsDone = today.prescriptions.reduce(
@@ -138,6 +148,8 @@ export function DailySetsSection() {
         ) : null}
       </View>
 
+      <TodayFocus focus={focusDays[0].focus} />
+
       {today.prescriptions.length === 0 ? (
         <Text style={styles.emptyText}>Rest day — no sets scheduled.</Text>
       ) : (
@@ -175,6 +187,8 @@ export function DailySetsSection() {
           Rest today: {restTracks.map(tr => tr.name).join(' · ')}
         </Text>
       ) : null}
+
+      <WeekFocus days={focusDays} />
 
       <Text style={styles.section}>Tracks</Text>
       {TRACKS.map(tr => {
