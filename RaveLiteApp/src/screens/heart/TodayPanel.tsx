@@ -367,20 +367,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.8,
   },
+  // Two by two, so every label fits on one line.
   links: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
     marginTop: spacing.sm,
   },
   link: {
-    flex: 1,
+    flexBasis: '47%',
+    flexGrow: 1,
     minHeight: 48,
     borderRadius: radius.md,
   },
-  // Four links share the row.
   linkText: {
     ...t.subtitle,
-    fontSize: 14,
+    fontSize: 15,
     color: palette.text,
   },
   linkRow: {
