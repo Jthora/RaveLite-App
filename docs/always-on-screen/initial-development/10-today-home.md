@@ -221,8 +221,9 @@ Water 13 · Core 5 · Air 2.
   call answered) comes with a 20 s **eye break**; the Drink +1 counter
   doesn't.
 - **Water** gets **Mobility** every day (hamstring floss → deep squat hold
-  → front split progression), and the morning session's Water slot is
-  always a few minutes of staff flow (Flow + Coordination, at most 10 min).
+  → front split progression), and the morning blocks bring staff flow and
+  footwork on Tuesday, Thursday and Friday and long stretches on Monday and
+  Sunday (see Focus wheel).
 - **Core** gets its own Daily Sets track, **Stillness** (pulse check →
   still sit → single-point focus, small timed sets every day), a **Morning
   Intent** check-in at 05:05, and the Evening Review at 20:45, which always
@@ -264,6 +265,14 @@ final, and every target can be changed.
     eyes closed 0:10–1:00 (0:47).
   - Water: deep squat hold 0:30–5:00 (3:47), staff flow without a drop
     1:00–20:00 (14:50).
+- **Projected dates** (`src/domain/standards/projection.ts`). Each goal's
+  card says where its tests are heading: a straight line through the tests
+  of the last four months dates when it reaches the target ("On pace for
+  the B+ around Nov 20"). It needs two tests at least a week apart, and says
+  "not on pace yet" for a trend going the wrong way or more than three years
+  out. Today's push-ups add how soon the sets could reach 200 a day keeping
+  up every week (`src/domain/program/ramp.ts`), or, when the sets top out at
+  today's max, the tested max that gets there.
 - **Push-ups, ramping toward 200 a day.** The day's count adds Push and
   Variants sets (rounds, "+ set", drill taps that count as a set), max tests
   and push-up tests from the Train log; standard push-ups count apart from
@@ -331,9 +340,19 @@ never more than four days apart:
   (`src/domain/exercises/sweat.ts`), and Try this now sinks them after 08:00.
 - **Tests are tagged `Test`**, so random plan picks, indoor weather swaps and
   Try this now never choose one.
-- **Not built yet:** morning chimes that follow the day's block (the Morning
-  Session still picks a conditioning drill and a flow drill), and the week's
-  wheel on the Daily Sets page.
+- **Morning chimes follow the block** (`src/domain/program/morning.ts`). The
+  Morning Session (05:45–07:00) has one slot marked `block: 'morning'`, a
+  chime every 25 minutes: 05:45, 06:10 and 06:35 take the day's three pieces
+  in order (a longer window repeats the last), and Saturday chimes its test.
+  Each says which piece it is ("Kicks and jumps · 1 of 3") on Today's list
+  and the chime unless the weather has a note, chimes in the piece's own
+  element, and still moves indoors or swaps in bad weather. Migration v7
+  moves an untouched default plan; any other slot still picks from the
+  library.
+- **On the Daily Sets page:** today's focus in its colors with the morning
+  block piece by piece and the daily core under the header, and the next
+  seven days (focus, and each morning's block or Saturday's test) before
+  the track list.
 
 ## Weather (`src/domain/conditions/`)
 
