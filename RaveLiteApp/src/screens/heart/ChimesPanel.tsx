@@ -11,6 +11,8 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {AppState, StyleSheet, Text, View} from 'react-native';
 
+import {ElementGlyph} from '../../components/icons/ElementGlyph';
+
 import {Tap} from '../../components/Tap';
 import {
   VOLUME_STEPS,
@@ -118,9 +120,10 @@ export function ChimesPanel() {
               accessibilityLabel={`Test ${el.name} chime`}
               onPress={() => test(element)}
               style={styles.testBtn}>
-              <Text style={[styles.testText, {color: el.color}]}>
-                {el.glyph} ▶
-              </Text>
+              <View style={styles.testRow}>
+                <ElementGlyph element={el} size={16} />
+                <Text style={[styles.testText, {color: el.color}]}>▶</Text>
+              </View>
             </Tap>
             <VolumePills
               value={percent}
@@ -207,6 +210,11 @@ function VolumePills({
 }
 
 const styles = StyleSheet.create({
+  testRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   panel: {
     backgroundColor: palette.surface,
     borderRadius: radius.lg,

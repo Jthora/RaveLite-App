@@ -35,7 +35,7 @@ it('a mark brings its own color until one is picked; then the color stays', () =
   });
 
   setHeartVariant('core');
-  expect(ELEMENTS.heart.icon).toBeUndefined();
+  expect(ELEMENTS.heart.icon).toBe('core');
   expect(ELEMENTS.heart.color).toBe(HEART_COLORS.violet.color);
 });
 

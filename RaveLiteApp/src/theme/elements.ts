@@ -11,8 +11,20 @@
 
 export type ElementId = 'fire' | 'air' | 'earth' | 'water' | 'heart';
 
-/** SVG glyph shapes, drawn by `components/icons/ElementGlyph`. */
-export type GlyphIconId = 'star5' | 'star6' | 'commander';
+/**
+ * Element marks drawn as SVG on one grid, so they share a size, a center
+ * and a line weight (see `components/icons/elementMarks`).
+ */
+export type GlyphIconId =
+  | 'fire'
+  | 'air'
+  | 'earth'
+  | 'water'
+  | 'core'
+  | 'heart'
+  | 'star5'
+  | 'star6'
+  | 'commander';
 
 export interface ElementIdentity {
   id: ElementId;
@@ -52,6 +64,7 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
     ethos:
       'Outward expression of force. Lean strength and fat-burning heat: push-ups, porch pull-ups, sprints, kicks, explosive rounds. Burn the cage.',
     glyph: '\u{1F702}', // 🜂
+    icon: 'fire',
     emoji: '🔥',
     color: '#FF3B2F',
     tint: '#FF3B2F1F',
@@ -66,6 +79,7 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
     ethos:
       'The unwinding of the spine. UCS reversal, abdominal-grip release, diaphragmatic breath, neck reset. Lift from the crown.',
     glyph: '\u{1F701}', // 🜁
+    icon: 'air',
     emoji: '💨',
     color: '#FFD60A',
     tint: '#FFD60A1F',
@@ -80,6 +94,7 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
     ethos:
       'Pelvis, glutes, hips, core. Crunches, leg-ups, side-ups, planks, squats, hangs and brick carries. Reverse anterior pelvic tilt. Build the base that holds every flow.',
     glyph: '\u{1F703}', // 🜃
+    icon: 'earth',
     emoji: '🌍',
     color: '#34C759',
     tint: '#34C7591F',
@@ -94,6 +109,7 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
     ethos:
       'Staff flow and dance-combat on the beat. Long fascia stretches that turn stiffness into glide. Drink on the call. Adapt without breaking shape.',
     glyph: '\u{1F704}', // 🜄
+    icon: 'water',
     emoji: '💧',
     color: '#0A84FF',
     tint: '#0A84FF1F',
@@ -108,6 +124,7 @@ export const ELEMENTS: Record<ElementId, ElementIdentity> = {
     ethos:
       'The conductor. Schedule, reminders, streaks, presence. Where the four meet and the rave begins.',
     glyph: '\u2661', // ♡ — outline heart, text presentation
+    icon: 'heart',
     emoji: '♦',
     color: '#FF2D9D',
     tint: '#FF2D9D1F',

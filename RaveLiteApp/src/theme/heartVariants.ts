@@ -113,8 +113,8 @@ export interface HeartVariantDef {
  *  ☆  U+2606  WHITE STAR              — Star's text fallback
  *  ★  U+2605  BLACK STAR              — Commander's text fallback
  *
- * Æther, Star and Commander draw their mark as SVG (`icon`); the Unicode
- * glyph stays for plain text such as notification titles.
+ * Every mark is drawn as SVG (`icon`, see `components/icons/elementMarks`);
+ * the Unicode glyph stays for plain text such as notification titles.
  */
 export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
   core: {
@@ -127,6 +127,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
       ethos:
         'The center point. Schedule, reminders, presence. The hub the four orbit; the still place the rave departs from and returns to.',
       glyph: '⊙', // ⊙
+      icon: 'core',
       emoji: '◉',
       accent: '#C6FF00',
       verbDone: 'Center',
@@ -142,6 +143,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
       ethos:
         'The conductor. Schedule, reminders, streaks, presence. Where the four meet and the rave begins.',
       glyph: '♡', // ♡
+      icon: 'heart',
       emoji: '♦',
       accent: '#C6FF00',
       verbDone: 'Seal',

@@ -15,6 +15,8 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Modal, StyleSheet, Text, View} from 'react-native';
 
+import {ElementGlyph} from '../../components/icons/ElementGlyph';
+
 import {MoveIcon} from '../../components/icons/MoveIcon';
 import {Tap} from '../../components/Tap';
 import {NumberPad} from '../../components/training/NumberPad';
@@ -166,13 +168,21 @@ export function DailySetsSection() {
         return (
           <View key={tr.id} style={styles.trackRow}>
             <View style={styles.trackInfo}>
-              <Text
-                style={[
-                  styles.trackName,
-                  {color: state.enabled ? el.color : palette.textMuted},
-                ]}>
-                {el.glyph} {tr.name} · {currentRung(tr, state).label}
-              </Text>
+              <View style={styles.trackTitle}>
+                <ElementGlyph
+                  element={el}
+                  size={15}
+                  color={state.enabled ? el.color : palette.textMuted}
+                />
+                <Text
+                  style={[
+                    styles.trackName,
+                    styles.trackNameText,
+                    {color: state.enabled ? el.color : palette.textMuted},
+                  ]}>
+                  {tr.name} · {currentRung(tr, state).label}
+                </Text>
+              </View>
               <Text style={styles.trackMeta}>
                 max {formatMax(tr, state.testMax)}
                 {state.testedAt === undefined ? ' (assumed)' : ''} ·{' '}
@@ -409,6 +419,14 @@ function formatHHMM(ts: number): string {
 }
 
 const styles = StyleSheet.create({
+  trackTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  trackNameText: {
+    flexShrink: 1,
+  },
   header: {
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,

@@ -1,5 +1,7 @@
 import React, {useMemo} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+
+import {ElementGlyph} from '../icons/ElementGlyph';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {CardGrid} from '../CardGrid';
@@ -43,9 +45,12 @@ export function LibrarySheet({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Text style={[styles.title, {color: element.accent}]}>
-            {element.glyph} {element.name} drills
-          </Text>
+          <View style={styles.titleRow}>
+            <ElementGlyph element={element} size={22} color={element.accent} />
+            <Text style={[styles.title, {color: element.accent}]}>
+              {element.name} drills
+            </Text>
+          </View>
           <Tap
             variant="plain"
             onPress={onClose}
@@ -86,6 +91,12 @@ export function LibrarySheet({
 }
 
 const styles = StyleSheet.create({
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
+  },
   root: {
     flex: 1,
     backgroundColor: palette.bg,

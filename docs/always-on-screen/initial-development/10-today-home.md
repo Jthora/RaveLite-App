@@ -55,8 +55,11 @@ Commander mark, filled). And a color, one of five that keep clear of the
 four elements' red, yellow, green and blue: orange, magenta, violet, cyan or
 white. Until a color is picked, each mark brings its own (Core orange,
 Heart magenta, the stars white); once picked, it stays across marks. The
-picker previews both, and the app redraws when Settings closes. The star
-marks are SVG on a 100-unit grid. The
+picker previews both, and the app redraws when Settings closes. Every
+element's mark (Fire, Air, Earth, Water and all five Core marks) is SVG
+on one 24-unit grid with one 1.75 line (`src/components/icons/elementMarks.ts`),
+sized to Lucide's keylines, so marks match in size, center and weight in
+the balance strip, page headers and the picker. The
 Commander mark is a regular five-pointed star whose lower legs are cut into
 two chevrons: below the body, four equal bands parallel to the legs' inner
 edges (gap, chevron, gap, chevron). It was traced from the CommanderIcon

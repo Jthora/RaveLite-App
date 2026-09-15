@@ -1,6 +1,8 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+import {ElementGlyph} from '../icons/ElementGlyph';
+
 import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {recordDrillTap} from '../../domain/activity/record';
@@ -76,9 +78,12 @@ export function DrillCard({element, focus, version, onOpenLibrary}: Props) {
 
   return (
     <View style={[styles.card, {borderColor: element.accent}]}>
-      <Text style={[styles.eyebrow, {color: element.accent}]}>
-        {element.glyph} TRY THIS NOW
-      </Text>
+      <View style={styles.eyebrowRow}>
+        <ElementGlyph element={element} size={13} color={element.accent} />
+        <Text style={[styles.eyebrow, {color: element.accent}]}>
+          TRY THIS NOW
+        </Text>
+      </View>
       <Tap
         variant="plain"
         color={element.accent}
@@ -152,6 +157,11 @@ export function DrillCard({element, focus, version, onOpenLibrary}: Props) {
 }
 
 const styles = StyleSheet.create({
+  eyebrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   card: {
     backgroundColor: palette.surface,
     borderRadius: radius.lg,
