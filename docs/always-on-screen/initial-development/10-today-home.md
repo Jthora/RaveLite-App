@@ -118,7 +118,8 @@ Top to bottom, one scroll:
   and Respect DND, the Stay alive checklist, the plan editor, restoring a
   plan the v2 migration replaced, alive motion, and the Core theme. A
   notifications-off warning leads when permission is denied.
-- **Goals** (Daily Sets › Goals) — push-ups today against today's
+- **Goals** (Daily Sets › Goals, shown inside the Daily Sets sheet so Back
+  returns to Daily Sets; see the note below) — push-ups today against today's
   sets, with 200 a day as the long-term goal, then each military
   test event with its target (a B+ on every test that uses it, or a target
   the operator set on a number pad), the best Train log test with its grade
@@ -136,6 +137,13 @@ Top to bottom, one scroll:
   in the header.
 - **Library** (element pages) — focus areas, saved per element, which also
   steer the drill card; and the element's whole drill list.
+
+**Sheets over sheets.** On the Redmi, once a React Native Modal opened over
+another Modal has been touched (scrolled or tapped), Back stops reaching it
+and then the sheet beneath, which stays open until tapped closed; a single
+sheet scrolled on its own closes on Back. So Goals is a view inside the
+Daily Sets sheet, not a sheet on top of it. Small pads over a sheet (Test
+max, a goal's target, Log a test) are still their own Modals.
 
 Cut outright: Progress's 7-day bars and 14-day trend, History's tiles and
 sparkline, the Train tab's headline card (now one line), Setup's own My day
