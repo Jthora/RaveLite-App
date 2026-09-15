@@ -61,6 +61,7 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'air.thread-the-needle': 'chestopener',
   'air.nasal-recovery-walk': 'walk',
   'air.shadow-rope': 'jump',
+  'air.long-walk': 'walk',
   // Earth
   'earth.posterior-pelvic-tilt': 'bridge',
   'earth.glute-bridge': 'bridge',
@@ -92,6 +93,8 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'earth.long-lever-plank': 'plank',
   'earth.active-hang': 'hang',
   'earth.one-arm-assisted-hang': 'hang',
+  'earth.plank-test': 'plank',
+  'earth.cft-brick-lifts': 'carry',
   // Fire
   'fire.pushups': 'push',
   'fire.situps': 'crunch',
@@ -117,6 +120,11 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'fire.one-arm-doorframe-row': 'row',
   'fire.table-row': 'row',
   'fire.brick-pack-pullup': 'pull',
+  'fire.pullup-test': 'pull',
+  'fire.run-2mi': 'run',
+  'fire.run-3mi': 'run',
+  'fire.cft-sprint': 'run',
+  'fire.cft-maneuver': 'run',
   // Water
   'water.figure-8': 'staff',
   'water.beat-locks': 'footwork',

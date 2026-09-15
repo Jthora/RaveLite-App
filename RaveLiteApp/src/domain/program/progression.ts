@@ -7,6 +7,7 @@ import type {
   Track,
   TrackState,
 } from './types';
+import {dayFocus, focusBonus} from './week';
 
 /**
  * Progression — pure rules for how much work each track asks for today.
@@ -14,6 +15,8 @@ import type {
  *   Volume  — sets/day climb +1 per build week, and each 4-week block
  *             starts one set higher than the last. Week 4 of every block
  *             is a deload at ~60% of the block's peak.
+ *   Focus   — a focus day adds one set to its dry track (Mobility,
+ *             Stillness or Breath); see `week.ts`.
  *   Load    — set size is ~50% of the tested max. Retesting (best done
  *             on deload weeks, when fresh) is what raises it.
  *   Skill   — once the set size reaches the rung's `graduateAt`, the next
@@ -96,6 +99,7 @@ export function prescribeDay(
   }
   const rung = currentRung(track, state);
   const week = programWeek(program.startDay, date);
+  const bonus = focusBonus(track.id, dayFocus(date, week).focus);
   return {
     trackId: track.id,
     element: track.element,
@@ -103,7 +107,7 @@ export function prescribeDay(
     label: rung.label,
     unit: track.unit,
     setSize: setSizeFor(track, state),
-    sets: setsForWeek(track, week),
+    sets: Math.min(track.maxSets, setsForWeek(track, week) + bonus),
     week,
     phase: phaseForWeek(week),
   };

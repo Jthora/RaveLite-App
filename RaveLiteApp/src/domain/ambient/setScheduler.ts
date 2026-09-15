@@ -37,6 +37,7 @@ import {
   prescriptionsFor,
   subscribeProgram,
 } from '../program/repository';
+import {programWeek} from '../program/progression';
 import {groupIntoRounds} from '../program/rounds';
 import {placeRounds, selectUpcomingRounds} from '../program/schedule';
 import {
@@ -45,6 +46,7 @@ import {
   type SetFire,
   type SetPrescription,
 } from '../program/types';
+import {dayFocus} from '../program/week';
 import {localDayKey} from '../training/grading';
 import {
   getActiveHours,
@@ -161,6 +163,7 @@ export function setsToday(now: number = Date.now()): SetsToday {
     endMarginMs: ROUND_END_MARGIN_MS,
     rounds: groupIntoRounds(prescriptions, {
       balance: partnerBalance(date, plan, planFires, myDay),
+      focus: dayFocus(date, programWeek(program.startDay, date)).focus,
     }),
     blockedTs: planFires.map(f => f.ts),
   });

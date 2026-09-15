@@ -232,6 +232,23 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 180,
   },
 
+  {
+    id: 'air.long-walk',
+    element: 'air',
+    name: 'Long Easy Walk',
+    purpose:
+      'An easy walk through the neighborhood: recovery for the legs and slow nose breathing for the lungs.',
+    dose: '30–60 min',
+    cues: [
+      'Breathe through the nose the whole way; slow down if you need your mouth',
+      'Shoulders down, arms swinging, eyes up',
+      'Easy enough to talk the whole time',
+    ],
+    targets: ['Breath', 'NoFloor'],
+    venues: ['yard'],
+    approxSeconds: 2700,
+  },
+
   // ─── EARTH — Foundation & Core ─────────────────────────────────────────
   {
     id: 'earth.posterior-pelvic-tilt',
@@ -713,6 +730,42 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 120,
   },
 
+  {
+    id: 'earth.plank-test',
+    element: 'earth',
+    name: 'Plank Test',
+    purpose:
+      "The Marine test's plank: one forearm plank held for as long as the form stays clean.",
+    dose: '1 hold for time',
+    cues: [
+      'Warm up with an easy 20-second plank, then rest a minute',
+      'Forearms under the shoulders, body in one line, glutes tight',
+      'Stop the clock when the hips sag or pike',
+      'Log the time in Standards',
+    ],
+    targets: ['Core', 'APT', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 300,
+  },
+  {
+    id: 'earth.cft-brick-lifts',
+    element: 'earth',
+    name: 'Ammo-Can Lifts',
+    purpose:
+      "The combat fitness test's lift: a 30 lb can from the shoulders to overhead, as many times as you can in two minutes. A bag of bricks stands in.",
+    dose: '2 min, most lifts',
+    cues: [
+      'About 6 bricks in a strong bag make roughly 30 lb',
+      'Outside: a low ceiling has no room for this',
+      'Start at the shoulders, press to straight arms overhead',
+      'Ribs down and glutes tight so the lower back does not arch',
+      'Log the count in Standards',
+    ],
+    targets: ['Strength', 'Conditioning'],
+    venues: ['yard'],
+    approxSeconds: 300,
+  },
+
   // ─── FIRE — Power & Conditioning ───────────────────────────────────────
   {
     id: 'fire.pushups',
@@ -1105,6 +1158,89 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     targets: ['Strength', 'Grip'],
     venues: ['porch'],
     approxSeconds: 180,
+  },
+
+  {
+    id: 'fire.pullup-test',
+    element: 'fire',
+    name: 'Pull-Up Test',
+    purpose:
+      "The Marine test's pull-ups: as many strict reps as you can from a dead hang.",
+    dose: '1 set, most reps',
+    cues: [
+      'Test the hang point first',
+      'Warm up with scap pulls and 2 easy pull-ups, then rest 2 min',
+      'Start each rep from straight arms, chin over the edge, no kipping',
+      'Log the count in Standards',
+    ],
+    targets: ['Strength', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 240,
+  },
+  {
+    id: 'fire.run-2mi',
+    element: 'fire',
+    name: '2-Mile Run Test',
+    purpose: 'The Air Force and Space Force run: two miles for time.',
+    dose: '2 mi for time',
+    cues: [
+      'Warm up: 5 min easy jog and 4 strides',
+      'Hold an even pace: the first mile should feel controlled',
+      'Log the time in Standards when you get back',
+    ],
+    targets: ['PFT-Run', 'Conditioning'],
+    venues: ['yard'],
+    approxSeconds: 1200,
+  },
+  {
+    id: 'fire.run-3mi',
+    element: 'fire',
+    name: '3-Mile Run Test',
+    purpose:
+      'The Marine run: three miles for time. The 3.2-mile loop works; it counts at the same pace.',
+    dose: '3 mi for time',
+    cues: [
+      'Warm up: 5 min easy jog and 4 strides',
+      'Start at goal pace, not faster: 7:00 a mile is a 21:00 finish',
+      'Log the time and distance in Standards when you get back',
+    ],
+    targets: ['PFT-Run', 'Conditioning'],
+    venues: ['yard'],
+    approxSeconds: 1800,
+  },
+  {
+    id: 'fire.cft-sprint',
+    element: 'fire',
+    name: '880-Yard Sprint',
+    purpose:
+      "The combat fitness test's first event: half a mile as fast as you can hold it.",
+    dose: '880 yd (805 m) for time',
+    cues: [
+      'Mark out a half-mile course first',
+      'Warm up: 5 min easy jog and 3 strides',
+      'Fast but even: the second half should not fall apart',
+      'Log the time in Standards',
+    ],
+    targets: ['Conditioning', 'PFT-Run', 'Agility'],
+    venues: ['yard'],
+    approxSeconds: 600,
+  },
+  {
+    id: 'fire.cft-maneuver',
+    element: 'fire',
+    name: 'Maneuver Under Fire',
+    purpose:
+      "The combat fitness test's shuttle course: sprints, crawls, a drag, a carry and push-ups over 25-yard lengths.",
+    dose: '1 course for time',
+    cues: [
+      'Mark a 25-yard lane in the yard',
+      'Sprint, crawl, drag and carry, then push-ups and a sprint back to finish',
+      'No partner: drag and carry a backpack loaded with bricks',
+      'Log the time in Standards',
+    ],
+    targets: ['Conditioning', 'Agility', 'Strength'],
+    venues: ['yard'],
+    approxSeconds: 480,
   },
 
   // ─── WATER — Flow, Fascia & Hydration ──────────────────────────────────

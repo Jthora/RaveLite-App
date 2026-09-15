@@ -2,6 +2,7 @@ import {POINTS} from '../activity/par';
 import type {ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {TRACKS} from './tracks';
+import {FOCUS_PARTNERS, type AttributeId} from './week';
 import type {
   DayPrescription,
   Partner,
@@ -33,6 +34,10 @@ import type {
  * comes from the least-worked element not already in the round (the lead
  * move's own partner when one fits, else the pool), and every partner
  * placed counts toward the next round's pick, so the day spreads them.
+ *
+ * Focus partners: on a focus day (see `week.ts`) every second round ends
+ * with a dry drill for the day's focus instead, a hip opener on a Mobility
+ * day or a balance on a Balance day, taking turns through the day.
  */
 
 /** Rounds a day aims for. */
@@ -178,9 +183,29 @@ export function partnerFor(
   return options.length > 0 ? pick(options) : undefined;
 }
 
+/**
+ * A focus partner for a round: the day's focus drills in turn, skipping
+ * any from an element already in the round.
+ */
+export function focusPartner(
+  focus: readonly AttributeId[],
+  turn: number,
+  roundElements: readonly ElementId[],
+): Partner | undefined {
+  const options = focus
+    .flatMap(a => FOCUS_PARTNERS[a] ?? [])
+    .filter(o => {
+      const element = elementOf(o.exerciseId);
+      return element !== undefined && !roundElements.includes(element);
+    });
+  return options.length > 0
+    ? toPartner(options[turn % options.length])
+    : undefined;
+}
+
 export function groupIntoRounds(
   prescriptions: readonly DayPrescription[],
-  opts: {balance?: ElementBalance} = {},
+  opts: {balance?: ElementBalance; focus?: readonly AttributeId[]} = {},
 ): Round[] {
   const active = prescriptions.filter(p => p.sets > 0);
   const total = active.reduce((sum, p) => sum + p.sets, 0);
@@ -253,12 +278,13 @@ export function groupIntoRounds(
           seen.set(m.trackId, setIndex);
           return {...m, setIndex};
         });
-      const partner = partnerFor(
-        ordered[0].trackId,
-        i + 1,
-        running,
-        ordered.map(m => m.element),
-      );
+      const elements = ordered.map(m => m.element);
+      // Every second round ends on the day's focus when a drill fits.
+      const partner =
+        (opts.focus && i % 2 === 1
+          ? focusPartner(opts.focus, (i - 1) / 2, elements)
+          : undefined) ??
+        partnerFor(ordered[0].trackId, i + 1, running, elements);
       if (running && partner) {
         running[partner.element] =
           (running[partner.element] ?? 0) + POINTS.drill;

@@ -16,6 +16,7 @@
 import type {ElementId} from '../../theme/elements';
 import type {Exercise, Target} from './types';
 import {exercisesFor} from './library';
+import {isSweaty} from './sweat';
 
 export interface DrillContext {
   element: ElementId;
@@ -77,10 +78,11 @@ const CIRCADIAN: Record<
     {hours: [6, 10], favored: ['Breath', 'UCS', 'Mobility']},
     {hours: [13, 16], favored: ['Mobility', 'NoFloor']},
   ],
-  // Fire: peak strength + conditioning through the late afternoon and
-  // the backyard session.
+  // Fire: conditioning and runs in the morning block; strength through the
+  // afternoon, kept dry.
   fire: [
-    {hours: [14, 19], favored: ['Strength', 'Conditioning', 'PFT-Pushups', 'PFT-Situps']},
+    {hours: [5, 8], favored: ['Conditioning', 'PFT-Run']},
+    {hours: [14, 19], favored: ['Strength', 'PFT-Pushups', 'PFT-Situps']},
     {hours: [10, 12], favored: ['NoFloor']},
   ],
   // Earth: alignment + core work mid-morning when joints are warm.
@@ -126,12 +128,21 @@ const varietyPressure: Scorer = (ex, ctx) => {
   return -hits;
 };
 
+/** The morning block is over by then; sweat after it means a wet shirt. */
+const MORNING_BLOCK_ENDS_HOUR = 8;
+
+/** Laundry is limited: after the morning block, sweaty drills sink below
+ *  anything dry. */
+const dryAfterMorning: Scorer = (ex, ctx) =>
+  ctx.hour >= MORNING_BLOCK_ENDS_HOUR && isSweaty(ex) ? -6 : 0;
+
 const SCORERS: ReadonlyArray<Scorer> = [
   fitsTimeWindow,
   matchesPreferredTargets,
   notYetLoggedToday,
   circadianFit,
   varietyPressure,
+  dryAfterMorning,
 ];
 
 // ─── Public API ─────────────────────────────────────────────────────────
