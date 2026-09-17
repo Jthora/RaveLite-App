@@ -515,7 +515,9 @@ function GoalCard({
           onPress={onInfo}
           disabled={onInfo === undefined}
           accessibilityRole="button"
-          accessibilityLabel={`${event.name}. What is this?`}
+          accessibilityLabel={
+            onInfo ? `${event.name}. What is this?` : undefined
+          }
           style={styles.cardTitle}>
           <View>
             <Text style={styles.eventName}>

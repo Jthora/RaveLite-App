@@ -105,3 +105,28 @@ it('a track card opens what the track is, and Back keeps working', () => {
   expect(onClose).not.toHaveBeenCalled();
   act(() => tree!.unmount());
 });
+
+it('a Goals event opens what the test asks for', () => {
+  let tree: renderer.ReactTestRenderer | undefined;
+  act(() => {
+    tree = renderer.create(<DailySetsSheet visible onClose={() => {}} />);
+  });
+  act(() => {
+    tree!.root
+      .findAll(node => node.props.testID === 'goals-open')[0]
+      .props.onPress();
+  });
+  act(() => {
+    tree!.root
+      .findAll(
+        node =>
+          node.props.testID === 'event-info-plank' &&
+          typeof node.props.onPress === 'function',
+      )[0]
+      .props.onPress();
+  });
+  const json = JSON.stringify(tree!.toJSON());
+  expect(json).toContain('forearm plank');
+  expect(json).toContain('LOG IT WITH');
+  act(() => tree!.unmount());
+});

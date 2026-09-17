@@ -325,7 +325,7 @@ function TrackCard({
           onPress={onInfo}
           disabled={onInfo === undefined}
           accessibilityRole="button"
-          accessibilityLabel={`${p.label}. What is this?`}
+          accessibilityLabel={onInfo ? `${p.label}. What is this?` : undefined}
           style={styles.cardNameTap}>
           <View style={styles.cardName}>
             <MoveIcon

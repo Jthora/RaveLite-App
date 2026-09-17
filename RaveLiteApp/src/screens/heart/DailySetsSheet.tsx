@@ -109,7 +109,7 @@ export function DailySetsSheet({visible, onClose}: Props) {
               </View>
             </View>
             {goals ? (
-              <Goals />
+              <Goals onInfo={info.open} />
             ) : showing === 'attributes' ? (
               <Attributes />
             ) : (
