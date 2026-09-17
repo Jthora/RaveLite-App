@@ -52,8 +52,10 @@ export function DayList({
           row.status === 'done' &&
           row.ref?.store === 'journal' &&
           row.source !== 'test';
+        // Upcoming chimes open their info card; the rest open to be logged.
+        const upcoming = row.status === 'upcoming';
         const editable =
-          onRowPress !== undefined && (train || late || removable);
+          onRowPress !== undefined && (train || late || removable || upcoming);
         const body = (
           <>
             <Text style={styles.time}>{formatHM(row.at)}</Text>

@@ -1,4 +1,5 @@
 import type {ElementId} from '../../theme/elements';
+import type {InfoLink} from '../info/info';
 import type {MoveId} from '../exercises/moves';
 import type {ActivityItem, ActivitySource} from '../activity/activity';
 import type {JournalEntry} from '../journal/types';
@@ -39,6 +40,8 @@ export interface DayRow {
   move?: MoveId;
   /** For chime rows: the drill the chime asked for. */
   exerciseId?: string;
+  /** For a chime that is several things: each piece, to explain one by one. */
+  parts?: readonly InfoLink[];
 }
 
 /** A chime on today's schedule (plan chime or Daily Sets round). */
@@ -50,6 +53,8 @@ export interface ScheduledChime {
   detail?: string;
   move?: MoveId;
   exerciseId?: string;
+  /** A round's moves, partner and glass. */
+  parts?: readonly InfoLink[];
 }
 
 export interface DayListInput {
@@ -154,6 +159,7 @@ export function buildDayList(input: DayListInput): DayRow[] {
       detail: chime.detail,
       move: chime.move,
       exerciseId: chime.exerciseId,
+      parts: chime.parts,
     });
   }
 

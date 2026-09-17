@@ -37,6 +37,7 @@ import {
 } from '../domain/ambient/pulseRuntime';
 import {setsToday} from '../domain/ambient/setScheduler';
 import type {ActiveHours, ActivePulseSummary} from '../domain/ambient/types';
+import {partsOf} from '../domain/info/info';
 import {moveForExercise, moveForTrack} from '../domain/exercises/moves';
 import {entriesForDay, handledPulseIds} from '../domain/journal/journal';
 import {doneByTrack} from '../domain/program/progress';
@@ -105,6 +106,7 @@ function roundChime(fire: SetFire): ScheduledChime {
     detail: extras.join(' · ') || undefined,
     move: moveForTrack(movesOf(rx)[0]?.trackId),
     exerciseId: fire.exerciseId,
+    parts: partsOf(rx, fire.element),
   };
 }
 

@@ -376,6 +376,34 @@ the week before, done against what each day asked (recorded daily under
   later rounds, at most one per round for each track and never past a full
   round; what doesn't fit is let go rather than crammed into one big set.
 
+## Info cards (`src/domain/info/`, `src/components/info/InfoSheet.tsx`, since 17 Sep 2026)
+
+"What is this?" for every named thing — the operator asked for it after
+meeting *Beat-Step Footwork* and *Coherence Breath* on a chime with nowhere
+to look them up. The content was already there: every drill carries a
+purpose, form cues, a dose and its venues; tracks carry why they exist and
+their ladder; attributes carry their gist.
+
+- **One shape.** `infoFor(ref)` takes a drill, a track or an attribute and
+  returns the same card: what it is, how to do it, how much, where and how
+  long, what it trains, and links.
+- **A group is not a thing.** A round's card (`roundCard`) lists its moves
+  with today's amounts, the partner drill and the glass of water; each is a
+  link to its own card. `partsOf` puts the same list on a scheduled chime,
+  so a chime still to come can be opened the same way.
+- **It links both ways.** A drill points back at its track ("one of its
+  variations", or "rides along after its sets"); a track lists its ladder,
+  marking where you are, and what rides along with it.
+- **How you open it:** the ⓘ on the chime card (now and next), and a tap on
+  any chime still to come in today's list. Chimes already logged, missed or
+  skipped keep their own sheets.
+- **The card keeps its own history:** open a round, then a move, and Back
+  walks back out before it closes (`useInfoStack`).
+- **Where it renders:** `InfoSheet` is a Modal, used only on Today, which
+  has no sheet of its own. `InfoCardView` is the same card as a plain view,
+  for hosting inside a sheet that is already open — never a Modal over a
+  Modal.
+
 ## Attributes (`src/domain/attributes/`, since 17 Sep 2026)
 
 The fifteen the focus wheel names are levels you grow, on the character

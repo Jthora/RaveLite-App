@@ -13,6 +13,7 @@ import {SessionSheet} from '../../../components/today/SessionSheet';
 import {addEntry} from '../../../domain/training/repository';
 import {startSession} from '../../../domain/training/session';
 import {SettingsSheet} from '../SettingsSheet';
+import {InfoCardView} from '../../../components/info/InfoSheet';
 import {TodayPanel} from '../TodayPanel';
 
 // Monday 14 Sep 2026, 10:00 — inside My day, so a chime can sound.
@@ -204,5 +205,28 @@ it('catch up logs several missed chimes at once', () => {
   const pulseIds = activityForDay().map(item => item.pulseId);
   expect(pulseIds).toEqual(expect.arrayContaining(ids.slice(0, 2)));
   expect(tree.root.findByType(CatchUpSheet).props.visible).toBe(false);
+  act(() => tree.unmount());
+});
+
+it('asks what a chime is, opens each piece of it, and walks back out', () => {
+  const tree = renderToday();
+  const card = () => tree.root.findAllByType(InfoCardView)[0]?.props.card;
+  // The last round row is still to come; earlier ones are missed by 10:00.
+  const round = tree.root
+    .findAll(
+      (node: ReactTestInstance) =>
+        String(node.props.testID ?? '').startsWith('day-row-sets:') &&
+        typeof node.props.onPress === 'function',
+    )
+    .pop()!;
+  act(() => round.props.onPress());
+  expect(card().parts.length).toBeGreaterThan(1);
+  act(() => byTestId(tree, 'info-part-0').props.onPress());
+  // A piece explains itself: what it is, and how to do it.
+  expect(card().how).toBeDefined();
+  act(() => byTestId(tree, 'info-back').props.onPress());
+  expect(card().parts.length).toBeGreaterThan(1);
+  act(() => byTestId(tree, 'info-close').props.onPress());
+  expect(card()).toBeUndefined();
   act(() => tree.unmount());
 });

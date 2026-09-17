@@ -17,6 +17,12 @@ import {
   moveForTrack,
   type MoveId,
 } from '../../domain/exercises/moves';
+import {
+  groupCard,
+  infoFor,
+  roundCard,
+  type InfoCard,
+} from '../../domain/info/info';
 import {formatSetAmount} from '../../domain/program/progress';
 import type {SetUnit, TrackId} from '../../domain/program/types';
 import type {DayRow} from '../../domain/today/dayList';
@@ -44,6 +50,8 @@ export interface ChimeCardProps {
   /** Chimes are paused until then. */
   pauseUntil?: number;
   onResume?: () => void;
+  /** "What is this?" — the card for what's being asked for. */
+  onInfo?: (card: InfoCard) => void;
 }
 
 /**
@@ -51,6 +59,29 @@ export interface ChimeCardProps {
  * with its own −/+), its partner and glass, a draining answer window, and
  * Done / +5 / Skip. Otherwise: the next chime, with +5 and Skip.
  */
+/** The circled i that opens the card behind whatever is being asked for. */
+function InfoTap({
+  color,
+  label,
+  onPress,
+}: {
+  color: string;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Tap
+      testID="chime-info"
+      variant="plain"
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`What is ${label}?`}
+      style={styles.info}>
+      <Text style={[styles.infoMark, {color}]}>ⓘ</Text>
+    </Tap>
+  );
+}
+
 /** The move on a soft square of its element's color; the element glyph when there is none. */
 function MoveTile({
   move,
@@ -101,6 +132,7 @@ function ActiveCard({
   onDone,
   onSnooze,
   onSkip,
+  onInfo,
 }: ChimeCardProps & {active: ActivePulseSummary}) {
   const el = ELEMENTS[active.element];
   const rx = active.prescription;
@@ -152,6 +184,23 @@ function ActiveCard({
             {title}
           </Text>
         </View>
+        {onInfo ? (
+          <InfoTap
+            color={el.color}
+            label={title}
+            onPress={() =>
+              onInfo(
+                rx
+                  ? roundCard(rx, active.element)
+                  : infoFor({kind: 'drill', id: active.drillId}) ?? {
+                      title: active.drillName,
+                      element: active.element,
+                      what: active.cuesShort.join(' · '),
+                    },
+              )
+            }
+          />
+        ) : null}
       </View>
 
       {active.note ? (
@@ -278,6 +327,31 @@ export function AmountRow({
   );
 }
 
+/** The card behind a scheduled chime: its pieces, or the drill it asks for. */
+export function cardForRow(row: DayRow): InfoCard {
+  if (row.parts && row.parts.length > 0) {
+    return groupCard({
+      title: row.detail?.startsWith('Round')
+        ? row.detail.split(' · ')[0]
+        : row.label,
+      element: row.element,
+      what: 'A few small sets back to back, then something from another element to balance them.',
+      subtitle: 'Daily Sets',
+      parts: row.parts,
+    });
+  }
+  const drill = row.exerciseId
+    ? infoFor({kind: 'drill', id: row.exerciseId})
+    : undefined;
+  return (
+    drill ?? {
+      title: row.label,
+      element: row.element,
+      what: row.detail ?? "A chime on today's schedule.",
+    }
+  );
+}
+
 function NextCard({
   now,
   next,
@@ -285,6 +359,7 @@ function NextCard({
   onDeferNext,
   onSkipNext,
   onResume,
+  onInfo,
 }: ChimeCardProps) {
   if (pauseUntil !== undefined && pauseUntil > now) {
     return (
@@ -333,6 +408,13 @@ function NextCard({
             </Text>
           ) : null}
         </View>
+        {onInfo ? (
+          <InfoTap
+            color={el.color}
+            label={next.label}
+            onPress={() => onInfo(cardForRow(next))}
+          />
+        ) : null}
       </View>
       <View style={styles.actions}>
         <Tap
@@ -447,6 +529,15 @@ const styles = StyleSheet.create({
     ...t.body,
     color: palette.text,
     marginTop: 2,
+  },
+  info: {
+    minHeight: 48,
+    minWidth: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoMark: {
+    fontSize: 20,
   },
   amountRow: {
     flexDirection: 'row',

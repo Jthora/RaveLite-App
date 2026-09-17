@@ -14,7 +14,12 @@ import {Settings} from 'lucide-react-native';
 
 import {Tap} from '../../components/Tap';
 import {BalanceStrip} from '../../components/today/BalanceStrip';
-import {ChimeCard, type DoneAdjust} from '../../components/today/ChimeCard';
+import {
+  ChimeCard,
+  cardForRow,
+  type DoneAdjust,
+} from '../../components/today/ChimeCard';
+import {InfoSheet, useInfoStack} from '../../components/info/InfoSheet';
 import {ConditionsLine} from '../../components/today/ConditionsLine';
 import {DayList} from '../../components/today/DayList';
 import {CatchUpSheet} from '../../components/today/CatchUpSheet';
@@ -61,6 +66,7 @@ interface Props {
 
 export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const model = useTodayModel();
+  const info = useInfoStack();
   const [logOpen, setLogOpen] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
   const [practiceOpen, setPracticeOpen] = useState(false);
@@ -92,23 +98,31 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
     cancelQueued([next.id]);
     append({kind: 'reminder.skipped', pulseId: next.id, respondedAfterMs: 0});
   }, [next]);
-  // A Train entry opens for edit, a missed or skipped chime opens to be
-  // logged, and anything else logged opens to keep or remove.
-  const onRowPress = useCallback((row: DayRow) => {
-    if (row.status === 'missed' || row.status === 'skipped') {
-      setLate(row);
-      return;
-    }
-    if (row.status === 'done' && row.ref?.store === 'journal') {
-      setLogged(row);
-      return;
-    }
-    const id = row.ref?.store === 'train' ? row.ref.id : undefined;
-    const entry = id ? loadEntries().find(e => e.id === id) : undefined;
-    if (entry) {
-      setEditing(entry);
-    }
-  }, []);
+  // A chime still to come opens what it is; a Train entry opens for edit,
+  // a missed or skipped chime opens to be logged, and anything else logged
+  // opens to keep or remove.
+  const onRowPress = useCallback(
+    (row: DayRow) => {
+      if (row.status === 'upcoming') {
+        info.show(cardForRow(row));
+        return;
+      }
+      if (row.status === 'missed' || row.status === 'skipped') {
+        setLate(row);
+        return;
+      }
+      if (row.status === 'done' && row.ref?.store === 'journal') {
+        setLogged(row);
+        return;
+      }
+      const id = row.ref?.store === 'train' ? row.ref.id : undefined;
+      const entry = id ? loadEntries().find(e => e.id === id) : undefined;
+      if (entry) {
+        setEditing(entry);
+      }
+    },
+    [info],
+  );
 
   // A round's moves, partner and glass, looked up when its row opens.
   const lateRound = useMemo(
@@ -179,6 +193,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           onSkip={() => resolveActive('skipped')}
           onDeferNext={onDeferNext}
           onSkipNext={onSkipNext}
+          onInfo={info.show}
         />
         <BalanceStrip
           points={model.points}
@@ -266,6 +281,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           </Tap>
         </View>
 
+        <InfoSheet stack={info} />
         <SessionSheet
           visible={sessionOpen}
           onClose={() => setSessionOpen(false)}

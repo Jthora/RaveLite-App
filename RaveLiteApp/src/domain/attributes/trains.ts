@@ -182,6 +182,29 @@ const ELEMENT_ATTRS: Record<ElementId, AttributeId> = {
 
 const EXERCISES = new Map(EXERCISE_LIBRARY.map(e => [e.id, e]));
 
+/** What a drill trains, on its own or as a set on a track. */
+export function attributesForDrill(
+  exerciseId: string | undefined,
+  trackId?: TrackId,
+): readonly AttributeId[] {
+  if (exerciseId && EXERCISE_ATTRS[exerciseId]) {
+    return EXERCISE_ATTRS[exerciseId];
+  }
+  if (trackId && TRACK_ATTRS[trackId]) {
+    return TRACK_ATTRS[trackId];
+  }
+  const exercise = exerciseId ? EXERCISES.get(exerciseId) : undefined;
+  if (exercise) {
+    for (const [tag, id] of TAG_ATTRS) {
+      if (exercise.targets.includes(tag)) {
+        return [id];
+      }
+    }
+    return [ELEMENT_ATTRS[exercise.element]];
+  }
+  return [];
+}
+
 function pairFor(item: ActivityItem): Pair {
   if (item.kindId && METRIC_ATTRS[item.kindId]) {
     return METRIC_ATTRS[item.kindId];
