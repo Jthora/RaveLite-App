@@ -24,7 +24,7 @@ import {
   type InfoCard,
 } from '../../domain/info/info';
 import {formatSetAmount} from '../../domain/program/progress';
-import type {SetUnit, TrackId} from '../../domain/program/types';
+import type {SetMove, SetUnit, TrackId} from '../../domain/program/types';
 import type {DayRow} from '../../domain/today/dayList';
 import {ELEMENTS, type ElementIdentity} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -213,8 +213,9 @@ function ActiveCard({
             label={m.label}
             unit={m.unit}
             value={amounts[m.trackId] ?? m.amount}
-            color={el.color}
+            color={ELEMENTS[m.element].color}
             onChange={v => setAmounts(a => ({...a, [m.trackId]: v}))}
+            onInfo={onInfo ? () => onInfo(moveCard(m)) : undefined}
           />
         ))
       ) : rx ? (
@@ -291,19 +292,36 @@ export function AmountRow({
   value,
   color,
   onChange,
+  onInfo,
 }: {
   label: string;
   unit: SetUnit;
   value: number;
   color: string;
   onChange: (next: number) => void;
+  /** "What is this?" for this move on its own. */
+  onInfo?: () => void;
 }) {
   const step = unit === 'seconds' ? 5 : 1;
   return (
     <View style={styles.amountRow}>
-      <Text style={styles.amountLabel} numberOfLines={1}>
-        {label}
-      </Text>
+      {onInfo ? (
+        <Tap
+          testID={`move-info-${label}`}
+          variant="plain"
+          onPress={onInfo}
+          accessibilityRole="button"
+          accessibilityLabel={`${label}. What is this?`}
+          style={styles.amountLabelTap}>
+          <Text style={styles.amountLabel} numberOfLines={1}>
+            {label} <Text style={{color}}>ⓘ</Text>
+          </Text>
+        </Tap>
+      ) : (
+        <Text style={styles.amountLabel} numberOfLines={1}>
+          {label}
+        </Text>
+      )}
       <Tap
         variant="ghost"
         color={color}
@@ -324,6 +342,20 @@ export function AmountRow({
         <Text style={[styles.stepText, {color}]}>+</Text>
       </Tap>
     </View>
+  );
+}
+
+/** The card behind one move of a round. */
+export function moveCard(move: SetMove): InfoCard {
+  return (
+    infoFor({kind: 'drill', id: move.exerciseId}) ??
+    infoFor({kind: 'track', id: move.trackId}) ?? {
+      title: move.label,
+      element: move.element,
+      what: `${move.amount}${move.unit === 'seconds' ? ' sec' : ''}, set ${
+        move.setIndex
+      } of ${move.sets} today.`,
+    }
   );
 }
 
@@ -544,6 +576,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     marginTop: spacing.xs,
+  },
+  amountLabelTap: {
+    flex: 1,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   amountLabel: {
     ...t.body,

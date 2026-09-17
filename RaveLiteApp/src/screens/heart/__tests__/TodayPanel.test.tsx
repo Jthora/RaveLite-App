@@ -230,3 +230,24 @@ it('asks what a chime is, opens each piece of it, and walks back out', () => {
   expect(card()).toBeUndefined();
   act(() => tree.unmount());
 });
+
+it('a missed chime explains itself from the sheet that logs it', () => {
+  const tree = renderToday();
+  const card = () => tree.root.findAllByType(InfoCardView)[0]?.props.card;
+  const missed = tree.root.findAll(
+    (node: ReactTestInstance) =>
+      typeof node.props.testID === 'string' &&
+      node.props.testID.startsWith('day-row-plan:') &&
+      typeof node.props.onPress === 'function',
+  )[0];
+  act(() => missed.props.onPress());
+  expect(tree.root.findByType(LateLogSheet).props.row).toBeDefined();
+  act(() => byTestId(tree, 'late-info').props.onPress());
+  // What it is and how to do it, without logging anything.
+  expect(card().what).toBeTruthy();
+  expect(card().element).toBeTruthy();
+  act(() => byTestId(tree, 'info-close').props.onPress());
+  expect(card()).toBeUndefined();
+  expect(tree.root.findByType(LateLogSheet).props.row).toBeDefined();
+  act(() => tree.unmount());
+});

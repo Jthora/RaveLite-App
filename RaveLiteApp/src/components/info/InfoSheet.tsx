@@ -17,6 +17,8 @@ import React, {useCallback, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {ElementGlyph} from '../icons/ElementGlyph';
+import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {
   infoFor,
@@ -24,7 +26,8 @@ import {
   type InfoLink,
   type InfoRef,
 } from '../../domain/info/info';
-import {ELEMENTS} from '../../theme/elements';
+import type {MoveId} from '../../domain/exercises/moves';
+import {ELEMENTS, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 export interface InfoStack {
@@ -57,14 +60,48 @@ export function useInfoStack(): InfoStack {
   };
 }
 
+/** The pictogram on a soft square of its element's colour. */
+function Tile({
+  element,
+  move,
+  size,
+}: {
+  element: ElementId;
+  move?: MoveId;
+  size: number;
+}) {
+  const el = ELEMENTS[element];
+  return (
+    <View
+      style={[
+        styles.tile,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 4,
+          backgroundColor: `${el.color}29`,
+        },
+      ]}>
+      {move ? (
+        <MoveIcon move={move} color={el.color} size={size * 0.6} />
+      ) : (
+        <ElementGlyph element={el} size={size * 0.55} color={el.color} />
+      )}
+    </View>
+  );
+}
+
 function Links({
   title,
   links,
+  element,
   color,
   onOpen,
 }: {
   title: string;
   links: readonly InfoLink[];
+  /** The card's own element, for a part that doesn't name one. */
+  element: ElementId;
   color: string;
   onOpen: (ref: InfoRef) => void;
 }) {
@@ -72,13 +109,19 @@ function Links({
     <View style={styles.section}>
       <Text style={styles.eyebrow}>{title.toUpperCase()}</Text>
       {links.map((link, i) => {
+        const own = link.element ?? element;
         const body = (
-          <View style={styles.linkBody}>
-            <Text style={styles.linkLabel}>{link.label}</Text>
-            {link.detail ? (
-              <Text style={styles.linkDetail}>{link.detail}</Text>
-            ) : null}
-          </View>
+          <>
+            <Tile element={own} move={link.move} size={34} />
+            <View style={styles.linkBody}>
+              <Text style={[styles.linkLabel, {color: ELEMENTS[own].color}]}>
+                {link.label}
+              </Text>
+              {link.detail ? (
+                <Text style={styles.linkDetail}>{link.detail}</Text>
+              ) : null}
+            </View>
+          </>
         );
         // Tap wraps its children in one view, so the row sits inside it.
         return link.ref ? (
@@ -149,10 +192,15 @@ export function InfoCardView({
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
-        <Text style={[styles.title, {color}]}>{card.title}</Text>
-        {card.subtitle ? (
-          <Text style={styles.subtitle}>{card.subtitle}</Text>
-        ) : null}
+        <View style={styles.titleRow}>
+          <Tile element={card.element} move={card.move} size={52} />
+          <View style={styles.titleText}>
+            <Text style={[styles.title, {color}]}>{card.title}</Text>
+            {card.subtitle ? (
+              <Text style={styles.subtitle}>{card.subtitle}</Text>
+            ) : null}
+          </View>
+        </View>
         <Text style={styles.what}>{card.what}</Text>
         {card.dose ? (
           <Text style={[styles.dose, {color}]}>{card.dose}</Text>
@@ -172,6 +220,7 @@ export function InfoCardView({
           <Links
             title={card.partsTitle ?? 'Each part'}
             links={card.parts}
+            element={card.element}
             color={color}
             onOpen={onOpen}
           />
@@ -193,6 +242,7 @@ export function InfoCardView({
           <Links
             title={card.relatedTitle ?? 'Part of'}
             links={card.related}
+            element={card.element}
             color={color}
             onOpen={onOpen}
           />
@@ -250,6 +300,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
     gap: spacing.sm,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  titleText: {
+    flex: 1,
+    gap: 2,
+  },
+  tile: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     ...t.title,

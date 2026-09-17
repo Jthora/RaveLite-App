@@ -5,6 +5,8 @@ import type {Exercise, Venue} from '../exercises/types';
 import {prescribeDay} from '../program/progression';
 import {loadProgram} from '../program/repository';
 import {TRACKS} from '../program/tracks';
+import {moveForExercise, moveForMetric, moveForTrack} from '../exercises/moves';
+import type {MoveId} from '../exercises/moves';
 import type {SetPrescription, TrackId} from '../program/types';
 import {
   STANDARD_EVENTS,
@@ -39,12 +41,18 @@ export interface InfoLink {
   ref?: InfoRef;
   label: string;
   detail?: string;
+  /** Whose colour the row takes — in a group, which element this piece is. */
+  element?: ElementId;
+  /** Its pictogram. */
+  move?: MoveId;
 }
 
 export interface InfoCard {
   title: string;
   subtitle?: string;
   element: ElementId;
+  /** The pictogram for the thing itself; the element's mark when absent. */
+  move?: MoveId;
   /** One line: what it is. */
   what: string;
   /** How to do it, in order. */
@@ -120,6 +128,7 @@ function drillCard(exercise: Exercise): InfoCard {
     title: exercise.name,
     subtitle: ELEMENTS[exercise.element].name,
     element: exercise.element,
+    move: moveForExercise(exercise.id),
     what: exercise.purpose,
     how: exercise.cues,
     dose: exercise.dose,
@@ -139,6 +148,8 @@ function drillCard(exercise: Exercise): InfoCard {
           {
             ref: {kind: 'track', id: home.track.id},
             label: `${home.track.name} track`,
+            element: home.track.element,
+            move: moveForTrack(home.track.id),
             detail: home.partner
               ? 'Rides along after its sets'
               : 'One of its variations',
@@ -163,6 +174,7 @@ function trackCard(id: TrackId): InfoCard | undefined {
     title: track.name,
     subtitle: `${ELEMENTS[track.element].name} · a Daily Sets track`,
     element: track.element,
+    move: moveForTrack(track.id),
     what: track.why,
     dose: today
       ? `Now: ${today.label}, ${today.sets} × ${today.setSize}${
@@ -178,6 +190,8 @@ function trackCard(id: TrackId): InfoCard | undefined {
     parts: track.ladder.map((step, i) => ({
       ref: {kind: 'drill' as const, id: step.exerciseId},
       label: step.label,
+      element: EXERCISES.get(step.exerciseId)?.element ?? track.element,
+      move: moveForExercise(step.exerciseId),
       detail:
         state && i === state.rung
           ? `Where you are · next rung at ${step.graduateAt}`
@@ -190,6 +204,8 @@ function trackCard(id: TrackId): InfoCard | undefined {
       ref: {kind: 'drill' as const, id: p.exerciseId},
       label: EXERCISES.get(p.exerciseId)?.name ?? p.exerciseId,
       detail: `Rides along · ${p.seconds} sec`,
+      element: EXERCISES.get(p.exerciseId)?.element,
+      move: moveForExercise(p.exerciseId),
     })),
   };
 }
@@ -243,6 +259,7 @@ function metricCard(id: string): InfoCard | undefined {
         ? 'Something you measure'
         : `${ELEMENTS[metric.element].name} · something you measure`,
     element: metric.element === 'any' ? 'heart' : metric.element,
+    move: moveForMetric(metric),
     what:
       MEASURES[id] ??
       metric.notes ??
@@ -255,6 +272,7 @@ function metricCard(id: string): InfoCard | undefined {
             ref: {kind: 'event', id: event.id},
             label: event.name,
             detail: event.subtitle,
+            element: elementOfEvent(event),
           },
         ]
       : undefined,
@@ -291,6 +309,8 @@ function eventCard(id: string): InfoCard | undefined {
             ref: {kind: 'metric', id: event.kindId},
             label: METRICS.get(event.kindId)?.label ?? event.kindId,
             detail: 'How to measure it',
+            element: elementOfEvent(event),
+            move: moveForMetric(METRICS.get(event.kindId)),
           },
         ]
       : undefined,
@@ -340,12 +360,16 @@ export function partsOf(
     detail: `${move.amount}${move.unit === 'seconds' ? ' sec' : ''} · set ${
       move.setIndex
     } of ${move.sets} today`,
+    element: move.element,
+    move: moveForTrack(move.trackId) ?? moveForExercise(move.exerciseId),
   }));
   if (prescription.partner) {
     parts.push({
       ref: {kind: 'drill', id: prescription.partner.exerciseId},
       label: prescription.partner.label,
       detail: `${prescription.partner.seconds} sec, straight after`,
+      element: prescription.partner.element,
+      move: moveForExercise(prescription.partner.exerciseId),
     });
   }
   if (prescription.water) {
