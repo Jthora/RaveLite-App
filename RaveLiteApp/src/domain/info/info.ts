@@ -53,6 +53,8 @@ export interface InfoCard {
   dose?: string;
   /** Where, how long, what it trains. */
   meta?: readonly string[];
+  /** Meta as its own line each, for marks that don't read as a sentence. */
+  metaLines?: boolean;
   /** The things inside this one. */
   parts?: readonly InfoLink[];
   partsTitle?: string;
@@ -275,6 +277,7 @@ function eventCard(id: string): InfoCard | undefined {
     subtitle: event.subtitle,
     element: elementOfEvent(event),
     what: EVENT_WHAT[id] ?? event.name,
+    metaLines: true,
     meta: [
       ...marks,
       marks.length > 0

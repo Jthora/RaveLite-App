@@ -177,7 +177,17 @@ export function InfoCardView({
           />
         ) : null}
         {card.meta && card.meta.length > 0 ? (
-          <Text style={styles.meta}>{card.meta.join(' · ')}</Text>
+          card.metaLines ? (
+            <View style={styles.metaLines}>
+              {card.meta.map(line => (
+                <Text key={line} style={styles.meta}>
+                  {line}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.meta}>{card.meta.join(' · ')}</Text>
+          )
         ) : null}
         {card.related && card.related.length > 0 ? (
           <Links
@@ -301,6 +311,10 @@ const styles = StyleSheet.create({
   },
   chevron: {
     ...t.subtitle,
+  },
+  metaLines: {
+    marginTop: spacing.sm,
+    gap: 4,
   },
   meta: {
     ...t.caption,
