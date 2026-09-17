@@ -10,7 +10,10 @@
  */
 import {AppState, PermissionsAndroid, Platform} from 'react-native';
 
-import {getCoarseLocation} from '../../native/raveLiteDevice';
+import {
+  getCoarseLocation,
+  isLocationEnabled,
+} from '../../native/raveLiteDevice';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import type {Exercise} from '../exercises/types';
@@ -299,7 +302,7 @@ export async function searchPlaces(
 
 export type DetectResult =
   | {ok: true; place: Place}
-  | {ok: false; reason: 'denied' | 'unavailable'};
+  | {ok: false; reason: 'denied' | 'unavailable' | 'off'};
 
 /** Ask for coarse location once, and save where the phone is. */
 export async function detectPlace(
@@ -323,7 +326,12 @@ export async function detectPlace(
   }
   const fix = await getCoarseLocation();
   if (!fix) {
-    return {ok: false, reason: 'unavailable'};
+    // A granted permission still gives nothing while the phone's location
+    // switch is off, and that needs different advice.
+    return {
+      ok: false,
+      reason: (await isLocationEnabled()) ? 'unavailable' : 'off',
+    };
   }
   const place = setPlace(
     {

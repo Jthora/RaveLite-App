@@ -26,6 +26,8 @@ interface RaveLiteDeviceNative {
   setWindowBrightness(level: number): Promise<boolean>;
   /** Missing on APKs built before location support. */
   getCoarseLocation?(): Promise<CoarseLocation | null>;
+  /** Missing on APKs built before the location switch check. */
+  isLocationEnabled?(): Promise<boolean>;
 }
 
 const native: RaveLiteDeviceNative | undefined =
@@ -97,6 +99,21 @@ export async function getInterruptionFilter(): Promise<number | null> {
  * The phone's rough location, once (the permission must already be
  * granted). Null when location is off, unavailable or not permitted.
  */
+/**
+ * Whether the phone's location switch is on. True when the build cannot
+ * tell, so a missing answer never becomes wrong advice.
+ */
+export async function isLocationEnabled(): Promise<boolean> {
+  if (!native?.isLocationEnabled) {
+    return true;
+  }
+  try {
+    return await native.isLocationEnabled();
+  } catch {
+    return true;
+  }
+}
+
 export async function getCoarseLocation(): Promise<CoarseLocation | null> {
   if (!native?.getCoarseLocation) {
     return null;

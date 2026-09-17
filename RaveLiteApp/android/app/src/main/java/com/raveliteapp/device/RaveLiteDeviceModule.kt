@@ -158,6 +158,22 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
   }
 
   /**
+   * Whether the phone's location switch is on at all. A granted permission
+   * still gives nothing while this is off, and "turn location on" is very
+   * different advice from "type a town instead".
+   */
+  @ReactMethod
+  fun isLocationEnabled(promise: Promise) {
+    val manager = reactContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val on =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) manager.isLocationEnabled
+        else
+            manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    promise.resolve(on)
+  }
+
+  /**
    * The phone's rough location, once. Resolves `{latitude, longitude, place?}`
    * from the freshest last-known fix under a day old, else a single network
    * (or GPS) fix, or null when location is off, not permitted, or nothing

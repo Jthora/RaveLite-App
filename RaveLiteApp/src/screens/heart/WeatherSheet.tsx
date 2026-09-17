@@ -132,7 +132,9 @@ export function WeatherSheet({visible, onClose}: Props) {
         setMessage(
           out.reason === 'denied'
             ? 'Location not allowed. Type a town instead.'
-            : "Couldn't get a location. Is location turned on?",
+            : out.reason === 'off'
+            ? 'Location is switched off on the phone. Turn it on in Settings, or type a town.'
+            : "Couldn't get a fix. Try again outside, or type a town.",
         );
       }
     } finally {
