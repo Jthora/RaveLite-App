@@ -67,8 +67,11 @@ export interface CompletionEntry extends BaseEntry {
   respondedAfterMs?: number;
   /** Daily Sets: the track this set counts toward (`program/types` TrackId). */
   trackId?: string;
-  /** Daily Sets: reps or seconds actually done, in the track's unit. */
+  /** Daily Sets: reps or seconds actually done, in the track's unit.
+   *  On a practice (no track), what was counted in `amountUnit`. */
   amount?: number;
+  /** What `amount` counts when there is no track: reps, 8-counts or seconds. */
+  amountUnit?: 'reps' | 'eights' | 'sec';
   /** Daily Sets round: every move done in one chime, each in its track's unit. */
   moves?: Array<{trackId: string; amount: number}>;
   /** Partner drill done alongside a set round. */

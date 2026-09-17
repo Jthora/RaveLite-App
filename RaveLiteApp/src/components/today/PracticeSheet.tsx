@@ -1,11 +1,14 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Modal, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {CardGrid} from '../CardGrid';
+import {PracticeRunner} from './PracticeRunner';
+import {SkillList} from './SkillList';
 import {ExerciseRow} from '../ExerciseRow';
 import {Tap} from '../Tap';
 import type {CircuitLeg} from '../../domain/circuit/circuit';
+import type {Exercise} from '../../domain/exercises/types';
 import {exercisesFor} from '../../domain/exercises/library';
 import {CircuitsPanel} from '../../screens/heart/CircuitsPanel';
 import {ELEMENTS} from '../../theme/elements';
@@ -18,17 +21,37 @@ interface Props {
 }
 
 /**
- * Practice on demand, off the home screen, in one scroll: the Pentagram
- * and saved circuits, then the Heart drill library.
+ * Practice on demand, off the home screen: the skills to drill with a
+ * counter, then the Pentagram and saved circuits, then the Heart drills.
+ *
+ * The counter shows in this same sheet, never as a sheet over it: on
+ * Android, Back stops reaching a sheet opened over another once it has
+ * been touched.
  */
 export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
   const accent = ELEMENTS.heart.accent;
+  const [drilling, setDrilling] = useState<Exercise | undefined>();
+  const [logged, setLogged] = useState<string | undefined>();
+  const [version, setVersion] = useState(0);
+
+  // Every opening starts on the list.
+  useEffect(() => {
+    if (!visible) {
+      setDrilling(undefined);
+      setLogged(undefined);
+    }
+  }, [visible]);
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={() => (drilling ? setDrilling(undefined) : onClose())}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>Practice</Text>
+          <Text style={[styles.title, {color: accent}]}>
+            {drilling ? 'Drill it' : 'Practice'}
+          </Text>
           <Tap
             variant="plain"
             onPress={onClose}
@@ -37,25 +60,53 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
             <Text style={styles.closeText}>Close</Text>
           </Tap>
         </View>
-        <CircuitsPanel
-          onEngageLegs={onEngageLegs}
-          footer={
-            <View style={styles.drills}>
-              <Text style={styles.sectionLabel}>HEART DRILLS</Text>
-              <CardGrid>
-                {exercisesFor('heart').map(ex => (
-                  <ExerciseRow key={ex.id} exercise={ex} />
-                ))}
-              </CardGrid>
-            </View>
-          }
-        />
+        {drilling ? (
+          <PracticeRunner
+            exercise={drilling}
+            onDone={summary => {
+              setLogged(summary);
+              setVersion(v => v + 1);
+              setDrilling(undefined);
+            }}
+            onCancel={() => setDrilling(undefined)}
+          />
+        ) : (
+          <CircuitsPanel
+            onEngageLegs={onEngageLegs}
+            header={
+              <View>
+                {logged ? (
+                  <Text testID="practice-logged" style={styles.logged}>
+                    Logged: {logged}
+                  </Text>
+                ) : null}
+                <SkillList version={version} onPick={setDrilling} />
+              </View>
+            }
+            footer={
+              <View style={styles.drills}>
+                <Text style={styles.sectionLabel}>HEART DRILLS</Text>
+                <CardGrid>
+                  {exercisesFor('heart').map(ex => (
+                    <ExerciseRow key={ex.id} exercise={ex} />
+                  ))}
+                </CardGrid>
+              </View>
+            }
+          />
+        )}
       </SafeAreaView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  logged: {
+    ...t.caption,
+    color: ELEMENTS.water.color,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xs,
+  },
   root: {
     flex: 1,
     backgroundColor: palette.bg,

@@ -1,3 +1,4 @@
+import {drinkTarget} from '../heatWater';
 import {store} from '../../../storage';
 import {KEYS} from '../../../storage/keys';
 import {
@@ -17,6 +18,7 @@ import {
   getForecast,
   hottestToday,
   planWithWeather,
+  hottestFeelsToday,
   refreshForecast,
   weatherLine,
 } from '../weather';
@@ -162,4 +164,17 @@ it('a hot afternoon adds water calls and raises the heat level', () => {
     next: expect.objectContaining({kind: 'sunrise'}),
     conditions: expect.objectContaining({known: true, tempC: 20}),
   });
+});
+
+it('a dangerous-heat day raises the Drink target, and says how hot', () => {
+  store.set(KEYS.weatherPlace, JSON.stringify(place));
+  // A Swansea afternoon in September: feels 39° at its worst.
+  saveForecast(h => ({feelsC: h === 15 ? 39.4 : 28}));
+  expect(hottestFeelsToday(at(12))).toBeCloseTo(39.4);
+  expect(hottestToday(at(12))).toBe('danger');
+  expect(drinkTarget(8, hottestToday(at(12)))).toBe(12);
+
+  // A merely hot day is two extra glasses, not four.
+  saveForecast(h => ({feelsC: h === 15 ? 33 : 28}));
+  expect(drinkTarget(8, hottestToday(at(12)))).toBe(10);
 });

@@ -202,6 +202,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         <WaterCounter
           glasses={model.glasses}
           target={model.waterTarget}
+          reason={model.waterReason}
           onAdd={() => logWaterGlass()}
         />
         <SetsMeters

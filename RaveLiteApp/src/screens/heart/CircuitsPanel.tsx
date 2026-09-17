@@ -33,11 +33,13 @@ import {palette, radius, spacing, type as t} from '../../theme';
 interface Props {
   /** HeartScreen owns the CircuitChamber; this fires it with given legs. */
   onEngageLegs: (legs: CircuitLeg[]) => void;
+  /** Shown before the circuits, in the same scroll (hidden while editing). */
+  header?: React.ReactNode;
   /** Shown after the circuits, in the same scroll (hidden while editing). */
   footer?: React.ReactNode;
 }
 
-export function CircuitsPanel({onEngageLegs, footer}: Props) {
+export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
   const [list, setList] = useState<CustomCircuit[]>(() => listCircuits());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
@@ -121,6 +123,7 @@ export function CircuitsPanel({onEngageLegs, footer}: Props) {
       style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
+      {header}
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>▸ CIRCUITS</Text>
         <Text style={styles.subtitle}>

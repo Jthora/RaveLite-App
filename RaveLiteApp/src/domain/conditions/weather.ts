@@ -398,6 +398,26 @@ export function planWithWeather(plan: Plan, now: number = Date.now()): Plan {
 }
 
 /** The hottest band any of today's forecast hours reach. */
+export function hottestFeelsToday(
+  now: number = Date.now(),
+): number | undefined {
+  const forecast = getForecast();
+  if (!forecast) {
+    return undefined;
+  }
+  const today = localDayKey(now);
+  let hottest: number | undefined;
+  for (const hour of forecast.hours) {
+    if (
+      localDayKey(hour.ts) === today &&
+      (hottest === undefined || hour.feelsC > hottest)
+    ) {
+      hottest = hour.feelsC;
+    }
+  }
+  return hottest;
+}
+
 export function hottestToday(now: number = Date.now()): HeatLevel {
   const forecast = getForecast();
   if (!forecast) {

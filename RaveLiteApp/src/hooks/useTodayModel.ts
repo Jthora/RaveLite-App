@@ -15,9 +15,12 @@ import {
 import {activeMinutes} from '../domain/activity/active';
 import {isHarmony} from '../domain/activity/par';
 import {WATER_TARGET} from '../components/today/WaterCounter';
+import {formatTemp} from '../domain/conditions/format';
 import {drinkTarget} from '../domain/conditions/heatWater';
 import {
   drillForPlanChime,
+  getWeatherPrefs,
+  hottestFeelsToday,
   hottestToday,
   planWithWeather,
   subscribeWeather,
@@ -73,6 +76,8 @@ export interface TodayModel {
   glasses: number;
   /** Glasses to aim for today: more on hot days. */
   waterTarget: number;
+  /** Why the target is above the usual eight, when it is. */
+  waterReason?: string;
   /** The sun and the weather now; undefined until a place is set. */
   weather?: WeatherLine;
   sets: SetsSummary;
@@ -108,6 +113,20 @@ function roundChime(fire: SetFire): ScheduledChime {
     exerciseId: fire.exerciseId,
     parts: partsOf(rx, fire.element),
   };
+}
+
+/** Why the Drink target grew, when it has: the heat, in your own units. */
+function heatReason(now: number): string | undefined {
+  const heat = hottestToday(now);
+  if (heat === 'none') {
+    return undefined;
+  }
+  const feels = hottestFeelsToday(now);
+  const extra = heat === 'danger' ? 4 : 2;
+  const units = getWeatherPrefs().units;
+  return feels === undefined
+    ? `+${extra} for the heat`
+    : `+${extra} glasses — it feels ${formatTemp(feels, units)} today`;
 }
 
 /** Everything Today shows, read from storage and the chime runtime. */
@@ -192,6 +211,7 @@ export function buildTodayModel(
     harmony: isHarmony(points),
     glasses: hydrationGlasses(activity),
     waterTarget: drinkTarget(WATER_TARGET, hottestToday(now)),
+    waterReason: heatReason(now),
     weather: weatherLine(now),
     sets: summarizeSets(sets.prescriptions, done),
     focus: focusFor(date),

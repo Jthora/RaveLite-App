@@ -447,6 +447,35 @@ core holds feed **Toughness**. A rainy-hour indoor swap now has to be at
 least four minutes long when it stands in for a run, since the library
 has plenty of short drills that cannot.
 
+## Practice, counted (`src/domain/activity/practice.ts`, since 17 Sep 2026)
+
+The rounds count themselves and a run measures itself, but drilling a
+skill had nowhere to land: tapping a library drill logged one flat "done"
+whether you threw ten kicks or a hundred, which is why Dexterity, Speed
+and Presence all read zero on the character sheet.
+
+- **Practice → a skill → a counter.** The curriculum (`SKILL_GROUPS`) is
+  the kicks, strikes and blocks, dance, staff, jumps, and yoga and tai chi,
+  each row showing what you drilled this week. Tapping one opens the
+  counter in the same sheet (never a sheet over a sheet).
+- **Counted in its own unit**, read from the drill's dose: reps, 8-counts
+  for the dance steps, or the clock itself for a hold.
+- **The clock starts on the first count** and the minutes are what earn
+  points — the same rule any long drill already follows — so twenty
+  minutes of toprock reaches Agility and Dexterity properly.
+- **It lands as an ordinary completion** (`amount` + `amountUnit` +
+  `durationSec` on the journal entry), so the day list, the element
+  counts, the streak and the attributes all read it without a new path.
+
+## Drink target and the heat
+
+Eight glasses (about 2 L) is the base. A day whose feels-like reaches the
+caution band (32 °C) adds two, and the danger band (39 °C, where the US
+heat index calls it dangerous) adds four — so a Swansea afternoon at 39°
+asks for twelve. The card now wraps its pips and says why ("+4 glasses —
+it feels 39° today"), because a target that changes without a reason just
+looks broken.
+
 ## Info cards (`src/domain/info/`, `src/components/info/InfoSheet.tsx`, since 17 Sep 2026)
 
 "What is this?" for every named thing — the operator asked for it after

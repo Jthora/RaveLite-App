@@ -12,11 +12,18 @@ export const WATER_TARGET = 8;
 interface Props {
   glasses: number;
   target?: number;
+  /** Why the target is above the usual eight — the heat, when it is. */
+  reason?: string;
   onAdd: () => void;
 }
 
 /** Glasses of water today — chimes, ride-alongs and the +1 all count. */
-export function WaterCounter({glasses, target = WATER_TARGET, onAdd}: Props) {
+export function WaterCounter({
+  glasses,
+  target = WATER_TARGET,
+  reason,
+  onAdd,
+}: Props) {
   const water = ELEMENTS.water;
   return (
     <View style={styles.row}>
@@ -32,11 +39,15 @@ export function WaterCounter({glasses, target = WATER_TARGET, onAdd}: Props) {
               style={[
                 styles.cup,
                 {borderColor: water.color},
+                // Glasses past the usual eight are the heat's doing: outlined
+                // in a dimmer edge so the base target stays readable.
+                i >= WATER_TARGET && styles.extraCup,
                 i < glasses && {backgroundColor: water.color},
               ]}
             />
           ))}
         </View>
+        {reason ? <Text style={styles.reason}>{reason}</Text> : null}
       </View>
       <Text testID="water-count" style={styles.count}>
         {glasses}/{target}
@@ -81,6 +92,7 @@ const styles = StyleSheet.create({
   },
   cups: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 4,
     marginTop: spacing.xs,
   },
@@ -89,6 +101,14 @@ const styles = StyleSheet.create({
     height: 18,
     borderWidth: 1,
     borderRadius: 3,
+  },
+  extraCup: {
+    opacity: 0.55,
+  },
+  reason: {
+    ...t.caption,
+    color: palette.textDim,
+    marginTop: 4,
   },
   count: {
     ...t.subtitle,

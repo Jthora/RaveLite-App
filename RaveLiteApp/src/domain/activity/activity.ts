@@ -28,6 +28,7 @@ import {
 } from '../training/repository';
 import type {MetricKind, TrainingLogEntry} from '../training/types';
 import {POINTS} from './par';
+import {formatCount} from './practice';
 import {
   EYE_BREAK_EXERCISE_ID,
   EYE_BREAK_SECONDS,
@@ -241,12 +242,17 @@ function completionItems(
     }
   } else {
     const ex = exerciseFor(e.exerciseId);
+    const counted =
+      typeof e.amount === 'number' && e.amountUnit
+        ? formatCount(e.amount, e.amountUnit)
+        : undefined;
     items.push({
       ...base,
       id: e.id,
       element: e.element,
       label: ex?.name ?? (e.exerciseId === 'retro' ? 'Logged later' : 'Drill'),
-      detail: ex?.dose,
+      detail: counted ?? ex?.dose,
+      amount: typeof e.amount === 'number' ? e.amount : undefined,
       exerciseId: e.exerciseId,
       move: moveForExercise(e.exerciseId),
       hydration: isHydration(ex) || undefined,
