@@ -313,7 +313,7 @@ export function AmountRow({
           accessibilityRole="button"
           accessibilityLabel={`${label}. What is this?`}
           style={styles.amountLabelTap}>
-          <Text style={styles.amountLabel} numberOfLines={1}>
+          <Text style={styles.amountLabelInTap} numberOfLines={1}>
             {label} <Text style={{color}}>ⓘ</Text>
           </Text>
         </Tap>
@@ -581,6 +581,12 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 44,
     justifyContent: 'center',
+  },
+  // Inside a Tap the label must not use flex: the wrapper is a column,
+  // and a flexed child there collapses to nothing.
+  amountLabelInTap: {
+    ...t.body,
+    color: palette.text,
   },
   amountLabel: {
     ...t.body,

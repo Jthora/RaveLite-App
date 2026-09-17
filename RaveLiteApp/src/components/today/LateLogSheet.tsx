@@ -204,6 +204,9 @@ const styles = StyleSheet.create({
     color: palette.textDim,
     letterSpacing: 1.6,
   },
+  headTap: {
+    alignSelf: 'stretch',
+  },
   head: {
     flexDirection: 'row',
     alignItems: 'center',
