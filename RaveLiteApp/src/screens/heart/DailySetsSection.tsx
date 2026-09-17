@@ -56,6 +56,7 @@ import type {
   TrackReview,
 } from '../../domain/program/types';
 import {formatDuration} from '../../domain/training/grading';
+import type {InfoRef} from '../../domain/info/info';
 import {TodayFocus, WeekFocus} from './FocusWeek';
 import {blockPieces, runFor} from '../../domain/program/morning';
 
@@ -67,8 +68,10 @@ const REFRESH_MS = 30_000;
 
 export function DailySetsSection({
   onOpenAttributes,
+  onInfo,
 }: {
   onOpenAttributes?: () => void;
+  onInfo?: (ref: InfoRef) => void;
 } = {}) {
   const [tick, setTick] = useState(0);
   const [testing, setTesting] = useState<TrackId | null>(null);
@@ -185,6 +188,11 @@ export function DailySetsSection({
               canLevelUp={readyToLevelUp(track, state)}
               nextRungLabel={track.ladder[state.rung + 1]?.label}
               review={state.lastReview}
+              onInfo={
+                onInfo
+                  ? () => onInfo({kind: 'track', id: p.trackId})
+                  : undefined
+              }
               onLogSet={() => logSet(p)}
               onTest={() => setTesting(p.trackId)}
               onLevelUp={() => levelUpTrack(p.trackId)}
@@ -277,6 +285,8 @@ interface TrackCardProps {
   onLogSet: () => void;
   onTest: () => void;
   onLevelUp: () => void;
+  /** "What is this?" for the track. */
+  onInfo?: () => void;
 }
 
 function TrackCard({
@@ -294,6 +304,7 @@ function TrackCard({
   onLogSet,
   onTest,
   onLevelUp,
+  onInfo,
 }: TrackCardProps) {
   const el = ELEMENTS[track.element];
   const total = p.setSize * p.sets;
@@ -308,16 +319,30 @@ function TrackCard({
         {borderColor: complete ? el.color : palette.border},
       ]}>
       <View style={styles.cardTop}>
-        <View style={styles.cardName}>
-          <MoveIcon
-            move={moveForTrack(track.id) ?? 'activity'}
-            color={el.color}
-            size={20}
-          />
-          <Text style={[styles.cardTitle, {color: el.color}]} numberOfLines={1}>
-            {p.label}
-          </Text>
-        </View>
+        <Tap
+          testID={`track-info-${track.id}`}
+          variant="plain"
+          onPress={onInfo}
+          disabled={onInfo === undefined}
+          accessibilityRole="button"
+          accessibilityLabel={`${p.label}. What is this?`}
+          style={styles.cardNameTap}>
+          <View style={styles.cardName}>
+            <MoveIcon
+              move={moveForTrack(track.id) ?? 'activity'}
+              color={el.color}
+              size={20}
+            />
+            <Text
+              style={[styles.cardTitle, {color: el.color}]}
+              numberOfLines={1}>
+              {p.label}
+            </Text>
+            {onInfo ? (
+              <Text style={[styles.cardInfo, {color: el.color}]}>ⓘ</Text>
+            ) : null}
+          </View>
+        </Tap>
         <Text style={styles.cardCount}>
           {doneAmount}/{total} {unitWord}
         </Text>
@@ -536,6 +561,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+  },
+  cardNameTap: {
+    flex: 1,
+  },
+  cardInfo: {
+    ...t.caption,
   },
   cardName: {
     flexDirection: 'row',

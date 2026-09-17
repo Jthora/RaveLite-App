@@ -80,6 +80,7 @@ function Links({
             ) : null}
           </View>
         );
+        // Tap wraps its children in one view, so the row sits inside it.
         return link.ref ? (
           <Tap
             key={`${link.label}-${i}`}
@@ -89,11 +90,15 @@ function Links({
             accessibilityRole="button"
             accessibilityLabel={`${link.label}. What is this?`}
             style={styles.link}>
-            {body}
-            <Text style={[styles.chevron, {color}]}>›</Text>
+            <View style={styles.linkRow}>
+              {body}
+              <Text style={[styles.chevron, {color}]}>›</Text>
+            </View>
           </Tap>
         ) : (
-          <View key={`${link.label}-${i}`} style={styles.link}>
+          <View
+            key={`${link.label}-${i}`}
+            style={[styles.link, styles.linkRow]}>
             {body}
           </View>
         );
@@ -270,13 +275,17 @@ const styles = StyleSheet.create({
     lineHeight: 21,
   },
   link: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+    justifyContent: 'center',
     minHeight: 48,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     backgroundColor: palette.surface,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    width: '100%',
   },
   linkBody: {
     flex: 1,

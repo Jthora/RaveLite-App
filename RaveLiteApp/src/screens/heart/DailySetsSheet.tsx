@@ -11,6 +11,7 @@ import React, {useEffect, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {InfoCardView, useInfoStack} from '../../components/info/InfoSheet';
 import {Tap} from '../../components/Tap';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
@@ -33,69 +34,95 @@ const TITLES: Record<View_, string> = {
 
 export function DailySetsSheet({visible, onClose}: Props) {
   const [showing, setShowing] = useState<View_>('sets');
+  const info = useInfoStack();
   const accent = ELEMENTS.heart.accent;
   const goals = showing === 'goals';
   const away = showing !== 'sets';
 
-  // Every opening starts on Daily Sets.
+  // Every opening starts on Daily Sets, with no card open.
   useEffect(() => {
     if (!visible) {
       setShowing('sets');
+      info.close();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
-  const back = () => (away ? setShowing('sets') : onClose());
+  // Back walks the card's own history first, then the view, then out.
+  const back = () => {
+    if (info.card) {
+      return info.depth > 1 ? info.back() : info.close();
+    }
+    return away ? setShowing('sets') : onClose();
+  };
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={back}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-        <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>{TITLES[showing]}</Text>
-          <View style={styles.actions}>
-            {away ? (
-              <Tap
-                testID="sets-back"
-                variant="plain"
-                onPress={() => setShowing('sets')}
-                accessibilityRole="button"
-                accessibilityLabel="Back to Daily Sets"
-                style={styles.close}>
-                <Text style={[styles.closeText, {color: accent}]}>
-                  Daily Sets
-                </Text>
-              </Tap>
-            ) : (
-              <Tap
-                testID="goals-open"
-                variant="plain"
-                onPress={() => setShowing('goals')}
-                accessibilityRole="button"
-                accessibilityLabel="Goals: push-ups today, the fitness tests and a goal for each element"
-                style={styles.close}>
-                <Text style={[styles.closeText, {color: accent}]}>Goals</Text>
-              </Tap>
-            )}
-            <Tap
-              variant="plain"
-              onPress={onClose}
-              accessibilityRole="button"
-              style={styles.close}>
-              <Text style={styles.closeText}>Close</Text>
-            </Tap>
-          </View>
-        </View>
-        {goals ? (
-          <Goals />
-        ) : showing === 'attributes' ? (
-          <Attributes />
+        {info.card ? (
+          <InfoCardView
+            card={info.card}
+            canGoBack={info.depth > 1}
+            onOpen={info.open}
+            onBack={info.back}
+            onClose={info.close}
+          />
         ) : (
-          <ScrollView
-            contentContainerStyle={styles.content}
-            showsVerticalScrollIndicator={false}>
-            <DailySetsSection
-              onOpenAttributes={() => setShowing('attributes')}
-            />
-          </ScrollView>
+          <>
+            <View style={styles.header}>
+              <Text style={[styles.title, {color: accent}]}>
+                {TITLES[showing]}
+              </Text>
+              <View style={styles.actions}>
+                {away ? (
+                  <Tap
+                    testID="sets-back"
+                    variant="plain"
+                    onPress={() => setShowing('sets')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Back to Daily Sets"
+                    style={styles.close}>
+                    <Text style={[styles.closeText, {color: accent}]}>
+                      Daily Sets
+                    </Text>
+                  </Tap>
+                ) : (
+                  <Tap
+                    testID="goals-open"
+                    variant="plain"
+                    onPress={() => setShowing('goals')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Goals: push-ups today, the fitness tests and a goal for each element"
+                    style={styles.close}>
+                    <Text style={[styles.closeText, {color: accent}]}>
+                      Goals
+                    </Text>
+                  </Tap>
+                )}
+                <Tap
+                  variant="plain"
+                  onPress={onClose}
+                  accessibilityRole="button"
+                  style={styles.close}>
+                  <Text style={styles.closeText}>Close</Text>
+                </Tap>
+              </View>
+            </View>
+            {goals ? (
+              <Goals />
+            ) : showing === 'attributes' ? (
+              <Attributes />
+            ) : (
+              <ScrollView
+                contentContainerStyle={styles.content}
+                showsVerticalScrollIndicator={false}>
+                <DailySetsSection
+                  onOpenAttributes={() => setShowing('attributes')}
+                  onInfo={info.open}
+                />
+              </ScrollView>
+            )}
+          </>
         )}
       </SafeAreaView>
     </Modal>

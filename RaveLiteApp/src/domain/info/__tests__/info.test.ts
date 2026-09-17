@@ -138,3 +138,26 @@ describe('a round', () => {
     expect(card.parts).toHaveLength(4);
   });
 });
+
+it('a measurement says how to take it, and what it counts toward', () => {
+  const card = infoFor({kind: 'metric', id: 'builtin.plank'})!;
+  expect(card.title).toBe('Plank — max hold');
+  expect(card.what).toContain('to the second the hips drop');
+  expect(card.meta).toEqual(['Logged as minutes and seconds']);
+  expect(card.related?.[0]).toMatchObject({
+    ref: {kind: 'event', id: 'plank'},
+    label: 'Plank',
+  });
+});
+
+it('a test event says what it asks and what the marks are', () => {
+  const card = infoFor({kind: 'event', id: 'plank'})!;
+  expect(card.what).toContain('forearm plank');
+  expect(card.meta?.[0]).toMatch(/^USMC: pass \d+ · B\+ \d+ · top \d+$/);
+  expect(card.related?.[0].ref).toEqual({kind: 'metric', id: 'builtin.plank'});
+});
+
+it('has nothing to say about a measurement or event it does not know', () => {
+  expect(infoFor({kind: 'metric', id: 'custom.nope'})).toBeUndefined();
+  expect(infoFor({kind: 'event', id: 'nope'})).toBeUndefined();
+});

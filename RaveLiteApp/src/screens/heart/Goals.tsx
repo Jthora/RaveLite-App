@@ -19,6 +19,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../../components/Tap';
+import type {InfoRef} from '../../domain/info/info';
 import {NumberPad} from '../../components/training/NumberPad';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {
@@ -177,7 +178,7 @@ function projectionLine(row: GoalRow): string | undefined {
   }
 }
 
-export function Goals() {
+export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
   const [version, setVersion] = useState(0);
   const [logKindId, setLogKindId] = useState<string | undefined>();
   const [editing, setEditing] = useState<StandardEvent | undefined>();
@@ -411,6 +412,11 @@ export function Goals() {
                   row={row}
                   sex={view.sex}
                   onEdit={() => setEditing(row.event)}
+                  onInfo={
+                    onInfo
+                      ? () => onInfo({kind: 'event', id: row.event.id})
+                      : undefined
+                  }
                   height={view.height}
                   onHeight={() => setHeightOpen(true)}
                   onLog={
@@ -463,6 +469,7 @@ function GoalCard({
   sex,
   onEdit,
   onLog,
+  onInfo,
   height,
   onHeight,
 }: {
@@ -471,6 +478,8 @@ function GoalCard({
   onEdit: () => void;
   /** Unset for a goal the app measures itself. */
   onLog?: () => void;
+  /** "What is this?" for the event. */
+  onInfo?: () => void;
   /** The operator's height in inches, for a per-height goal. */
   height?: number;
   onHeight?: () => void;
@@ -500,10 +509,22 @@ function GoalCard({
   return (
     <View style={styles.card}>
       <View style={styles.cardTop}>
-        <View style={styles.cardTitle}>
-          <Text style={styles.eventName}>{event.name}</Text>
-          <Text style={styles.caption}>{event.subtitle}</Text>
-        </View>
+        <Tap
+          testID={`event-info-${event.id}`}
+          variant="plain"
+          onPress={onInfo}
+          disabled={onInfo === undefined}
+          accessibilityRole="button"
+          accessibilityLabel={`${event.name}. What is this?`}
+          style={styles.cardTitle}>
+          <View>
+            <Text style={styles.eventName}>
+              {event.name}
+              {onInfo ? <Text style={styles.cardInfo}> ⓘ</Text> : null}
+            </Text>
+            <Text style={styles.caption}>{event.subtitle}</Text>
+          </View>
+        </Tap>
         <Tap
           testID={`target-${event.id}`}
           variant="plain"
@@ -843,6 +864,9 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     flex: 1,
+  },
+  cardInfo: {
+    color: palette.textDim,
   },
   eventName: {
     ...t.subtitle,

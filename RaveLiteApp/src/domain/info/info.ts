@@ -6,6 +6,15 @@ import {prescribeDay} from '../program/progression';
 import {loadProgram} from '../program/repository';
 import {TRACKS} from '../program/tracks';
 import type {SetPrescription, TrackId} from '../program/types';
+import {
+  STANDARD_EVENTS,
+  getPrimarySex,
+  markFor,
+  type StandardEvent,
+} from '../standards/standards';
+import {BUILTIN_METRICS} from '../training/builtinMetrics';
+import type {MetricKind} from '../training/types';
+import {EVENT_WHAT, MEASURES} from './measures';
 import {ELEMENTS, type ElementId} from '../../theme/elements';
 
 /**
@@ -21,7 +30,9 @@ import {ELEMENTS, type ElementId} from '../../theme/elements';
 export type InfoRef =
   | {kind: 'drill'; id: string}
   | {kind: 'track'; id: TrackId}
-  | {kind: 'attribute'; id: AttributeId};
+  | {kind: 'attribute'; id: AttributeId}
+  | {kind: 'metric'; id: string}
+  | {kind: 'event'; id: string};
 
 export interface InfoLink {
   /** Absent when the part is real but has nothing to explain (a glass). */
@@ -198,6 +209,91 @@ function attributeCard(id: AttributeId): InfoCard {
   };
 }
 
+const METRICS = new Map(BUILTIN_METRICS.map(m => [m.id, m]));
+const EVENTS = new Map(STANDARD_EVENTS.map(e => [e.id, e]));
+
+const ENTRY: Record<MetricKind['inputMode'], string> = {
+  mmss: 'Logged as minutes and seconds',
+  integer: 'Logged as a count',
+  'distance-time': 'Logged as a distance and a time',
+  decimal: 'Logged to two decimal places',
+};
+
+/** An event's element: the one its drill lives under, else its goal group. */
+function elementOfEvent(event: StandardEvent): ElementId {
+  const metric = event.kindId ? METRICS.get(event.kindId) : undefined;
+  if (metric && metric.element !== 'any') {
+    return metric.element;
+  }
+  return event.group === 'tests' ? 'fire' : event.group;
+}
+
+function metricCard(id: string): InfoCard | undefined {
+  const metric = METRICS.get(id);
+  if (!metric) {
+    return undefined;
+  }
+  const event = STANDARD_EVENTS.find(e => e.kindId === id);
+  return {
+    title: metric.label,
+    subtitle:
+      metric.element === 'any'
+        ? 'Something you measure'
+        : `${ELEMENTS[metric.element].name} · something you measure`,
+    element: metric.element === 'any' ? 'heart' : metric.element,
+    what:
+      MEASURES[id] ??
+      metric.notes ??
+      'Measured the same way every time, so the numbers can be compared.',
+    meta: [ENTRY[metric.inputMode]],
+    relatedTitle: 'Counts toward',
+    related: event
+      ? [
+          {
+            ref: {kind: 'event', id: event.id},
+            label: event.name,
+            detail: event.subtitle,
+          },
+        ]
+      : undefined,
+  };
+}
+
+function eventCard(id: string): InfoCard | undefined {
+  const event = EVENTS.get(id);
+  if (!event) {
+    return undefined;
+  }
+  const sex = getPrimarySex();
+  const marks = (event.scales ?? []).map(scale => {
+    const name = scale.test ? scale.test.toUpperCase() : 'Marks';
+    const at = (grade: 'D−' | 'B+' | 'A+') => markFor(event, scale, sex, grade);
+    return `${name}: pass ${at('D−')} · B+ ${at('B+')} · top ${at('A+')}`;
+  });
+  return {
+    title: event.name,
+    subtitle: event.subtitle,
+    element: elementOfEvent(event),
+    what: EVENT_WHAT[id] ?? event.name,
+    meta: [
+      ...marks,
+      marks.length > 0
+        ? 'Grades run evenly from the passing minimum to the top score.'
+        : '',
+    ].filter(Boolean),
+    relatedTitle: 'Log it with',
+    related: event.kindId
+      ? [
+          {
+            ref: {kind: 'metric', id: event.kindId},
+            label: METRICS.get(event.kindId)?.label ?? event.kindId,
+            detail: 'How to measure it',
+          },
+        ]
+      : undefined,
+  };
+}
+
 /** The card for anything with a ref. */
 export function infoFor(ref: InfoRef): InfoCard | undefined {
   switch (ref.kind) {
@@ -209,6 +305,10 @@ export function infoFor(ref: InfoRef): InfoCard | undefined {
       return trackCard(ref.id);
     case 'attribute':
       return attributeCard(ref.id);
+    case 'metric':
+      return metricCard(ref.id);
+    case 'event':
+      return eventCard(ref.id);
   }
 }
 

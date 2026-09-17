@@ -394,15 +394,23 @@ their ladder; attributes carry their gist.
 - **It links both ways.** A drill points back at its track ("one of its
   variations", or "rides along after its sets"); a track lists its ladder,
   marking where you are, and what rides along with it.
-- **How you open it:** the ⓘ on the chime card (now and next), and a tap on
-  any chime still to come in today's list. Chimes already logged, missed or
-  skipped keep their own sheets.
+- **Measurements and tests too.** `measures.ts` holds one line per Train
+  metric ("around the navel, tape snug but not biting, at the end of a
+  normal breath out") and per test event; a measurement links to the event
+  it counts toward, and an event back to the kind you log it with, with its
+  pass, B+ and top marks.
+- **How you open it:** the ⓘ on the chime card (now and next), a tap on any
+  chime still to come in today's list, the name on a Daily Sets track card,
+  a Goals event, and the kind you picked in the log sheet. Chimes already
+  logged, missed or skipped keep their own sheets, and the drill library
+  already prints purpose and cues in full, so it needs no card.
 - **The card keeps its own history:** open a round, then a move, and Back
   walks back out before it closes (`useInfoStack`).
 - **Where it renders:** `InfoSheet` is a Modal, used only on Today, which
   has no sheet of its own. `InfoCardView` is the same card as a plain view,
-  for hosting inside a sheet that is already open — never a Modal over a
-  Modal.
+  and the Daily Sets sheet and the log sheet host it that way, covering
+  their own content — never a Modal over a Modal. In each host, Back walks
+  the card first, then that host's own history.
 
 ## Attributes (`src/domain/attributes/`, since 17 Sep 2026)
 

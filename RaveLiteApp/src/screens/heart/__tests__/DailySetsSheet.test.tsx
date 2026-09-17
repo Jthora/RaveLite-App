@@ -79,3 +79,29 @@ it("opens the attributes from today's focus, and Back comes home", () => {
   expect(onClose).not.toHaveBeenCalled();
   act(() => tree!.unmount());
 });
+
+it('a track card opens what the track is, and Back keeps working', () => {
+  const onClose = jest.fn();
+  let tree: renderer.ReactTestRenderer | undefined;
+  act(() => {
+    tree = renderer.create(<DailySetsSheet visible onClose={onClose} />);
+  });
+  const back = () => tree!.root.findAllByType(Modal)[0].props.onRequestClose();
+  act(() => {
+    tree!.root
+      .findAll(
+        node =>
+          node.props.testID === 'track-info-push' &&
+          typeof node.props.onPress === 'function',
+      )[0]
+      .props.onPress();
+  });
+  const json = JSON.stringify(tree!.toJSON());
+  expect(json).toContain('THE LADDER');
+  expect(json).toContain('Push-ups');
+  // Back closes the card, not the sheet.
+  act(() => back());
+  expect(JSON.stringify(tree!.toJSON())).not.toContain('THE LADDER');
+  expect(onClose).not.toHaveBeenCalled();
+  act(() => tree!.unmount());
+});

@@ -26,6 +26,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {InfoCardView, useInfoStack} from '../info/InfoSheet';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {ELEMENTS} from '../../theme/elements';
 import {useElementAccent} from '../../theme/elementContext';
@@ -82,6 +83,7 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
     [editing?.id, tick],
   );
 
+  const info = useInfoStack();
   const [selectedKindId, setSelectedKindId] = useState<string>(
     editing?.kindId ?? defaultKindId ?? metrics[0]?.id ?? '',
   );
@@ -225,11 +227,23 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
     <Modal
       visible={visible}
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={() =>
+        info.card ? (info.depth > 1 ? info.back() : info.close()) : onClose()
+      }
       transparent={false}
       statusBarTranslucent>
       {/* The window runs under the status bar: keep the header below it. */}
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+        {info.card ? (
+          <InfoCardView
+            card={info.card}
+            canGoBack={info.depth > 1}
+            onOpen={info.open}
+            onBack={info.back}
+            onClose={info.close}
+          />
+        ) : (
+          <>
         {/* Compact header with inline save/cancel */}
         <View style={styles.header}>
           <Text style={styles.title}>{editing ? 'Edit Entry' : 'New Training Log'}</Text>
@@ -273,12 +287,18 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
               <Text style={styles.sectionTitle}>Exercises</Text>
               {/* What's being logged, even when the list is scrolled away from it. */}
               {selectedKind ? (
-                <Text
+                <Pressable
                   testID="log-selected-kind"
-                  style={[styles.selectedKind, {color: accent}]}
-                  numberOfLines={1}>
-                  {selectedKind.label}
-                </Text>
+                  onPress={() => info.open({kind: 'metric', id: selectedKind.id})}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${selectedKind.label}. What is this?`}>
+                  <Text
+                    style={[styles.selectedKind, {color: accent}]}
+                    numberOfLines={1}>
+                    {selectedKind.label} ⓘ
+                  </Text>
+                </Pressable>
               ) : null}
               <Pressable onPress={() => setShowManage(true)} hitSlop={8}>
                 <Text style={[styles.sectionAction, {color: accent}]}>Manage</Text>
@@ -409,6 +429,8 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
           onClose={closeCalendar}
           accent={accent}
         />
+          </>
+        )}
       </SafeAreaView>
     </Modal>
   );
