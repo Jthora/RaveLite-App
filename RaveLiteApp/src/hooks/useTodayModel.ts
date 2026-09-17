@@ -126,7 +126,7 @@ function heatReason(now: number): string | undefined {
   const units = getWeatherPrefs().units;
   return feels === undefined
     ? `+${extra} for the heat`
-    : `+${extra} glasses — it feels ${formatTemp(feels, units)} today`;
+    : `+${extra} · feels ${formatTemp(feels, units)} today`;
 }
 
 /** Everything Today shows, read from storage and the chime runtime. */
