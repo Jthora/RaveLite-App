@@ -61,10 +61,13 @@ export function gainXp(
   return {level, xp: level >= cap ? 0 : banked};
 }
 
-/** Jagged Alliance's Wisdom rule: attribute XP × this. */
+/**
+ * Jagged Alliance's Wisdom rule: attribute XP × this. One-sided on
+ * purpose — Focus speeds the rest up once it passes 50, but a low Focus
+ * never taxes the work. Nothing here should punish starting out.
+ */
 export function focusMultiplier(focusLevel: number): number {
-  const scaled = 1 + (focusLevel - 50) / 200;
-  return Math.max(0.75, Math.min(1.25, scaled));
+  return Math.min(1.25, 1 + Math.max(0, focusLevel - 50) / 200);
 }
 
 /**

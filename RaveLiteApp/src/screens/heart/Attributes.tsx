@@ -63,13 +63,17 @@ function lines(standing: AttributeStanding): string[] {
   out.push(
     practice >= PRACTICE_CAP
       ? `Practice has taken it as far as it goes (${PRACTICE_CAP}). Only a test moves it now.`
-      : `Practice: ${practice}, ${xp} of ${toNext} XP toward ${practice + 1}.`,
+      : `Practice: level ${practice} · ${xp} of ${toNext} XP to ${
+          practice + 1
+        }.`,
   );
   if (today > 0) {
     out.push(`+${today} XP today.`);
   }
   if (idleDays === undefined) {
-    out.push('Nothing logged toward it yet.');
+    if (tested === undefined) {
+      out.push('Nothing logged toward it yet.');
+    }
   } else if (idleDays > 14) {
     out.push(`Left alone ${idleDays} days — sliding a level a week.`);
   }
@@ -120,7 +124,7 @@ function Row({
         </View>
       ) : null}
       {!open && tested !== undefined && tested > practice ? (
-        <Text style={styles.caption}>Tested</Text>
+        <Text style={styles.caption}>Set by a test</Text>
       ) : null}
     </Tap>
   );
@@ -175,10 +179,8 @@ export function Attributes() {
         </Text>
         <Text style={styles.note}>
           {bonus === 0
-            ? 'Focus speeds up everything else once it passes 50.'
-            : `Focus is ${bonus > 0 ? 'adding' : 'costing'} ${Math.abs(
-                bonus,
-              )}% of every attribute's XP.`}
+            ? 'Focus speeds everything else up once it passes 50.'
+            : `Focus is adding ${bonus}% to every attribute's XP.`}
         </Text>
       </View>
 

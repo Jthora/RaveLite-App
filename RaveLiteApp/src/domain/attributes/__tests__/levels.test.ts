@@ -36,10 +36,10 @@ describe('the curve', () => {
 });
 
 describe('the rest of the rules', () => {
-  it('lets Focus speed everything up, within reason', () => {
+  it('lets Focus speed everything up, but never tax it', () => {
     expect(focusMultiplier(50)).toBe(1);
     expect(focusMultiplier(85)).toBeCloseTo(1.175);
-    expect(focusMultiplier(0)).toBe(0.75);
+    expect(focusMultiplier(0)).toBe(1);
     expect(focusMultiplier(100)).toBe(1.25);
   });
 

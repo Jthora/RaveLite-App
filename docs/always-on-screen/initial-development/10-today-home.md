@@ -393,8 +393,9 @@ Recovery, Presence). Jagged Alliance's rules, in a body.
 - **The next level costs more.** `8 × 100 / (100 − level)` XP, so 0 → 85
   is about 1,500 XP: months of steady work, and the last levels cost six
   times the first.
-- **Focus speeds learning** — every attribute's XP × `1 + (Focus − 50)/200`,
-  Wisdom's old job.
+- **Focus speeds learning** — every attribute's XP × `1 + max(0, Focus − 50)/200`,
+  Wisdom's old job. One-sided on purpose: a high Focus helps, a low one
+  never taxes the work.
 - **Practice stops at 85.** Past that only a passed test sets the number: a
   result scores 100 for a perfect score, 50 for half of one, and for a
   timed event twice the perfect time is 0 (`levels.ts`). The level shown is

@@ -73,7 +73,7 @@ it("opens the attributes from today's focus, and Back comes home", () => {
   });
   const json = JSON.stringify(tree!.toJSON());
   expect(json).toContain('Holding load.');
-  expect(json).toContain('Practice: 0');
+  expect(json).toContain('Practice: level 0');
   act(() => tree!.root.findAllByType(Modal)[0].props.onRequestClose());
   expect(shown()).toBe(false);
   expect(onClose).not.toHaveBeenCalled();
