@@ -47,6 +47,29 @@ export const MOVE_IDS = [
 export type MoveId = (typeof MOVE_IDS)[number];
 
 const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
+  // Mat, backyard, neighborhood, house (added 17 Sep 2026)
+  'air.listening-walk': 'walk',
+  'air.ruler-drop': 'presence',
+  'air.wall-ball-catch': 'footwork',
+  'air.stair-breath': 'breath',
+  'earth.curb-walk': 'balance',
+  'earth.stair-step-up': 'lunge',
+  'earth.stair-carry': 'carry',
+  'earth.chair-dip': 'push',
+  'earth.bear-crawl': 'plank',
+  'fire.hill-sprints': 'run',
+  'fire.block-loop': 'run',
+  'fire.shadow-strikes': 'kick',
+  'fire.broad-jump': 'jump',
+  'water.juggle-toss': 'activity',
+  'water.off-hand-task': 'activity',
+  'water.legs-up-the-wall': 'legraise',
+  'water.foot-roll': 'stretch',
+  'water.hip-cars': 'hipopener',
+  'water.shoulder-cars': 'chestopener',
+  'heart.voice-work': 'presence',
+  'heart.teach-a-move': 'presence',
+  'heart.dawn-sit': 'presence',
   // Air
   'air.eye-break': 'presence',
   'air.chin-tuck': 'posture',

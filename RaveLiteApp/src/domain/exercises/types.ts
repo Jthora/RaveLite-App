@@ -30,7 +30,9 @@ export type Venue =
   | 'yard' // Outside, requires open space
   | 'mat' // Floor work — requires clean surface
   | 'wall' // Needs a wall or doorframe
-  | 'porch'; // Hang point on the side of the backyard deck
+  | 'porch' // Hang point on the side of the backyard deck
+  | 'house' // Indoors beyond the desk: stairs, a chair, a counter, a hallway
+  | 'neighborhood'; // Out the door: streets, a hill, a curb line, the block
 
 export interface Exercise {
   id: string;

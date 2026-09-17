@@ -12,8 +12,13 @@ import {Exercise} from './types';
  * the fascia, build toward kick-flips, and flow staff on the beat.
  *
  * Kit: bodyweight, a mat behind the desk, a big backyard, a porch edge to
- * hang from, and bricks. No pool, no weights — drills that need anything
+ * hang from, bricks — and, since 17 Sep 2026, the house (stairs, a sturdy
+ * chair, a wall, a hallway) and the neighborhood (a hill, a curb line, a
+ * loop of the block). No pool, no weights — drills that need anything
  * else don't belong here (guarded by __tests__/library.test.ts).
+ *
+ * Indoors has a low ceiling: nothing in a `house` drill may need height,
+ * a run-up or a swinging staff.
  *
  * "NoFloor" tag flags drills that work standing or at the desk without
  * getting down on the mat.
@@ -267,6 +272,73 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 60,
   },
 
+  {
+    id: 'air.listening-walk',
+    element: 'air',
+    name: 'Listening Walk',
+    purpose:
+      'Trains attention outward: the senses lead, the feet follow. A walk that wakes you up instead of winding you down.',
+    dose: '5–10 min',
+    cues: [
+      'Walk the block at an easy pace, eyes soft and level',
+      'Name five sounds, nearest to furthest, without stopping',
+      'Then five things you can see moving, and five you can smell',
+      'If a thought takes over, start the count again',
+    ],
+    targets: ['Presence', 'NoFloor'],
+    venues: ['neighborhood', 'yard'],
+    approxSeconds: 420,
+  },
+  {
+    id: 'air.ruler-drop',
+    element: 'air',
+    name: 'Ruler Drop',
+    purpose:
+      'Reaction time, measured. The gap between seeing and moving is trainable, and it shows up in sparring and on a bike.',
+    dose: '5 catches each hand',
+    cues: [
+      'Hold a ruler or a pen above your open hand, then let it go',
+      'Catch it as soon as it moves — no guessing the rhythm',
+      'Swap hands; the off hand is always slower at first',
+      'Same starting height every time, or the number means nothing',
+    ],
+    targets: ['Coordination', 'NoFloor'],
+    venues: ['desk', 'house'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'air.wall-ball-catch',
+    element: 'air',
+    name: 'Wall Ball Catches',
+    purpose:
+      'Eyes, hands and feet on one job. Sharpens the reaction the eye break rests.',
+    dose: '2 × 30 sec',
+    cues: [
+      'Stand two steps from a blank wall, throw underhand and catch',
+      'Alternate hands, then catch with the off hand only',
+      'Soft knees: let the feet move to the ball, not the arms alone',
+      'Outside or in a room with nothing breakable behind you',
+    ],
+    targets: ['Coordination', 'Agility', 'NoFloor'],
+    venues: ['yard', 'wall', 'house'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'air.stair-breath',
+    element: 'air',
+    name: 'Stair Breath',
+    purpose:
+      'Nose-only on the stairs: shows how much of being out of breath is pace, not fitness.',
+    dose: '3 trips up',
+    cues: [
+      'Mouth closed the whole way up and down',
+      'In for two steps, out for three, and slow the legs to keep it',
+      'If the mouth opens, stop at the top until it closes again',
+    ],
+    targets: ['Breath', 'Conditioning', 'NoFloor'],
+    venues: ['house'],
+    approxSeconds: 180,
+  },
   // ─── EARTH — Foundation & Core ─────────────────────────────────────────
   {
     id: 'earth.posterior-pelvic-tilt',
@@ -819,6 +891,91 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 60,
   },
 
+  {
+    id: 'earth.curb-walk',
+    element: 'earth',
+    name: 'Curb Walk',
+    purpose:
+      'Balance where the ground is narrow and real. Heel-to-toe on a line turns a walk into stance training.',
+    dose: '2 × 20 steps',
+    cues: [
+      'Heel touching toe each step, arms low and quiet',
+      'Eyes on a fixed point ahead, not on your feet',
+      'Turn without stepping off; a wobble is the work',
+      'A curb, a kerbstone line or a painted line all count',
+    ],
+    targets: ['Coordination', 'Agility', 'NoFloor'],
+    venues: ['neighborhood', 'yard'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.stair-step-up',
+    element: 'earth',
+    name: 'Stair Step-ups',
+    purpose:
+      'One leg at a time under your own weight — the gap single-leg work fills that squats never do.',
+    dose: '3 × 10 each leg',
+    cues: [
+      'Whole foot on the step, knee tracking over the middle toes',
+      'Stand up through the top leg; the back foot only taps',
+      'Lower slow enough to make no sound',
+      'The bottom stair is plenty; height is not the point',
+    ],
+    targets: ['Strength', 'Coordination'],
+    venues: ['house'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'earth.stair-carry',
+    element: 'earth',
+    name: 'Stair Carry',
+    purpose:
+      'Grip, trunk and legs under load on uneven ground. The most honest carry you can do without leaving the house.',
+    dose: '3 trips up',
+    cues: [
+      'A brick in each hand, arms long, shoulders down and back',
+      'Stand tall — the load must not pull you into a hunch',
+      'One hand on the rail if the stairs are steep; carry one brick then',
+      'Set them down at the top rather than dropping them',
+    ],
+    targets: ['Grip', 'Strength', 'Core'],
+    venues: ['house'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'earth.chair-dip',
+    element: 'earth',
+    name: 'Chair Dips',
+    purpose:
+      'Presses the arms behind the body, which nothing else in the program does. Counts the triceps in.',
+    dose: '3 × 8',
+    cues: [
+      'Hands on a sturdy chair or a step, fingers forward',
+      'Elbows straight back, not flaring out',
+      'Only as deep as the shoulders stay comfortable',
+      'Feet closer in makes it easier; further out, harder',
+    ],
+    targets: ['Strength'],
+    venues: ['house'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'earth.bear-crawl',
+    element: 'earth',
+    name: 'Bear Crawl',
+    purpose:
+      'The trunk braced while all four limbs work — a plank that moves. Grass, so the wrists get an easier ride.',
+    dose: '4 × 10 m',
+    cues: [
+      'Knees an inch off the ground, hips no higher than the shoulders',
+      'Opposite hand and foot together, short steps',
+      'Keep a cup of water level on your back — that steady',
+      'Back the same way to finish',
+    ],
+    targets: ['Core', 'Strength', 'Coordination'],
+    venues: ['yard'],
+    approxSeconds: 180,
+  },
   // ─── FIRE — Power & Conditioning ───────────────────────────────────────
   {
     id: 'fire.pushups',
@@ -1331,6 +1488,73 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 2100,
   },
 
+  {
+    id: 'fire.hill-sprints',
+    element: 'fire',
+    name: 'Hill Sprints',
+    purpose:
+      'Top-end power with the brakes off: a hill limits the speed, so the legs work hard and land soft. The safest sprint there is.',
+    dose: '6 × 10 sec, walk down',
+    cues: [
+      'Find a rise you can run up for about ten seconds',
+      'Drive the knees, arms long and loose, eyes up the hill',
+      'Walk all the way back down — the walk is the rest',
+      'Stop while every one still feels fast; this is not conditioning',
+    ],
+    targets: ['Conditioning', 'Agility'],
+    venues: ['neighborhood'],
+    approxSeconds: 480,
+  },
+  {
+    id: 'fire.block-loop',
+    element: 'fire',
+    name: 'Block Loop',
+    purpose:
+      'An easy loop of the neighborhood on a day the run feels like too much. Minutes on your feet still count.',
+    dose: '10–20 min',
+    cues: [
+      'Run or run/walk, nose breathing if you can hold it',
+      'Same loop each time so the pace means something',
+      'Finish wanting another lap',
+    ],
+    targets: ['Conditioning', 'PFT-Run'],
+    venues: ['neighborhood'],
+    approxSeconds: 900,
+  },
+  {
+    id: 'fire.shadow-strikes',
+    element: 'fire',
+    name: 'Shadow Strikes',
+    purpose:
+      'Hands, hips and feet on the beat with nothing to hit. Conditioning that is also technique.',
+    dose: '3 × 1 min',
+    cues: [
+      'Light on the feet, hands up, chin behind the shoulder',
+      'Turn the hip into every strike; the arm is the last part to move',
+      'Never lock the elbow out — strike through the air, not at it',
+      'Breathe out on each strike, not in a held-breath flurry',
+    ],
+    targets: ['Conditioning', 'Coordination', 'Agility', 'NoFloor'],
+    venues: ['yard', 'standing', 'house'],
+    approxSeconds: 240,
+  },
+  {
+    id: 'fire.broad-jump',
+    element: 'fire',
+    name: 'Broad Jump',
+    purpose:
+      'Standing power, measured in a single number: how far you can throw yourself from a standstill.',
+    dose: '5 jumps, full rest',
+    cues: [
+      'Swing the arms back, hinge the hips, then jump out and land soft',
+      'Land with bent knees and hips back — quiet feet',
+      'Rest until you feel fresh between jumps; tired jumps are not jumps',
+      'Grass, not pavement',
+    ],
+    targets: ['Agility', 'Strength'],
+    venues: ['yard'],
+    approxSeconds: 180,
+  },
   // ─── WATER — Flow, Fascia & Hydration ──────────────────────────────────
   {
     id: 'water.figure-8',
@@ -1653,6 +1877,105 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 90,
   },
 
+  {
+    id: 'water.juggle-toss',
+    element: 'water',
+    name: 'Juggle Tosses',
+    purpose:
+      'Two hands, one rhythm — the fine-motor end of flow, and it carries straight into staff work.',
+    dose: '3 × 1 min',
+    cues: [
+      'Two balls or rolled socks: throw from hand to hand at eye height',
+      'Watch the top of the arc, not your hands',
+      'Drop it, pick it up, carry on — the drops are the practice',
+      'Lead with the weaker hand every other set',
+    ],
+    targets: ['Flow', 'Coordination', 'NoFloor'],
+    venues: ['house', 'standing'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'water.off-hand-task',
+    element: 'water',
+    name: 'Off-hand Task',
+    purpose:
+      'Dexterity trained in the day rather than added to it: the weaker hand does something ordinary.',
+    dose: '1 task',
+    cues: [
+      'Brush your teeth, pour a drink or use the mouse with the other hand',
+      'Slow is the point; clumsy is the work',
+      'One task at a time until it stops feeling strange',
+    ],
+    targets: ['Coordination', 'NoFloor'],
+    venues: ['house', 'desk'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'water.legs-up-the-wall',
+    element: 'water',
+    name: 'Legs Up the Wall',
+    purpose:
+      'The cheapest recovery there is: drains heavy legs after a run and settles the nervous system before sleep.',
+    dose: '3–5 min',
+    cues: [
+      'Sit side-on to the wall, swing the legs up and lie back',
+      'Hips a hand-width from the wall, knees soft, arms wide',
+      'Let the breath go long and quiet; nothing to hold',
+    ],
+    targets: ['Mobility', 'Breath'],
+    venues: ['wall', 'mat', 'house'],
+    approxSeconds: 240,
+  },
+  {
+    id: 'water.foot-roll',
+    element: 'water',
+    name: 'Foot Roll',
+    purpose:
+      'The foot is where the fascia chain starts; free it and the hamstrings and back give up range for nothing.',
+    dose: '90 sec each foot',
+    cues: [
+      'Stand and roll the sole over a ball, heel to toes',
+      'Stop on the sore spots and breathe for a few seconds',
+      'Pressure you could hold for a minute, not a wince',
+      'Check your toe-touch before and after',
+    ],
+    targets: ['Mobility', 'NoFloor'],
+    venues: ['house', 'standing', 'desk'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'water.hip-cars',
+    element: 'water',
+    name: 'Hip CARs',
+    purpose:
+      'A slow circle at the very edge of what the hip owns. Controlled range is the range you keep.',
+    dose: '3 circles each way, each leg',
+    cues: [
+      'Stand tall, hand on a wall, brace the trunk so only the hip moves',
+      'Knee up, out, around and back — as slow as you can stand',
+      'Stay inside the range you control; no swinging past it',
+      'If the back moves, the circle is too big',
+    ],
+    targets: ['Mobility', 'Coordination', 'NoFloor'],
+    venues: ['standing', 'wall', 'house'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'water.shoulder-cars',
+    element: 'water',
+    name: 'Shoulder CARs',
+    purpose:
+      'The same slow circle for the shoulder — the joint that a day at the desk quietly shrinks.',
+    dose: '3 circles each way, each arm',
+    cues: [
+      'Arm forward, thumb up, then trace the biggest circle you own',
+      'Ribs down and still; the shoulder travels, the trunk does not',
+      'Slow enough that the last quarter is the hardest',
+    ],
+    targets: ['Mobility', 'UCS', 'NoFloor'],
+    venues: ['standing', 'desk', 'house'],
+    approxSeconds: 180,
+  },
   // ─── HEART — Integration & Cadence ─────────────────────────────────────
   {
     id: 'heart.morning-intent',
@@ -1782,6 +2105,54 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     targets: ['Presence', 'NoFloor'],
     venues: ['desk', 'standing'],
     approxSeconds: 60,
+  },
+  {
+    id: 'heart.voice-work',
+    element: 'heart',
+    name: 'Voice Work',
+    purpose:
+      'Presence is carried by the voice. A hum on a long breath out steadies it and the nervous system with it.',
+    dose: '2 min',
+    cues: [
+      'Sit or stand tall, breathe into the belly, hum the breath out',
+      'Feel the buzz in the face and chest; drop the pitch until you do',
+      'Then say one sentence you mean, at that volume',
+    ],
+    targets: ['Presence', 'Breath', 'NoFloor'],
+    venues: ['house', 'standing', 'desk'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'heart.teach-a-move',
+    element: 'heart',
+    name: 'Teach a Move',
+    purpose:
+      'You learn a movement twice: once doing it, once explaining it. Teaching is the second half.',
+    dose: '3 min',
+    cues: [
+      'Pick one move you can already do well',
+      'Say the three cues that matter, out loud, while showing it',
+      'Teach a person or the camera — both count',
+    ],
+    targets: ['Presence', 'NoFloor'],
+    venues: ['house', 'yard', 'standing'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'heart.dawn-sit',
+    element: 'heart',
+    name: 'Dawn Sit',
+    purpose:
+      'Five minutes outside before the day starts. Light on the eyes sets the clock; the stillness sets the rest.',
+    dose: '5 min',
+    cues: [
+      'Sit outside facing the brightest part of the sky, never the sun itself',
+      'Eyes open and soft, hands still, nothing to solve',
+      'Let the first thought through and the second one go',
+    ],
+    targets: ['Presence', 'NoFloor'],
+    venues: ['yard', 'neighborhood'],
+    approxSeconds: 300,
   },
 ];
 

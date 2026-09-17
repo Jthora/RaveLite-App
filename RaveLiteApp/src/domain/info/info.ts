@@ -80,6 +80,8 @@ const VENUES: Record<Venue, string> = {
   mat: 'on the mat',
   wall: 'at a wall or doorframe',
   porch: 'on the porch edge',
+  house: 'in the house',
+  neighborhood: 'out in the neighborhood',
 };
 
 const trains = (ids: readonly AttributeId[]): string | undefined =>

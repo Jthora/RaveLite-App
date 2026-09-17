@@ -40,21 +40,33 @@ type Scorer = (ex: Exercise, ctx: DrillContext) => number;
  *  it dwarfs it. No window = neutral. */
 const fitsTimeWindow: Scorer = (ex, ctx) => {
   const win = ctx.windowMinutes;
-  if (win == null) {return 0;}
+  if (win == null) {
+    return 0;
+  }
   const winSec = win * 60;
-  if (ex.approxSeconds <= winSec * 0.5) {return 2;}
-  if (ex.approxSeconds <= winSec) {return 1;}
-  if (ex.approxSeconds <= winSec * 1.5) {return -1;}
+  if (ex.approxSeconds <= winSec * 0.5) {
+    return 2;
+  }
+  if (ex.approxSeconds <= winSec) {
+    return 1;
+  }
+  if (ex.approxSeconds <= winSec * 1.5) {
+    return -1;
+  }
   return -2;
 };
 
 /** +1 for each of the operator's preferred targets the drill matches.
  *  Capped at +3 so a 4-target overlap doesn't dominate the score. */
 const matchesPreferredTargets: Scorer = (ex, ctx) => {
-  if (ctx.preferredTargets.length === 0) {return 0;}
+  if (ctx.preferredTargets.length === 0) {
+    return 0;
+  }
   let hits = 0;
   for (const t of ex.targets) {
-    if (ctx.preferredTargets.includes(t)) {hits++;}
+    if (ctx.preferredTargets.includes(t)) {
+      hits++;
+    }
   }
   return Math.min(hits, 3);
 };
@@ -107,12 +119,18 @@ const circadianFit: Scorer = (ex, ctx) => {
   const windows = CIRCADIAN[ctx.element];
   for (const w of windows) {
     const [start, end] = w.hours;
-    if (ctx.hour < start || ctx.hour >= end) {continue;}
+    if (ctx.hour < start || ctx.hour >= end) {
+      continue;
+    }
     let hits = 0;
     for (const t of ex.targets) {
-      if (w.favored.includes(t)) {hits++;}
+      if (w.favored.includes(t)) {
+        hits++;
+      }
     }
-    if (hits > 0) {return Math.min(hits, 2);}
+    if (hits > 0) {
+      return Math.min(hits, 2);
+    }
   }
   return 0;
 };
@@ -120,10 +138,14 @@ const circadianFit: Scorer = (ex, ctx) => {
 /** Variety: -1 per occurrence in the last 5 picks. Stops the engine
  *  from getting stuck on a single high-scoring drill. */
 const varietyPressure: Scorer = (ex, ctx) => {
-  if (!ctx.recentPickIds?.length) {return 0;}
+  if (!ctx.recentPickIds?.length) {
+    return 0;
+  }
   let hits = 0;
   for (const id of ctx.recentPickIds.slice(0, 5)) {
-    if (id === ex.id) {hits++;}
+    if (id === ex.id) {
+      hits++;
+    }
   }
   return -hits;
 };

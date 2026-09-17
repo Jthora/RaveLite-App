@@ -69,6 +69,7 @@ const INDOOR_VENUES: ReadonlySet<Venue> = new Set<Venue>([
   'standing',
   'mat',
   'wall',
+  'house',
 ]);
 /** What an indoor stand-in should train, by element, best first. */
 const INDOOR_TAGS: Record<ElementId, readonly Target[]> = {

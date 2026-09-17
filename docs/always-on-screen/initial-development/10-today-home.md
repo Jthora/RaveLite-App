@@ -376,6 +376,22 @@ the week before, done against what each day asked (recorded daily under
   later rounds, at most one per round for each track and never past a full
   round; what doesn't fit is let go rather than crammed into one big set.
 
+## Places you can train (`src/domain/exercises/types.ts`, since 17 Sep 2026)
+
+Two venues joined the mat, the desk, the yard, the wall and the porch edge:
+`house` (stairs, a sturdy chair, a hallway — indoors, so it counts as an
+indoor swap when the weather turns) and `neighborhood` (a hill, a curb
+line, a loop of the block). The low basement ceiling still rules: nothing
+tagged `house` may need height, a run-up or a swinging staff.
+
+Twenty-two drills came with them, aimed at what the fifteen attributes had
+least of: Awareness (a listening walk, a ruler drop, wall-ball catches),
+Balance (a curb walk), Power and Speed (hill sprints, a broad jump),
+Dexterity (juggle tosses, an off-hand task), Recovery (legs up the wall, a
+foot roll), Toughness (a stair carry, a bear crawl) and Presence (voice
+work, teaching a move, a dawn sit). Each is mapped to its pictogram
+(`moves.ts`) and to what it trains (`attributes/trains.ts`).
+
 ## Info cards (`src/domain/info/`, `src/components/info/InfoSheet.tsx`, since 17 Sep 2026)
 
 "What is this?" for every named thing — the operator asked for it after
