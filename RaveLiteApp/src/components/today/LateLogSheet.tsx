@@ -87,25 +87,33 @@ export function LateLogSheet({row, prescription: rx, onDone, onClose}: Props) {
                     onPress={() => info.show(cardForRow(row))}
                     accessibilityRole="button"
                     accessibilityLabel={`${row.label}. What is this?`}
-                    style={styles.head}>
-                    {row.move ? (
-                      <View
-                        style={[
-                          styles.tile,
-                          {backgroundColor: `${el.color}29`},
-                        ]}>
-                        <MoveIcon move={row.move} color={el.color} size={28} />
-                      </View>
-                    ) : null}
-                    <View style={styles.headText}>
-                      <Text style={styles.title} numberOfLines={2}>
-                        {row.label} <Text style={{color: el.color}}>ⓘ</Text>
-                      </Text>
-                      {moves ? null : drill ? (
-                        <Text style={styles.detail}>{drill.dose}</Text>
-                      ) : row.detail ? (
-                        <Text style={styles.detail}>{row.detail}</Text>
+                    style={styles.headTap}>
+                    {/* Tap wraps its children in one column view, so the row
+                        layout has to sit inside it, not on the Tap. */}
+                    <View style={styles.head}>
+                      {row.move ? (
+                        <View
+                          style={[
+                            styles.tile,
+                            {backgroundColor: `${el.color}29`},
+                          ]}>
+                          <MoveIcon
+                            move={row.move}
+                            color={el.color}
+                            size={28}
+                          />
+                        </View>
                       ) : null}
+                      <View style={styles.headText}>
+                        <Text style={styles.title} numberOfLines={2}>
+                          {row.label} <Text style={{color: el.color}}>ⓘ</Text>
+                        </Text>
+                        {moves ? null : drill ? (
+                          <Text style={styles.detail}>{drill.dose}</Text>
+                        ) : row.detail ? (
+                          <Text style={styles.detail}>{row.detail}</Text>
+                        ) : null}
+                      </View>
                     </View>
                   </Tap>
 

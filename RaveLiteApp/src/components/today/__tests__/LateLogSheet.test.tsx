@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text} from 'react-native';
+import {StyleSheet} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
 
 import {store} from '../../../storage';
@@ -77,8 +77,9 @@ it('says what was missed, and names every move', () => {
   expect(json).toContain('Chin tucks');
   expect(json).toContain('Did it but didn');
 
-  // The invariant behind that bug: no text inside a Tap may use flex, or
-  // the column wrapper gives it no height and the words vanish.
+  // The invariant behind that bug: a Tap wraps its children in one column
+  // view, so a direct child that relies on flex gets no size and vanishes.
+  // The renderer cannot see the collapse, but it can see the flex.
   const taps = tree!.root.findAll(
     node =>
       typeof node.props.testID === 'string' &&
@@ -87,9 +88,15 @@ it('says what was missed, and names every move', () => {
   );
   expect(taps.length).toBeGreaterThan(0);
   for (const tap of taps) {
-    for (const text of tap.findAllByType(Text)) {
-      const flat = StyleSheet.flatten(text.props.style) ?? {};
-      expect(flat.flex).toBeUndefined();
+    const [wrapper] = tap.findAll(n => n.props.pointerEvents === 'none');
+    expect(wrapper).toBeDefined();
+    for (const child of wrapper.children) {
+      if (typeof child === 'string') {
+        continue;
+      }
+      // flex: 0 is fine (don't grow); anything positive is the bug.
+      const flat = StyleSheet.flatten(child.props.style) ?? {};
+      expect(flat.flex ?? 0).toBeLessThanOrEqual(0);
     }
   }
   act(() => tree!.unmount());
