@@ -54,6 +54,7 @@ const ROUND_ORDER: readonly TrackId[] = [
   'mobility',
   'pull',
   'kicks',
+  'flow',
   'crunch',
   'legs-up',
   'hang',

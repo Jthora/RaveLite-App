@@ -31,7 +31,8 @@ export type TrackId =
   | 'stillness'
   | 'push-variants'
   | 'pelvis'
-  | 'kicks';
+  | 'kicks'
+  | 'flow';
 
 export type SetUnit = 'reps' | 'seconds';
 

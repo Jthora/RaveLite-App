@@ -106,6 +106,11 @@ export const TRACKS: Track[] = [
         graduateAt: 12,
       },
       {exerciseId: 'fire.table-row', label: 'Table rows', graduateAt: 12},
+      {
+        exerciseId: 'fire.inverted-row',
+        label: 'Inverted rows (porch edge)',
+        graduateAt: 15,
+      },
     ],
     defaultRung: 0,
     defaultMax: 12,
@@ -215,6 +220,16 @@ export const TRACKS: Track[] = [
         label: 'Hanging leg raises',
         graduateAt: 10,
       },
+      {
+        exerciseId: 'earth.windshield-wiper',
+        label: 'Windshield wipers (each side)',
+        graduateAt: 10,
+      },
+      {
+        exerciseId: 'earth.dragon-flag-negative',
+        label: 'Dragon flag negatives',
+        graduateAt: 8,
+      },
     ],
     defaultRung: 1,
     defaultMax: 10,
@@ -238,6 +253,11 @@ export const TRACKS: Track[] = [
     ladder: [
       {exerciseId: 'earth.crunch', label: 'Crunches', graduateAt: 25},
       {exerciseId: 'earth.situp', label: 'Sit-ups', graduateAt: 25},
+      {
+        exerciseId: 'earth.hollow-rock',
+        label: 'Hollow rocks',
+        graduateAt: 25,
+      },
     ],
     defaultRung: 0,
     defaultMax: 20,
@@ -506,6 +526,43 @@ export const TRACKS: Track[] = [
     partners: [
       {exerciseId: 'air.leg-swings', seconds: 60},
       {exerciseId: 'earth.horse-stance', seconds: 45},
+    ],
+  },
+  {
+    id: 'flow',
+    name: 'Flow',
+    element: 'water',
+    unit: 'seconds',
+    // Tai chi, and only the dry half of it: the day rounds never sweat, so
+    // the kicks, strikes and dance live in the morning block instead.
+    ladder: [
+      {
+        exerciseId: 'water.cloud-hands',
+        label: 'Cloud hands',
+        graduateAt: 120,
+      },
+      {
+        exerciseId: 'water.tai-chi-walk',
+        label: 'Tai chi walking',
+        graduateAt: 120,
+      },
+      {
+        exerciseId: 'water.grasp-sparrows-tail',
+        label: 'Grasp the sparrow’s tail',
+        graduateAt: 180,
+      },
+    ],
+    defaultRung: 0,
+    defaultMax: 60,
+    intensity: 0.5,
+    days: ALL_DAYS,
+    baseSets: 2,
+    maxSets: 5,
+    enabledByDefault: true,
+    why: 'Slow weight shifts and turning waist: balance, dexterity and calm, in a set that needs no shower.',
+    partners: [
+      {exerciseId: 'air.coherence-breath', seconds: 60},
+      {exerciseId: 'heart.mirror-presence', seconds: 30},
     ],
   },
 ];

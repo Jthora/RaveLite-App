@@ -50,6 +50,7 @@ const TRACK_ATTRS: Record<TrackId, Pair> = {
   stillness: ['focus'],
   pelvis: ['strength', 'mobility'],
   kicks: ['mobility', 'agility'],
+  flow: ['balance', 'dexterity'],
 };
 
 /** Drills whose tags would land them in the wrong seat. */
@@ -131,9 +132,9 @@ const EXERCISE_ATTRS: Record<string, Pair> = {
   'earth.windshield-wiper': ['toughness', 'mobility'],
   'earth.dragon-flag-negative': ['toughness', 'strength'],
   'earth.tuck-l-sit': ['toughness', 'strength'],
-  'earth.inverted-row': ['strength', 'toughness'],
-  'earth.assisted-pullup': ['strength'],
-  'earth.pullup-top-hold': ['strength', 'toughness'],
+  'fire.inverted-row': ['strength', 'toughness'],
+  'fire.assisted-pullup': ['strength'],
+  'fire.pullup-top-hold': ['strength', 'toughness'],
   'earth.hanging-tuck-hold': ['toughness', 'strength'],
   'earth.grip-shifts': ['toughness', 'strength'],
   'earth.warrior-flow': ['strength', 'mobility'],

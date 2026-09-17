@@ -117,17 +117,17 @@ export const FOCUS_WHEEL: readonly WheelDay[] = [
   {
     focus: ['recovery', 'agility'],
     block: {
-      title: 'Long walk and light skips',
-      pieces: ['air.long-walk', 'air.shadow-rope', 'water.frog-stretch'],
+      title: 'Yoga and a long walk',
+      pieces: ['water.sun-salutation', 'air.long-walk', 'air.shadow-rope'],
     },
   },
   {
     focus: ['power', 'mobility', 'presence'],
     block: {
-      title: 'Kicks and jumps',
+      title: 'Kicks and flips',
       pieces: [
+        'fire.roundhouse-kick',
         'fire.kick-flip-foundations',
-        'fire.jump-squat',
         'water.front-split-progression',
       ],
     },
@@ -157,18 +157,18 @@ export const FOCUS_WHEEL: readonly WheelDay[] = [
   {
     focus: ['agility', 'mobility', 'presence'],
     block: {
-      title: 'Footwork and flow',
-      pieces: ['water.beat-step', 'water.beat-locks', 'water.pancake-reach'],
+      title: 'Dance basics',
+      pieces: ['water.body-isolations', 'water.toprock', 'water.groove-combo'],
     },
   },
   {
     focus: ['power', 'dexterity', 'balance'],
     block: {
-      title: 'Bricks and staff',
+      title: 'Strikes, blocks and stances',
       pieces: [
-        'fire.fire-rounds',
-        'earth.brick-farmer-walk',
-        'water.staff-combat-rounds',
+        'fire.jab-cross',
+        'fire.block-drill',
+        'earth.stance-transitions',
       ],
     },
   },
@@ -180,6 +180,7 @@ export const FOCUS_TRACK: Readonly<Partial<Record<AttributeId, TrackId>>> = {
   mobility: 'mobility',
   presence: 'stillness',
   recovery: 'breath',
+  dexterity: 'flow',
 };
 
 /** Dry partner drills for focus rounds; sweaty focus waits for the morning. */

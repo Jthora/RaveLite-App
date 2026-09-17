@@ -77,9 +77,9 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'earth.windshield-wiper': 'legraise',
   'earth.dragon-flag-negative': 'legraise',
   'earth.tuck-l-sit': 'legraise',
-  'earth.inverted-row': 'row',
-  'earth.assisted-pullup': 'pull',
-  'earth.pullup-top-hold': 'pull',
+  'fire.inverted-row': 'row',
+  'fire.assisted-pullup': 'pull',
+  'fire.pullup-top-hold': 'pull',
   'earth.hanging-tuck-hold': 'hang',
   'earth.grip-shifts': 'hang',
   'earth.warrior-flow': 'lunge',
@@ -300,6 +300,7 @@ const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {
   'push-variants': 'push',
   pelvis: 'bridge',
   kicks: 'hipopener',
+  flow: 'activity',
 };
 
 export function moveForExercise(id: string | undefined): MoveId | undefined {

@@ -74,9 +74,9 @@ describe('groupIntoRounds', () => {
   );
 
   it('turns week 1 Monday into nine rounds of three to six moves', () => {
-    // 48 base sets (Pelvis and Kick range included), plus Monday's Mobility
-    // and Presence sets.
-    expect(totalSets(monday)).toBe(50);
+    // 50 base sets (Pelvis, Kick range and Flow included), plus Monday's
+    // Mobility and Presence sets.
+    expect(totalSets(monday)).toBe(52);
     const rounds = groupIntoRounds(monday);
     expect(rounds).toHaveLength(TARGET_ROUNDS);
     for (const r of rounds) {

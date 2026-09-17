@@ -124,7 +124,11 @@ export function readyToLevelUp(track: Track, state: TrackState): boolean {
 }
 
 /** Record a max test on the current rung. */
-export function applyTest(state: TrackState, max: number, at: number): TrackState {
+export function applyTest(
+  state: TrackState,
+  max: number,
+  at: number,
+): TrackState {
   return {...state, testMax: Math.max(1, Math.round(max)), testedAt: at};
 }
 

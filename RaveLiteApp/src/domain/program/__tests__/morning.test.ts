@@ -45,14 +45,14 @@ it("chimes Monday's block piece by piece at 05:45, 06:10 and 06:35", () => {
     chimes.map(c => new Date(c.fire.ts).toTimeString().slice(0, 5)),
   ).toEqual(['05:45', '06:10', '06:35']);
   expect(chimes.map(c => c.drill?.id)).toEqual([
+    'fire.roundhouse-kick',
     'fire.kick-flip-foundations',
-    'fire.jump-squat',
     'water.front-split-progression',
   ]);
   expect(chimes.map(c => c.detail)).toEqual([
-    'Kicks and jumps · 1 of 3',
-    'Kicks and jumps · 2 of 3',
-    'Kicks and jumps · 3 of 3',
+    'Kicks and flips · 1 of 3',
+    'Kicks and flips · 2 of 3',
+    'Kicks and flips · 3 of 3',
   ]);
 });
 
@@ -77,7 +77,7 @@ it('other slots still pick from the library, and the weather keeps the piece', (
       first.fire.ts,
       morning,
     ),
-  ).toEqual({drill: first.drill, detail: 'Kicks and jumps · 1 of 3'});
+  ).toEqual({drill: first.drill, detail: 'Kicks and flips · 1 of 3'});
 });
 
 it('on a run day the run plan takes the piece, and the chime says the run', () => {

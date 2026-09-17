@@ -78,7 +78,7 @@ describe('focus wheel', () => {
   it('knows the day: Monday leans on Power, Mobility and Presence; a week 2 Saturday is the Marine PFT', () => {
     const monday = dayFocus(MONDAY, 1);
     expect(monday.focus).toEqual(['power', 'mobility', 'presence']);
-    expect(monday.block.title).toBe('Kicks and jumps');
+    expect(monday.block.title).toBe('Kicks and flips');
     expect(monday.test).toBeUndefined();
     const saturday = dayFocus(new Date(2026, 8, 26), 2);
     expect(saturday.test?.id).toBe('usmc-pft');
@@ -119,6 +119,7 @@ describe('dry daytime', () => {
     expect(sets(MONDAY, 'stillness')).toBe(sets(TUESDAY, 'stillness') + 1);
     expect(sets(MONDAY, 'breath')).toBe(sets(TUESDAY, 'breath'));
     expect(Object.keys(FOCUS_TRACK).sort()).toEqual([
+      'dexterity',
       'mobility',
       'presence',
       'recovery',

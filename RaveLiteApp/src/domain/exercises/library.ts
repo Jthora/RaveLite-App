@@ -1129,57 +1129,6 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     approxSeconds: 120,
   },
   {
-    id: 'earth.inverted-row',
-    element: 'earth',
-    name: 'Inverted Rows',
-    purpose:
-      'The porch edge is low, which makes it perfect for these: a horizontal pull that balances every push you do.',
-    dose: '3 × 10',
-    cues: [
-      'Test the hang point before you load it',
-      'Lie under the edge, heels on the ground, body in one line',
-      'Pull the chest to the bar, elbows past the ribs, shoulders down',
-      'Walk the feet in to make it easier, out to make it harder',
-    ],
-    targets: ['Strength', 'UCS', 'Grip'],
-    venues: ['porch'],
-    approxSeconds: 180,
-  },
-  {
-    id: 'earth.assisted-pullup',
-    element: 'earth',
-    name: 'Feet-assisted Pull-ups',
-    purpose:
-      'With the ground in reach you can give yourself exactly as much help as you need — the fastest way to more real pull-ups.',
-    dose: '3 × 8',
-    cues: [
-      'Test the hang point before you load it',
-      'Knees bent, toes on the ground, and push only as much as you must',
-      'Chin over the edge, then lower for three full seconds',
-      'Take the help away a little each week',
-    ],
-    targets: ['Strength', 'Grip'],
-    venues: ['porch'],
-    approxSeconds: 180,
-  },
-  {
-    id: 'earth.pullup-top-hold',
-    element: 'earth',
-    name: 'Top Holds',
-    purpose:
-      'The top of a pull-up is where the strength is missing. Holding it there is how it arrives.',
-    dose: '3 × 10 sec',
-    cues: [
-      'Test the hang point before you load it',
-      'Get to the top however you like — feet help is fine',
-      'Chin above, chest to the edge, shoulders pulled down',
-      'Lower slowly rather than dropping off',
-    ],
-    targets: ['Strength', 'Grip'],
-    venues: ['porch'],
-    approxSeconds: 120,
-  },
-  {
     id: 'earth.hanging-tuck-hold',
     element: 'earth',
     name: 'Tucked Hang',
@@ -2199,6 +2148,57 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     targets: ['Agility', 'Strength'],
     venues: ['yard', 'wall'],
     approxSeconds: 180,
+  },
+  {
+    id: 'fire.inverted-row',
+    element: 'fire',
+    name: 'Inverted Rows',
+    purpose:
+      'The porch edge is low, which makes it perfect for these: a horizontal pull that balances every push you do.',
+    dose: '3 × 10',
+    cues: [
+      'Test the hang point before you load it',
+      'Lie under the edge, heels on the ground, body in one line',
+      'Pull the chest to the bar, elbows past the ribs, shoulders down',
+      'Walk the feet in to make it easier, out to make it harder',
+    ],
+    targets: ['Strength', 'UCS', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'fire.assisted-pullup',
+    element: 'fire',
+    name: 'Feet-assisted Pull-ups',
+    purpose:
+      'With the ground in reach you can give yourself exactly as much help as you need — the fastest way to more real pull-ups.',
+    dose: '3 × 8',
+    cues: [
+      'Test the hang point before you load it',
+      'Knees bent, toes on the ground, and push only as much as you must',
+      'Chin over the edge, then lower for three full seconds',
+      'Take the help away a little each week',
+    ],
+    targets: ['Strength', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'fire.pullup-top-hold',
+    element: 'fire',
+    name: 'Top Holds',
+    purpose:
+      'The top of a pull-up is where the strength is missing. Holding it there is how it arrives.',
+    dose: '3 × 10 sec',
+    cues: [
+      'Test the hang point before you load it',
+      'Get to the top however you like — feet help is fine',
+      'Chin above, chest to the edge, shoulders pulled down',
+      'Lower slowly rather than dropping off',
+    ],
+    targets: ['Strength', 'Grip'],
+    venues: ['porch'],
+    approxSeconds: 120,
   },
   // ─── WATER — Flow, Fascia & Hydration ──────────────────────────────────
   {

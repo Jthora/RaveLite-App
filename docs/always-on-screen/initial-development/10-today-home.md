@@ -419,6 +419,27 @@ hangs from the porch, a harder core, and yoga and tai chi. 56 drills:
   down dog to cobra; cloud hands, brush knee, grasp the sparrow’s tail,
   tai chi walking and the standing post.
 
+**Where the reps come from.** Daily Sets rounds stay dry (the sweat rule
+in `exercises/sweat.ts`), so kicks, strikes, dance and jumps cannot be
+track rungs — they go in the morning block, which already changes by day:
+
+| Day | Morning block |
+|---|---|
+| Sun | Yoga and a long walk (sun salutation, long walk, skips) |
+| Mon | Kicks and flips (roundhouse, kick-flip foundations, front split) |
+| Tue | Strides and staff (run day) |
+| Wed | Easy run |
+| Thu | Dance basics (isolations, toprock, groove combo) |
+| Fri | Strikes, blocks and stances |
+| Sat | The week's test |
+
+What *is* dry gets a track: **Flow** (Water, every day) climbs cloud hands
+→ tai chi walking → grasp the sparrow’s tail, and a Dexterity focus day
+gives it an extra set. The core tracks got somewhere to climb too: Sit-ups
+→ hollow rocks, Leg-ups → windshield wipers → dragon-flag negatives, Row →
+inverted rows on the porch edge. New rungs are only ever appended, so a
+stored rung never shifts under the operator.
+
 Where they land: the blocks and the parry feed **Awareness**, which had
 only the eye break; the dance steps feed **Agility** and **Dexterity**;
 the tai chi forms and tree pose feed **Balance**; the porch work and the
