@@ -77,12 +77,25 @@ export function LateLogSheet({row, prescription: rx, onDone, onClose}: Props) {
                 </View>
               ) : (
                 <>
-                  <Text style={styles.eyebrow}>
-                    {row.status === 'skipped' ? 'SKIPPED' : 'MISSED'} ·{' '}
-                    {formatHM(row.at)}
-                  </Text>
+                  <View style={styles.topRow}>
+                    <Text style={styles.eyebrow}>
+                      {row.status === 'skipped' ? 'SKIPPED' : 'MISSED'} ·{' '}
+                      {formatHM(row.at)}
+                    </Text>
+                    <Tap
+                      testID="late-info"
+                      variant="plain"
+                      onPress={() => info.show(cardForRow(row))}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${row.label}. What is this?`}
+                      style={styles.infoTap}>
+                      <Text style={[styles.infoMark, {color: el.color}]}>
+                        ⓘ
+                      </Text>
+                    </Tap>
+                  </View>
                   <Tap
-                    testID="late-info"
+                    testID="late-info-title"
                     variant="plain"
                     onPress={() => info.show(cardForRow(row))}
                     accessibilityRole="button"
@@ -106,7 +119,7 @@ export function LateLogSheet({row, prescription: rx, onDone, onClose}: Props) {
                       ) : null}
                       <View style={styles.headText}>
                         <Text style={styles.title} numberOfLines={2}>
-                          {row.label} <Text style={{color: el.color}}>ⓘ</Text>
+                          {row.label}
                         </Text>
                         {moves ? null : drill ? (
                           <Text style={styles.detail}>{drill.dose}</Text>
@@ -211,6 +224,20 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.textDim,
     letterSpacing: 1.6,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  infoTap: {
+    minHeight: 44,
+    minWidth: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoMark: {
+    fontSize: 20,
   },
   headTap: {
     alignSelf: 'stretch',

@@ -116,9 +116,10 @@ export function indoorAlternative(
         !o.targets.includes('Test') &&
         canGoInside(o),
     );
-    // Prefer a stand-in of some substance for a long drill.
+    // Prefer a stand-in of some substance for a long drill: swapping a
+    // half-hour run for two minutes of anything is not a swap.
     const long = options.filter(
-      o => o.approxSeconds >= Math.min(drill.approxSeconds, 120),
+      o => o.approxSeconds >= Math.min(drill.approxSeconds, 240),
     );
     const pick = seededPick(long.length > 0 ? long : options, seed);
     if (pick) {

@@ -83,7 +83,7 @@ it('says what was missed, and names every move', () => {
   const taps = tree!.root.findAll(
     node =>
       typeof node.props.testID === 'string' &&
-      /^(late-info|move-info-)/.test(node.props.testID) &&
+      /^(late-info|late-info-title|move-info-)/.test(node.props.testID) &&
       typeof node.props.onPress === 'function',
   );
   expect(taps.length).toBeGreaterThan(0);

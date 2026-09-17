@@ -100,13 +100,20 @@ it('fetches the forecast for the rounded place, then keeps it for three hours', 
   expect(getForecast()?.hours).toHaveLength(1);
 });
 
-it('a rainy hour swaps the run for indoor Fire Rounds, and says why', () => {
+it('a rainy hour swaps the run for something indoors, and says why', () => {
   store.set(KEYS.weatherPlace, JSON.stringify(place));
   saveForecast(() => ({rainChance: 90}));
-  expect(drillForPlanChime(run, 'plan:yard:0:1', at(12))).toEqual({
-    drill: expect.objectContaining({id: 'fire.fire-rounds'}),
-    note: 'Rain 90% — Fire Rounds (20 on / 10 off) inside instead',
-  });
+  const {drill, note} = drillForPlanChime(run, 'plan:yard:0:1', at(12));
+  // Which drill it lands on is the library's business, and the library
+  // keeps growing; what matters is that it is indoors and of a length
+  // that can stand in for a run.
+  expect(drill!.venues).toEqual(
+    expect.arrayContaining([
+      expect.stringMatching(/^(mat|standing|wall|desk|house)$/),
+    ]),
+  );
+  expect(drill!.approxSeconds).toBeGreaterThanOrEqual(240);
+  expect(note).toMatch(/^Rain 90% — .+ inside instead$/);
 });
 
 it('the plan scheduler queues the adapted drill, and queues it again when the forecast changes', () => {

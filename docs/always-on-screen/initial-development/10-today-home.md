@@ -392,6 +392,40 @@ foot roll), Toughness (a stair carry, a bear crawl) and Presence (voice
 work, teaching a move, a dawn sit). Each is mapped to its pictogram
 (`moves.ts`) and to what it trains (`attributes/trains.ts`).
 
+## Skills: kicks, strikes, dance, jumps, yoga, tai chi (since 17 Sep 2026)
+
+The operator asked for the things a practice is actually made of, not just
+conditioning: "I need actual kicks to practice", dance procedures with
+reps rather than timed sessions, martial fundamentals, jumps, more than
+hangs from the porch, a harder core, and yoga and tai chi. 56 drills:
+
+- **Kicks:** front, roundhouse, side, back, hook, axe, crescent, knees, a
+  spin-turn drill (the safe half of the spinning back kick) and a
+  three-kick combo.
+- **Martial basics:** jab–cross, hooks and uppercuts, elbows, the four
+  blocks, parry and slip, stance work (horse, front, back, cat) and a
+  strike–block–kick flow.
+- **Dance, counted:** isolations, body wave, arm wave, two-step,
+  grapevine, toprock, the Jack, spins with spotting, freezes, and a groove
+  combo that puts four moves on one eight-count, both sides.
+- **Jumps:** tuck jumps, skater bounds, pogo hops and a vertical-jump mark.
+- **The porch edge, past hangs:** inverted rows, feet-assisted pull-ups,
+  top holds, a tucked hang and grip shifts — all with the feet in reach,
+  which is what that low edge is good for.
+- **Core, harder:** hollow rocks, the RKC plank, the Copenhagen plank,
+  bird dog, suitcase carries, windshield wipers, dragon-flag negatives and
+  a tucked L-sit.
+- **Yoga and tai chi:** sun salutation, warrior flow, chair, tree, crow,
+  down dog to cobra; cloud hands, brush knee, grasp the sparrow’s tail,
+  tai chi walking and the standing post.
+
+Where they land: the blocks and the parry feed **Awareness**, which had
+only the eye break; the dance steps feed **Agility** and **Dexterity**;
+the tai chi forms and tree pose feed **Balance**; the porch work and the
+core holds feed **Toughness**. A rainy-hour indoor swap now has to be at
+least four minutes long when it stands in for a run, since the library
+has plenty of short drills that cannot.
+
 ## Info cards (`src/domain/info/`, `src/components/info/InfoSheet.tsx`, since 17 Sep 2026)
 
 "What is this?" for every named thing — the operator asked for it after
