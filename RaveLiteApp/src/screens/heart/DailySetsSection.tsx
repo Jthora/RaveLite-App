@@ -65,7 +65,11 @@ import {palette, radius, spacing, type as t} from '../../theme';
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const REFRESH_MS = 30_000;
 
-export function DailySetsSection() {
+export function DailySetsSection({
+  onOpenAttributes,
+}: {
+  onOpenAttributes?: () => void;
+} = {}) {
   const [tick, setTick] = useState(0);
   const [testing, setTesting] = useState<TrackId | null>(null);
   const refresh = useCallback(() => setTick(k => k + 1), []);
@@ -151,7 +155,11 @@ export function DailySetsSection() {
         ) : null}
       </View>
 
-      <TodayFocus focus={focusDays[0].focus} pieces={pieces} />
+      <TodayFocus
+        focus={focusDays[0].focus}
+        pieces={pieces}
+        onOpen={onOpenAttributes}
+      />
 
       {today.prescriptions.length === 0 ? (
         <Text style={styles.emptyText}>Rest day — no sets scheduled.</Text>

@@ -1,4 +1,4 @@
-import type {ElementId} from '../../theme/elements';
+import type {AttributeId} from '../attributes/attributes';
 import type {TrackId, TrackPartner} from './types';
 
 /**
@@ -21,51 +21,12 @@ import type {TrackId, TrackPartner} from './types';
  * PFT, the Marine combat fitness test, then max tests in the deload week.
  */
 
-export type AttributeId =
-  | 'power'
-  | 'stamina'
-  | 'speed'
-  | 'awareness'
-  | 'breath'
-  | 'agility'
-  | 'resolve'
-  | 'focus'
-  | 'presence'
-  | 'strength'
-  | 'toughness'
-  | 'balance'
-  | 'dexterity'
-  | 'mobility'
-  | 'recovery';
-
-export interface Attribute {
-  id: AttributeId;
-  name: string;
-  element: ElementId;
-}
-
-/** In the balance strip's element order. */
-export const ATTRIBUTES: readonly Attribute[] = [
-  {id: 'power', name: 'Power', element: 'fire'},
-  {id: 'stamina', name: 'Stamina', element: 'fire'},
-  {id: 'speed', name: 'Speed', element: 'fire'},
-  {id: 'awareness', name: 'Awareness', element: 'air'},
-  {id: 'breath', name: 'Breath', element: 'air'},
-  {id: 'agility', name: 'Agility', element: 'air'},
-  {id: 'resolve', name: 'Resolve', element: 'heart'},
-  {id: 'focus', name: 'Focus', element: 'heart'},
-  {id: 'presence', name: 'Presence', element: 'heart'},
-  {id: 'strength', name: 'Strength', element: 'earth'},
-  {id: 'toughness', name: 'Toughness', element: 'earth'},
-  {id: 'balance', name: 'Balance', element: 'earth'},
-  {id: 'dexterity', name: 'Dexterity', element: 'water'},
-  {id: 'mobility', name: 'Mobility', element: 'water'},
-  {id: 'recovery', name: 'Recovery', element: 'water'},
-];
-
-export function attributeById(id: AttributeId): Attribute {
-  return ATTRIBUTES.find(a => a.id === id)!;
-}
+export {
+  ATTRIBUTES,
+  attributeById,
+  type Attribute,
+  type AttributeId,
+} from '../attributes/attributes';
 
 /** Trained by every day's rounds, so never a day's focus. */
 export const DAILY_CORE: readonly AttributeId[] = [

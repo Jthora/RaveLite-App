@@ -59,6 +59,10 @@ export const KEYS = {
   /** `{day: {trackId: amount}}` JSON — what each recent day asked, read by the daily review. */
   programDays: 'program.days',
 
+  // ── Attributes (the character sheet's fifteen) ───────────────────
+  /** `AttributesState` JSON — levels, XP and the day rolled up through. */
+  attributesState: 'attributes.state',
+
   // ── Weather: sunrise, the forecast, conditions ────────────────────
   /** `Place` JSON — the operator's town, rounded to about 10 km. */
   weatherPlace: 'weather.place',

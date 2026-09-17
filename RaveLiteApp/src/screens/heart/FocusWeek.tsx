@@ -5,6 +5,8 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+import {Tap} from '../../components/Tap';
+
 import {EXERCISE_LIBRARY} from '../../domain/exercises/library';
 import type {BlockPiece} from '../../domain/program/morning';
 import type {RunDay} from '../../domain/run/plan';
@@ -53,15 +55,21 @@ function Attributes({
 export function TodayFocus({
   focus,
   pieces,
+  onOpen,
 }: {
   focus: DayFocus;
   /** The block with the run plan's run in place; the plain block otherwise. */
   pieces?: readonly BlockPiece[];
+  /** Opens the attributes today's focus leans on. */
+  onOpen?: () => void;
 }) {
   const shown = pieces ?? focus.block.pieces.map(id => ({exerciseId: id}));
-  return (
-    <View testID="today-focus" style={styles.card}>
-      <Text style={styles.eyebrow}>Today's focus</Text>
+  const body = (
+    <>
+      <View style={styles.eyebrowRow}>
+        <Text style={styles.eyebrow}>Today's focus</Text>
+        {onOpen ? <Text style={styles.more}>Attributes ›</Text> : null}
+      </View>
       <Attributes ids={focus.focus} style={styles.focusLine} />
       <Text style={styles.blockTitle}>
         Morning: {focus.block.title}
@@ -83,6 +91,24 @@ export function TodayFocus({
         Every day's rounds:{' '}
         {DAILY_CORE.map(id => attributeById(id).name).join(' · ')}
       </Text>
+    </>
+  );
+
+  return onOpen ? (
+    <Tap
+      testID="today-focus"
+      variant="plain"
+      onPress={onOpen}
+      accessibilityRole="button"
+      accessibilityLabel={`Today's focus: ${focus.focus
+        .map(id => attributeById(id).name)
+        .join(', ')}. Open attributes`}
+      style={styles.card}>
+      {body}
+    </Tap>
+  ) : (
+    <View testID="today-focus" style={styles.card}>
+      {body}
     </View>
   );
 }
@@ -123,6 +149,15 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.md,
     gap: 4,
+  },
+  eyebrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  more: {
+    ...t.caption,
+    color: ELEMENTS.heart.color,
   },
   eyebrow: {
     ...t.caption,

@@ -376,6 +376,41 @@ the week before, done against what each day asked (recorded daily under
   later rounds, at most one per round for each track and never past a full
   round; what doesn't fit is let go rather than crammed into one big set.
 
+## Attributes (`src/domain/attributes/`, since 17 Sep 2026)
+
+The fifteen the focus wheel names are levels you grow, on the character
+sheet's grid of five elements × three modalities: cardinal starts (Power,
+Strength, Awareness, Dexterity, Resolve), fixed holds (Stamina, Toughness,
+Breath, Mobility, Focus), mutable changes (Speed, Balance, Agility,
+Recovery, Presence). Jagged Alliance's rules, in a body.
+
+- **You grow by doing.** Nothing is assigned or spent: every thing done
+  hands its effort points to the attributes it trains — a push set to
+  Strength with Power riding along at half, an eye break to Awareness, a
+  logged plank to Toughness (`trains.ts`; a Train metric decides first,
+  then a named drill, then the Daily Sets track, then the drill's tags,
+  then its element, so nothing done is worth nothing).
+- **The next level costs more.** `8 × 100 / (100 − level)` XP, so 0 → 85
+  is about 1,500 XP: months of steady work, and the last levels cost six
+  times the first.
+- **Focus speeds learning** — every attribute's XP × `1 + (Focus − 50)/200`,
+  Wisdom's old job.
+- **Practice stops at 85.** Past that only a passed test sets the number: a
+  result scores 100 for a perfect score, 50 for half of one, and for a
+  timed event twice the perfect time is 0 (`levels.ts`). The level shown is
+  the better of practice and the best test.
+- **Neglect costs.** Untouched for 14 days, an attribute loses a level a
+  week; deload weeks are free.
+- **Today is never stored.** The roll-up closes finished days only
+  (`repository.ts`, `attributes.state`, up to 35 days on a first run) and
+  today's work is added live on top, so a set done a minute ago already
+  shows.
+- **On the Daily Sets page:** today's focus card opens Attributes — the
+  character level, then each element's three with a bar and a mark at the
+  practice cap. Tap one for what it is, how it's trained, what its level
+  stands on and its sign. It shows in the same sheet, like Goals, so Back
+  keeps working.
+
 ## Focus wheel (`src/domain/program/week.ts`)
 
 Fifteen attributes, three per element. Six are the **daily core**, trained

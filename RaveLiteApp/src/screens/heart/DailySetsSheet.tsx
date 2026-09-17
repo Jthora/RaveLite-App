@@ -1,11 +1,11 @@
 /**
  * DailySetsSheet — Daily Sets in full, opened from Today's set meters:
  * today's tracks with their rounds, max tests, level ups and track on/off,
- * and Goals.
+ * plus Goals and Attributes.
  *
- * Goals shows in this same sheet, not as a sheet over it: on Android, once
- * a sheet opened over another has been touched, Back stops reaching it.
- * Back from Goals returns to Daily Sets; Back again closes the sheet.
+ * Both of those show in this same sheet, not as a sheet over it: on Android,
+ * once a sheet opened over another has been touched, Back stops reaching it.
+ * Back returns to Daily Sets; Back again closes the sheet.
  */
 import React, {useEffect, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -14,6 +14,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {Tap} from '../../components/Tap';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
+import {Attributes} from './Attributes';
 import {DailySetsSection} from './DailySetsSection';
 import {Goals} from './Goals';
 
@@ -22,12 +23,19 @@ interface Props {
   onClose: () => void;
 }
 
-type View_ = 'sets' | 'goals';
+type View_ = 'sets' | 'goals' | 'attributes';
+
+const TITLES: Record<View_, string> = {
+  sets: 'Daily Sets',
+  goals: 'Goals',
+  attributes: 'Attributes',
+};
 
 export function DailySetsSheet({visible, onClose}: Props) {
   const [showing, setShowing] = useState<View_>('sets');
   const accent = ELEMENTS.heart.accent;
   const goals = showing === 'goals';
+  const away = showing !== 'sets';
 
   // Every opening starts on Daily Sets.
   useEffect(() => {
@@ -36,17 +44,15 @@ export function DailySetsSheet({visible, onClose}: Props) {
     }
   }, [visible]);
 
-  const back = () => (goals ? setShowing('sets') : onClose());
+  const back = () => (away ? setShowing('sets') : onClose());
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={back}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>
-            {goals ? 'Goals' : 'Daily Sets'}
-          </Text>
+          <Text style={[styles.title, {color: accent}]}>{TITLES[showing]}</Text>
           <View style={styles.actions}>
-            {goals ? (
+            {away ? (
               <Tap
                 testID="sets-back"
                 variant="plain"
@@ -80,11 +86,15 @@ export function DailySetsSheet({visible, onClose}: Props) {
         </View>
         {goals ? (
           <Goals />
+        ) : showing === 'attributes' ? (
+          <Attributes />
         ) : (
           <ScrollView
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}>
-            <DailySetsSection />
+            <DailySetsSection
+              onOpenAttributes={() => setShowing('attributes')}
+            />
           </ScrollView>
         )}
       </SafeAreaView>

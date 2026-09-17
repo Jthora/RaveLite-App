@@ -3,6 +3,7 @@ import {Modal} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
 
 import {store} from '../../../storage';
+import {Attributes} from '../Attributes';
 import {DailySetsSheet} from '../DailySetsSheet';
 import {Goals} from '../Goals';
 
@@ -47,4 +48,34 @@ it("shows today's focus, its morning block, and the week ahead", () => {
   expect(json).toContain('Air Force test');
   act(() => tree!.unmount());
   jest.useRealTimers();
+});
+
+it("opens the attributes from today's focus, and Back comes home", () => {
+  const onClose = jest.fn();
+  let tree: renderer.ReactTestRenderer | undefined;
+  act(() => {
+    tree = renderer.create(<DailySetsSheet visible onClose={onClose} />);
+  });
+  const shown = () => tree!.root.findAllByType(Attributes).length > 0;
+  expect(shown()).toBe(false);
+  act(() => {
+    tree!.root
+      .findAll(node => node.props.testID === 'today-focus')[0]
+      .props.onPress();
+  });
+  expect(shown()).toBe(true);
+  expect(JSON.stringify(tree!.toJSON())).toContain('Toughness');
+  // Tapping one opens what it is, how it's trained and where it stands.
+  act(() => {
+    tree!.root
+      .findAll(node => node.props.testID === 'attribute-toughness')[0]
+      .props.onPress();
+  });
+  const json = JSON.stringify(tree!.toJSON());
+  expect(json).toContain('Holding load.');
+  expect(json).toContain('Practice: 0');
+  act(() => tree!.root.findAllByType(Modal)[0].props.onRequestClose());
+  expect(shown()).toBe(false);
+  expect(onClose).not.toHaveBeenCalled();
+  act(() => tree!.unmount());
 });
