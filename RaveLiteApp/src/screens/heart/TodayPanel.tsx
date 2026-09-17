@@ -175,12 +175,11 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
-        {model.weather ? (
-          <ConditionsLine
-            weather={model.weather}
-            onPress={() => setWeatherOpen(true)}
-          />
-        ) : null}
+        {/* Always shown: with no place it is the only way to set one. */}
+        <ConditionsLine
+          weather={model.weather}
+          onPress={() => setWeatherOpen(true)}
+        />
         <SessionBanner onPress={() => setSessionOpen(true)} />
         <ChimeCard
           now={model.now}

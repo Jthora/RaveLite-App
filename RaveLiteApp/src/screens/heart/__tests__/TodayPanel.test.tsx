@@ -15,6 +15,7 @@ import {startSession} from '../../../domain/training/session';
 import {SettingsSheet} from '../SettingsSheet';
 import {InfoCardView} from '../../../components/info/InfoSheet';
 import {TodayPanel} from '../TodayPanel';
+import {WeatherSheet} from '../WeatherSheet';
 
 // Monday 14 Sep 2026, 10:00 — inside My day, so a chime can sound.
 const TEN_AM = new Date(2026, 8, 14, 10, 0);
@@ -249,5 +250,17 @@ it('a missed chime explains itself from the sheet that logs it', () => {
   act(() => byTestId(tree, 'info-close').props.onPress());
   expect(card()).toBeUndefined();
   expect(tree.root.findByType(LateLogSheet).props.row).toBeDefined();
+  act(() => tree.unmount());
+});
+
+it('offers to set a place when there is none, and opens Weather', () => {
+  const tree = renderToday();
+  // Without a place there is no weather line to show — and it is the only
+  // door to the Weather sheet, so it has to be there asking for one.
+  const line = byTestId(tree, 'conditions-open');
+  expect(line).toBeDefined();
+  expect(JSON.stringify(tree.toJSON())).toContain('Set your place');
+  act(() => line.props.onPress());
+  expect(tree.root.findAllByType(WeatherSheet)[0].props.visible).toBe(true);
   act(() => tree.unmount());
 });
