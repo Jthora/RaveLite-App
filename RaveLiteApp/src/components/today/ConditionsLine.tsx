@@ -29,7 +29,11 @@ export function ConditionsLine({weather, onPress}: Props) {
         style={styles.line}>
         <View style={styles.row}>
           <MapPin size={14} color={palette.textDim} strokeWidth={2} />
-          <Text style={styles.text}>
+          <Text
+            style={styles.text}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}>
             Set your place for sunrise and weather ›
           </Text>
         </View>
@@ -57,7 +61,12 @@ export function ConditionsLine({weather, onPress}: Props) {
       style={styles.line}>
       <View style={styles.row}>
         <SunIcon size={14} color={palette.textDim} strokeWidth={2} />
-        <Text testID="conditions-text" style={styles.text} numberOfLines={1}>
+        <Text
+          testID="conditions-text"
+          style={styles.text}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}>
           {parts.join(' · ')}
         </Text>
         <Text style={styles.text}>›</Text>
@@ -68,7 +77,7 @@ export function ConditionsLine({weather, onPress}: Props) {
 
 const styles = StyleSheet.create({
   line: {
-    minHeight: 44,
+    minHeight: 22,
     justifyContent: 'center',
   },
   row: {

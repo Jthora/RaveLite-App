@@ -1,4 +1,5 @@
 import React from 'react';
+import {Text} from 'react-native';
 import renderer, {act, type ReactTestInstance} from 'react-test-renderer';
 import {afterEach, beforeEach, expect, it, jest} from '@jest/globals';
 
@@ -260,6 +261,10 @@ it('offers to set a place when there is none, and opens Weather', () => {
   const line = byTestId(tree, 'conditions-open');
   expect(line).toBeDefined();
   expect(JSON.stringify(tree.toJSON())).toContain('Set your place');
+  // The weather line is one line, always: it shrinks rather than wraps.
+  for (const text of line.findAllByType(Text)) {
+    expect(text.props.numberOfLines).toBe(1);
+  }
   act(() => line.props.onPress());
   expect(tree.root.findAllByType(WeatherSheet)[0].props.visible).toBe(true);
   act(() => tree.unmount());
