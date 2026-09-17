@@ -33,12 +33,18 @@ export interface WeatherPrefs {
   runInDark: boolean;
   /** Move static yard work inside when bugs are likely. */
   bugsMoveInside: boolean;
+  /**
+   * The house is air conditioned, so a hot day only costs water for the
+   * time actually spent out in it.
+   */
+  airConditioned: boolean;
 }
 
 export const DEFAULT_WEATHER_PREFS: WeatherPrefs = {
   units: 'C',
   runInDark: false,
   bugsMoveInside: true,
+  airConditioned: true,
 };
 
 export interface Adapted {

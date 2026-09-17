@@ -339,6 +339,19 @@ export function WeatherSheet({visible, onClose}: Props) {
               accent={accent}
             />
             <Toggle
+              title="Central air"
+              detail={
+                prefs.airConditioned
+                  ? 'On — a hot day only adds water for the time you spend outside.'
+                  : 'Off — a hot day adds water whatever you do, since the house is hot too.'
+              }
+              on={prefs.airConditioned}
+              onPress={() =>
+                setWeatherPrefs({airConditioned: !prefs.airConditioned})
+              }
+              accent={accent}
+            />
+            <Toggle
               title="Run in the dark"
               detail={
                 prefs.runInDark

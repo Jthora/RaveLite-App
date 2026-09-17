@@ -469,12 +469,22 @@ and Presence all read zero on the character sheet.
 
 ## Drink target and the heat
 
-Eight glasses (about 2 L) is the base. A day whose feels-like reaches the
-caution band (32 °C) adds two, and the danger band (39 °C, where the US
-heat index calls it dangerous) adds four — so a Swansea afternoon at 39°
-asks for twelve. The card now wraps its pips and says why ("+4 glasses —
-it feels 39° today"), because a target that changes without a reason just
-looks broken.
+Eight glasses (about 2 L) is the base, and eight is what the card always
+draws at full height. The heat can add two (feels-like 32 °C, the caution
+band) or four (39 °C, where the US heat index calls it dangerous) — but
+only for the time actually spent out in it: with **Central air** on (the
+default, in Weather), a glass is added for each 20 minutes outdoors, up
+to the heat's own maximum, so a day at the desk on a 41° afternoon still
+asks for eight. Turn it off and the house is hot too, so the day costs
+the full bump.
+
+Outdoor minutes come from the log itself (`activity/active.ts`): drills
+whose venues are all outdoors — yard, porch, neighborhood — plus runs,
+rucks, walks and rides.
+
+The extra glasses draw as short stubs under the eight rather than a
+second full row, and the reason sits on the label line ("+1 · 25 min out
+in 41°"), so a hot day costs a few pixels instead of a whole row.
 
 ## Info cards (`src/domain/info/`, `src/components/info/InfoSheet.tsx`, since 17 Sep 2026)
 

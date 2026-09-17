@@ -81,6 +81,32 @@ export function withHeatWaterCalls(
 }
 
 /** The Drink target on a day whose hottest hour reaches `heat`. */
-export function drinkTarget(base: number, heat: HeatLevel): number {
-  return base + (heat === 'danger' ? 4 : heat === 'caution' ? 2 : 0);
+/** Glasses the heat adds at its worst: two in caution, four in danger. */
+export function heatGlasses(heat: HeatLevel): number {
+  return heat === 'danger' ? 4 : heat === 'caution' ? 2 : 0;
+}
+
+/** A glass for every this many minutes spent out in the heat. */
+export const MINUTES_PER_HEAT_GLASS = 20;
+
+/**
+ * The day's glasses. A hot forecast only costs water if you are in it:
+ * with air conditioning the heat adds a glass for each 20 minutes spent
+ * outside, up to its own maximum. Without it, the heat is the whole day
+ * and the maximum applies from the start.
+ */
+export function drinkTarget(
+  base: number,
+  heat: HeatLevel,
+  outside: {airConditioned: boolean; outdoorMinutes: number} = {
+    airConditioned: false,
+    outdoorMinutes: 0,
+  },
+): number {
+  const most = heatGlasses(heat);
+  if (!outside.airConditioned) {
+    return base + most;
+  }
+  const earned = Math.floor(outside.outdoorMinutes / MINUTES_PER_HEAT_GLASS);
+  return base + Math.min(most, earned);
 }

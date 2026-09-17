@@ -31,23 +31,42 @@ export function WaterCounter({
         <View style={styles.labelRow}>
           <MoveIcon move="drink" color={water.color} size={14} />
           <Text style={styles.label}>Drink</Text>
+          {reason ? (
+            <Text testID="water-reason" style={styles.reason} numberOfLines={1}>
+              {reason}
+            </Text>
+          ) : null}
         </View>
+        {/* The usual eight at full height; anything the heat added sits
+            under them as a short stub, so a hot day costs a few pixels
+            rather than a whole second row. */}
         <View style={styles.cups}>
-          {Array.from({length: target}, (_, i) => (
+          {Array.from({length: Math.min(target, WATER_TARGET)}, (_, i) => (
             <View
               key={i}
               style={[
                 styles.cup,
                 {borderColor: water.color},
-                // Glasses past the usual eight are the heat's doing: outlined
-                // in a dimmer edge so the base target stays readable.
-                i >= WATER_TARGET && styles.extraCup,
                 i < glasses && {backgroundColor: water.color},
               ]}
             />
           ))}
         </View>
-        {reason ? <Text style={styles.reason}>{reason}</Text> : null}
+        {target > WATER_TARGET ? (
+          <View style={styles.cups}>
+            {Array.from({length: target - WATER_TARGET}, (_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.cup,
+                  styles.extraCup,
+                  {borderColor: water.color},
+                  i + WATER_TARGET < glasses && {backgroundColor: water.color},
+                ]}
+              />
+            ))}
+          </View>
+        ) : null}
       </View>
       <Text testID="water-count" style={styles.count}>
         {glasses}/{target}
@@ -92,9 +111,8 @@ const styles = StyleSheet.create({
   },
   cups: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 4,
-    marginTop: spacing.xs,
+    marginTop: 4,
   },
   cup: {
     width: 14,
@@ -103,12 +121,13 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   extraCup: {
-    opacity: 0.55,
+    height: 6,
+    opacity: 0.75,
   },
   reason: {
     ...t.caption,
-    color: palette.textDim,
-    marginTop: 4,
+    color: palette.textMuted,
+    flex: 1,
   },
   count: {
     ...t.subtitle,

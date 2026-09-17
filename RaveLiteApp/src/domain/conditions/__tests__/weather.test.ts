@@ -178,3 +178,21 @@ it('a dangerous-heat day raises the Drink target, and says how hot', () => {
   saveForecast(h => ({feelsC: h === 15 ? 33 : 28}));
   expect(drinkTarget(8, hottestToday(at(12)))).toBe(10);
 });
+
+it('with air conditioning, the heat only costs water for time outside', () => {
+  store.set(KEYS.weatherPlace, JSON.stringify(place));
+  saveForecast(h => ({feelsC: h === 15 ? 41 : 30}));
+  const heat = hottestToday(at(12));
+  const inside = {airConditioned: true, outdoorMinutes: 0};
+  // A programmer's day indoors on a 41° day is still eight glasses.
+  expect(drinkTarget(8, heat, inside)).toBe(8);
+  // Twenty minutes out on the porch is one, an hour is three.
+  expect(drinkTarget(8, heat, {...inside, outdoorMinutes: 25})).toBe(9);
+  expect(drinkTarget(8, heat, {...inside, outdoorMinutes: 60})).toBe(11);
+  // It never passes what the heat itself is worth.
+  expect(drinkTarget(8, heat, {...inside, outdoorMinutes: 300})).toBe(12);
+  // Without air conditioning the house is hot too, so the day costs it all.
+  expect(drinkTarget(8, heat, {airConditioned: false, outdoorMinutes: 0})).toBe(
+    12,
+  );
+});

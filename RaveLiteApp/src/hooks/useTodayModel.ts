@@ -4,6 +4,7 @@ import {
   activityForDay,
   activityInRange,
   subscribeActivity,
+  type ActivityItem,
 } from '../domain/activity/activity';
 import {
   hydrationGlasses,
@@ -12,7 +13,7 @@ import {
   streakDays,
   windowStart,
 } from '../domain/activity/stats';
-import {activeMinutes} from '../domain/activity/active';
+import {activeMinutes, outdoorMinutes} from '../domain/activity/active';
 import {isHarmony} from '../domain/activity/par';
 import {WATER_TARGET} from '../components/today/WaterCounter';
 import {formatTemp} from '../domain/conditions/format';
@@ -115,18 +116,34 @@ function roundChime(fire: SetFire): ScheduledChime {
   };
 }
 
-/** Why the Drink target grew, when it has: the heat, in your own units. */
-function heatReason(now: number): string | undefined {
+/**
+ * Why the Drink target grew, when it has. With air conditioning it only
+ * grows for time actually spent outside, so a hot day at the desk asks
+ * for the usual eight.
+ */
+function heatReason(
+  now: number,
+  activity: readonly ActivityItem[],
+): string | undefined {
   const heat = hottestToday(now);
   if (heat === 'none') {
     return undefined;
   }
+  const prefs = getWeatherPrefs();
+  const outside = outdoorMinutes(activity);
+  const extra =
+    drinkTarget(WATER_TARGET, heat, {
+      airConditioned: prefs.airConditioned,
+      outdoorMinutes: outside,
+    }) - WATER_TARGET;
+  if (extra === 0) {
+    return undefined;
+  }
   const feels = hottestFeelsToday(now);
-  const extra = heat === 'danger' ? 4 : 2;
-  const units = getWeatherPrefs().units;
-  return feels === undefined
-    ? `+${extra} for the heat`
-    : `+${extra} · feels ${formatTemp(feels, units)} today`;
+  const hot = feels === undefined ? 'the heat' : formatTemp(feels, prefs.units);
+  return prefs.airConditioned
+    ? `+${extra} · ${outside} min out in ${hot}`
+    : `+${extra} · feels ${hot} today`;
 }
 
 /** Everything Today shows, read from storage and the chime runtime. */
@@ -210,8 +227,11 @@ export function buildTodayModel(
     points,
     harmony: isHarmony(points),
     glasses: hydrationGlasses(activity),
-    waterTarget: drinkTarget(WATER_TARGET, hottestToday(now)),
-    waterReason: heatReason(now),
+    waterTarget: drinkTarget(WATER_TARGET, hottestToday(now), {
+      airConditioned: getWeatherPrefs().airConditioned,
+      outdoorMinutes: outdoorMinutes(activity),
+    }),
+    waterReason: heatReason(now, activity),
     weather: weatherLine(now),
     sets: summarizeSets(sets.prescriptions, done),
     focus: focusFor(date),
