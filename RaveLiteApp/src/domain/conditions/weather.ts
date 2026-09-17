@@ -29,6 +29,8 @@ import {withHeatWaterCalls} from './heatWater';
 import {
   parsePlaces,
   placeSearchUrl,
+  planSearch,
+  rankPlaces,
   roundCoord,
   type Place,
   type PlaceResult,
@@ -177,6 +179,42 @@ async function fetchJson(
 
 export type RefreshResult = 'updated' | 'fresh' | 'no-place' | 'failed';
 
+export interface FetchReport {
+  at: number;
+  ok: boolean;
+  /** Why it failed, in the operator's words. */
+  why?: string;
+}
+
+const REPORT_KEY = KEYS.setting('weather.lastFetch');
+
+/** What happened the last time the app went looking for a forecast. */
+export function getFetchReport(): FetchReport | undefined {
+  return readJson<FetchReport>(REPORT_KEY);
+}
+
+function report(at: number, ok: boolean, why?: string): void {
+  store.set(REPORT_KEY, JSON.stringify({at, ok, ...(why ? {why} : {})}));
+}
+
+/** A thrown fetch error, said plainly. */
+function reasonFor(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/abort/i.test(message)) {
+    return 'the forecast took too long to answer';
+  }
+  if (/^HTTP 4/.test(message)) {
+    return `the forecast service refused the request (${message})`;
+  }
+  if (/^HTTP 5/.test(message)) {
+    return `the forecast service is having trouble (${message})`;
+  }
+  if (/network|failed to fetch|request failed/i.test(message)) {
+    return 'no connection';
+  }
+  return message || 'something went wrong';
+}
+
 let inFlight: Promise<RefreshResult> | undefined;
 
 /** Fetch the forecast when it's stale (or always, with `force`). Never throws. */
@@ -213,12 +251,23 @@ export function refreshForecast(
         latest.lat !== place.lat ||
         latest.lon !== place.lon
       ) {
+        report(
+          now,
+          false,
+          forecast
+            ? 'the place changed mid-fetch'
+            : 'the forecast made no sense',
+        );
+        notify();
         return 'failed';
       }
       store.set(KEYS.weatherForecast, JSON.stringify(forecast));
+      report(now, true);
       notify();
       return 'updated';
-    } catch {
+    } catch (error) {
+      report(now, false, reasonFor(error));
+      notify();
       return 'failed';
     } finally {
       inFlight = undefined;
@@ -228,15 +277,24 @@ export function refreshForecast(
   return request;
 }
 
-/** Towns matching `query`. Throws when the search can't be reached. */
+/**
+ * Towns matching `query`. Throws when the search can't be reached.
+ *
+ * The API matches on the name alone, so "Swansea IL" is tried as typed,
+ * then as "Swansea" with Illinois as the hint that sorts what comes back.
+ */
 export async function searchPlaces(
   query: string,
   fetchImpl: typeof fetch = globalThis.fetch,
 ): Promise<PlaceResult[]> {
-  if (query.trim().length < 2) {
-    return [];
+  const {terms, hint} = planSearch(query);
+  for (const term of terms) {
+    const found = parsePlaces(await fetchJson(placeSearchUrl(term), fetchImpl));
+    if (found.length > 0) {
+      return rankPlaces(found, hint);
+    }
   }
-  return parsePlaces(await fetchJson(placeSearchUrl(query), fetchImpl));
+  return [];
 }
 
 export type DetectResult =

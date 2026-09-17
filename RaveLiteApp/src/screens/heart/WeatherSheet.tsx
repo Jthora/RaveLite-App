@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {formatHM} from '../../components/ambient/format';
 import {Tap} from '../../components/Tap';
 import {
   clockHM,
@@ -32,6 +33,8 @@ import {
 import {
   conditionsFor,
   detectPlace,
+  getFetchReport,
+  type FetchReport,
   getForecast,
   getPlace,
   getWeatherPrefs,
@@ -56,6 +59,23 @@ const NEXT_HOURS = 12;
 
 type Busy = 'search' | 'detect' | 'refresh';
 
+/** "Updated 14:58" — or what stopped it, so a blank screen is never a mystery. */
+function fetchLine(
+  report: FetchReport | undefined,
+  fetchedAt: number | undefined,
+): string {
+  if (!report && fetchedAt === undefined) {
+    return 'No forecast yet — it fetches on its own.';
+  }
+  if (report && !report.ok) {
+    const had = fetchedAt
+      ? ` Showing the one from ${formatHM(fetchedAt)}.`
+      : '';
+    return `Last try ${formatHM(report.at)} failed: ${report.why}.${had}`;
+  }
+  return `Updated ${formatHM(fetchedAt ?? report!.at)}.`;
+}
+
 export function WeatherSheet({visible, onClose}: Props) {
   const [, setVersion] = useState(0);
   const [query, setQuery] = useState('');
@@ -69,6 +89,7 @@ export function WeatherSheet({visible, onClose}: Props) {
   const place = getPlace();
   const prefs = getWeatherPrefs();
   const forecast = getForecast();
+  const report = getFetchReport();
   const sun = place
     ? sunTimes(localNoon(now), place.lat, place.lon)
     : undefined;
@@ -83,7 +104,9 @@ export function WeatherSheet({visible, onClose}: Props) {
       const found = await searchPlaces(query);
       setResults(found);
       if (found.length === 0) {
-        setMessage('No towns found. Try just the town name.');
+        setMessage(
+          `No town called “${query.trim()}”. Try the town name on its own.`,
+        );
       }
     } catch {
       setResults(undefined);
@@ -210,6 +233,11 @@ export function WeatherSheet({visible, onClose}: Props) {
               </Text>
             </Tap>
             {message ? <Text style={styles.message}>{message}</Text> : null}
+            {place ? (
+              <Text testID="weather-report" style={styles.caption}>
+                {fetchLine(report, forecast?.fetchedAt)}
+              </Text>
+            ) : null}
           </View>
 
           {place && sun ? (
