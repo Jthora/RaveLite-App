@@ -1,4 +1,5 @@
 import {attributeById, type AttributeId} from '../attributes/attributes';
+import {attributeSheet} from '../attributes/repository';
 import {attributesForDrill} from '../attributes/trains';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {Exercise, Venue} from '../exercises/types';
@@ -214,18 +215,41 @@ function trackCard(id: TrackId): InfoCard | undefined {
 
 function attributeCard(id: AttributeId): InfoCard {
   const attribute = attributeById(id);
+  const standing = attributeSheet().standings.find(s => s.attribute.id === id);
+  const meta: string[] = [attribute.sign];
+  if (standing) {
+    meta.push(
+      standing.practice >= 85
+        ? `Level ${standing.level} · practice has taken it as far as it goes`
+        : `Level ${standing.level} · practice ${standing.practice}, ${
+            standing.xp
+          } of ${standing.toNext} XP to ${standing.practice + 1}`,
+    );
+    if (standing.today > 0) {
+      meta.push(`+${standing.today} XP today`);
+    }
+    if (standing.testedBy && standing.tested !== undefined) {
+      meta.push(`${standing.testedBy.name} sets it to ${standing.tested}`);
+    }
+    if (standing.idleDays !== undefined && standing.idleDays > 14) {
+      meta.push(
+        `Left alone ${standing.idleDays} days — sliding a level a week`,
+      );
+    }
+  }
+  meta.push(
+    attribute.events.length === 0
+      ? 'No test for this one yet, so practice is all there is'
+      : 'A passed test can carry it past 85',
+  );
   return {
     title: attribute.name,
     subtitle: `${ELEMENTS[attribute.element].name} · ${attribute.modality}`,
     element: attribute.element,
     what: attribute.gist,
     how: [attribute.how],
-    meta: [
-      attribute.sign,
-      attribute.events.length === 0
-        ? 'No test for this one yet, so practice is all there is'
-        : 'A passed test can carry it past 85',
-    ],
+    meta,
+    metaLines: true,
   };
 }
 

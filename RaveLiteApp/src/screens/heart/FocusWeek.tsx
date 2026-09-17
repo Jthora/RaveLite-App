@@ -68,7 +68,7 @@ export function TodayFocus({
     <>
       <View style={styles.eyebrowRow}>
         <Text style={styles.eyebrow}>Today's focus</Text>
-        {onOpen ? <Text style={styles.more}>Attributes ›</Text> : null}
+        {onOpen ? <Text style={styles.more}>Character ›</Text> : null}
       </View>
       <Attributes ids={focus.focus} style={styles.focusLine} />
       <Text style={styles.blockTitle}>
@@ -102,7 +102,7 @@ export function TodayFocus({
       accessibilityRole="button"
       accessibilityLabel={`Today's focus: ${focus.focus
         .map(id => attributeById(id).name)
-        .join(', ')}. Open attributes`}
+        .join(', ')}. Open the character sheet`}
       style={styles.card}>
       {body}
     </Tap>

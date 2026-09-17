@@ -3,7 +3,7 @@ import {Modal} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
 
 import {store} from '../../../storage';
-import {Attributes} from '../Attributes';
+import {CharacterSheet} from '../CharacterSheet';
 import {DailySetsSheet} from '../DailySetsSheet';
 import {Goals} from '../Goals';
 
@@ -50,13 +50,13 @@ it("shows today's focus, its morning block, and the week ahead", () => {
   jest.useRealTimers();
 });
 
-it("opens the attributes from today's focus, and Back comes home", () => {
+it("opens the character sheet from today's focus, and Back comes home", () => {
   const onClose = jest.fn();
   let tree: renderer.ReactTestRenderer | undefined;
   act(() => {
     tree = renderer.create(<DailySetsSheet visible onClose={onClose} />);
   });
-  const shown = () => tree!.root.findAllByType(Attributes).length > 0;
+  const shown = () => tree!.root.findAllByType(CharacterSheet).length > 0;
   expect(shown()).toBe(false);
   act(() => {
     tree!.root
@@ -65,16 +65,24 @@ it("opens the attributes from today's focus, and Back comes home", () => {
   });
   expect(shown()).toBe(true);
   expect(JSON.stringify(tree!.toJSON())).toContain('Toughness');
-  // Tapping one opens what it is, how it's trained and where it stands.
+  // Tapping a cell opens what it is, how it's trained and where it stands.
   act(() => {
     tree!.root
-      .findAll(node => node.props.testID === 'attribute-toughness')[0]
+      .findAll(
+        node =>
+          node.props.testID === 'cell-toughness' &&
+          typeof node.props.onPress === 'function',
+      )[0]
       .props.onPress();
   });
   const json = JSON.stringify(tree!.toJSON());
   expect(json).toContain('Holding load.');
-  expect(json).toContain('Practice: level 0');
-  act(() => tree!.root.findAllByType(Modal)[0].props.onRequestClose());
+  expect(json).toContain('Level 0');
+  // Back walks out of the card first, then off the sheet, then closes.
+  const back = () => tree!.root.findAllByType(Modal)[0].props.onRequestClose();
+  act(() => back());
+  expect(shown()).toBe(true);
+  act(() => back());
   expect(shown()).toBe(false);
   expect(onClose).not.toHaveBeenCalled();
   act(() => tree!.unmount());

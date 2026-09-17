@@ -22,7 +22,11 @@ import {WindowEditor} from '../../components/plan/WindowEditor';
 import {WindowRow} from '../../components/plan/WindowRow';
 import {Tap} from '../../components/Tap';
 
-import {loadPlan, savePlan, resetPlanToDefault} from '../../domain/reminders/repository';
+import {
+  loadPlan,
+  savePlan,
+  resetPlanToDefault,
+} from '../../domain/reminders/repository';
 import {
   addWindow,
   findWindow,
@@ -88,7 +92,9 @@ export function PlanPanel({onPlanCommitted}: Props) {
   }, []);
 
   const onWindowDelete = useCallback(() => {
-    if (!editingWindowId) {return;}
+    if (!editingWindowId) {
+      return;
+    }
     setDraft(d => removeWindow(d, editingWindowId));
     setEditingWindowId(null);
     setNewlyAddedId(null);
@@ -130,10 +136,11 @@ export function PlanPanel({onPlanCommitted}: Props) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>
-          ▸  PLAN · {draft.name.toUpperCase()}
+          ▸ PLAN · {draft.name.toUpperCase()}
         </Text>
         <Text style={styles.subtitle}>
-          {draft.windows.length} window{draft.windows.length === 1 ? '' : 's'}  ·  {totalSlotCount(draft)} slot
+          {draft.windows.length} window{draft.windows.length === 1 ? '' : 's'} ·{' '}
+          {totalSlotCount(draft)} slot
           {totalSlotCount(draft) === 1 ? '' : 's'} / day
         </Text>
       </View>
@@ -164,7 +171,9 @@ export function PlanPanel({onPlanCommitted}: Props) {
           color={accentDim}
           onPress={onAddWindow}
           style={styles.utilBtn}>
-          <Text style={[styles.utilBtnText, {color: accentDim}]}>+ Add window</Text>
+          <Text style={[styles.utilBtnText, {color: accentDim}]}>
+            + Add window
+          </Text>
         </Tap>
         <Tap
           variant="ghost"
@@ -172,7 +181,11 @@ export function PlanPanel({onPlanCommitted}: Props) {
           onPress={onRevert}
           disabled={!dirty}
           style={styles.utilBtn}>
-          <Text style={[styles.utilBtnText, {color: dirty ? palette.text : palette.textMuted}]}>
+          <Text
+            style={[
+              styles.utilBtnText,
+              {color: dirty ? palette.text : palette.textMuted},
+            ]}>
             Revert
           </Text>
         </Tap>
@@ -186,9 +199,7 @@ export function PlanPanel({onPlanCommitted}: Props) {
           onPress={onApply}
           disabled={!dirty}
           style={styles.applyBtn}>
-          <Text style={styles.applyText}>
-            {dirty ? 'Save plan' : 'Saved'}
-          </Text>
+          <Text style={styles.applyText}>{dirty ? 'Save plan' : 'Saved'}</Text>
         </Tap>
       </View>
 

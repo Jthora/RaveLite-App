@@ -56,7 +56,7 @@ export function StayAlivePanel() {
   if (!inputs) {
     return (
       <View style={styles.panel}>
-        <Text style={[styles.eyebrow, {color: accent}]}>▸  STAY ALIVE</Text>
+        <Text style={[styles.eyebrow, {color: accent}]}>▸ STAY ALIVE</Text>
         <Text style={styles.body}>Checking this phone…</Text>
       </View>
     );
@@ -66,11 +66,13 @@ export function StayAlivePanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>▸  STAY ALIVE</Text>
+      <Text style={[styles.eyebrow, {color: accent}]}>▸ STAY ALIVE</Text>
       <Text style={styles.body}>
         {warnings === 0
           ? 'All set — chimes should keep firing all day.'
-          : `${warnings} thing${warnings === 1 ? '' : 's'} could stop chimes on this phone.`}
+          : `${warnings} thing${
+              warnings === 1 ? '' : 's'
+            } could stop chimes on this phone.`}
       </Text>
 
       {checks.map(check => {

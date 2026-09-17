@@ -15,7 +15,7 @@ import {InfoCardView, useInfoStack} from '../../components/info/InfoSheet';
 import {Tap} from '../../components/Tap';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
-import {Attributes} from './Attributes';
+import {CharacterSheet} from './CharacterSheet';
 import {DailySetsSection} from './DailySetsSection';
 import {Goals} from './Goals';
 
@@ -29,7 +29,7 @@ type View_ = 'sets' | 'goals' | 'attributes';
 const TITLES: Record<View_, string> = {
   sets: 'Daily Sets',
   goals: 'Goals',
-  attributes: 'Attributes',
+  attributes: 'Character',
 };
 
 export function DailySetsSheet({visible, onClose}: Props) {
@@ -111,7 +111,7 @@ export function DailySetsSheet({visible, onClose}: Props) {
             {goals ? (
               <Goals onInfo={info.open} />
             ) : showing === 'attributes' ? (
-              <Attributes />
+              <CharacterSheet onInfo={info.open} />
             ) : (
               <ScrollView
                 contentContainerStyle={styles.content}

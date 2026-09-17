@@ -513,11 +513,16 @@ Recovery, Presence). Jagged Alliance's rules, in a body.
   (`repository.ts`, `attributes.state`, up to 35 days on a first run) and
   today's work is added live on top, so a set done a minute ago already
   shows.
-- **On the Daily Sets page:** today's focus card opens Attributes — the
-  character level, then each element's three with a bar and a mark at the
-  practice cap. Tap one for what it is, how it's trained, what its level
-  stands on and its sign. It shows in the same sheet, like Goals, so Back
-  keeps working.
+- **The character sheet** (`screens/heart/CharacterSheet.tsx`, since 17 Sep
+  2026): today's focus card opens it. Your level and XP, the five element
+  marks lit as each reaches par (all five is Harmony), then the grid as the
+  design draws it — five elements down, three modalities across, each cell
+  a level with a bar and a mark at the practice cap. Tapping a cell opens
+  that attribute's info card, which carries the detail the old list held:
+  practice level, XP to the next, today's gain, the test behind a tested
+  level, and a warning when it has been left alone. Perks, traits and flaws
+  will sit under the grid once they are agreed. It shows in the Daily Sets
+  sheet, like Goals, so Back keeps working.
 
 ## Focus wheel (`src/domain/program/week.ts`)
 
