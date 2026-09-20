@@ -66,7 +66,6 @@ export async function hydratePersistence(): Promise<void> {
       }
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.warn('[persistence] hydrate failed', e);
   }
 }

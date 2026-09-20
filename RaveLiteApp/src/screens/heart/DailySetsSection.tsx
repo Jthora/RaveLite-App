@@ -57,6 +57,7 @@ import type {
 } from '../../domain/program/types';
 import {formatDuration} from '../../domain/training/grading';
 import type {InfoRef} from '../../domain/info/info';
+import {loadFacts} from '../../domain/profile/repository';
 import {TodayFocus, WeekFocus} from './FocusWeek';
 import {blockPieces, runFor} from '../../domain/program/morning';
 
@@ -228,7 +229,7 @@ export function DailySetsSection({
                     styles.trackNameText,
                     {color: state.enabled ? el.color : palette.textMuted},
                   ]}>
-                  {tr.name} · {currentRung(tr, state).label}
+                  {tr.name} · {currentRung(tr, state, loadFacts())?.label ?? '—'}
                 </Text>
               </View>
               <Text style={styles.trackMeta}>
@@ -430,8 +431,12 @@ function MaxTestSheet({
   const track = trackById(trackId);
   const state = loadProgram().tracks[trackId];
   const el = ELEMENTS[track.element];
-  const rung = currentRung(track, state);
+  const rung = currentRung(track, state, loadFacts());
   const seconds = track.unit === 'seconds';
+  if (!rung) {
+    // Nothing on this ladder suits the room, so there is nothing to test.
+    return null;
+  }
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>

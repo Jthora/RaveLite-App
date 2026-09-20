@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`the author's rounds are unchanged 1`] = `
+[
+  "row + mobility + flow + crunch + plank + stillness",
+  "push + posture + squat + pull + legs-up + breath",
+  "row + mobility + kicks + hang + pelvis + stillness",
+  "push + posture + squat + pull + pelvis + breath",
+  "row + mobility + crunch + legs-up + plank + stillness",
+  "push + posture + squat + hang + breath + push-variants",
+  "row + kicks + flow + crunch + pelvis + breath",
+  "push + posture + squat + legs-up + hang + stillness",
+  "mobility + pull + plank + push-variants",
+]
+`;

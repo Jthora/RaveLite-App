@@ -41,4 +41,3 @@ const persistentStore: KeyValueStore = {
 };
 
 export const store: KeyValueStore = persistentStore;
-

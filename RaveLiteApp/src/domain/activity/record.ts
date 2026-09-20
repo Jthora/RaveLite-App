@@ -3,6 +3,7 @@ import type {Exercise} from '../exercises/types';
 import {append} from '../journal/journal';
 import type {CompletionEntry} from '../journal/types';
 import {currentRung, setSizeFor} from '../program/progression';
+import {loadFacts} from '../profile/repository';
 import {loadProgram} from '../program/repository';
 import {TRACKS} from '../program/tracks';
 
@@ -39,7 +40,10 @@ export function recordDrillTap(
   const program = loadProgram(now);
   const track = TRACKS.find(t => {
     const state = program.tracks[t.id];
-    return state?.enabled && currentRung(t, state).exerciseId === exercise.id;
+    return (
+      state?.enabled &&
+      currentRung(t, state, loadFacts())?.exerciseId === exercise.id
+    );
   });
   const set = track
     ? {trackId: track.id, amount: setSizeFor(track, program.tracks[track.id])}

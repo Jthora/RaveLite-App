@@ -47,6 +47,13 @@ export const MOVE_IDS = [
 export type MoveId = (typeof MOVE_IDS)[number];
 
 const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
+  // Stand-ins for a room with no hang point
+  'fire.isometric-door-pull': 'pull',
+  'fire.towel-door-row': 'row',
+  'fire.feet-up-towel-row': 'row',
+  'earth.table-edge-hold': 'hang',
+  'earth.towel-pinch-hold': 'hang',
+  'earth.reverse-crunch': 'legraise',
   // Kicks, strikes, dance, jumps, hang work, yoga and tai chi
   'fire.front-kick': 'kick',
   'fire.roundhouse-kick': 'kick',

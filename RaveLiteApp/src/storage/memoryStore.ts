@@ -31,7 +31,9 @@ class MemoryStore implements KeyValueStore {
   keysWithPrefix(prefix: string): string[] {
     const out: string[] = [];
     for (const k of this.map.keys()) {
-      if (k.startsWith(prefix)) {out.push(k);}
+      if (k.startsWith(prefix)) {
+        out.push(k);
+      }
     }
     return out;
   }

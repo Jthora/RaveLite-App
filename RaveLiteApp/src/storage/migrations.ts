@@ -1,4 +1,5 @@
 import {store} from './index';
+import {defaultProfile} from '../domain/profile/repository';
 import {CURRENT_SCHEMA_VERSION, KEYS} from './keys';
 import {DEFAULT_ACTIVE_HOURS, type ActiveHours} from '../domain/ambient/types';
 import {DEFAULT_PLAN} from '../domain/reminders/defaultPlan';
@@ -49,6 +50,9 @@ export function runMigrations(now: number = Date.now()): void {
   }
   if (from < 7) {
     morningBlocks();
+  }
+  if (from < 8) {
+    keepTheAuthorsKit();
   }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
@@ -471,4 +475,18 @@ function morningBlocks(): void {
   if (rawPlan !== undefined && isPlan(rawPlan, V6_DEFAULT_PLAN)) {
     store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
   }
+}
+
+/**
+ * v8 — an install that predates the profile belongs to the author, whose
+ * kit is a mat, a yard, a porch edge to hang from and a stack of bricks.
+ * Writing it down now means a later release can default a *fresh* install
+ * to almost nothing and ask, without that default ever reaching a phone
+ * that has been training for weeks.
+ */
+function keepTheAuthorsKit(): void {
+  if (store.getString(KEYS.profile)) {
+    return;
+  }
+  store.set(KEYS.profile, JSON.stringify(defaultProfile()));
 }

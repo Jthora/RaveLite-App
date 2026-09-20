@@ -110,6 +110,10 @@ export const TRACKS: Track[] = [
         exerciseId: 'fire.inverted-row',
         label: 'Inverted rows (porch edge)',
         graduateAt: 15,
+        instead: {
+          exerciseId: 'fire.feet-up-towel-row',
+          label: 'Feet-up towel rows',
+        },
       },
     ],
     defaultRung: 0,
@@ -131,16 +135,29 @@ export const TRACKS: Track[] = [
     element: 'fire',
     unit: 'reps',
     ladder: [
-      {exerciseId: 'fire.scap-pull', label: 'Scap pulls', graduateAt: 10},
+      {
+        exerciseId: 'fire.scap-pull',
+        label: 'Scap pulls',
+        graduateAt: 10,
+        instead: {
+          exerciseId: 'fire.isometric-door-pull',
+          label: 'Isometric door pulls',
+        },
+      },
       {
         exerciseId: 'fire.pullup-negative',
         label: 'Pull-up negatives',
         graduateAt: 5,
+        instead: {exerciseId: 'fire.towel-door-row', label: 'Towel door rows'},
       },
       {
         exerciseId: 'fire.porch-pullup',
         label: 'Porch pull-ups',
         graduateAt: 10,
+        instead: {
+          exerciseId: 'fire.feet-up-towel-row',
+          label: 'Feet-up towel rows',
+        },
       },
       {
         exerciseId: 'fire.brick-pack-pullup',
@@ -214,11 +231,16 @@ export const TRACKS: Track[] = [
         exerciseId: 'earth.hanging-knee-raise',
         label: 'Hanging knee raises',
         graduateAt: 12,
+        instead: {exerciseId: 'earth.reverse-crunch', label: 'Reverse crunches'},
       },
       {
         exerciseId: 'earth.hanging-leg-raise',
         label: 'Hanging leg raises',
         graduateAt: 10,
+        instead: {
+          exerciseId: 'earth.reverse-crunch',
+          label: 'Reverse crunches, slow',
+        },
       },
       {
         exerciseId: 'earth.windshield-wiper',
@@ -324,8 +346,24 @@ export const TRACKS: Track[] = [
     element: 'earth',
     unit: 'seconds',
     ladder: [
-      {exerciseId: 'earth.porch-dead-hang', label: 'Dead hang', graduateAt: 60},
-      {exerciseId: 'earth.active-hang', label: 'Active hang', graduateAt: 45},
+      {
+        exerciseId: 'earth.porch-dead-hang',
+        label: 'Dead hang',
+        graduateAt: 60,
+        instead: {
+          exerciseId: 'earth.table-edge-hold',
+          label: 'Table edge holds',
+        },
+      },
+      {
+        exerciseId: 'earth.active-hang',
+        label: 'Active hang',
+        graduateAt: 45,
+        instead: {
+          exerciseId: 'earth.towel-pinch-hold',
+          label: 'Towel pinch holds (each hand)',
+        },
+      },
       {
         exerciseId: 'earth.one-arm-assisted-hang',
         label: 'One-arm assisted hang (each arm)',

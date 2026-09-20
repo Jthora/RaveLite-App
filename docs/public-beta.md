@@ -403,14 +403,28 @@ possible without touching app code.
 - [ ] Firebase project, release keystore off-repo, first tester build
 
 **Phase 1 — not author-only** *(the real work)*
-- [ ] `profile/` module: Facts, kit, `canDo`, storage, migration v8
-- [ ] Four new drills (towel-door row, towel-door hold, reverse crunch,
-      backpack carry)
-- [ ] Track `ladders` with requirements; `currentRung` picks an available one
+- [x] `profile/` module: `Facts`, `canDo`, `usableDrills`, `unlockCount`,
+      storage, migration v8 (20 Sep 2026)
+- [x] Six stand-in drills: isometric door pull, towel door row, feet-up
+      towel row, table edge hold, towel pinch hold, reverse crunch
+- [x] Per-rung `instead`, and `currentRung(track, state, facts)` that takes
+      the stand-in at the same step, else the highest step below it the
+      room can do, else nothing — and `prescribeDay` skips a track whose
+      whole ladder is out of reach
+- [x] Tests: kit gating, noise, injury, unlock counts, a program for five
+      rooms, and the author golden test
 - [ ] Gating in the scheduler, rounds, partners, morning block, practice,
       indoor swaps
 - [ ] Kit card in Settings with unlock counts
-- [ ] Tests: kit property, noise, author golden
+
+**What Phase 1 exposed:** substitution is at the *same step of the
+ladder*, which is right — but the step a track *starts* on is calibrated
+to the author. A flat-dweller's Pull therefore starts at "feet-up towel
+rows", the stand-in for porch pull-ups, because that is where the author
+stands. Nothing about that is specific to substitution: the author's
+starting rungs were always going to be wrong for a stranger. **Setup must
+set the starting rung** — "how many push-ups can you do?" — which belongs
+with the archetypes in Phase 3.
 
 **Phase 2 — fits a life**
 - [ ] Day shapes and density; `roundsFor`, base-set and par scaling

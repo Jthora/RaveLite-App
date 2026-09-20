@@ -44,6 +44,12 @@ export interface Rung {
   label: string;
   /** Set size on this rung at which the next rung unlocks. */
   graduateAt: number;
+  /**
+   * What stands in when the kit cannot do this rung — a towel over a
+   * door where there is no bar to hang from. The step keeps its place in
+   * the ladder, so a stored rung index never shifts under anyone.
+   */
+  instead?: {exerciseId: string; label: string};
 }
 
 /** A partner drill option: a library drill and how long to do it. */

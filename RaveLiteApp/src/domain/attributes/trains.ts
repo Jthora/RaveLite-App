@@ -102,6 +102,13 @@ const EXERCISE_ATTRS: Record<string, Pair> = {
   'heart.pulse-check': ['recovery', 'focus'],
   'heart.mirror-presence': ['presence'],
   'heart.rave-vision': ['presence'],
+  // Stand-ins for a room with no hang point.
+  'fire.isometric-door-pull': ['strength', 'toughness'],
+  'fire.towel-door-row': ['strength'],
+  'fire.feet-up-towel-row': ['strength', 'toughness'],
+  'earth.table-edge-hold': ['toughness', 'strength'],
+  'earth.towel-pinch-hold': ['toughness'],
+  'earth.reverse-crunch': ['toughness', 'strength'],
   // Kicks, strikes, dance, jumps, the porch edge, yoga and tai chi.
   'fire.front-kick': ['agility', 'power'],
   'fire.roundhouse-kick': ['agility', 'power'],

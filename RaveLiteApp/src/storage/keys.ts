@@ -59,6 +59,10 @@ export const KEYS = {
   /** `{day: {trackId: amount}}` JSON — what each recent day asked, read by the daily review. */
   programDays: 'program.days',
 
+  // ── Who is using it: kit, room, and what they train for ─────────
+  /** `Profile` JSON — facts about the person, and any temporary mode. */
+  profile: 'profile.state',
+
   // ── Attributes (the character sheet's fifteen) ───────────────────
   /** `AttributesState` JSON — levels, XP and the day rolled up through. */
   attributesState: 'attributes.state',
@@ -86,4 +90,4 @@ export const KEYS = {
  *       Training (a different saved plan is kept under `planBackupV1`),
  *       and Daily Sets lose their own day window.
  */
-export const CURRENT_SCHEMA_VERSION = 7;
+export const CURRENT_SCHEMA_VERSION = 8;

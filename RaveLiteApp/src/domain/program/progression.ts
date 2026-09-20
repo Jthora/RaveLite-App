@@ -7,6 +7,8 @@ import type {
   Track,
   TrackState,
 } from './types';
+import {EXERCISE_LIBRARY} from '../exercises/library';
+import {canDo, type Facts} from '../profile/kit';
 import {dayFocus, focusBonus} from './week';
 
 /**
@@ -73,12 +75,41 @@ export function setSizeFor(track: Track, state: TrackState): number {
   return Math.max(1, Math.round(raw));
 }
 
+const EXERCISES = new Map(EXERCISE_LIBRARY.map(e => [e.id, e]));
+const exerciseById = (id: string) => EXERCISES.get(id);
+
 function clampRung(track: Track, rung: number): number {
   return Math.max(0, Math.min(track.ladder.length - 1, rung));
 }
 
-export function currentRung(track: Track, state: TrackState): Rung {
-  return track.ladder[clampRung(track, state.rung)];
+/**
+ * The rung to train today. With the author's kit this is simply the rung
+ * the state points at. With less kit it is the same step's stand-in — a
+ * towel over a door where there is no bar — and failing that, the
+ * highest step below it that the room can actually do. A track whose
+ * whole ladder is out of reach returns nothing, and is skipped.
+ */
+export function currentRung(
+  track: Track,
+  state: TrackState,
+  facts?: Facts,
+): Rung | undefined {
+  const at = clampRung(track, state.rung);
+  if (!facts) {
+    return track.ladder[at];
+  }
+  for (let i = at; i >= 0; i--) {
+    const rung = track.ladder[i];
+    const drill = exerciseById(rung.exerciseId);
+    if (drill && canDo(drill, facts)) {
+      return rung;
+    }
+    const stand = rung.instead ? exerciseById(rung.instead.exerciseId) : undefined;
+    if (stand && canDo(stand, facts)) {
+      return {...rung, exerciseId: stand.id, label: rung.instead!.label};
+    }
+  }
+  return undefined;
 }
 
 export function trainsOn(track: Track, date: Date): boolean {
@@ -91,11 +122,16 @@ export function prescribeDay(
   state: TrackState,
   program: ProgramState,
   date: Date,
+  facts?: Facts,
 ): DayPrescription | undefined {
   if (!state.enabled || !trainsOn(track, date)) {
     return undefined;
   }
-  const rung = currentRung(track, state);
+  const rung = currentRung(track, state, facts);
+  if (!rung) {
+    // Nothing on this ladder can be done here — no bar, no stand-in.
+    return undefined;
+  }
   const week = programWeek(program.startDay, date);
   const bonus = focusBonus(track.id, dayFocus(date, week).focus);
   return {

@@ -1230,6 +1230,57 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     venues: ['mat'],
     approxSeconds: 150,
   },
+  {
+    id: 'earth.table-edge-hold',
+    element: 'earth',
+    name: 'Table Edge Hold',
+    purpose:
+      'Grip and lats with no hang point: sit under a sturdy table and hold your own weight against it.',
+    dose: '3 × 20 sec',
+    cues: [
+      'Sit under a table you have tested, hands gripping the edge above',
+      'Pull down and in as if trying to lift yourself, heels planted',
+      'Shoulders pulled away from the ears throughout',
+      'Stop before the grip fails, not after',
+    ],
+    targets: ['Grip', 'Strength', 'NoFloor'],
+    venues: ['house', 'desk'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'earth.towel-pinch-hold',
+    element: 'earth',
+    name: 'Towel Pinch Hold',
+    purpose:
+      'The grip work a dead hang would do, in a room with nothing to hang from.',
+    dose: '3 × 30 sec each hand',
+    cues: [
+      'Fold a towel to a thick pad and pinch it between fingers and thumb',
+      'Arm straight down, shoulder set, squeeze as if it were trying to escape',
+      'Swap hands and match the time',
+      'Thicker folds are harder; start where you can hold thirty seconds',
+    ],
+    targets: ['Grip', 'Strength', 'NoFloor'],
+    venues: ['standing', 'desk', 'house'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'earth.reverse-crunch',
+    element: 'earth',
+    name: 'Reverse Crunch',
+    purpose:
+      'The lower abs the hanging raises train, on the floor: the pelvis lifts, the legs only come along.',
+    dose: '3 × 12',
+    cues: [
+      'On your back, knees over hips, low back pressed into the mat',
+      'Curl the pelvis up toward the ribs — a short move, not a leg swing',
+      'Lower slowly enough that the back never arches away from the floor',
+      'Hands by your sides, not pulling on anything',
+    ],
+    targets: ['Core', 'APT', 'Strength'],
+    venues: ['mat'],
+    approxSeconds: 150,
+  },
   // ─── FIRE — Power & Conditioning ───────────────────────────────────────
   {
     id: 'fire.pushups',
@@ -2199,6 +2250,57 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     targets: ['Strength', 'Grip'],
     venues: ['porch'],
     approxSeconds: 120,
+  },
+  {
+    id: 'fire.isometric-door-pull',
+    element: 'fire',
+    name: 'Isometric Door Pull',
+    purpose:
+      'Pulling strength with nothing to hang from: the back learns to fire hard against something that will not move.',
+    dose: '5 × 10 sec',
+    cues: [
+      'Sit or stand in a doorway and grip both sides of the frame',
+      'Pull as if rowing yourself through it, elbows driving back',
+      'Shoulders down away from the ears, ribs down, breathe out slowly',
+      'Ten hard seconds beats thirty polite ones',
+    ],
+    targets: ['Strength', 'UCS', 'Grip', 'NoFloor'],
+    venues: ['wall', 'desk', 'house'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'fire.towel-door-row',
+    element: 'fire',
+    name: 'Towel Door Row',
+    purpose:
+      'A real row with no bar: a towel over a door turns any room into somewhere to pull. This is the stand-in for pull-ups when there is nothing to hang from.',
+    dose: '3 × 10',
+    cues: [
+      'Loop a towel around both door handles, or over the door and shut it',
+      'Test it takes your weight before you lean back on it',
+      'Feet forward, body straight, pull the chest to your hands',
+      'Walk the feet forward to make it harder, back to make it easier',
+    ],
+    targets: ['Strength', 'UCS', 'Grip'],
+    venues: ['wall', 'house'],
+    approxSeconds: 150,
+  },
+  {
+    id: 'fire.feet-up-towel-row',
+    element: 'fire',
+    name: 'Feet-up Towel Row',
+    purpose:
+      'The hard end of rowing without a bar: feet on a chair puts most of you on the towel.',
+    dose: '3 × 8',
+    cues: [
+      'Towel over a door as before; test it first',
+      'Heels on a chair or a step so the body is level',
+      'Pull the chest to your hands, pause, lower for three seconds',
+      'Stop the set while the body is still one line',
+    ],
+    targets: ['Strength', 'UCS', 'Grip'],
+    venues: ['wall', 'house'],
+    approxSeconds: 150,
   },
   // ─── WATER — Flow, Fascia & Hydration ──────────────────────────────────
   {
