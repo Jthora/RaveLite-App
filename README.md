@@ -149,7 +149,17 @@ We value feedback from our users! If you have any suggestions, questions, or iss
 
 ## License
 
-This project is licensed under the [Creative Commons Zero (CC0) license](https://creativecommons.org/publicdomain/zero/1.0/), allowing you to copy, modify, distribute, and use the software for any purpose, without asking for permission.
+Licensed under the [Apache License 2.0](LICENSE) — use it, change it, ship
+it, commercially or not; keep the notice, and you get an explicit patent
+grant with it. See [NOTICE](NOTICE).
+
+Releases before 2026-09-20 were published under CC0 1.0 and stay that way;
+everything from then on is Apache-2.0.
+
+**No warranty, and not medical advice.** RaveLite suggests exercise,
+hydration targets and heat rules from public guidance and the author's own
+training. It does not know your health. Start conservatively, stop if
+something hurts, and ask a professional about anything that matters.
 
 ## Acknowledgments
 
