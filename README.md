@@ -1,8 +1,16 @@
 # RaveLite
 
-RaveLite is an Android mobile app built using React Native. It is a personal training + rave-companion tool — fitness reminders, posture-correction drills, flow-arts practice, and music attunement, organized around the five classical elements. iOS support is deferred; the `ios/` folder is preserved but not currently built.
+A training app that chimes. It spreads small sets of bodyweight work
+across your day, asks for water, teaches drills it explains properly, and
+keeps a character sheet of what all that has made of you — organised
+around five elements.
 
-> **Target devices:** Samsung Galaxy A7 Tablet, Redmi A3 phone (Android only).
+Android, React Native, no account, no server, no analytics. It is one
+person's app, opened up: **beta, no support promised.**
+
+> **For Ravers and Super Heroes** — training to be fit for the rave,
+> ready for intensive dancing, able to defend yourself, and of balanced
+> and positively energised spirit.
 
 ## Why RaveLite exists
 
@@ -38,37 +46,74 @@ this repo should be checked against them:
 When in doubt: choose the option that feels more like a rite and less
 like a productivity tool. Choose felt-sense (color, glyph, haptic)
 before text. Choose continuous presence (foreground keep-awake, ambient
-pulse) over transactional taps. Choose ceremonial language ("ignite",
-"root", "flow", "seal") over generic verbs ("done", "complete", "log").
+pulse) over transactional taps.
 
-## Overview
+One amendment from use: the buttons say **Done**, not "seal" or
+"ignite". Answering a chime twenty times a day wants a word you don't
+have to translate. The ceremony lives in the colours, the glyphs, the
+cues and the element language — not in the verbs.
 
-RaveLite is designed to complement the rave experience by offering features for analog communication and mesmerizing visualizations. Whether you're at a rave, festival, or party, RaveLite adds an extra layer of excitement and engagement.
+## What it actually does
 
-## Key Features
+- **One home screen.** The chime that is due, five element counts, the
+  water counter, today's sets, and the day's list. Everything else opens
+  from there as a sheet.
+- **Chimes across the day.** About twenty on a full day: rounds of small
+  sets, water calls, two meal check-ins, a morning intent and an evening
+  review. Each one can be answered from the notification — Done, +5,
+  Skip — with the app closed.
+- **Daily Sets.** Seventeen tracks (push, pull, row, squat, core, hangs,
+  posture, breath, mobility, stillness, pelvis, kick range, flow…) each
+  prescribing sets at about half your tested max, spread over the day.
+  They climb when you keep up, hold when you don't, and back off after a
+  break — automatically.
+- **A morning block that changes by day.** Kicks and flips on Monday,
+  dance basics on Thursday, strikes and stances on Friday, runs on
+  Tuesday and Wednesday, a fitness test on Saturday.
+- **Practice, counted.** Pick a skill — roundhouse kick, toprock, cloud
+  hands — and tap out reps or 8-counts while a clock runs.
+- **Goals.** The USAF, Space Force, Marine and MARSOC events graded from
+  the passing minimum to the maximum, plus marks of the app's own for
+  breath, balance, mobility and stillness. Log a test and it projects
+  when you'll reach the target.
+- **A character sheet.** Fifteen attributes on a grid of five elements ×
+  three modalities, growing from what you actually log: harder as they
+  rise, capped at 85 until a test says otherwise, and sliding if you
+  neglect them.
+- **An info card behind every name.** Tap anything — a drill, a round, a
+  track, an attribute, a measurement, a test — and it says what it is,
+  how to do it, how much, and what it feeds.
+- **Weather that changes the plan.** Sunrise, heat, rain, cold and a bug
+  estimate move the run, swap yard work indoors and raise the water
+  target — but only for the time you actually spend outside.
 
-- **Analog Communication**: Use analog-style tools such as light signals, hand gestures, and sound to communicate with fellow ravers.
-- **Visualizations**: Enjoy stunning visualizations and effects synced with the music, creating an immersive atmosphere.
-- **Customization**: Personalize your experience with customizable visual themes, colors, and effects.
-- **Party Tools**: Access a range of party tools, including a flashlight, strobe light, and countdown timer.
-- **Social Integration**: Share your experiences and connect with other users through social media integration.
+## Status
 
-## Installation
+Working and in daily use by its author. Everything above is real. What it
+is **not**, yet: usable by someone without a mat, a yard and a porch edge
+to hang from — the program leans hard on the author's kit and his day.
+Fixing that is the whole of [docs/public-beta.md](docs/public-beta.md),
+which is the plan this repo is currently following.
 
-To install RaveLite on your device, follow these steps:
+There is no beat-detection visualiser, no light show and no social
+anything, whatever older versions of this README promised.
 
-1. Clone this repository to your local machine.
-2. `cd RaveLiteApp`
-3. Run `yarn install` (or `npm install`) to install dependencies.
-4. Connect an Android device (USB debugging enabled) or start an emulator.
-5. Run `yarn android` to build and install the app.
+## Try it
 
-## Usage
+The beta goes out through Firebase App Distribution — ask for an invite
+and install without a store account. Or build it yourself:
 
-1. Open RaveLite on your device.
-2. Explore the different features and tools available.
-3. Use analog communication methods and enjoy the visualizations synced with the music.
-4. Have fun and enhance your rave experience with RaveLite!
+```sh
+git clone https://github.com/JordanTrana/RaveLite-App
+cd RaveLite-App/RaveLiteApp
+yarn install
+yarn android          # a connected Android device or an emulator
+```
+
+Android 13+ will ask for notification permission on the first visit to
+the home screen. On MIUI/HyperOS phones you must also turn **Autostart**
+on by hand, or chimes stop when the app is backgrounded; Settings → Stay
+alive lists everything this phone needs, with a button for each.
 
 ## Chimes, notifications and Daily Sets
 
@@ -112,7 +157,7 @@ What works today:
   Autostart, alarm volume, locked in recents, charger) with a button to
   fix each.
 
-Not yet verified on a device.
+All of the above is verified on the author's Redmi A3, in daily use.
 
 OEM caveat: stock Android (Galaxy Tab A7) is friendly. MIUI/HyperOS on
 the Redmi A3 needs Autostart turned on manually in system settings;
@@ -136,16 +181,10 @@ recognizer.
 
 ## Contributing
 
-We welcome contributions from the community to improve RaveLite. If you'd like to contribute, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Make your changes and ensure the codebase is properly tested.
-4. Submit a pull request with a detailed description of your changes.
-
-## Feedback
-
-We value feedback from our users! If you have any suggestions, questions, or issues, please don't hesitate to reach out to us.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Drills and kit substitutions are
+the most useful things to send; changes to the home screen's shape are
+the least likely to land. The house style, the checks to run and how to
+add a drill are all in there.
 
 ## License
 

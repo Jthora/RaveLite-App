@@ -1,0 +1,53 @@
+name: Drill or pack
+description: Suggest an exercise, or a bundle of them
+labels: [content]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: What is it called
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Why would someone do it
+      description: One sentence. What does it change in the body?
+    validations:
+      required: true
+  - type: textarea
+    id: cues
+    attributes:
+      label: How to do it
+      description: >
+        Three or four cues, in order, the way you would coach it — including
+        how to fail safely.
+    validations:
+      required: true
+  - type: input
+    id: dose
+    attributes:
+      label: Dose
+      placeholder: 3 × 10, or 60 sec each side
+    validations:
+      required: true
+  - type: dropdown
+    id: kit
+    attributes:
+      label: What it needs
+      multiple: true
+      options: [floor, mat, wall, doorway, chair, stairs, hang point, bricks or weight, staff, rope, ball, yard, streets]
+    validations:
+      required: true
+  - type: dropdown
+    id: element
+    attributes:
+      label: Which element it belongs to
+      options:
+        - Fire — output, power, conditioning
+        - Air — breath, posture, senses
+        - Earth — structure, core, load
+        - Water — flow, fascia, range
+        - Core — attention, will, presence
+    validations:
+      required: true

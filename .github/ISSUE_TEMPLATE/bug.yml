@@ -1,0 +1,48 @@
+name: Bug
+description: Something does not work
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got.
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone and Android version
+      placeholder: Redmi A3, Android 14 (HyperOS)
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options:
+        - Chimes not firing
+        - Today screen
+        - Daily Sets or the program
+        - Goals or tests
+        - Practice or drilling
+        - Weather or location
+        - Character sheet
+        - Setup or settings
+        - Somewhere else
+    validations:
+      required: true
+  - type: textarea
+    id: chimes
+    attributes:
+      label: If chimes are the problem
+      description: >
+        Settings → Stay alive lists what this phone needs. Which items are
+        green, and which are not?
+  - type: textarea
+    id: export
+    attributes:
+      label: Your data export, if it helps
+      description: >
+        Settings → Data → Export copies everything the app has recorded.
+        Attach it only if you are comfortable — it is your training log.

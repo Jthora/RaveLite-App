@@ -1,0 +1,30 @@
+name: Archetype or mode
+description: A kind of person, or a temporary state, the app should handle
+labels: [design]
+body:
+  - type: input
+    id: who
+    attributes:
+      label: Who is it for
+      placeholder: Night-shift nurse; parent of a toddler; someone back from a knee injury
+    validations:
+      required: true
+  - type: textarea
+    id: day
+    attributes:
+      label: What their day actually allows
+      description: When can they be interrupted, and for how long?
+    validations:
+      required: true
+  - type: textarea
+    id: kit
+    attributes:
+      label: What they have to train with
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What the app gets wrong for them today
+    validations:
+      required: true
