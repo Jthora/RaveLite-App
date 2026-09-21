@@ -492,7 +492,13 @@ with the archetypes in Phase 3.
       (20 Sep 2026)
 
 **Phase 4 — contributors**
-- [ ] Pack format documented; a contributed pack accepted end to end
+- [x] Pack format documented (`docs/packs.md`) with a validator that
+      tells a contributor what is wrong in their words, a worked example
+      that is itself under test, and the same rules applied to every pack
+      this app ships — so there is no second standard for built-in
+      content (20 Sep 2026). Packs ship as source and are reviewed like
+      any other change; there is no sideloading in the beta, and the doc
+      says so.
 - [ ] Locale and units; text scaling pass
 - [x] Data export, restore and wipe; privacy copy *(done early — see §12)*
 - [ ] F-Droid submission

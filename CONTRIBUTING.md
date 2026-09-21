@@ -96,3 +96,9 @@ Exercise advice reaches real bodies. Anything you add should fail safely:
 name the escape ("knee pain means back out"), start conservative, and
 never assume the reader is already strong. RaveLite is not medical advice
 and neither is your contribution.
+
+## Adding a curriculum
+
+Drills, grouped the way they are taught, are added as **packs** — pure
+data, no app code. See [docs/packs.md](docs/packs.md) for the format, the
+rules that get a pack rejected, and a working example to copy.

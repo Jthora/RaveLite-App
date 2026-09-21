@@ -1,0 +1,45 @@
+{
+  "id": "capoeira",
+  "name": "Capoeira basics",
+  "detail": "Ginga, esquiva and the low game. Needs room to move.",
+  "drills": [
+    {
+      "id": "fire.ginga",
+      "element": "fire",
+      "name": "Ginga",
+      "purpose": "The step everything else in capoeira comes out of.",
+      "dose": "3 × 60 sec",
+      "cues": [
+        "Stay low — knees soft the whole time",
+        "Cross the arm that matches the back foot",
+        "Keep breathing; this is a rhythm, not a hold"
+      ],
+      "targets": ["Coordination", "Agility"],
+      "venues": ["standing", "yard"],
+      "approxSeconds": 60,
+      "move": "kick"
+    },
+    {
+      "id": "fire.esquiva",
+      "element": "fire",
+      "name": "Esquiva",
+      "purpose": "Getting out of the way low, so you finish able to move.",
+      "dose": "3 × 8 each side",
+      "cues": [
+        "Weight onto the bent leg, chest over the knee",
+        "One hand to the floor, eyes up",
+        "Come back to the ginga rather than standing straight up"
+      ],
+      "targets": ["Agility", "Mobility"],
+      "venues": ["standing", "yard", "mat"],
+      "approxSeconds": 45,
+      "move": "lunge"
+    }
+  ],
+  "groups": [
+    {
+      "title": "Capoeira",
+      "ids": ["fire.ginga", "fire.esquiva"]
+    }
+  ]
+}
