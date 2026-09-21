@@ -505,7 +505,11 @@ with the archetypes in Phase 3.
 - [x] Text scaling pass — capped at 1.35, verified on the device at 1.3×
       (20 Sep 2026)
 - [x] Data export, restore and wipe; privacy copy *(done early — see §12)*
-- [ ] F-Droid submission
+- [~] F-Droid submission — audited and prepared (`docs/f-droid.md`):
+      no proprietary dependencies, no anti-features, Flipper confirmed
+      absent from the release APK, store metadata written. The submission
+      itself needs a public repo, tags, screenshots and a GitLab account,
+      so it waits on the operator (20 Sep 2026).
 
 ## 15. Open questions for the operator
 

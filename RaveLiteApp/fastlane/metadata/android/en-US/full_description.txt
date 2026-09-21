@@ -1,0 +1,39 @@
+RaveLite spreads small sets of bodyweight work across your day, asks for
+water, teaches drills it explains properly, and keeps a character sheet of
+what all that has made of you — organised around five elements.
+
+For Ravers and Super Heroes: training to be fit for the rave, ready for
+intensive dancing, able to defend yourself, and of balanced and positively
+energised spirit.
+
+<b>How it works</b>
+
+A chime arrives, asks for one small thing, and you answer it with one tap:
+Done, +5 min, or Skip it. Nothing is a streak you can fail — a missed day
+eases the program off, a good week climbs it.
+
+• <b>Daily Sets</b> — push, pull, squat, hinge, core, breath, posture,
+  stillness and mobility, grouped into a handful of rounds a day. Volume
+  follows what you actually do.
+• <b>Packs</b> — optional curricula on top: dance, martial basics, staff
+  and flow, yoga and tai chi, jumps, running, military test standards.
+• <b>Fits your day</b> — say how many times a day you can stop and move,
+  and everything is sized from that. A short day is a full day's training,
+  not a failed one.
+• <b>Fits your week</b> — travelling, injured, at a festival, or taking
+  the day off. Each one expires by itself.
+• <b>Explains itself</b> — every drill, track and attribute has a card
+  saying what it is, how to do it and why it is there.
+
+<b>Your data</b>
+
+No account, no server, no analytics, no ads. Everything you log lives on
+your phone and is sent nowhere. The only network requests are to Open-Meteo
+for the forecast, carrying a location rounded to about 10 km. Settings has
+an export that writes the whole thing to a file you choose — take one.
+
+<b>Beta</b>
+
+This is one person's app, opened up. It is not a medical device and gives
+no medical advice. Stop if it hurts, and talk to a doctor before starting
+if you have reason to.
