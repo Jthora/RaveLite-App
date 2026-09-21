@@ -35,6 +35,7 @@ import {ChimesPanel} from './ChimesPanel';
 import {DataPanel} from './DataPanel';
 import {KitPanel} from './KitPanel';
 import {ModePanel} from './ModePanel';
+import {PacksPanel} from './PacksPanel';
 import {ShapePanel} from './ShapePanel';
 import {PlanPanel} from './PlanPanel';
 import {StayAlivePanel} from './StayAlivePanel';
@@ -214,6 +215,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
 
           <ModePanel />
           <ShapePanel />
+          <PacksPanel />
           <KitPanel />
           <ChimesPanel />
           <StayAlivePanel />

@@ -1,6 +1,7 @@
 import {append} from '../journal/journal';
 import type {CompletionEntry} from '../journal/types';
 import {EXERCISE_LIBRARY} from '../exercises/library';
+import {ALL_PACKS, groupsFor, type PackId} from '../profile/packs';
 import type {Exercise} from '../exercises/types';
 import {canDo, type Facts} from '../profile/kit';
 import type {ActivityItem} from './activity';
@@ -73,92 +74,13 @@ export interface SkillGroup {
 
 /**
  * The curriculum: what there is to drill, grouped the way it is taught.
- * Everything here is in the library with its own cues and dose.
+ *
+ * This is derived from the packs rather than listed again here. The two
+ * lists said the same thing for a while, which is exactly how they start
+ * disagreeing — a drill added to a pack but not to the curriculum simply
+ * never gets taught, and nothing fails. `packs.ts` owns it now.
  */
-export const SKILL_GROUPS: readonly SkillGroup[] = [
-  {
-    title: 'Kicks',
-    ids: [
-      'fire.front-kick',
-      'fire.roundhouse-kick',
-      'fire.side-kick',
-      'fire.back-kick',
-      'fire.hook-kick',
-      'fire.axe-kick',
-      'fire.crescent-kick',
-      'fire.knee-strike',
-      'fire.spin-turn-drill',
-      'fire.kick-combo',
-      'fire.kick-flip-foundations',
-    ],
-  },
-  {
-    title: 'Strikes and blocks',
-    ids: [
-      'fire.jab-cross',
-      'fire.hook-uppercut',
-      'fire.elbow-strikes',
-      'fire.block-drill',
-      'fire.parry-slip',
-      'earth.stance-transitions',
-      'fire.combo-flow',
-      'fire.shadow-strikes',
-    ],
-  },
-  {
-    title: 'Dance',
-    ids: [
-      'water.body-isolations',
-      'water.body-wave',
-      'water.arm-wave',
-      'water.two-step',
-      'water.grapevine',
-      'water.toprock',
-      'water.house-jack',
-      'water.spin-spotting',
-      'water.freeze-hold',
-      'water.beat-step',
-      'water.groove-combo',
-    ],
-  },
-  {
-    title: 'Staff and flow',
-    ids: [
-      'water.figure-8',
-      'water.beat-locks',
-      'water.sword-form-slow',
-      'water.staff-combat-rounds',
-      'water.album-no-drop',
-    ],
-  },
-  {
-    title: 'Jumps',
-    ids: [
-      'fire.tuck-jump',
-      'fire.skater-bound',
-      'fire.pogo-hops',
-      'fire.broad-jump',
-      'fire.vertical-jump',
-      'fire.jump-squat',
-    ],
-  },
-  {
-    title: 'Yoga and tai chi',
-    ids: [
-      'water.sun-salutation',
-      'water.down-dog-cobra',
-      'earth.warrior-flow',
-      'earth.chair-pose',
-      'earth.tree-pose',
-      'earth.crow-progression',
-      'water.cloud-hands',
-      'water.brush-knee',
-      'water.grasp-sparrows-tail',
-      'water.tai-chi-walk',
-      'heart.standing-post',
-    ],
-  },
-];
+export const SKILL_GROUPS: readonly SkillGroup[] = groupsFor(ALL_PACKS);
 
 const BY_ID = new Map(EXERCISE_LIBRARY.map(e => [e.id, e]));
 
@@ -168,14 +90,19 @@ export const skillDrill = (id: string): Exercise | undefined => BY_ID.get(id);
  * The curriculum this kit can practise. A group with nothing left in it
  * drops out rather than teasing: no staff, no staff section.
  */
-export function skillGroupsFor(facts: Facts): SkillGroup[] {
-  return SKILL_GROUPS.map(group => ({
-    ...group,
-    ids: group.ids.filter(id => {
-      const drill = BY_ID.get(id);
-      return drill !== undefined && canDo(drill, facts);
-    }),
-  })).filter(group => group.ids.length > 0);
+export function skillGroupsFor(
+  facts: Facts,
+  packs: readonly PackId[] = ALL_PACKS,
+): SkillGroup[] {
+  return groupsFor(packs)
+    .map(group => ({
+      ...group,
+      ids: group.ids.filter(id => {
+        const drill = BY_ID.get(id);
+        return drill !== undefined && canDo(drill, facts);
+      }),
+    }))
+    .filter(group => group.ids.length > 0);
 }
 
 /** Every drill in the curriculum, for the guards and the tally. */

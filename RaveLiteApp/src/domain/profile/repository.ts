@@ -4,6 +4,7 @@ import {DAILY_PAR} from '../activity/par';
 import {densityFor, parFor, roundsFor} from '../program/density';
 import type {DayShapeId} from '../program/types';
 import {AUTHOR_FACTS, type Facts, type KitItem, type Region} from './kit';
+import {ALL_PACKS, type PackId} from './packs';
 import {
   activeMode,
   densityUnder,
@@ -38,6 +39,8 @@ export interface Profile {
   customRounds?: number;
   /** What is true right now, over the top of the rest. See `mode.ts`. */
   mode?: Mode;
+  /** Which curricula this person carries. Absent means all of them. */
+  packs?: PackId[];
 }
 
 export function defaultProfile(): Profile {
@@ -116,7 +119,20 @@ export function clearMode(): void {
  * can be done here gets the hotel room without knowing modes exist.
  */
 export function loadFacts(now: number = Date.now()): Facts {
-  return factsUnder(loadProfile().facts, loadMode(now));
+  const profile = loadProfile();
+  return factsUnder({...profile.facts, packs: loadPacks()}, loadMode(now));
+}
+
+/**
+ * The curricula this person carries. An install that has never been asked
+ * carries all of them, which is the app as it was before packs existed.
+ */
+export function loadPacks(): PackId[] {
+  return loadProfile().packs ?? [...ALL_PACKS];
+}
+
+export function setPacks(packs: readonly PackId[]): void {
+  saveProfile({...loadProfile(), packs: [...packs]});
 }
 
 /** What the room is really like, with no mode over the top. */

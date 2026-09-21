@@ -324,11 +324,27 @@ the architecture is honest.
 
 ## 10. Packs
 
-Content bundles, many at once, each a list of drill ids, tracks and goal
-groups: `dance` · `martial` · `staff` · `yoga-taichi` · `jumps` ·
-`military-tests` · `desk-fixes` · `hangs-pulls` · `bricks-carries` ·
-`runs`. A pack is pure data, which is what makes a contributed pack
+Content bundles, many at once, each a list of drill ids and the tracks it
+turns on. A pack is pure data, which is what makes a contributed pack
 possible without touching app code.
+
+**Shipped (20 Sep 2026):** `dance` · `martial` · `staff` · `yoga-taichi` ·
+`jumps` · `military-tests` · `runs`.
+
+**Three from this list were dropped**, with the operator's agreement:
+
+- `hangs-pulls` and `bricks-carries` are already gated by kit in Phase 1 —
+  no hang point substitutes the Pull ladder, no bricks means no carries. A
+  pack over the top would be a second switch for one thing, and two
+  switches for one thing is how a settings screen starts lying.
+- `desk-fixes` is the Posture and Mobility tracks, which are base. As a
+  pack it would be nearly empty, and turning it off would mean offering
+  someone a program with no posture work.
+
+The load-bearing rule: **a drill in no pack is always there.** Turning
+every pack off leaves a complete program — push, pull, squat, hinge,
+breath, posture, stillness, mobility — and a test asserts exactly that,
+in every element.
 
 ## 11. Testing
 
@@ -453,7 +469,10 @@ with the archetypes in Phase 3.
 
 **Phase 3 — someone else's app**
 - [ ] Archetypes (10) as data, with the picker card
-- [ ] Packs as data; goals per archetype; the push-up goal off 200
+- [x] Packs as data (7 of 10 — see §10), gated through `canDo`, with the
+      curriculum derived from them so the two lists cannot drift
+      (20 Sep 2026)
+- [ ] Goals per archetype; the push-up goal off 200
 - [ ] Setup flow, the live preview strip, the first-chime tutorial
 - [ ] Character sheet held back to level 2
 - [ ] Tests: every archetype yields a valid day

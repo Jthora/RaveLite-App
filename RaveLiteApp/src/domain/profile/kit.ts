@@ -1,4 +1,5 @@
 import {EXERCISE_LIBRARY} from '../exercises/library';
+import {inScope, type PackId} from './packs';
 import type {Exercise, Venue} from '../exercises/types';
 import {moveForExercise, type MoveId} from '../exercises/moves';
 
@@ -71,6 +72,14 @@ export type Region = (typeof REGIONS)[number];
 
 export interface Facts {
   kit: KitItem[];
+  /**
+   * Which curricula exist for this person. Like `injured`, not a fact
+   * about the room — but it decides availability the same way and comes
+   * through the same door, so `canDo` is the one place that has to know.
+   * Absent means everything, which keeps every caller written before
+   * packs existed meaning what it did. See `packs.ts`.
+   */
+  packs?: PackId[];
   /**
    * A part that must not be loaded today. Not a fact about the room, but
    * it gates drills exactly like one, and it arrives by the same door:
@@ -215,6 +224,9 @@ export function canDo(
   }
   const injured = opts.injured ?? facts.injured;
   if (injured && loadsRegion(drill, injured)) {
+    return false;
+  }
+  if (facts.packs && !inScope(drill.id, facts.packs)) {
     return false;
   }
   return true;
