@@ -14,7 +14,12 @@ import {
 } from './progression';
 import {doneByTrack} from './progress';
 import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
-import {dayDensity, loadFacts} from '../profile/repository';
+import {
+  dayDensity,
+  loadFacts,
+  rampIsPaused,
+  trainsToday,
+} from '../profile/repository';
 import {dayFocus, type DayFocus} from './week';
 
 /**
@@ -122,6 +127,13 @@ export function prescriptionsFor(
   program: ProgramState,
   date: Date,
 ): DayPrescription[] {
+  // A rest day asks for nothing. Not one set scaled to nothing — nothing,
+  // so the day is empty on purpose rather than looking like a day that
+  // went wrong. Water and the evening review still chime; they are not
+  // Daily Sets.
+  if (!trainsToday(date.getTime())) {
+    return [];
+  }
   const out: DayPrescription[] = [];
   for (const t of TRACKS) {
     const p = prescribeDay(
@@ -129,8 +141,8 @@ export function prescriptionsFor(
       program.tracks[t.id],
       program,
       date,
-      loadFacts(),
-      dayDensity(),
+      loadFacts(date.getTime()),
+      dayDensity(date.getTime()),
     );
     if (p) {
       out.push(p);
@@ -247,7 +259,14 @@ export function reviewProgram(now: number = Date.now()): ProgramState {
         },
       ];
     });
-    tracks[track.id] = reviewTrack({track, state, days, today, deload});
+    tracks[track.id] = reviewTrack({
+      track,
+      state,
+      days,
+      today,
+      deload,
+      paused: rampIsPaused(),
+    });
   }
   const next: ProgramState = {...program, tracks, reviewedThrough: through};
   saveProgram(next);

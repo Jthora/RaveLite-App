@@ -3,7 +3,18 @@ import {KEYS} from '../../storage/keys';
 import {DAILY_PAR} from '../activity/par';
 import {densityFor, parFor, roundsFor} from '../program/density';
 import type {DayShapeId} from '../program/types';
-import {AUTHOR_FACTS, type Facts, type Region} from './kit';
+import {AUTHOR_FACTS, type Facts, type KitItem, type Region} from './kit';
+import {
+  activeMode,
+  densityUnder,
+  factsUnder,
+  injuredRegion,
+  rampPaused,
+  startMode as buildMode,
+  trainsUnder,
+  type Mode,
+  type ModeId,
+} from './mode';
 
 /**
  * Who is using the app, and what they have to train with.
@@ -25,6 +36,8 @@ export interface Profile {
   shape?: DayShapeId;
   /** Rounds, when `shape` is 'custom'. */
   customRounds?: number;
+  /** What is true right now, over the top of the rest. See `mode.ts`. */
+  mode?: Mode;
 }
 
 export function defaultProfile(): Profile {
@@ -72,9 +85,58 @@ export function subscribeProfile(listener: () => void): () => void {
   };
 }
 
-/** What the program should assume about this person's kit and room. */
-export function loadFacts(): Facts {
+/**
+ * The mode in force, or undefined. Expiry is read, never written: a mode
+ * that has run out simply stops answering, so no timer has to fire and a
+ * phone that was off all weekend still comes back to the right day.
+ */
+export function loadMode(now: number = Date.now()): Mode | undefined {
+  return activeMode(loadProfile().mode, now);
+}
+
+export function setMode(
+  id: ModeId,
+  opts: {region?: Region; kit?: KitItem[]} = {},
+  now: number = Date.now(),
+): void {
+  const mode = buildMode(id, now, opts);
+  if (mode) {
+    saveProfile({...loadProfile(), mode});
+  }
+}
+
+export function clearMode(): void {
+  const profile = loadProfile();
+  saveProfile({...profile, mode: undefined});
+}
+
+/**
+ * What the program should assume about this person's kit and room —
+ * already under whatever mode is running, so every caller that asks what
+ * can be done here gets the hotel room without knowing modes exist.
+ */
+export function loadFacts(now: number = Date.now()): Facts {
+  return factsUnder(loadProfile().facts, loadMode(now));
+}
+
+/** What the room is really like, with no mode over the top. */
+export function baseFacts(): Facts {
   return loadProfile().facts;
+}
+
+/** A part of the body nothing may load today. */
+export function loadInjured(now: number = Date.now()): Region | undefined {
+  return injuredRegion(loadMode(now)) ?? loadProfile().injured;
+}
+
+/** Whether Daily Sets ask for anything today. */
+export function trainsToday(now: number = Date.now()): boolean {
+  return trainsUnder(loadMode(now));
+}
+
+/** Whether the ramp should stop reading today as a verdict. */
+export function rampIsPaused(now: number = Date.now()): boolean {
+  return rampPaused(loadMode(now));
 }
 
 export function setFacts(facts: Facts): void {
@@ -99,9 +161,12 @@ export function setShape(shape: DayShapeId, customRounds?: number): void {
 }
 
 /** This person's share of a full day, 0–1. */
-export function dayDensity(): number {
+export function dayDensity(now: number = Date.now()): number {
   const profile = loadProfile();
-  return densityFor(profile.shape ?? 'desk', profile.customRounds);
+  return densityUnder(
+    densityFor(profile.shape ?? 'desk', profile.customRounds),
+    loadMode(now),
+  );
 }
 
 /** Chimes this day can carry. */

@@ -100,7 +100,9 @@ export type ReviewChange =
   | 'top'
   | 'down'
   | 'rebuild'
-  | 'deload';
+  | 'deload'
+  /** A mode was running that the ramp must not read (see `profile/mode.ts`). */
+  | 'paused';
 
 /** A track's daily look back at the last week (see `adapt.ts`). */
 export interface TrackReview {

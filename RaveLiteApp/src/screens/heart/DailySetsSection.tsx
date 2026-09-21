@@ -507,6 +507,8 @@ export function reviewLine(review: TrackReview): string {
       return `Back from a break at ${sets}: a set more after every three good days.`;
     case 'deload':
       return 'Deload week: lighter on purpose. The climb picks up after it.';
+    case 'paused':
+      return `Held at ${sets} while a mode is on. These days don't count either way.`;
     case 'hold':
       if (review.ratio === undefined) {
         return `Holding at ${sets} until there are a few days to go on.`;

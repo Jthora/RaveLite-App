@@ -26,6 +26,8 @@ import {CatchUpSheet} from '../../components/today/CatchUpSheet';
 import {LateLogSheet} from '../../components/today/LateLogSheet';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
+import {clearMode, loadMode} from '../../domain/profile/repository';
+import {ModeChip} from '../../components/today/ModeChip';
 import {SessionBanner, SessionSheet} from '../../components/today/SessionSheet';
 import {SetsMeters} from '../../components/today/SetsMeters';
 import {WaterCounter} from '../../components/today/WaterCounter';
@@ -74,6 +76,8 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [setsOpen, setSetsOpen] = useState(false);
   const [weatherOpen, setWeatherOpen] = useState(false);
+  /** Re-read whenever Settings closes, since that is where one is picked. */
+  const [mode, setMode] = useState(() => loadMode());
   /** A missed or skipped chime being logged after the fact. */
   const [late, setLate] = useState<DayRow | undefined>();
   /** A logged row being kept or removed. */
@@ -179,6 +183,15 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         <ConditionsLine
           weather={model.weather}
           onPress={() => setWeatherOpen(true)}
+        />
+        {/* Renders nothing at all unless a mode is running. */}
+        <ModeChip
+          mode={mode}
+          now={model.now}
+          onClear={() => {
+            clearMode();
+            setMode(undefined);
+          }}
         />
         <SessionBanner onPress={() => setSessionOpen(true)} />
         <ChimeCard
@@ -311,6 +324,9 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           permission={permission}
           onClose={() => {
             setSettingsOpen(false);
+            // Settings is where a mode is picked; pick the chip up on the
+            // way out rather than polling for it.
+            setMode(loadMode());
           }}
         />
         <DailySetsSheet visible={setsOpen} onClose={() => setSetsOpen(false)} />

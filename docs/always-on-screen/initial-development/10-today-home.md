@@ -742,6 +742,46 @@ moves until someone says otherwise; the golden test in
 
 Chosen in Settings › How much day you have.
 
+## Modes: what is true right now (`src/domain/profile/mode.ts`, since 20 Sep 2026)
+
+Facts gate what is possible, the day shape sizes it, and a mode overrides
+both for a while. Every one of them is a moment where a program built for
+a normal week starts lying — asking for a pull-up bar 300 miles away, or
+reading three days of doctor's orders as giving up and cutting the sets
+you had earned.
+
+| Mode | Does | Ends |
+|---|---|---|
+| Away from home | kit → floor + wall, noise → quiet | 7 days |
+| Hurt somewhere | drops drills that load the region | when cleared |
+| At a festival | a third of the volume | 3 days |
+| Taking the day off | Daily Sets ask for nothing | end of today |
+
+- **They expire by reading, never by writing.** `activeMode(mode, now)`
+  returns undefined once `expiresAt` has passed, so no timer has to fire
+  and a phone that was off all weekend still comes back to the right day.
+  Modes end at the *end of a day*, so a rest day begun at 09:00 is a day
+  off, not until 09:00 tomorrow.
+- **One seam, not eight.** `loadFacts()` returns facts already under the
+  mode, so every caller that asks what can be done here gets the hotel
+  room without knowing modes exist. An injury rides the same door:
+  `Facts.injured` is stamped by `loadFacts()` and honoured by `canDo`,
+  rather than threading a region through eight call sites. `baseFacts()`
+  is there for the one place that wants the room as it really is.
+- **The ramp pause is checked before the break, not after it.** An injury
+  or a rest day is the app's own instruction, and three days of following
+  it look exactly like three days of quitting — `reviewTrack` would cut
+  the sets. `paused` short-circuits above that check and returns
+  `'paused'`, and it moves `steppedOn` to today, which freezes the step
+  clock: when the mode lifts the ramp waits a full week of real training
+  before passing judgement instead of reading the rest.
+- **A rest day prescribes nothing**, not one set scaled to nothing, so the
+  day is empty on purpose rather than looking like a day that went wrong.
+  Water and the evening review still chime; they are not Daily Sets.
+- Settings gets a "Today I'm…" row. Today gets **one chip, only while a
+  mode is running** — with none it renders `null`, not a spacer. A test
+  holds that.
+
 ## Your data (`src/domain/data/backup.ts`, `src/screens/heart/DataPanel.tsx`, since 20 Sep 2026)
 
 No account and no server means the only copy of a year's training is on

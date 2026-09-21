@@ -57,17 +57,28 @@ export const KIT_LABELS: Readonly<Record<KitItem, string>> = {
 export type Noise = 'quiet' | 'normal' | 'free';
 
 /** A part of the body a mode says not to load. */
-export type Region =
-  | 'shoulder'
-  | 'elbow'
-  | 'wrist'
-  | 'back'
-  | 'hip'
-  | 'knee'
-  | 'ankle';
+export const REGIONS = [
+  'shoulder',
+  'elbow',
+  'wrist',
+  'back',
+  'hip',
+  'knee',
+  'ankle',
+] as const;
+
+export type Region = (typeof REGIONS)[number];
 
 export interface Facts {
   kit: KitItem[];
+  /**
+   * A part that must not be loaded today. Not a fact about the room, but
+   * it gates drills exactly like one, and it arrives by the same door:
+   * `loadFacts()` stamps it from the active mode, so every caller that
+   * already asks what can be done here gets it without knowing modes
+   * exist. See `mode.ts`.
+   */
+  injured?: Region;
   noise: Noise;
   corrections: ('UCS' | 'APT' | 'Hourglass')[];
   heightInches?: number;
@@ -202,7 +213,8 @@ export function canDo(
   if (facts.noise === 'quiet' && isLoud(drill)) {
     return false;
   }
-  if (opts.injured && loadsRegion(drill, opts.injured)) {
+  const injured = opts.injured ?? facts.injured;
+  if (injured && loadsRegion(drill, injured)) {
     return false;
   }
   return true;

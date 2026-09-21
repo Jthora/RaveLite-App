@@ -13,6 +13,7 @@ import {DailySetsSheet} from '../DailySetsSheet';
 import {SessionSheet} from '../../../components/today/SessionSheet';
 import {addEntry} from '../../../domain/training/repository';
 import {startSession} from '../../../domain/training/session';
+import {loadMode, setMode} from '../../../domain/profile/repository';
 import {SettingsSheet} from '../SettingsSheet';
 import {InfoCardView} from '../../../components/info/InfoSheet';
 import {TodayPanel} from '../TodayPanel';
@@ -99,6 +100,28 @@ it('Done answers the chime that is sounding', () => {
     byTestId(tree, 'chime-done').props.onPress();
   });
   expect(runtime.getActivePulseSummary()).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('shows nothing at all about modes until there is one', () => {
+  const tree = renderToday();
+  expect(byTestId(tree, 'mode-chip')).toBeUndefined();
+  expect(byTestId(tree, 'mode-chip-clear')).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('says so on Today while a mode is running, and ends it in one tap', () => {
+  setMode('rest', {}, TEN_AM.getTime());
+  const tree = renderToday();
+
+  expect(byTestId(tree, 'mode-chip').props.children).toBe(
+    'Taking the day off · today',
+  );
+  act(() => {
+    byTestId(tree, 'mode-chip-clear').props.onPress();
+  });
+  expect(loadMode()).toBeUndefined();
+  expect(byTestId(tree, 'mode-chip')).toBeUndefined();
   act(() => tree.unmount());
 });
 

@@ -441,8 +441,11 @@ with the archetypes in Phase 3.
       rather than rounding freely to 5, because the one-set-per-track
       floor keeps the shortest day at ~⅓ of a full day, not ⅕.
 - [ ] Windows editor with the timeline graphic
-- [ ] Modes: travelling, injured, festival, rest; ramp pause
-- [ ] Tests: density, injured
+- [x] Modes: travelling, injured, festival, rest; ramp pause (20 Sep 2026).
+      Deload is not a stored mode — it is computed from the program week,
+      so offering it as a thing to switch on would let it disagree with
+      itself.
+- [x] Tests: density, injured, and every mode's own promise
 
 **Phase 3 — someone else's app**
 - [ ] Archetypes (10) as data, with the picker card
