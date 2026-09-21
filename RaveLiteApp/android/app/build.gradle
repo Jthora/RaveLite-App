@@ -82,6 +82,13 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    // The release keystore never lives in this repo. Put its details in
+    // ~/.gradle/gradle.properties (see scripts/make-keystore.sh) and the
+    // release build picks them up; leave them out and it stays
+    // debug-signed exactly as before, so a clone still builds.
+    def releaseStore = project.findProperty('RAVELITE_STORE_FILE')
+    def hasRelease = releaseStore != null && file(releaseStore).exists()
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -89,15 +96,24 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasRelease) {
+            release {
+                storeFile file(releaseStore)
+                storePassword project.property('RAVELITE_STORE_PASSWORD')
+                keyAlias project.property('RAVELITE_KEY_ALIAS')
+                keyPassword project.property('RAVELITE_KEY_PASSWORD')
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // An install signed with one key cannot be replaced by a build
+            // signed with another: switching costs an uninstall, and an
+            // uninstall costs the training log. Export first.
+            signingConfig hasRelease ? signingConfigs.release : signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

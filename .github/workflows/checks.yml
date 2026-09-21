@@ -1,0 +1,39 @@
+# Every pull request gets the same three checks the maintainer runs, so a
+# contributor finds out from CI rather than from a review comment.
+#
+# No Android build here on purpose: it needs the SDK, takes minutes, and
+# these three catch what review cannot see at a glance.
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: RaveLiteApp
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: RaveLiteApp/package-lock.json
+
+      - run: npm ci
+
+      # Types first: the cheapest check, and the one that caught a bug
+      # rendering blank labels for months.
+      - name: typecheck
+        run: npx tsc --noEmit
+
+      - name: lint
+        run: npx eslint .
+
+      - name: test
+        run: npx jest --ci

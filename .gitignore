@@ -1,0 +1,10 @@
+# Scratch output from device walks and screenshot runs.
+/artifacts/
+/screenshots/
+
+# Anything to do with signing or distribution lives in ~/.ravelite,
+# never here. This is belt and braces.
+*.keystore
+!RaveLiteApp/android/app/debug.keystore
+*.jks
+firebase.env
