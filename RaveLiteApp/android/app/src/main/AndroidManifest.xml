@@ -39,6 +39,16 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+      <!-- Demo mode, for producing screenshots without photographing
+           somebody's real training. No menu mentions it: a button for it
+           is a button pressed by accident, by somebody who then thinks
+           their history is gone. See domain/demo/. -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="ravelite" />
+      </intent-filter>
       </activity>
 
       <!-- API 34+ requires a foregroundServiceType on the FGS. We

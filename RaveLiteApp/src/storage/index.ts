@@ -40,4 +40,29 @@ const persistentStore: KeyValueStore = {
   },
 };
 
-export const store: KeyValueStore = persistentStore;
+/**
+ * Demo mode swaps this out for a throwaway store (see `domain/demo/`).
+ *
+ * The real data is not exported and put back — it is simply never
+ * written to, because the overlay is a different map and persistence is
+ * bypassed entirely. A crash, a kill, a flat battery mid-demo all end the
+ * same way: the app restarts on the real data, untouched.
+ */
+let active: KeyValueStore = persistentStore;
+
+export const store: KeyValueStore = {
+  getString: k => active.getString(k),
+  getNumber: k => active.getNumber(k),
+  getBoolean: k => active.getBoolean(k),
+  set: (k, v) => active.set(k, v),
+  delete: k => active.delete(k),
+  keysWithPrefix: p => active.keysWithPrefix(p),
+  clearAll: () => active.clearAll(),
+};
+
+/** Point every read and write somewhere else. Only `domain/demo` does this. */
+export function __swapStore(next: KeyValueStore | undefined): void {
+  active = next ?? persistentStore;
+}
+
+export const __realStore = persistentStore;

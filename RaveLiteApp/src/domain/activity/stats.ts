@@ -109,7 +109,11 @@ function tallyByElementByDay(
   }
   for (const item of items) {
     const idx = dayIndex(item.at, from);
-    if (idx >= 0 && idx < n) {
+    // An item with an element this app does not know is skipped rather
+    // than crashing the page it is counted on. A journal written by a
+    // newer version, or one corrupt entry, should cost a number — not
+    // Today.
+    if (idx >= 0 && idx < n && out[item.element] !== undefined) {
       out[item.element][idx] += valueOf(item);
     }
   }

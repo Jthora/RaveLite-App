@@ -10,7 +10,7 @@
  *                                element rail; one page per element)
  */
 import React, {useEffect, useState} from 'react';
-import {StatusBar, StyleSheet, View} from 'react-native';
+import {Linking, StatusBar, StyleSheet, View} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
@@ -34,6 +34,7 @@ import {ElementShell} from './src/shell/ElementShell';
 import {SetupFlow} from './src/screens/setup/SetupFlow';
 import {needsSetup} from './src/domain/profile/repository';
 import {capTextScaling} from './src/lib/textScaling';
+import {handleDemoLink} from './src/domain/demo/demo';
 import {guessUnitsOnce} from './src/domain/settings/units';
 import {setWeatherPrefs} from './src/domain/conditions/weather';
 import {getLocale} from './src/native/raveLiteDevice';
@@ -123,6 +124,20 @@ function App(): React.JSX.Element {
     return subscribeHeartVariant(() => {
       setThemeEpoch(e => e + 1);
     });
+  }, []);
+
+  // Demo mode (ravelite://demo/on) swaps the whole store, so every screen
+  // has to be built again from the new one — the same remount the theme
+  // uses, for the same reason.
+  useEffect(() => {
+    const apply = (url: string | null) => {
+      if (handleDemoLink(url)) {
+        setThemeEpoch(e => e + 1);
+      }
+    };
+    void Linking.getInitialURL().then(apply);
+    const sub = Linking.addEventListener('url', ({url}) => apply(url));
+    return () => sub.remove();
   }, []);
 
   return (
