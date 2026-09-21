@@ -50,7 +50,14 @@ export interface NumberPadProps {
   compact?: boolean;
 }
 
-export function NumberPad({mode, value, onChange, accent, max, compact}: NumberPadProps) {
+export function NumberPad({
+  mode,
+  value,
+  onChange,
+  accent,
+  max,
+  compact,
+}: NumberPadProps) {
   const accentColor = accent ?? palette.text;
 
   // Internal digit-string state. We can't derive this from `value` each render
@@ -70,7 +77,9 @@ export function NumberPad({mode, value, onChange, accent, max, compact}: NumberP
 
   const emit = (next: string) => {
     const numeric = decodeFromDigits(mode, next);
-    if (max !== undefined && numeric > max) return;
+    if (max !== undefined && numeric > max) {
+      return;
+    }
     setDigits(next);
     lastEmitted.current = numeric;
     onChange(numeric);
@@ -121,7 +130,12 @@ export function NumberPad({mode, value, onChange, accent, max, compact}: NumberP
         ].map((row, ri) => (
           <View key={ri} style={styles.row}>
             {row.map(d => (
-              <Key key={d} label={d} onPress={() => push(d)} compact={compact} />
+              <Key
+                key={d}
+                label={d}
+                onPress={() => push(d)}
+                compact={compact}
+              />
             ))}
           </View>
         ))}
@@ -156,7 +170,9 @@ function Key({
         muted && styles.keyMuted,
         pressed && styles.keyPressed,
       ]}>
-      <Text style={[styles.keyText, muted && styles.keyTextMuted]}>{label}</Text>
+      <Text style={[styles.keyText, muted && styles.keyTextMuted]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -164,14 +180,19 @@ function Key({
 // ─── Encoding helpers ──────────────────────────────────────────────────────
 
 function encodeToDigits(mode: NumberPadMode, value: number): string {
-  if (!Number.isFinite(value) || value <= 0) return '';
+  if (!Number.isFinite(value) || value <= 0) {
+    return '';
+  }
   switch (mode) {
     case 'mmss': {
       const total = Math.max(0, Math.round(value));
       const hh = Math.min(99, Math.floor(total / 3600));
       const mm = Math.floor((total - hh * 3600) / 60);
       const ss = total - hh * 3600 - mm * 60;
-      const padded = `${String(hh).padStart(2, '0')}${String(mm).padStart(2, '0')}${String(ss).padStart(2, '0')}`;
+      const padded = `${String(hh).padStart(2, '0')}${String(mm).padStart(
+        2,
+        '0',
+      )}${String(ss).padStart(2, '0')}`;
       // Strip leading zeros so the display starts compact.
       return padded.replace(/^0+/, '');
     }
@@ -183,7 +204,9 @@ function encodeToDigits(mode: NumberPadMode, value: number): string {
 }
 
 function decodeFromDigits(mode: NumberPadMode, digits: string): number {
-  if (digits === '') return 0;
+  if (digits === '') {
+    return 0;
+  }
   switch (mode) {
     case 'mmss': {
       const padded = digits.padStart(6, '0');

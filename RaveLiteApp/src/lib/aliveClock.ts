@@ -84,7 +84,12 @@ export function getIntensity(): AliveIntensity {
 }
 
 function recompute(): void {
-  const next = resolveMotionMode({reduceMotion, night, paused, setting: intensity});
+  const next = resolveMotionMode({
+    reduceMotion,
+    night,
+    paused,
+    setting: intensity,
+  });
   if (next === mode) {
     return;
   }

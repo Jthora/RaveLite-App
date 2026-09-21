@@ -19,8 +19,7 @@ export function ElementProvider({
   element: ElementIdentity | ElementId;
   children: React.ReactNode;
 }) {
-  const value =
-    typeof element === 'string' ? ELEMENTS[element] : element;
+  const value = typeof element === 'string' ? ELEMENTS[element] : element;
   return (
     <ElementContext.Provider value={value}>{children}</ElementContext.Provider>
   );

@@ -42,7 +42,12 @@ import {
   unarchiveMetric,
   updateEntry,
 } from '../../domain/training/repository';
-import {InputMode, MetricCategory, MetricKind, TrainingLogEntry} from '../../domain/training/types';
+import {
+  InputMode,
+  MetricCategory,
+  MetricKind,
+  TrainingLogEntry,
+} from '../../domain/training/types';
 import type {ElementId} from '../../theme/elements';
 import {gradeForRun, formatPace} from '../../domain/training/grading';
 import {NumberPad} from './NumberPad';
@@ -63,7 +68,13 @@ interface Props {
   defaultKindId?: string;
 }
 
-export function TrainingLogSheet({visible, onClose, editing, defaultElement, defaultKindId}: Props) {
+export function TrainingLogSheet({
+  visible,
+  onClose,
+  editing,
+  defaultElement,
+  defaultKindId,
+}: Props) {
   const {width, height} = useWindowDimensions();
   const accent = useElementAccent();
   // Use 2-column layout whenever width > height (phone landscape too).
@@ -74,14 +85,21 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
   const [tick, setTick] = useState(0);
   const refresh = () => setTick(x => x + 1);
 
+  // `tick` is the point: it is not read in here, it is how `refresh()`
+  // says the stored metrics changed. And `editing?.id` rather than
+  // `editing` so a new object of the same entry does not re-read storage
+  // on every render.
+  /* eslint-disable react-hooks/exhaustive-deps */
   const metrics = useMemo(
-    () => (defaultElement ? loadMetricsForElement(defaultElement) : loadMetrics()),
+    () =>
+      defaultElement ? loadMetricsForElement(defaultElement) : loadMetrics(),
     [tick, defaultElement],
   );
   const editingKind = useMemo(
     () => (editing ? getMetric(editing.kindId) : undefined),
     [editing?.id, tick],
   );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const info = useInfoStack();
   const [selectedKindId, setSelectedKindId] = useState<string>(
@@ -107,7 +125,9 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
   }, []);
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      return;
+    }
     if (editing && editingKind) {
       setSelectedKindId(editing.kindId);
       setAtEpoch(editing.at);
@@ -152,27 +172,32 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, editing?.id, defaultKindId]);
 
-  const canSave = !!selectedKind && hasValue(selectedKind.inputMode, {
-    valueSec,
-    valueReps,
-    distanceCenti,
-    fixedDistance: selectedKind?.defaultDistanceMeters,
-  });
+  const canSave =
+    !!selectedKind &&
+    hasValue(selectedKind.inputMode, {
+      valueSec,
+      valueReps,
+      distanceCenti,
+      fixedDistance: selectedKind?.defaultDistanceMeters,
+    });
 
   function handleSave() {
-    if (!selectedKind || !canSave) return;
+    if (!selectedKind || !canSave) {
+      return;
+    }
     const value =
-      selectedKind.inputMode === 'mmss' || selectedKind.inputMode === 'distance-time'
+      selectedKind.inputMode === 'mmss' ||
+      selectedKind.inputMode === 'distance-time'
         ? valueSec
         : selectedKind.inputMode === 'decimal'
-          ? valueReps / 100
-          : valueReps;
+        ? valueReps / 100
+        : valueReps;
     const distanceMeters =
       selectedKind.inputMode !== 'distance-time'
         ? undefined
         : selectedKind.defaultDistanceMeters
-          ? selectedKind.defaultDistanceMeters
-          : Math.round((distanceCenti / 100) * METERS_PER_MILE);
+        ? selectedKind.defaultDistanceMeters
+        : Math.round((distanceCenti / 100) * METERS_PER_MILE);
     const trimmedNotes = notes.trim() || undefined;
     if (editing) {
       updateEntry(editing.id, {
@@ -199,27 +224,42 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
   }
 
   function handleDelete() {
-    if (!editing) return;
+    if (!editing) {
+      return;
+    }
     deleteEntry(editing.id);
     onClose();
   }
 
   // Live grade chip for runs.
   const runDistance = useMemo(() => {
-    if (!selectedKind) return undefined;
-    if (selectedKind.inputMode === 'mmss' && selectedKind.defaultDistanceMeters)
+    if (!selectedKind) {
+      return undefined;
+    }
+    if (
+      selectedKind.inputMode === 'mmss' &&
+      selectedKind.defaultDistanceMeters
+    ) {
       return selectedKind.defaultDistanceMeters;
-    if (selectedKind.inputMode === 'distance-time')
+    }
+    if (selectedKind.inputMode === 'distance-time') {
       return Math.round((distanceCenti / 100) * METERS_PER_MILE);
+    }
     return undefined;
   }, [selectedKind, distanceCenti]);
 
   const liveGrade = useMemo(
-    () => (runDistance && valueSec > 0 ? gradeForRun(runDistance, valueSec) : undefined),
+    () =>
+      runDistance && valueSec > 0
+        ? gradeForRun(runDistance, valueSec)
+        : undefined,
     [runDistance, valueSec],
   );
   const livePace = useMemo(
-    () => (runDistance && valueSec > 0 ? formatPace(runDistance, valueSec) : undefined),
+    () =>
+      runDistance && valueSec > 0
+        ? formatPace(runDistance, valueSec)
+        : undefined,
     [runDistance, valueSec],
   );
 
@@ -244,191 +284,249 @@ export function TrainingLogSheet({visible, onClose, editing, defaultElement, def
           />
         ) : (
           <>
-        {/* Compact header with inline save/cancel */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{editing ? 'Edit Entry' : 'New Training Log'}</Text>
-          {isLandscape && liveGrade && livePace ? (
-            <View style={styles.headerGrade}>
-              <Text style={[styles.headerGradeText, {color: accent}]}>
-                {liveGrade.grade}
+            {/* Compact header with inline save/cancel */}
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                {editing ? 'Edit Entry' : 'New Training Log'}
               </Text>
-              <Text style={styles.headerPaceText}>{livePace}</Text>
-            </View>
-          ) : null}
-          <View style={styles.headerActions}>
-            {editing ? (
-              <Pressable onPress={handleDelete} style={[styles.btn, styles.btnDanger]}>
-                <Text style={[styles.btnText, {color: palette.danger}]}>Delete</Text>
-              </Pressable>
-            ) : null}
-            <Pressable onPress={onClose} style={[styles.btn, styles.btnGhost]}>
-              <Text style={styles.btnText}>Cancel</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleSave}
-              disabled={!canSave}
-              style={[styles.btn, styles.btnPrimary, {backgroundColor: accent}, !canSave && styles.btnDisabled]}>
-              <Text style={[styles.btnText, styles.btnTextPrimary]}>
-                {editing ? 'Save' : 'Log Entry'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Body: two-column in landscape, stacked otherwise */}
-        <View style={isLandscape ? styles.bodyLandscape : styles.bodyPortrait}>
-          {/* Left column: exercise picker */}
-          <View
-            style={[
-              isLandscape ? styles.leftCol : styles.leftColPortrait,
-              isCompactLand && styles.leftColCompact,
-            ]}>
-            <View style={styles.colHeader}>
-              <Text style={styles.sectionTitle}>Exercises</Text>
-              {/* What's being logged, even when the list is scrolled away from it. */}
-              {selectedKind ? (
+              {isLandscape && liveGrade && livePace ? (
+                <View style={styles.headerGrade}>
+                  <Text style={[styles.headerGradeText, {color: accent}]}>
+                    {liveGrade.grade}
+                  </Text>
+                  <Text style={styles.headerPaceText}>{livePace}</Text>
+                </View>
+              ) : null}
+              <View style={styles.headerActions}>
+                {editing ? (
+                  <Pressable
+                    onPress={handleDelete}
+                    style={[styles.btn, styles.btnDanger]}>
+                    <Text style={[styles.btnText, {color: palette.danger}]}>
+                      Delete
+                    </Text>
+                  </Pressable>
+                ) : null}
                 <Pressable
-                  testID="log-selected-kind"
-                  onPress={() => info.open({kind: 'metric', id: selectedKind.id})}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${selectedKind.label}. What is this?`}>
-                  <Text
-                    style={[styles.selectedKind, {color: accent}]}
-                    numberOfLines={1}>
-                    {selectedKind.label} ⓘ
+                  onPress={onClose}
+                  style={[styles.btn, styles.btnGhost]}>
+                  <Text style={styles.btnText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleSave}
+                  disabled={!canSave}
+                  style={[
+                    styles.btn,
+                    styles.btnPrimary,
+                    {backgroundColor: accent},
+                    !canSave && styles.btnDisabled,
+                  ]}>
+                  <Text style={[styles.btnText, styles.btnTextPrimary]}>
+                    {editing ? 'Save' : 'Log Entry'}
                   </Text>
                 </Pressable>
-              ) : null}
-              <Pressable onPress={() => setShowManage(true)} hitSlop={8}>
-                <Text style={[styles.sectionAction, {color: accent}]}>Manage</Text>
-              </Pressable>
+              </View>
             </View>
-            <ScrollView style={styles.exerciseScroll} showsVerticalScrollIndicator={false}>
-              <FlatMetricList
-                metrics={metrics}
-                selectedId={selectedKindId}
-                onSelect={setSelectedKindId}
-                accent={accent}
-              />
-            </ScrollView>
-          </View>
 
-          {/* Right column: value column + (when + notes) column */}
-          <RightCol isLandscape={isLandscape} isCompactLand={isCompactLand}>
-            {(() => {
-              const whenSection = (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>When</Text>
-                  <View style={styles.dateRow}>
-                    {[0, 1, 2, 3].map(i => {
-                      const day = startOfDay(Date.now()) - i * MS_PER_DAY;
-                      const isSel = startOfDay(atEpoch) === day;
-                      return (
-                        <Pressable
-                          key={i}
-                          onPress={() => setAtEpoch(day)}
-                          style={[styles.chip, isSel && styles.chipSel, isSel && {backgroundColor: accent, borderColor: accent}]}>
-                          <Text style={[styles.chipText, isSel && styles.chipTextSel]}>
-                            {dayLabel(day, i)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
+            {/* Body: two-column in landscape, stacked otherwise */}
+            <View
+              style={isLandscape ? styles.bodyLandscape : styles.bodyPortrait}>
+              {/* Left column: exercise picker */}
+              <View
+                style={[
+                  isLandscape ? styles.leftCol : styles.leftColPortrait,
+                  isCompactLand && styles.leftColCompact,
+                ]}>
+                <View style={styles.colHeader}>
+                  <Text style={styles.sectionTitle}>Exercises</Text>
+                  {/* What's being logged, even when the list is scrolled away from it. */}
+                  {selectedKind ? (
                     <Pressable
-                      onPress={() => setShowCalendar(true)}
-                      style={[
-                        styles.chip,
-                        !isWithinQuickRange(atEpoch) && styles.chipSel,
-                        !isWithinQuickRange(atEpoch) && {backgroundColor: accent, borderColor: accent},
-                      ]}>
+                      testID="log-selected-kind"
+                      onPress={() =>
+                        info.open({kind: 'metric', id: selectedKind.id})
+                      }
+                      hitSlop={8}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${selectedKind.label}. What is this?`}>
                       <Text
-                        style={[
-                          styles.chipText,
-                          !isWithinQuickRange(atEpoch) && styles.chipTextSel,
-                        ]}>
-                        {isWithinQuickRange(atEpoch)
-                          ? '📅 Pick…'
-                          : `📅 ${formatPickedDate(atEpoch)}`}
+                        style={[styles.selectedKind, {color: accent}]}
+                        numberOfLines={1}>
+                        {selectedKind.label} ⓘ
                       </Text>
                     </Pressable>
-                  </View>
+                  ) : null}
+                  <Pressable onPress={() => setShowManage(true)} hitSlop={8}>
+                    <Text style={[styles.sectionAction, {color: accent}]}>
+                      Manage
+                    </Text>
+                  </Pressable>
                 </View>
-              );
+                <ScrollView
+                  style={styles.exerciseScroll}
+                  showsVerticalScrollIndicator={false}>
+                  <FlatMetricList
+                    metrics={metrics}
+                    selectedId={selectedKindId}
+                    onSelect={setSelectedKindId}
+                    accent={accent}
+                  />
+                </ScrollView>
+              </View>
 
-              return (
-                <>
-                  {/* Portrait: When sits above Value + Notes column. */}
-                  {!isLandscape && whenSection}
-
-                  {/* Value + (When+Notes) side-by-side in landscape */}
-                  <View style={isLandscape ? styles.valueNotesRowLand : styles.valueNotesColPort}>
-                    {selectedKind ? (
-                      <View
-                        style={[
-                          isLandscape ? styles.valueColLand : styles.valueColPort,
-                          isCompactLand && styles.valueColCompact,
-                        ]}>
-                        <Text style={styles.sectionTitle}>{inputLabel(selectedKind)}</Text>
-                        <ValueInput
-                          kind={selectedKind}
-                          valueSec={valueSec}
-                          valueReps={valueReps}
-                          distanceCenti={distanceCenti}
-                          onSec={setValueSec}
-                          onReps={setValueReps}
-                          onDistance={setDistanceCenti}
-                          accent={accent}
-                        />
+              {/* Right column: value column + (when + notes) column */}
+              <RightCol isLandscape={isLandscape} isCompactLand={isCompactLand}>
+                {(() => {
+                  const whenSection = (
+                    <View style={styles.section}>
+                      <Text style={styles.sectionTitle}>When</Text>
+                      <View style={styles.dateRow}>
+                        {[0, 1, 2, 3].map(i => {
+                          const day = startOfDay(Date.now()) - i * MS_PER_DAY;
+                          const isSel = startOfDay(atEpoch) === day;
+                          return (
+                            <Pressable
+                              key={i}
+                              onPress={() => setAtEpoch(day)}
+                              style={[
+                                styles.chip,
+                                isSel && styles.chipSel,
+                                isSel && {
+                                  backgroundColor: accent,
+                                  borderColor: accent,
+                                },
+                              ]}>
+                              <Text
+                                style={[
+                                  styles.chipText,
+                                  isSel && styles.chipTextSel,
+                                ]}>
+                                {dayLabel(day, i)}
+                              </Text>
+                            </Pressable>
+                          );
+                        })}
+                        <Pressable
+                          onPress={() => setShowCalendar(true)}
+                          style={[
+                            styles.chip,
+                            !isWithinQuickRange(atEpoch) && styles.chipSel,
+                            !isWithinQuickRange(atEpoch) && {
+                              backgroundColor: accent,
+                              borderColor: accent,
+                            },
+                          ]}>
+                          <Text
+                            style={[
+                              styles.chipText,
+                              !isWithinQuickRange(atEpoch) &&
+                                styles.chipTextSel,
+                            ]}>
+                            {isWithinQuickRange(atEpoch)
+                              ? '📅 Pick…'
+                              : `📅 ${formatPickedDate(atEpoch)}`}
+                          </Text>
+                        </Pressable>
                       </View>
-                    ) : null}
-
-                    <View style={isLandscape ? styles.notesColLand : styles.notesColPort}>
-                      {/* Landscape: When sits above Notes in this column. */}
-                      {isLandscape && whenSection}
-                      <Text style={styles.sectionTitle}>Notes</Text>
-                      <TextInput
-                        value={notes}
-                        onChangeText={setNotes}
-                        placeholder="How it felt, route, weather…"
-                        placeholderTextColor={palette.textMuted}
-                        style={[styles.notesInput, isLandscape && styles.notesInputLand]}
-                        multiline
-                      />
-                      {!isLandscape && liveGrade && livePace ? (
-                        <View style={styles.portraitGradeRow}>
-                          <View style={styles.headerGrade}>
-                            <Text style={[styles.headerGradeText, {color: accent}]}>
-                              {liveGrade.grade}
-                            </Text>
-                            <Text style={styles.headerPaceText}>{livePace}</Text>
-                          </View>
-                        </View>
-                      ) : null}
                     </View>
-                  </View>
-                </>
-              );
-            })()}
-          </RightCol>
-        </View>
+                  );
 
-        <ManageMetricsSheet
-          visible={showManage}
-          metrics={metrics}
-          onClose={closeManage}
-          onChange={refresh}
-          accent={accent}
-          defaultElement={defaultElement}
-        />
+                  return (
+                    <>
+                      {/* Portrait: When sits above Value + Notes column. */}
+                      {!isLandscape && whenSection}
 
-        <CalendarPicker
-          visible={showCalendar}
-          selected={atEpoch}
-          onPick={setAtEpoch}
-          onClose={closeCalendar}
-          accent={accent}
-        />
+                      {/* Value + (When+Notes) side-by-side in landscape */}
+                      <View
+                        style={
+                          isLandscape
+                            ? styles.valueNotesRowLand
+                            : styles.valueNotesColPort
+                        }>
+                        {selectedKind ? (
+                          <View
+                            style={[
+                              isLandscape
+                                ? styles.valueColLand
+                                : styles.valueColPort,
+                              isCompactLand && styles.valueColCompact,
+                            ]}>
+                            <Text style={styles.sectionTitle}>
+                              {inputLabel(selectedKind)}
+                            </Text>
+                            <ValueInput
+                              kind={selectedKind}
+                              valueSec={valueSec}
+                              valueReps={valueReps}
+                              distanceCenti={distanceCenti}
+                              onSec={setValueSec}
+                              onReps={setValueReps}
+                              onDistance={setDistanceCenti}
+                              accent={accent}
+                            />
+                          </View>
+                        ) : null}
+
+                        <View
+                          style={
+                            isLandscape
+                              ? styles.notesColLand
+                              : styles.notesColPort
+                          }>
+                          {/* Landscape: When sits above Notes in this column. */}
+                          {isLandscape && whenSection}
+                          <Text style={styles.sectionTitle}>Notes</Text>
+                          <TextInput
+                            value={notes}
+                            onChangeText={setNotes}
+                            placeholder="How it felt, route, weather…"
+                            placeholderTextColor={palette.textMuted}
+                            style={[
+                              styles.notesInput,
+                              isLandscape && styles.notesInputLand,
+                            ]}
+                            multiline
+                          />
+                          {!isLandscape && liveGrade && livePace ? (
+                            <View style={styles.portraitGradeRow}>
+                              <View style={styles.headerGrade}>
+                                <Text
+                                  style={[
+                                    styles.headerGradeText,
+                                    {color: accent},
+                                  ]}>
+                                  {liveGrade.grade}
+                                </Text>
+                                <Text style={styles.headerPaceText}>
+                                  {livePace}
+                                </Text>
+                              </View>
+                            </View>
+                          ) : null}
+                        </View>
+                      </View>
+                    </>
+                  );
+                })()}
+              </RightCol>
+            </View>
+
+            <ManageMetricsSheet
+              visible={showManage}
+              metrics={metrics}
+              onClose={closeManage}
+              onChange={refresh}
+              accent={accent}
+              defaultElement={defaultElement}
+            />
+
+            <CalendarPicker
+              visible={showCalendar}
+              selected={atEpoch}
+              onPick={setAtEpoch}
+              onClose={closeCalendar}
+              accent={accent}
+            />
           </>
         )}
       </SafeAreaView>
@@ -496,7 +594,9 @@ const FlatMetricListInner = React.memo(function FlatMetricListInner({
     <View>
       {cats.map(cat => {
         const list = grouped[cat];
-        if (!list || list.length === 0) return null;
+        if (!list || list.length === 0) {
+          return null;
+        }
         return (
           <View key={cat} style={{marginBottom: spacing.sm}}>
             <Text style={styles.catHeader}>{categoryLabel(cat)}</Text>
@@ -504,7 +604,10 @@ const FlatMetricListInner = React.memo(function FlatMetricListInner({
               <Pressable
                 key={m.id}
                 onPress={() => onSelect(m.id)}
-                style={[styles.metricRow, selectedId === m.id && styles.metricRowSel]}>
+                style={[
+                  styles.metricRow,
+                  selectedId === m.id && styles.metricRowSel,
+                ]}>
                 <Text
                   style={[
                     styles.metricBulletText,
@@ -545,12 +648,37 @@ function ValueInput({
 }) {
   switch (kind.inputMode) {
     case 'mmss':
-      return <NumberPad mode="mmss" value={valueSec} onChange={onSec} accent={accent} compact />;
+      return (
+        <NumberPad
+          mode="mmss"
+          value={valueSec}
+          onChange={onSec}
+          accent={accent}
+          compact
+        />
+      );
     case 'integer':
-      return <NumberPad mode="integer" value={valueReps} onChange={onReps} accent={accent} max={999} compact />;
+      return (
+        <NumberPad
+          mode="integer"
+          value={valueReps}
+          onChange={onReps}
+          accent={accent}
+          max={999}
+          compact
+        />
+      );
     case 'decimal':
       // Hundredths, e.g. a waist of 36.50 in.
-      return <NumberPad mode="decimal-2dp" value={valueReps} onChange={onReps} accent={accent} compact />;
+      return (
+        <NumberPad
+          mode="decimal-2dp"
+          value={valueReps}
+          onChange={onReps}
+          accent={accent}
+          compact
+        />
+      );
     case 'distance-time': {
       const hasFixed = !!kind.defaultDistanceMeters;
       return (
@@ -558,11 +686,23 @@ function ValueInput({
           {!hasFixed && (
             <View style={{marginBottom: spacing.sm}}>
               <Text style={styles.subLabel}>Distance (mi)</Text>
-              <NumberPad mode="decimal-2dp" value={distanceCenti} onChange={onDistance} accent={accent} compact />
+              <NumberPad
+                mode="decimal-2dp"
+                value={distanceCenti}
+                onChange={onDistance}
+                accent={accent}
+                compact
+              />
             </View>
           )}
           <Text style={styles.subLabel}>Time (HH:MM:SS)</Text>
-          <NumberPad mode="mmss" value={valueSec} onChange={onSec} accent={accent} compact />
+          <NumberPad
+            mode="mmss"
+            value={valueSec}
+            onChange={onSec}
+            accent={accent}
+            compact
+          />
         </View>
       );
     }
@@ -586,7 +726,11 @@ function ManageMetricsSheet({
 }) {
   const [showAdd, setShowAdd] = useState(false);
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent={false}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}
+      transparent={false}>
       <View style={styles.root}>
         <View style={styles.header}>
           <Text style={styles.title}>Manage Exercises</Text>
@@ -596,18 +740,29 @@ function ManageMetricsSheet({
             </Pressable>
           </View>
         </View>
-        <ScrollView contentContainerStyle={{padding: spacing.lg, paddingBottom: spacing.xxl}}>
+        <ScrollView
+          contentContainerStyle={{
+            padding: spacing.lg,
+            paddingBottom: spacing.xxl,
+          }}>
           <Pressable
             onPress={() => setShowAdd(true)}
-            style={[styles.btn, styles.btnPrimary, {backgroundColor: accent, marginBottom: spacing.lg}]}>
-            <Text style={[styles.btnText, styles.btnTextPrimary]}>+ Add new exercise</Text>
+            style={[
+              styles.btn,
+              styles.btnPrimary,
+              {backgroundColor: accent, marginBottom: spacing.lg},
+            ]}>
+            <Text style={[styles.btnText, styles.btnTextPrimary]}>
+              + Add new exercise
+            </Text>
           </Pressable>
           {metrics.map(m => (
             <View key={m.id} style={styles.manageRow}>
               <View style={{flex: 1}}>
                 <Text style={styles.metricLabel}>{m.label}</Text>
                 <Text style={styles.metricMode}>
-                  {inputModeShort(m.inputMode)} · {m.builtIn ? 'built-in' : 'custom'}
+                  {inputModeShort(m.inputMode)} ·{' '}
+                  {m.builtIn ? 'built-in' : 'custom'}
                 </Text>
               </View>
               <Pressable
@@ -616,13 +771,16 @@ function ManageMetricsSheet({
                   onChange();
                 }}
                 style={styles.iconBtn}>
-                <Text style={styles.iconBtnText}>{m.builtIn ? 'Hide' : 'Delete'}</Text>
+                <Text style={styles.iconBtnText}>
+                  {m.builtIn ? 'Hide' : 'Delete'}
+                </Text>
               </Pressable>
             </View>
           ))}
           <Text style={styles.helpText}>
-            Built-in exercises are hidden, not removed — old log entries that reference them stay readable.
-            Custom exercises with no entries are deleted; otherwise they're archived.
+            Built-in exercises are hidden, not removed — old log entries that
+            reference them stay readable. Custom exercises with no entries are
+            deleted; otherwise they're archived.
           </Text>
           <ArchivedList onChange={onChange} />
         </ScrollView>
@@ -642,10 +800,14 @@ function ManageMetricsSheet({
 
 function ArchivedList({onChange}: {onChange: () => void}) {
   const archived = useMemo(loadArchivedMetrics, []);
-  if (archived.length === 0) return null;
+  if (archived.length === 0) {
+    return null;
+  }
   return (
     <View style={{marginTop: spacing.xl}}>
-      <Text style={[styles.sectionTitle, {marginBottom: spacing.sm}]}>Archived</Text>
+      <Text style={[styles.sectionTitle, {marginBottom: spacing.sm}]}>
+        Archived
+      </Text>
       {archived.map(a => (
         <View key={a.id} style={styles.manageRow}>
           <Text style={[styles.metricLabel, {flex: 1}]}>{a.label}</Text>
@@ -689,7 +851,9 @@ function AddCustomMetricSheet({
   const canSave = label.trim().length > 0;
 
   function save() {
-    if (!canSave) return;
+    if (!canSave) {
+      return;
+    }
     addCustomMetric({
       label: label.trim(),
       category,
@@ -701,7 +865,11 @@ function AddCustomMetricSheet({
   }
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent={false}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}
+      transparent={false}>
       <View style={styles.root}>
         <View style={styles.header}>
           <Text style={styles.title}>New Exercise</Text>
@@ -712,7 +880,12 @@ function AddCustomMetricSheet({
             <Pressable
               onPress={save}
               disabled={!canSave}
-              style={[styles.btn, styles.btnPrimary, {backgroundColor: accent}, !canSave && styles.btnDisabled]}>
+              style={[
+                styles.btn,
+                styles.btnPrimary,
+                {backgroundColor: accent},
+                !canSave && styles.btnDisabled,
+              ]}>
               <Text style={[styles.btnText, styles.btnTextPrimary]}>Add</Text>
             </Pressable>
           </View>
@@ -726,20 +899,35 @@ function AddCustomMetricSheet({
             placeholderTextColor={palette.textMuted}
             style={styles.notesInput}
           />
-          <Text style={[styles.sectionTitle, {marginTop: spacing.lg}]}>Category</Text>
+          <Text style={[styles.sectionTitle, {marginTop: spacing.lg}]}>
+            Category
+          </Text>
           <View style={styles.dateRow}>
             {(['run', 'reps', 'hold', 'custom'] as MetricCategory[]).map(c => (
               <Pressable
                 key={c}
                 onPress={() => setCategory(c)}
-                style={[styles.chip, category === c && styles.chipSel, category === c && {backgroundColor: accent, borderColor: accent}]}>
-                <Text style={[styles.chipText, category === c && styles.chipTextSel]}>
+                style={[
+                  styles.chip,
+                  category === c && styles.chipSel,
+                  category === c && {
+                    backgroundColor: accent,
+                    borderColor: accent,
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.chipText,
+                    category === c && styles.chipTextSel,
+                  ]}>
                   {categoryLabel(c)}
                 </Text>
               </Pressable>
             ))}
           </View>
-          <Text style={[styles.sectionTitle, {marginTop: spacing.lg}]}>Input type</Text>
+          <Text style={[styles.sectionTitle, {marginTop: spacing.lg}]}>
+            Input type
+          </Text>
           <View style={styles.dateRow}>
             {(
               [
@@ -751,8 +939,15 @@ function AddCustomMetricSheet({
               <Pressable
                 key={m}
                 onPress={() => setMode(m)}
-                style={[styles.chip, mode === m && styles.chipSel, mode === m && {backgroundColor: accent, borderColor: accent}]}>
-                <Text style={[styles.chipText, mode === m && styles.chipTextSel]}>{lbl}</Text>
+                style={[
+                  styles.chip,
+                  mode === m && styles.chipSel,
+                  mode === m && {backgroundColor: accent, borderColor: accent},
+                ]}>
+                <Text
+                  style={[styles.chipText, mode === m && styles.chipTextSel]}>
+                  {lbl}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -771,8 +966,12 @@ function startOfDay(epoch: number): number {
 }
 
 function dayLabel(day: number, i: number): string {
-  if (i === 0) return 'Today';
-  if (i === 1) return 'Yest';
+  if (i === 0) {
+    return 'Today';
+  }
+  if (i === 1) {
+    return 'Yest';
+  }
   return new Date(day).toLocaleDateString(undefined, {weekday: 'short'});
 }
 
@@ -832,10 +1031,14 @@ function inputLabel(kind: MetricKind): string {
   }
 }
 
-function groupByCategory(metrics: MetricKind[]): Partial<Record<MetricCategory, MetricKind[]>> {
+function groupByCategory(
+  metrics: MetricKind[],
+): Partial<Record<MetricCategory, MetricKind[]>> {
   const out: Partial<Record<MetricCategory, MetricKind[]>> = {};
   for (const m of metrics) {
-    if (!out[m.category]) out[m.category] = [];
+    if (!out[m.category]) {
+      out[m.category] = [];
+    }
     out[m.category]!.push(m);
   }
   return out;
@@ -843,7 +1046,12 @@ function groupByCategory(metrics: MetricKind[]): Partial<Record<MetricCategory, 
 
 function hasValue(
   mode: InputMode,
-  v: {valueSec: number; valueReps: number; distanceCenti: number; fixedDistance?: number},
+  v: {
+    valueSec: number;
+    valueReps: number;
+    distanceCenti: number;
+    fixedDistance?: number;
+  },
 ): boolean {
   switch (mode) {
     case 'mmss':
@@ -853,8 +1061,7 @@ function hasValue(
       return v.valueReps > 0;
     case 'distance-time':
       return (
-        v.valueSec > 0 &&
-        ((v.fixedDistance ?? 0) > 0 || v.distanceCenti > 0)
+        v.valueSec > 0 && ((v.fixedDistance ?? 0) > 0 || v.distanceCenti > 0)
       );
   }
 }

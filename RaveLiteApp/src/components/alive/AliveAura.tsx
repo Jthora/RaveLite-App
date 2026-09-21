@@ -41,7 +41,14 @@ function Glow({
   return (
     <Svg width="100%" height="100%" preserveAspectRatio="none">
       <Defs>
-        <RadialGradient id={id} cx="50%" cy="0%" rx="85%" ry="60%" fx="50%" fy="0%">
+        <RadialGradient
+          id={id}
+          cx="50%"
+          cy="0%"
+          rx="85%"
+          ry="60%"
+          fx="50%"
+          fy="0%">
           <Stop offset="0" stopColor={color} stopOpacity={strength} />
           <Stop offset="0.45" stopColor={deep} stopOpacity={strength * 0.6} />
           <Stop offset="1" stopColor={deep} stopOpacity={0} />
@@ -74,7 +81,12 @@ export function AliveAura({color, deep}: Props) {
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Glow id="aura-static" color={color} deep={deep} strength={STATIC_STRENGTH} />
+      <Glow
+        id="aura-static"
+        color={color}
+        deep={deep}
+        strength={STATIC_STRENGTH}
+      />
       {moving ? (
         <Animated.View
           renderToHardwareTextureAndroid

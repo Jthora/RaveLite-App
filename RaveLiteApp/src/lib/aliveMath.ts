@@ -97,10 +97,28 @@ export interface MotionBudget {
 }
 
 const BUDGETS: Record<MotionMode, MotionBudget> = {
-  whisper: {breathMin: 0.02, breathMax: 0.05, energyMax: 0.04, cuePeak: 0.14, enterPeak: 0.1},
-  glow: {breathMin: 0.04, breathMax: 0.09, energyMax: 0.06, cuePeak: 0.14, enterPeak: 0.12},
+  whisper: {
+    breathMin: 0.02,
+    breathMax: 0.05,
+    energyMax: 0.04,
+    cuePeak: 0.14,
+    enterPeak: 0.1,
+  },
+  glow: {
+    breathMin: 0.04,
+    breathMax: 0.09,
+    energyMax: 0.06,
+    cuePeak: 0.14,
+    enterPeak: 0.12,
+  },
   // "Still until a chime": no idle breathing, touches and chimes still move.
-  still: {breathMin: 0, breathMax: 0, energyMax: 0.04, cuePeak: 0.14, enterPeak: 0.1},
+  still: {
+    breathMin: 0,
+    breathMax: 0,
+    energyMax: 0.04,
+    cuePeak: 0.14,
+    enterPeak: 0.1,
+  },
   // Forced stillness (Remove animations / night / pause): only a gentle
   // chime fade remains so a chime is still visibly felt.
   off: {breathMin: 0, breathMax: 0, energyMax: 0, cuePeak: 0.08, enterPeak: 0},

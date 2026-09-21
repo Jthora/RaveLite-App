@@ -52,7 +52,9 @@ export function Tap({
       disabled={disabled}
       onPress={disabled ? undefined : onPress}
       android_ripple={
-        disabled ? undefined : {color: hexWithAlpha(color, 0.18), borderless: false}
+        disabled
+          ? undefined
+          : {color: hexWithAlpha(color, 0.18), borderless: false}
       }
       style={({pressed}) => [
         baseStyleFor(variant),
@@ -87,15 +89,21 @@ function baseStyleFor(v: Variant): ViewStyle {
 function pressedOverlay(v: Variant): ViewStyle {
   // Slightly different feedback per variant — solid dims, ghost
   // brightens, plain just fades.
-  if (v === 'solid') {return {opacity: 0.78};}
-  if (v === 'ghost') {return {opacity: 0.65};}
+  if (v === 'solid') {
+    return {opacity: 0.78};
+  }
+  if (v === 'ghost') {
+    return {opacity: 0.65};
+  }
   return {opacity: 0.6};
 }
 
 function hexWithAlpha(hex: string, alpha: number): string {
   // Simple #RRGGBB → rgba(). Falls back to white if shape is unexpected.
   const m = /^#([0-9a-f]{6})$/i.exec(hex);
-  if (!m) {return `rgba(255,255,255,${alpha})`;}
+  if (!m) {
+    return `rgba(255,255,255,${alpha})`;
+  }
   const n = parseInt(m[1], 16);
   const r = (n >> 16) & 0xff;
   const g = (n >> 8) & 0xff;

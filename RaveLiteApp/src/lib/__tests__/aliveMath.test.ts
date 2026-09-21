@@ -67,7 +67,8 @@ describe('steppedBreath', () => {
   it('jumps between steps rather than gliding', () => {
     for (let i = 1; i < inputRange.length; i++) {
       const gliding =
-        inputRange[i] > inputRange[i - 1] && outputRange[i] !== outputRange[i - 1];
+        inputRange[i] > inputRange[i - 1] &&
+        outputRange[i] !== outputRange[i - 1];
       expect(gliding).toBe(false);
     }
   });
@@ -93,7 +94,10 @@ describe('touch energy', () => {
 
 describe('motion budgets', () => {
   it('keeps idle motion within the agreed limits', () => {
-    expect(intensityBudget('whisper')).toMatchObject({breathMin: 0.02, breathMax: 0.05});
+    expect(intensityBudget('whisper')).toMatchObject({
+      breathMin: 0.02,
+      breathMax: 0.05,
+    });
     expect(intensityBudget('glow').breathMax).toBeLessThanOrEqual(0.09);
     for (const mode of ['whisper', 'glow', 'still', 'off'] as const) {
       const b = intensityBudget(mode);
@@ -110,7 +114,12 @@ describe('motion budgets', () => {
   });
 
   it('reduce motion, night or pause force off; otherwise the setting wins', () => {
-    const base = {reduceMotion: false, night: false, paused: false, setting: 'glow' as const};
+    const base = {
+      reduceMotion: false,
+      night: false,
+      paused: false,
+      setting: 'glow' as const,
+    };
     expect(resolveMotionMode(base)).toBe('glow');
     expect(resolveMotionMode({...base, reduceMotion: true})).toBe('off');
     expect(resolveMotionMode({...base, night: true})).toBe('off');

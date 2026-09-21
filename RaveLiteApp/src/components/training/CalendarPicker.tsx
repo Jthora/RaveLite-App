@@ -24,7 +24,13 @@ interface Props {
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-export const CalendarPicker = React.memo(function CalendarPicker({visible, selected, onPick, onClose, accent: accentProp}: Props) {
+export const CalendarPicker = React.memo(function CalendarPicker({
+  visible,
+  selected,
+  onPick,
+  onClose,
+  accent: accentProp,
+}: Props) {
   const ctxAccent = useElementAccent();
   const accent = accentProp ?? ctxAccent;
   const initial = new Date(selected);
@@ -65,21 +71,37 @@ export const CalendarPicker = React.memo(function CalendarPicker({visible, selec
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}>
       <Pressable style={styles.scrim} onPress={onClose}>
         <Pressable style={styles.card} onPress={() => {}}>
           <View style={styles.header}>
-            <Pressable onPress={() => step(-12)} style={styles.navBtn} hitSlop={12}>
+            <Pressable
+              onPress={() => step(-12)}
+              style={styles.navBtn}
+              hitSlop={12}>
               <Text style={styles.navText}>‹‹</Text>
             </Pressable>
-            <Pressable onPress={() => step(-1)} style={styles.navBtn} hitSlop={12}>
+            <Pressable
+              onPress={() => step(-1)}
+              style={styles.navBtn}
+              hitSlop={12}>
               <Text style={styles.navText}>‹</Text>
             </Pressable>
             <Text style={styles.monthLabel}>{monthLabel}</Text>
-            <Pressable onPress={() => step(1)} style={styles.navBtn} hitSlop={12}>
+            <Pressable
+              onPress={() => step(1)}
+              style={styles.navBtn}
+              hitSlop={12}>
               <Text style={styles.navText}>›</Text>
             </Pressable>
-            <Pressable onPress={() => step(12)} style={styles.navBtn} hitSlop={12}>
+            <Pressable
+              onPress={() => step(12)}
+              style={styles.navBtn}
+              hitSlop={12}>
               <Text style={styles.navText}>››</Text>
             </Pressable>
           </View>
@@ -160,7 +182,9 @@ function buildMonthGrid(year: number, month: number): Date[] {
   // 6 weeks × 7 = 42 cells, starting from the Sunday on/before the 1st.
   const start = new Date(year, month, 1 - startOffset);
   for (let i = 0; i < 42; i++) {
-    grid.push(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+    grid.push(
+      new Date(start.getFullYear(), start.getMonth(), start.getDate() + i),
+    );
   }
   return grid;
 }

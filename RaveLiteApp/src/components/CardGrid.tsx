@@ -34,10 +34,7 @@ export const CardGrid: React.FC<Props> = ({children}) => {
       {cols.map((col, i) => (
         <View
           key={i}
-          style={[
-            styles.col,
-            i < columns - 1 && {marginRight: spacing.md},
-          ]}>
+          style={[styles.col, i < columns - 1 && {marginRight: spacing.md}]}>
           {col}
         </View>
       ))}
