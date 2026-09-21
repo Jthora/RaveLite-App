@@ -32,6 +32,8 @@ interface RaveLiteDeviceNative {
   saveExport?(filename: string, text: string): Promise<string | null>;
   readExport?(): Promise<string | null>;
   restartApp?(): Promise<boolean>;
+  /** Missing on APKs built before units. */
+  getLocale?(): Promise<{language: string; country: string}>;
 }
 
 const native: RaveLiteDeviceNative | undefined =
@@ -170,6 +172,24 @@ export async function restartApp(): Promise<boolean> {
     return await native.restartApp();
   } catch {
     return false;
+  }
+}
+
+/**
+ * The phone's language and country, or null when the build cannot say.
+ * Used once, to guess units rather than ask about them.
+ */
+export async function getLocale(): Promise<{
+  language: string;
+  country: string;
+} | null> {
+  if (!native?.getLocale) {
+    return null;
+  }
+  try {
+    return await native.getLocale();
+  } catch {
+    return null;
   }
 }
 

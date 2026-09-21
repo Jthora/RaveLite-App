@@ -36,6 +36,7 @@ import {windowStart} from '../../domain/activity/stats';
 import {setsToday} from '../../domain/ambient/setScheduler';
 import {lastWeekDone} from '../../domain/program/adapt';
 import {pushupDay} from '../../domain/program/pushups';
+import {heightToInches, loadUnits} from '../../domain/settings/units';
 import {loadPacks, loadPushupGoal} from '../../domain/profile/repository';
 import {pushupRamp, type PushupRamp} from '../../domain/program/ramp';
 import {runFor} from '../../domain/program/morning';
@@ -734,24 +735,33 @@ function HeightEditor({
   onClose: () => void;
   onSave: (inches: number) => void;
 }) {
+  const units = loadUnits();
   const [value, setValue] = useState(0);
   useEffect(() => {
     if (visible) {
-      setValue(getHeightInches() ?? 0);
+      const inches = getHeightInches();
+      setValue(
+        inches === undefined
+          ? 0
+          : Math.round(units === 'imperial' ? inches : inches * 2.54),
+      );
     }
-  }, [visible]);
+  }, [visible, units]);
   if (!visible) {
     return null;
   }
   const accent = ELEMENTS.heart.accent;
-  const valid = value >= 36;
+  // 36 in / 91 cm — below that it is a typo, not a person.
+  const valid = heightToInches(value, units) >= 36;
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.editor, {borderColor: accent}]}>
           <Text style={[styles.editorTitle, {color: accent}]}>Your height</Text>
           <Text style={styles.caption}>
-            In inches, for waist-to-height: 5 ft 10 in is 70.
+            {units === 'imperial'
+              ? 'In inches, for waist-to-height: 5 ft 10 in is 70.'
+              : 'In centimetres, for waist-to-height: 5 ft 10 in is 178.'}
           </Text>
           <NumberPad
             mode="integer"
@@ -774,7 +784,7 @@ function HeightEditor({
               variant="solid"
               color={valid ? accent : palette.textMuted}
               disabled={!valid}
-              onPress={() => onSave(value)}
+              onPress={() => onSave(heightToInches(value, units))}
               accessibilityRole="button"
               style={styles.editorBtn}>
               <Text style={styles.saveText}>Save</Text>

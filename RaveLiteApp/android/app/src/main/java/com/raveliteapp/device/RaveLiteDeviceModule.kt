@@ -127,6 +127,20 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     promise.resolve(true)
   }
 
+  /**
+   * The phone's locale, as a BCP-47 tag ("en-US", "en-GB"). Used once, to
+   * guess whether somebody thinks in miles or kilometres — the app asks
+   * nobody a units question it can answer itself.
+   */
+  @ReactMethod
+  fun getLocale(promise: Promise) {
+    val locale = Locale.getDefault()
+    val result = Arguments.createMap()
+    result.putString("language", locale.language)
+    result.putString("country", locale.country)
+    promise.resolve(result)
+  }
+
   /** Resolves `{current, max}` for the alarm stream. */
   @ReactMethod
   fun getAlarmVolume(promise: Promise) {

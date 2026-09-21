@@ -33,6 +33,10 @@ import {startWeather} from './src/domain/conditions/weather';
 import {ElementShell} from './src/shell/ElementShell';
 import {SetupFlow} from './src/screens/setup/SetupFlow';
 import {needsSetup} from './src/domain/profile/repository';
+import {capTextScaling} from './src/lib/textScaling';
+import {guessUnitsOnce} from './src/domain/settings/units';
+import {setWeatherPrefs} from './src/domain/conditions/weather';
+import {getLocale} from './src/native/raveLiteDevice';
 import {NightVeil} from './src/components/alive/NightVeil';
 import {CueWash} from './src/components/alive/CueWash';
 import {startAliveBridge} from './src/domain/ambient/aliveBridge';
@@ -53,6 +57,10 @@ registerAmbientForegroundService();
 function onRootTouch(): void {
   aliveTouch();
 }
+
+// Once, before anything renders: the OS font setting may grow this app,
+// but not far enough to break the rows it is built around.
+capTextScaling();
 
 function App(): React.JSX.Element {
   // Gate the first render until persisted state has been loaded into
@@ -84,7 +92,13 @@ function App(): React.JSX.Element {
       // schema version.
       runMigrations();
       if (!cancelled) {
-        setSetup(needsSetup());
+        const fresh = needsSetup();
+        // Guess miles or kilometres from the phone rather than asking. An
+        // install that has been running keeps what it was showing.
+        void guessUnitsOnce(fresh, getLocale, units =>
+          setWeatherPrefs({units}),
+        );
+        setSetup(fresh);
         setHydrated(true);
         // Reminders pipeline: now that persisted state is available,
         // start the runtime, both producers (Plan cadence + Daily Sets),

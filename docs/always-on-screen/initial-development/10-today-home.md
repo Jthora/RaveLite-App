@@ -783,6 +783,59 @@ The lesson worth keeping: a tolerated error count is a place for real
 bugs to hide, because a baseline is something people compare against
 instead of read.
 
+## Units (`src/domain/settings/units.ts`, since 20 Sep 2026)
+
+The app was written in one country and quietly assumed it: distances in
+miles, height in inches, and a `formatTemp` whose `TempUnits` argument
+nobody ever passed, so everyone saw Celsius whatever they thought in.
+Neither was a default so much as an accident.
+
+Two rules:
+
+- **Guess, don't ask.** The phone knows the country
+  (`getLocale()` on the device module). A units question in setup is a
+  question the app could have answered itself.
+- **Never move the ground under somebody already standing on it.** The
+  guess runs only for an install with no history. Anyone already running
+  keeps exactly what they were seeing, because waking up to a number that
+  means something different is worse than one in units you would not have
+  picked. A test holds this.
+
+Only the US, Liberia and Myanmar are treated as imperial. The UK is
+deliberately metric here: miles on the road, Celsius in the forecast,
+feet for a person — no single system fits, and "metric with miles" is a
+mess this app does not need to model.
+
+**Temperature keeps its own toggle.** Weather has had a C/F switch since
+before units existed, and that switch stays the truth for temperature;
+the guess only seeds what it starts at. One choice, not two — the module
+takes `seedTemperature` as an argument rather than importing the weather,
+so it stays out of that business entirely.
+
+**Test distances do not convert.** A USAF 1.5-mile run is 1.5 miles in
+every country, and a chart scored in miles stays in miles. Units apply to
+what the app says about a person, not to what an official standard says
+about a distance.
+
+## Text scaling (`src/lib/textScaling.ts`, since 20 Sep 2026)
+
+Nothing capped text scaling, which means it was uncapped: a phone on its
+largest font setting asks for roughly double, and on a 720 dp screen that
+folds the rows this design is built around — the conditions line that has
+to stay on one line, the Daily Sets meters, the bottom links. A broken
+layout serves the person who needed large text worse than slightly
+smaller text would have.
+
+So text grows to `MAX_FONT_SCALE` (1.35) and no further, set once through
+`Text.defaultProps` rather than on 559 components. The number is a
+judgement, checked on the device: at 1.3× everything is readable, nothing
+overlaps, nothing scrolls sideways, and the conditions line truncates its
+last word rather than wrapping. Past about 1.35 those rows start to fold.
+
+Somebody who needs more than this is better served by the system zoom
+than by an app that folds in half, and the cap should be honest about
+being a compromise rather than pretending to be a feature.
+
 ## Packs and archetypes (`src/domain/profile/`, since 20 Sep 2026)
 
 Four dials, coarsest last: the **room** decides what is possible

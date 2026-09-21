@@ -499,7 +499,11 @@ with the archetypes in Phase 3.
       content (20 Sep 2026). Packs ship as source and are reviewed like
       any other change; there is no sideloading in the beta, and the doc
       says so.
-- [ ] Locale and units; text scaling pass
+- [x] Units, guessed from the phone and never re-guessed (20 Sep 2026).
+      Temperature keeps its existing C/F toggle; test distances stay in
+      the units their charts are written in.
+- [x] Text scaling pass — capped at 1.35, verified on the device at 1.3×
+      (20 Sep 2026)
 - [x] Data export, restore and wipe; privacy copy *(done early — see §12)*
 - [ ] F-Droid submission
 

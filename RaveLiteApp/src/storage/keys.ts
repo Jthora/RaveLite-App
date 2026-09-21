@@ -62,6 +62,8 @@ export const KEYS = {
   // ── Who is using it: kit, room, and what they train for ─────────
   /** `Profile` JSON — facts about the person, and any temporary mode. */
   profile: 'profile.state',
+  /** 'metric' | 'imperial'; absent means never chosen. */
+  units: 'settings.units',
 
   // ── Attributes (the character sheet's fifteen) ───────────────────
   /** `AttributesState` JSON — levels, XP and the day rolled up through. */
