@@ -1,8 +1,8 @@
 /**
  * Daily par — balance as the goal.
  *
- * Each element aims for DAILY_PAR effort points a day. Points past par
- * count half, up to PAR_CEILING, and nothing beyond: piling more onto one
+ * Each element aims for a number of effort points a day. Points past par
+ * count half, up to twice par, and nothing beyond: piling more onto one
  * element can't carry the day. A day with all five at par is a Harmony day.
  */
 import {ELEMENT_ORDER, type ElementId} from '../../theme/elements';
@@ -25,13 +25,21 @@ export const POINTS = {
   sessionMinutesMax: 30,
 } as const;
 
+/**
+ * Par for a full day. A shorter day asks for proportionally less — see
+ * `program/density.ts`, and `profile/repository.ts#dailyPar` for the one
+ * this person is actually measured against. The functions below take par
+ * as an argument so they stay pure; the default is the full day, which is
+ * what every caller written before day shapes existed expects.
+ */
 export const DAILY_PAR = 20;
-export const PAR_CEILING = 40;
+/** Where a full day's points stop counting at all. */
+export const PAR_CEILING = DAILY_PAR * 2;
 
-/** Points toward the day's score: in full to par, half to the ceiling, then none. */
-export function scoredPoints(raw: number): number {
-  const capped = Math.max(0, Math.min(raw, PAR_CEILING));
-  return Math.min(capped, DAILY_PAR) + Math.max(0, capped - DAILY_PAR) / 2;
+/** Points toward the day's score: in full to par, half to double, then none. */
+export function scoredPoints(raw: number, par: number = DAILY_PAR): number {
+  const capped = Math.max(0, Math.min(raw, par * 2));
+  return Math.min(capped, par) + Math.max(0, capped - par) / 2;
 }
 
 /**
@@ -40,11 +48,12 @@ export function scoredPoints(raw: number): number {
  */
 export function averageShortfall(
   byDay: Readonly<Record<ElementId, readonly number[]>>,
+  par: number = DAILY_PAR,
 ): Record<ElementId, number> {
   const out = {} as Record<ElementId, number>;
   for (const id of ELEMENT_ORDER) {
     const days = byDay[id] ?? [];
-    const missed = days.reduce((sum, p) => sum + Math.max(0, DAILY_PAR - p), 0);
+    const missed = days.reduce((sum, p) => sum + Math.max(0, par - p), 0);
     out[id] = days.length > 0 ? missed / days.length : 0;
   }
   return out;
@@ -53,6 +62,7 @@ export function averageShortfall(
 /** Every element reached par. */
 export function isHarmony(
   points: Readonly<Partial<Record<ElementId, number>>>,
+  par: number = DAILY_PAR,
 ): boolean {
-  return ELEMENT_ORDER.every(id => (points[id] ?? 0) >= DAILY_PAR);
+  return ELEMENT_ORDER.every(id => (points[id] ?? 0) >= par);
 }

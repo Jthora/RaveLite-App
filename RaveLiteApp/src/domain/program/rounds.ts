@@ -273,17 +273,27 @@ function placeSets(
 
 export function groupIntoRounds(
   prescriptions: readonly DayPrescription[],
-  opts: {balance?: ElementBalance; focus?: readonly AttributeId[]} = {},
+  opts: {
+    balance?: ElementBalance;
+    focus?: readonly AttributeId[];
+    /** Chimes this day can carry; defaults to the full nine. */
+    rounds?: number;
+  } = {},
 ): Round[] {
   const active = prescriptions.filter(p => p.sets > 0);
   const total = active.reduce((sum, p) => sum + p.sets, 0);
   if (total === 0) {
     return [];
   }
+  const target = Math.max(1, opts.rounds ?? TARGET_ROUNDS);
   const most = Math.max(...active.map(p => p.sets));
+  // `most` and the moves-per-round ceiling are floors, not preferences: a
+  // track cannot appear twice in one round, and a round that asks for
+  // eight moves is not a round. A short day gets fewer, bigger rounds —
+  // never fewer sets than it was prescribed.
   let count = Math.max(
     most,
-    Math.min(TARGET_ROUNDS, total),
+    Math.min(target, total),
     Math.ceil(total / MAX_MOVES_PER_ROUND),
   );
   let slots = placeSets(active, count);

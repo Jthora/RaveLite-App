@@ -7,6 +7,7 @@ import type {
   Track,
   TrackState,
 } from './types';
+import {scaleSets} from './density';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {canDo, type Facts} from '../profile/kit';
 import {dayFocus, focusBonus} from './week';
@@ -57,13 +58,26 @@ export function phaseForWeek(week: number): Phase {
 
 /**
  * Sets a day for a track: what it has earned (see `adapt.ts`), or its week-1
- * base before its first review; a deload week asks for about 60%.
+ * base before its first review; a deload week asks for about 60%, and a
+ * shorter day (`density`, see `density.ts`) asks for its share of that.
+ *
+ * Density is applied here, at the point of prescription, and never to the
+ * stored ladder. The ramp keeps climbing the full ladder underneath, so a
+ * month of short days doesn't unwind what was earned, and moving back to a
+ * longer day hands it all back at once.
  */
-export function setsFor(track: Track, state: TrackState, phase: Phase): number {
+export function setsFor(
+  track: Track,
+  state: TrackState,
+  phase: Phase,
+  density: number = 1,
+): number {
   const earned = Math.min(track.maxSets, state.sets ?? track.baseSets);
-  return phase === 'deload'
-    ? Math.max(2, Math.round(earned * DELOAD_FACTOR))
-    : earned;
+  const full =
+    phase === 'deload'
+      ? Math.max(2, Math.round(earned * DELOAD_FACTOR))
+      : earned;
+  return scaleSets(full, density);
 }
 
 /** Per-set amount: ~intensity × max. Holds round to 5 s, minimum 10 s. */
@@ -125,6 +139,7 @@ export function prescribeDay(
   program: ProgramState,
   date: Date,
   facts?: Facts,
+  density: number = 1,
 ): DayPrescription | undefined {
   if (!state.enabled || !trainsOn(track, date)) {
     return undefined;
@@ -143,9 +158,12 @@ export function prescribeDay(
     label: rung.label,
     unit: track.unit,
     setSize: setSizeFor(track, state),
+    // The focus bonus is not scaled. It is one set, and one set is how a
+    // focus day announces itself; scaled down it would round to nothing
+    // and a short week would have no shape at all.
     sets: Math.min(
       track.maxSets,
-      setsFor(track, state, phaseForWeek(week)) + bonus,
+      setsFor(track, state, phaseForWeek(week), density) + bonus,
     ),
     week,
     phase: phaseForWeek(week),

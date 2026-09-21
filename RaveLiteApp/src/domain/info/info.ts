@@ -5,6 +5,7 @@ import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {Exercise, Venue} from '../exercises/types';
 import {prescribeDay} from '../program/progression';
 import {loadProgram} from '../program/repository';
+import {dayDensity, loadFacts} from '../profile/repository';
 import {TRACKS} from '../program/tracks';
 import {moveForExercise, moveForMetric, moveForTrack} from '../exercises/moves';
 import type {MoveId} from '../exercises/moves';
@@ -170,7 +171,7 @@ function trackCard(id: TrackId): InfoCard | undefined {
   const program = loadProgram();
   const state = program.tracks[id];
   const today = state?.enabled
-    ? prescribeDay(track, state, program, new Date())
+    ? prescribeDay(track, state, program, new Date(), loadFacts(), dayDensity())
     : undefined;
   const rung = state ? track.ladder[state.rung] : undefined;
   return {

@@ -19,7 +19,8 @@ import {
   activityForDay,
   subscribeActivity,
 } from '../../domain/activity/activity';
-import {DAILY_PAR, isHarmony} from '../../domain/activity/par';
+import {isHarmony} from '../../domain/activity/par';
+import {dailyPar} from '../../domain/profile/repository';
 import {pointsByElement} from '../../domain/activity/stats';
 import {MODALITIES, type Modality} from '../../domain/attributes/attributes';
 import {PRACTICE_CAP} from '../../domain/attributes/levels';
@@ -78,15 +79,17 @@ function ElementRow({
   element,
   standings,
   points,
+  par,
   onOpen,
 }: {
   element: ElementId;
   standings: AttributeStanding[];
   points: number;
+  par: number;
   onOpen?: (ref: InfoRef) => void;
 }) {
   const el = ELEMENTS[element];
-  const at = Math.min(1, points / DAILY_PAR);
+  const at = Math.min(1, points / par);
   const byMode = (mode: Modality) =>
     standings.find(s => s.attribute.modality === mode);
   return (
@@ -97,7 +100,7 @@ function ElementRow({
           {el.name}
         </Text>
         <Text style={styles.rowPoints}>
-          {Math.round(points)}/{DAILY_PAR}
+          {Math.round(points)}/{par}
         </Text>
         <View style={styles.parBar}>
           <View
@@ -142,7 +145,8 @@ export function CharacterSheet({
   );
 
   const {level, into, needs} = sheet.character;
-  const harmony = isHarmony(points);
+  const par = dailyPar();
+  const harmony = isHarmony(points, par);
   const bonus = Math.round((sheet.multiplier - 1) * 100);
 
   return (
@@ -165,7 +169,7 @@ export function CharacterSheet({
                 element={ELEMENTS[id]}
                 size={16}
                 color={
-                  (points[id] ?? 0) >= DAILY_PAR
+                  (points[id] ?? 0) >= par
                     ? ELEMENTS[id].color
                     : palette.textMuted
                 }
@@ -211,6 +215,7 @@ export function CharacterSheet({
           element={element}
           standings={standings}
           points={points[element] ?? 0}
+          par={par}
           onOpen={onInfo}
         />
       ))}

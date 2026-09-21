@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
 import type {RibbonDay} from '../../domain/activity/elementDay';
-import {DAILY_PAR} from '../../domain/activity/par';
+import {dailyPar} from '../../domain/profile/repository';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 const LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -33,8 +33,9 @@ function spoken(day: RibbonDay): string {
 export function DayRibbon({days, selected, color, onSelect}: Props) {
   const [width, setWidth] = useState(0);
   // Bars share one scale that always reaches par, so the par line stays put.
-  const most = Math.max(DAILY_PAR, ...days.map(d => d.points));
-  const parHeight = 6 + Math.round((DAILY_PAR / most) * (BAR_MAX - 6));
+  const par = dailyPar();
+  const most = Math.max(par, ...days.map(d => d.points));
+  const parHeight = 6 + Math.round((par / most) * (BAR_MAX - 6));
   const selectedIndex = days.findIndex(d => d.dayStart === selected);
 
   const pickAt = (x: number) => {

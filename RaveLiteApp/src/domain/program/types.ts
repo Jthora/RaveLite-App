@@ -58,6 +58,12 @@ export interface TrackPartner {
   seconds: number;
 }
 
+/**
+ * How much room a day has for training. See `density.ts` — the shape sets
+ * the number of rounds, and sets and par follow from it.
+ */
+export type DayShapeId = 'desk' | 'office' | 'shift' | 'weekend' | 'custom';
+
 export interface Track {
   id: TrackId;
   name: string;

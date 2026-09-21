@@ -72,12 +72,14 @@ export function elementStatLine({
   today,
   week,
   streak,
+  par = DAILY_PAR,
 }: {
   today: number;
   week: number;
   streak: number;
+  par?: number;
 }): string {
-  const parts = [`${today}/${DAILY_PAR} today`, `${week} this week`];
+  const parts = [`${today}/${par} today`, `${week} this week`];
   if (streak > 0) {
     parts.push(`${streak}-day streak`);
   }

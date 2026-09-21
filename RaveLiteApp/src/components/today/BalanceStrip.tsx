@@ -3,7 +3,7 @@ import {StyleSheet, Text, View} from 'react-native';
 
 import {ElementGlyph} from '../icons/ElementGlyph';
 import {Tap} from '../Tap';
-import {DAILY_PAR} from '../../domain/activity/par';
+import {dailyPar} from '../../domain/profile/repository';
 import {ELEMENTS, ELEMENT_ORDER, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing} from '../../theme';
 
@@ -26,7 +26,7 @@ interface Props {
  */
 export function BalanceStrip({
   points,
-  par = DAILY_PAR,
+  par = dailyPar(),
   week,
   onElementPress,
 }: Props) {

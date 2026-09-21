@@ -44,6 +44,7 @@ import type {ActiveHours, ActivePulseSummary} from '../domain/ambient/types';
 import {partsOf} from '../domain/info/info';
 import {moveForExercise, moveForTrack} from '../domain/exercises/moves';
 import {entriesForDay, handledPulseIds} from '../domain/journal/journal';
+import {dailyPar} from '../domain/profile/repository';
 import {doneByTrack} from '../domain/program/progress';
 import {focusFor, subscribeProgram} from '../domain/program/repository';
 import {movesOf} from '../domain/program/rounds';
@@ -225,7 +226,7 @@ export function buildTodayModel(
     next: rows.find(r => r.status === 'upcoming'),
     rows,
     points,
-    harmony: isHarmony(points),
+    harmony: isHarmony(points, dailyPar()),
     glasses: hydrationGlasses(activity),
     waterTarget: drinkTarget(WATER_TARGET, hottestToday(now), {
       airConditioned: getWeatherPrefs().airConditioned,

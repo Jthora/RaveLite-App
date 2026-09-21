@@ -691,6 +691,57 @@ the screen and foreground service at once.
 - A skip from Today writes `reminder.skipped`; `handledPulseIds` keeps the
   schedulers from re-queueing it after a restart.
 
+## How much day there is (`src/domain/program/density.ts`, since 20 Sep 2026)
+
+Every constant in the app was written for one person's day: at a desk,
+nine chimes between waking and dinner. That assumption is load-bearing in
+a way that only shows up on someone else's schedule — the adaptive ramp
+reads *share of prescribed sets done*, so a four-chime life measured
+against a nine-chime prescription sits at 40% for ever and never levels
+up. The fix is not a lower bar. It is asking for a day's work instead of
+someone else's day's work.
+
+A **day shape** sets one number, rounds, and the rest follows:
+
+| Shape | Rounds | Sets (Mon) | Par |
+|---|---|---|---|
+| At a desk | 9 | 52 | 20 |
+| In an office | 6 | 36 | 15 |
+| On your feet | 4 | 23 | 10 |
+| Only some days | 2 | 18 | 10 |
+
+- `densityFor(shape)` is rounds ÷ 9. `scaleSets` multiplies by it, floored
+  at 1 — a short day is a smaller day, never a narrower one, so no track
+  and no element is ever dropped.
+- **Density is applied when prescribing, never to the stored ladder.**
+  `setsFor(track, state, phase, density)` scales what the day asks for
+  while the ramp keeps climbing the full ladder underneath. A month of
+  short days costs nothing earned, and moving back to a desk day hands it
+  all back at once. A test freezes this.
+- **The focus bonus is not scaled.** It is one set, and one set is how a
+  focus day announces itself; scaled it would round to nothing.
+- `groupIntoRounds(…, {rounds})` takes the target. It is a target, not a
+  promise: a track cannot appear twice in one round and a round will not
+  carry more than `MAX_MOVES_PER_ROUND` moves, so the shortest day lands
+  on 3 rounds rather than 2. Fewer, bigger rounds — never fewer sets.
+- **Par floors at `MIN_PAR` (10), which is a deviation from the written
+  plan's "round to 5".** Because sets never scale below one per track, the
+  shortest day still prescribes about a third of a full day, not the fifth
+  its density implies. Par straight off the density would be 5 against a
+  typical 7 points, and Harmony would arrive just for doing as told.
+- The ramp's thresholds (85% up, 60% down) are untouched. They are shares,
+  and shares travel.
+
+`DAILY_PAR` is no longer read directly by anything that renders. The par
+a person is measured against comes from `profile/repository#dailyPar()`,
+and `par.ts`'s helpers take par as an argument with the full day as the
+default — so every caller written before day shapes existed still means
+what it did. An install that has never been asked is `'desk'`, so nothing
+moves until someone says otherwise; the golden test in
+`profile/__tests__/golden.test.ts` holds that line.
+
+Chosen in Settings › How much day you have.
+
 ## Your data (`src/domain/data/backup.ts`, `src/screens/heart/DataPanel.tsx`, since 20 Sep 2026)
 
 No account and no server means the only copy of a year's training is on

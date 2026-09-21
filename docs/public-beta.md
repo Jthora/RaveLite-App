@@ -436,7 +436,10 @@ set the starting rung** — "how many push-ups can you do?" — which belongs
 with the archetypes in Phase 3.
 
 **Phase 2 — fits a life**
-- [ ] Day shapes and density; `roundsFor`, base-set and par scaling
+- [x] Day shapes and density; `roundsFor`, set and par scaling, chosen in
+      Settings (20 Sep 2026). One deviation from §6: par floors at 10
+      rather than rounding freely to 5, because the one-set-per-track
+      floor keeps the shortest day at ~⅓ of a full day, not ⅕.
 - [ ] Windows editor with the timeline graphic
 - [ ] Modes: travelling, injured, festival, rest; ramp pause
 - [ ] Tests: density, injured

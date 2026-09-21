@@ -40,6 +40,7 @@ import {
 } from '../program/repository';
 import {plannedDrill} from '../program/morning';
 import {programWeek} from '../program/progression';
+import {dailyPar, dayRounds} from '../profile/repository';
 import {groupIntoRounds} from '../program/rounds';
 import {placeRounds, selectUpcomingRounds} from '../program/schedule';
 import {
@@ -119,6 +120,7 @@ function partnerBalance(
         7,
         yesterday,
       ),
+      dailyPar(),
     );
     const balance = emptyElementCounts();
     for (const fire of planFires) {
@@ -167,6 +169,7 @@ export function setsToday(now: number = Date.now()): SetsToday {
     rounds: groupIntoRounds(prescriptions, {
       balance: partnerBalance(date, plan, planFires, myDay),
       focus: dayFocus(date, programWeek(program.startDay, date)).focus,
+      rounds: dayRounds(),
     }),
     blockedTs: planFires.map(f => f.ts),
   });

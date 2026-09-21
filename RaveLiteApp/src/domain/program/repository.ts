@@ -14,7 +14,7 @@ import {
 } from './progression';
 import {doneByTrack} from './progress';
 import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
-import {loadFacts} from '../profile/repository';
+import {dayDensity, loadFacts} from '../profile/repository';
 import {dayFocus, type DayFocus} from './week';
 
 /**
@@ -124,7 +124,14 @@ export function prescriptionsFor(
 ): DayPrescription[] {
   const out: DayPrescription[] = [];
   for (const t of TRACKS) {
-    const p = prescribeDay(t, program.tracks[t.id], program, date, loadFacts());
+    const p = prescribeDay(
+      t,
+      program.tracks[t.id],
+      program,
+      date,
+      loadFacts(),
+      dayDensity(),
+    );
     if (p) {
       out.push(p);
     }
@@ -222,7 +229,14 @@ export function reviewProgram(now: number = Date.now()): ProgramState {
         return [];
       }
       const key = localDayKey(day.getTime());
-      const would = prescribeDay(track, state, program, day, loadFacts());
+      const would = prescribeDay(
+        track,
+        state,
+        program,
+        day,
+        loadFacts(),
+        dayDensity(),
+      );
       return [
         {
           day: key,
