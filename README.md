@@ -22,6 +22,14 @@ specific:
 > **A ritual companion for the raver as urban shaman — reclaiming a
 > desk-broken body for ecstatic practice.**
 
+It trains for **PLURL** — Peace, Love, Unity and Respect as a way of
+Life. That is not decoration on a fitness app. It is why the character
+sheet measures Presence and Resolve beside Power, why the app asks for
+breath and stillness as often as push-ups, and why "of balanced and
+positively energised spirit" sits in the same sentence as "able to
+defend yourself". A body kept ready is no use attached to someone who
+has gone hard and cold.
+
 Android. No account, no server, no analytics, no ads. One person's app,
 opened up: **beta, no support promised.**
 
@@ -206,6 +214,23 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Drills and kit substitutions are
 the most useful things to send; changes to the home screen's shape are
 the least likely to land. The house style, the checks to run and how to
 add a drill are all in there.
+
+**What to expect from me:** issues are read, not triaged. Pull requests
+are welcome and may sit for a while. Nothing here comes with a timeline —
+this is one person's training app that other people are welcome to use,
+and forking it is always a fine answer.
+
+## Where this comes from
+
+RaveLite was built by the author as his own Raver Super Hero training —
+every drill fits a real mat, a real backyard, a real porch, and a body
+that had to be talked out of a chair. It is opened up because the thing
+that worked for one person may work for others, not because it was ever
+designed as a product.
+
+The **Starcom** mark, one of the five Core themes in Settings, is the
+mark of [Starcom](https://github.com/Jthora) by the same author. It sits
+in here as provenance.
 
 ## License
 

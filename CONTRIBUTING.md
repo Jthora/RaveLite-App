@@ -4,6 +4,16 @@ RaveLite is a five-element altar for Ravers and Super Heroes — one
 person's training app, opened up. Contributions are welcome; so is
 forking it and making it yours, which is what Apache-2.0 is for.
 
+**What to expect.** Issues are read, not triaged. Pull requests are
+welcome and may sit for a while. Nothing here comes with a timeline, and
+no offence is meant by a slow reply — this is somebody's training app
+before it is anybody's project. If waiting does not suit you, fork it;
+that is a real answer and not a consolation prize.
+
+One house rule with no obvious source: **the author's personal training
+plan and clan name never appear in drill or UI copy.** They are where a
+lot of this came from, but the app has to speak to whoever is holding it.
+
 Before proposing anything, know what it is aiming at: a ritual companion
 for the raver as urban shaman, not a fitness tracker with a theme. When
 a change could go either way, pick the one that feels more like a rite

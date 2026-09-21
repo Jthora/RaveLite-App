@@ -517,14 +517,20 @@ with the archetypes in Phase 3.
 0. ~~**How public should the positioning be?**~~ **Answered 21 Sep
    2026:** lead with the rave identity on every surface, and the name
    stays. See `docs/releasing.md` § What it says it is.
-1. **Names** — are Raver / Guardian / Monk / Operator the shipping names,
-   and do the six new ones earn their keep?
+1. ~~**Names**~~ — **answered 21 Sep 2026: the ten names ship as they
+   are.** "Anyone can be a raver", so The Raver needs no apology for
+   sitting beside The Parent and The Night Shift.
 2. **Your preset's name** — "The Operator" is what the docs call you.
    Ship it, or keep it private?
-3. **The Starcom mark** — your personal Star Commander mark is one of the
-   five Core marks. Does it ship with the public app?
-4. **The plan versions** — RaveLite Plan 1.0–3.0 stay out of app copy.
-   Still true in public?
+3. ~~**The Starcom mark**~~ — **answered 21 Sep 2026: it ships.** It is
+   the mark of the Starcom app, by the same author, and carrying it here
+   is provenance rather than a private joke.
+4. ~~**The plan versions**~~ — **not a question, on inspection.** The
+   operator's personal RaveLite Plan 1.0–3.0 are context they shared, not
+   files in this repo, and nothing references them. The rule they
+   produced still stands and is now a contributor note rather than an
+   open question: **personal plan text and the clan name never go into
+   drill or UI copy.**
 5. **How much do you want to own?** A public beta brings issues. Is this
    "here it is, no promises", or a project you intend to steward?
 6. ~~**Does the beta include the author's data?**~~ **Answered 21 Sep

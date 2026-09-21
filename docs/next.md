@@ -102,14 +102,25 @@ somebody is training to keep their job.
 
 From [public-beta.md](public-beta.md) §15:
 
-- **Archetype names.** Ten of them ship. Do they keep these names?
-- **The Starcom mark.** Your personal Star Commander mark is one of the
-  five Core themes. Does it ship?
-- **The plan versions.** RaveLite Plan 1.0–3.0 have stayed out of app
-  copy. Still true in public?
-- **How much do you want to own?** A public beta brings issues. "Here it
-  is, no promises", or something you intend to steward? The answer
-  changes how CONTRIBUTING should read.
+*(Nothing — all four closed on 21 Sep 2026.)*
+
+**Closed 21 Sep 2026:** the ten archetype names ship as they are (anyone
+can be a raver); the Starcom mark ships, credited in the README as
+provenance; the plan-versions question turned out to be stale — those
+documents are personal context, not repo files, and the rule they
+produced is now a contributor note; and stewardship is **light** —
+issues read not triaged, PRs welcome but unhurried, no timelines, forking
+encouraged. Said plainly in both the README and CONTRIBUTING so nobody
+feels ignored by a slow reply.
+
+**Still undecided, and deliberately so:** how much of the wider EIN
+ecosystem — Starcom, Navcom, Arch Angel Agency, the Raver Angel
+Initiative — belongs in public copy. PLURL is in the README because it
+explains the app's values and needs no other knowledge. The organisation
+names are provenance rather than purpose, and a stranger meets them as
+unexplained proper nouns. See the brainstorm in the session notes; the
+conservative version shipped, and going further is a deliberate choice
+rather than a default.
 
 ---
 
