@@ -15,7 +15,8 @@
  *   core          a ring with a solid center dot
  *   heart         Lucide's heart (ISC license)
  *   star5         a regular five-pointed star, in lines
- *   star6         a six-pointed star, in lines
+ *   star6         Æther's Merkaba: Fire's triangle and Water's crossing,
+ *                 drawn as two paths so the crossing lines show
  *   commander     the Starcom mark: a regular five-pointed star whose lower legs are cut into
  *                 two chevrons: below the body, four equal bands parallel to
  *                 the legs' inner edges (gap, chevron, gap, chevron). Traced
@@ -109,12 +110,28 @@ function star5Points(
   return points;
 }
 
-function star6Points(R: number, inner: number): Point[] {
-  const points: Point[] = [];
-  for (let k = 0; k < 12; k++) {
-    points.push(polar(C, C, k % 2 === 0 ? R : R * inner, -90 + 30 * k));
-  }
-  return points;
+/**
+ * Æther as a Merkaba: Fire's triangle and Water's, superimposed.
+ *
+ * It used to be a six-pointed star traced as one outline, which reads as
+ * a star and says nothing. Drawn as two crossing triangles it says the
+ * true thing — the fifth element is not a sixth shape, it is the four
+ * held together. The crossing lines are the point, so the triangles stay
+ * two separate paths rather than being merged into a hexagram.
+ *
+ * They are the elemental triangles at `MERKABA_SCALE`, so Æther sits
+ * beside Fire, Air, Earth and Water as visibly the same geometry. A
+ * hexagram is wider than a single triangle at equal side length, so the
+ * scale brings the whole mark back inside the others' keyline.
+ */
+function merkabaTriangle(up: boolean): string {
+  const side = TRIANGLE_SIDE * MERKABA_SCALE;
+  const h = (side * Math.sqrt(3)) / 2;
+  // Each triangle's centroid sits at the grid centre, so the two cross
+  // symmetrically instead of one riding high.
+  const tip = up ? C - (h * 2) / 3 : C + (h * 2) / 3;
+  const base = up ? C + h / 3 : C - h / 3;
+  return polygon([at(C, tip), at(C + side / 2, base), at(C - side / 2, base)]);
 }
 
 /**
@@ -186,8 +203,15 @@ const STAR5_OUTLINE_INNER = 0.42;
  * outside of its line, so the two read the same size side by side.
  */
 export const COMMANDER_WIDTH = STAR5_WIDTH + MARK_STROKE;
-const STAR6_RADIUS = 11.25;
-const STAR6_INNER = 0.55;
+/**
+ * The Merkaba's triangles, relative to the elemental ones.
+ *
+ * A hexagram with a point top and bottom is taller than it is wide by
+ * 2/√3, so scaling by √3/2 makes its *height* land on the pointed-shape
+ * keyline (21) rather than its width — which is what the eye measures on
+ * a star, and what keeps it the same size as Star beside it.
+ */
+const MERKABA_SCALE = Math.sqrt(3) / 2;
 const RING_RADIUS = 9.75;
 const DOT_RADIUS = 2.25;
 
@@ -208,7 +232,7 @@ export const MARKS: Record<GlyphIconId, readonly MarkShape[]> = {
   star5: [
     {d: polygon(star5Points(star5Frame(STAR5_WIDTH), STAR5_OUTLINE_INNER))},
   ],
-  star6: [{d: polygon(star6Points(STAR6_RADIUS, STAR6_INNER))}],
+  star6: [{d: merkabaTriangle(true)}, {d: merkabaTriangle(false)}],
   commander: commanderPolygons(star5Frame(COMMANDER_WIDTH)).polygons.map(
     points => ({d: polygon(points), fill: true}),
   ),

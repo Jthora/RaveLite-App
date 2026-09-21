@@ -16,6 +16,7 @@ import {Tap} from '../../components/Tap';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
 import {CharacterSheet} from './CharacterSheet';
+import {Guard} from '../../components/Guard';
 import {DailySetsSection} from './DailySetsSection';
 import {Goals} from './Goals';
 
@@ -111,7 +112,9 @@ export function DailySetsSheet({visible, onClose}: Props) {
             {goals ? (
               <Goals onInfo={info.open} />
             ) : showing === 'attributes' ? (
-              <CharacterSheet onInfo={info.open} />
+              <Guard name="Character sheet">
+                <CharacterSheet onInfo={info.open} />
+              </Guard>
             ) : (
               <ScrollView
                 contentContainerStyle={styles.content}

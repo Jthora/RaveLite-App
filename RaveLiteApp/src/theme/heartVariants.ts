@@ -153,7 +153,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
     id: 'aether',
     defaultColor: 'white',
     description:
-      'Six-pointed star in lines — the quintessence, the fifth that holds the four.',
+      "A Merkaba in lines — Fire's triangle and Water's, crossing. The quintessence, the fifth that holds the four.",
     identity: {
       name: 'Æther',
       domain: 'Spirit & Cadence',

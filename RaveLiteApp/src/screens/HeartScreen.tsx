@@ -10,6 +10,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 
 import {CircuitChamber} from '../components/CircuitChamber';
 import {ScreenScaffold} from '../components/ScreenScaffold';
+import {Guard} from '../components/Guard';
 import type {CircuitLeg} from '../domain/circuit/circuit';
 import {requestNotificationPermission} from '../domain/reminders/notifeeScheduler';
 import type {ElementScreenProps} from '../shell/ElementShell';
@@ -36,11 +37,15 @@ const HeartScreen: React.FC<ElementScreenProps> = ({onElementChange}) => {
 
   return (
     <ScreenScaffold element={ELEMENTS.heart}>
-      <TodayPanel
-        permission={permission}
-        onElementPress={onElementChange}
-        onEngageLegs={engageLegs}
-      />
+      {/* Today is the app. A bad row in the day's list used to take the
+          chime, the water counter and the whole page with it. */}
+      <Guard name="Today">
+        <TodayPanel
+          permission={permission}
+          onElementPress={onElementChange}
+          onEngageLegs={engageLegs}
+        />
+      </Guard>
       <CircuitChamber
         visible={chamberOpen}
         legs={chamberLegs}

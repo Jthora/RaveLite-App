@@ -64,6 +64,8 @@ export const KEYS = {
   profile: 'profile.state',
   /** 'metric' | 'imperial'; absent means never chosen. */
   units: 'settings.units',
+  /** The last 50 things that went wrong (see `domain/diagnostics`). */
+  errorLog: 'diagnostics.errors',
 
   // ── Attributes (the character sheet's fifteen) ───────────────────
   /** `AttributesState` JSON — levels, XP and the day rolled up through. */
