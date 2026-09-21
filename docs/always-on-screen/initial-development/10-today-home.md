@@ -720,6 +720,17 @@ The files go through the system picker (`ACTION_CREATE_DOCUMENT` /
 path: no storage permission at any API level, and the backup can land on
 Drive or an SD card, somewhere that outlives the phone.
 
+**A picker does not always come back.** On the Redmi A3 the system can
+tear the activity down behind the chooser, and it then simply goes away
+with no `onActivityResult`. The first build disabled Export and Restore
+while a picker was "in flight", so one lost result left both buttons dead
+for good — visible on device as two rows that had lost their outlines.
+Two defences: `onHostResume` answers any still-pending picker promise as a
+cancel (Android delivers `onActivityResult` before `onResume`, so a
+promise outstanding by then will never be answered), and the panel keeps
+no in-flight flag at all, because a button disabled until a promise that
+never settles is a button that is gone.
+
 **Why it exists now** rather than in Phase 4 of the beta plan: release
 builds are currently debug-signed. The first properly signed build can't
 install over an existing one, and the only way through is an uninstall,

@@ -34,7 +34,6 @@ function whenFrom(at: number): string {
 
 export function DataPanel() {
   const [note, setNote] = useState<string | undefined>();
-  const [busy, setBusy] = useState(false);
   const [staged, setStaged] = useState<Staged | undefined>();
   const [confirmWipe, setConfirmWipe] = useState(false);
 
@@ -45,47 +44,42 @@ export function DataPanel() {
     }
   };
 
+  // Nothing here latches on an "in flight" flag. A file picker can be torn
+  // down without ever returning, and a button disabled until a promise that
+  // never settles is a button that is gone for good. The native side allows
+  // one picker at a time and cancels the previous one, so a second tap is
+  // always safe.
   const onExport = async () => {
-    setBusy(true);
     setNote(undefined);
-    try {
-      const backup = buildBackup();
-      const result = await saveExport(backupFilename(), JSON.stringify(backup));
-      if (result.ok) {
-        setNote(`Saved ${result.value} — ${backupSummary(backup)}.`);
-      } else if (result.why === 'unsupported') {
-        setNote(NO_PICKER);
-      } else if (result.why !== 'cancelled') {
-        setNote('That file could not be written.');
-      }
-    } finally {
-      setBusy(false);
+    const backup = buildBackup();
+    const result = await saveExport(backupFilename(), JSON.stringify(backup));
+    if (result.ok) {
+      setNote(`Saved ${result.value} — ${backupSummary(backup)}.`);
+    } else if (result.why === 'unsupported') {
+      setNote(NO_PICKER);
+    } else if (result.why !== 'cancelled') {
+      setNote('That file could not be written.');
     }
   };
 
   const onPick = async () => {
-    setBusy(true);
     setNote(undefined);
     setStaged(undefined);
-    try {
-      const result = await readExport();
-      if (!result.ok) {
-        if (result.why === 'unsupported') {
-          setNote(NO_PICKER);
-        } else if (result.why !== 'cancelled') {
-          setNote('That file could not be read.');
-        }
-        return;
+    const result = await readExport();
+    if (!result.ok) {
+      if (result.why === 'unsupported') {
+        setNote(NO_PICKER);
+      } else if (result.why !== 'cancelled') {
+        setNote('That file could not be read.');
       }
-      const backup = readBackup(result.value);
-      if (!backup) {
-        setNote('That file is not a RaveLite export.');
-        return;
-      }
-      setStaged({backup, text: result.value});
-    } finally {
-      setBusy(false);
+      return;
     }
+    const backup = readBackup(result.value);
+    if (!backup) {
+      setNote('That file is not a RaveLite export.');
+      return;
+    }
+    setStaged({backup, text: result.value});
   };
 
   const onReplace = async () => {
@@ -135,7 +129,6 @@ export function DataPanel() {
           variant="ghost"
           color={palette.textDim}
           onPress={onExport}
-          disabled={busy}
           accessibilityRole="button"
           accessibilityLabel="Export everything to a file"
           style={styles.rowBtn}>
@@ -155,7 +148,6 @@ export function DataPanel() {
           variant="ghost"
           color={palette.textDim}
           onPress={onPick}
-          disabled={busy}
           accessibilityRole="button"
           accessibilityLabel="Restore from an export file"
           style={styles.rowBtn}>

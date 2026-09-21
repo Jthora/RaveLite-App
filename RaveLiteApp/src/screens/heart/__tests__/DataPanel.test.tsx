@@ -147,6 +147,24 @@ it('replaces everything on the second tap, then starts the app again', async () 
   act(() => tree.unmount());
 });
 
+it('stays usable when a picker never answers', async () => {
+  // A picker torn down by the system resolves nothing. The buttons must
+  // not be waiting on it — see onHostResume in RaveLiteDeviceModule.
+  saveExport.mockReturnValue(new Promise(() => {}));
+  const tree = renderPanel();
+
+  await press(tree, 'data-export');
+
+  expect(byTestId(tree, 'data-export').props.disabled).toBeFalsy();
+  expect(byTestId(tree, 'data-restore').props.disabled).toBeFalsy();
+
+  // And the next tap still reaches the native side.
+  readExport.mockResolvedValue({ok: false, why: 'cancelled'});
+  await press(tree, 'data-restore');
+  expect(readExport).toHaveBeenCalled();
+  act(() => tree.unmount());
+});
+
 it('names what is wrong with a file that is not an export', async () => {
   aLifeLogged();
   const mine = store.getString(KEYS.trainingEntries);

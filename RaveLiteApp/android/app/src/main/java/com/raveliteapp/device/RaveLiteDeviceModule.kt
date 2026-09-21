@@ -21,6 +21,7 @@ import android.os.Looper
 import android.view.WindowManager
 import com.facebook.react.bridge.ActivityEventListener
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -49,7 +50,7 @@ import java.util.concurrent.atomic.AtomicReference
  * MainApplication via [RaveLiteDevicePackage].
  */
 class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
-    ReactContextBaseJavaModule(reactContext), ActivityEventListener {
+    ReactContextBaseJavaModule(reactContext), ActivityEventListener, LifecycleEventListener {
 
   private val audioManager =
       reactContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -94,6 +95,7 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
       sampleIds[element] = soundPool.load(reactContext, res, 1)
     }
     reactContext.addActivityEventListener(this)
+    reactContext.addLifecycleEventListener(this)
   }
 
   override fun getName(): String = NAME
@@ -391,6 +393,25 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
 
   override fun onNewIntent(intent: Intent?) {}
 
+  /**
+   * A file picker does not always come back with a result: on a low-memory
+   * phone the system can tear the activity down behind it, and the chooser
+   * then simply goes away. Android delivers onActivityResult before
+   * onResume, so a picker promise still pending by the time we are in front
+   * again is one that will never be answered — and a JS caller waiting on it
+   * forever leaves its buttons dead. Answer it as a cancel.
+   */
+  override fun onHostResume() {
+    pendingPicker.getAndSet(null)?.resolve(null)
+    pendingText.set(null)
+  }
+
+  override fun onHostPause() {}
+
+  override fun onHostDestroy() {
+    onHostResume()
+  }
+
   /** The name the picker gave the file, for the "saved as" line. */
   private fun displayName(uri: android.net.Uri): String {
     return try {
@@ -448,6 +469,7 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     abandonFocus()
     soundPool.release()
     reactContext.removeActivityEventListener(this)
+    reactContext.removeLifecycleEventListener(this)
     pendingPicker.getAndSet(null)?.resolve(null)
     pendingText.set(null)
     super.invalidate()
