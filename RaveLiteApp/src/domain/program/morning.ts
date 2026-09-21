@@ -2,6 +2,8 @@ import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {Exercise} from '../exercises/types';
 import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import type {CadenceSlot, Window} from '../reminders/types';
+import {canDo} from '../profile/kit';
+import {loadFacts} from '../profile/repository';
 import {runDay, runFitness, type RunDay} from '../run/plan';
 import {getMetric, loadEntries} from '../training/repository';
 import {programWeek} from './progression';
@@ -43,17 +45,26 @@ export function runFor(
 }
 
 /** The day's morning block, piece by piece, with the run plan's run in place. */
+const EXERCISES = new Map(EXERCISE_LIBRARY.map(e => [e.id, e]));
+const exerciseById = (id: string) => EXERCISES.get(id);
+
 export function blockPieces(
   date: Date,
   now: number = Date.now(),
 ): BlockPiece[] {
   const {block} = focusFor(date);
   const run = runFor(date, now);
-  return block.pieces.map(id =>
-    run && id === run.replaces
-      ? {exerciseId: run.exerciseId, run}
-      : {exerciseId: id},
-  );
+  const facts = loadFacts();
+  return block.pieces
+    .map(id =>
+      run && id === run.replaces
+        ? {exerciseId: run.exerciseId, run}
+        : {exerciseId: id},
+    )
+    .filter(piece => {
+      const drill = exerciseById(piece.exerciseId);
+      return drill !== undefined && canDo(drill, facts);
+    });
 }
 
 /** Which of the day's chimes of `slot` falls at `ts`, from 0. */

@@ -79,7 +79,6 @@ export function expandPlanToFires(
       })
       .filter(({w, start, end}) => {
         if (end <= start) {
-          // eslint-disable-next-line no-console
           console.warn(
             `[expandPlanToFires] window ${w.id} has end <= start; skipping. ` +
               'Cross-midnight windows are not supported.',

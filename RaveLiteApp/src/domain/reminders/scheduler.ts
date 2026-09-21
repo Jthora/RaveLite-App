@@ -1,5 +1,7 @@
 import {ELEMENTS, ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
+import {canDo} from '../profile/kit';
+import {loadFacts} from '../profile/repository';
 import {Exercise} from '../exercises/types';
 import {CadenceSlot, Plan, ReminderPayload} from './types';
 
@@ -67,8 +69,13 @@ function candidatesForSlot(slot: CadenceSlot): Exercise[] {
     const drill = EXERCISE_LIBRARY.find(ex => ex.id === slot.exerciseId);
     return drill ? [drill] : [];
   }
+  const facts = loadFacts();
   return EXERCISE_LIBRARY.filter(ex => {
     if (ex.element !== slot.element) {
+      return false;
+    }
+    // Nothing this room, this kit or this noise limit rules out.
+    if (!canDo(ex, facts)) {
       return false;
     }
     // A test belongs to its Saturday, never a random pick.

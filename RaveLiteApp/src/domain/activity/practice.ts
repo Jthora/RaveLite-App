@@ -2,6 +2,7 @@ import {append} from '../journal/journal';
 import type {CompletionEntry} from '../journal/types';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {Exercise} from '../exercises/types';
+import {canDo, type Facts} from '../profile/kit';
 import type {ActivityItem} from './activity';
 
 /**
@@ -162,6 +163,20 @@ export const SKILL_GROUPS: readonly SkillGroup[] = [
 const BY_ID = new Map(EXERCISE_LIBRARY.map(e => [e.id, e]));
 
 export const skillDrill = (id: string): Exercise | undefined => BY_ID.get(id);
+
+/**
+ * The curriculum this kit can practise. A group with nothing left in it
+ * drops out rather than teasing: no staff, no staff section.
+ */
+export function skillGroupsFor(facts: Facts): SkillGroup[] {
+  return SKILL_GROUPS.map(group => ({
+    ...group,
+    ids: group.ids.filter(id => {
+      const drill = BY_ID.get(id);
+      return drill !== undefined && canDo(drill, facts);
+    }),
+  })).filter(group => group.ids.length > 0);
+}
 
 /** Every drill in the curriculum, for the guards and the tally. */
 export const SKILL_IDS: readonly string[] = SKILL_GROUPS.flatMap(g => [

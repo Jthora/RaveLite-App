@@ -413,9 +413,10 @@ possible without touching app code.
       whole ladder is out of reach
 - [x] Tests: kit gating, noise, injury, unlock counts, a program for five
       rooms, and the author golden test
-- [ ] Gating in the scheduler, rounds, partners, morning block, practice,
-      indoor swaps
-- [ ] Kit card in Settings with unlock counts
+- [x] Gating in the scheduler, round partners, morning block, practice
+      curriculum and indoor swaps — all through the one `canDo`
+- [x] Kit card in Settings: tiles saying what each would unlock, and the
+      noise setting
 
 **What Phase 1 exposed:** substitution is at the *same step of the
 ladder*, which is right — but the step a track *starts* on is calibrated

@@ -177,3 +177,20 @@ describe('a program for a room that is not the author', () => {
     );
   });
 });
+
+it('claiming a piece of kit changes what the program asks for', () => {
+  // A flat with a mat: Pull is a towel over a door.
+  setFacts(facts({kit: ['floor', 'wall', 'mat']}));
+  expect(
+    prescriptionsFor(defaultProgram(MONDAY), MONDAY).find(
+      p => p.trackId === 'pull',
+    )?.exerciseId,
+  ).toBe('fire.feet-up-towel-row');
+  // They buy a doorway bar and say so. The same track, the real thing.
+  setFacts(facts({kit: ['floor', 'wall', 'mat', 'hangPoint']}));
+  expect(
+    prescriptionsFor(defaultProgram(MONDAY), MONDAY).find(
+      p => p.trackId === 'pull',
+    )?.exerciseId,
+  ).toBe('fire.porch-pullup');
+});

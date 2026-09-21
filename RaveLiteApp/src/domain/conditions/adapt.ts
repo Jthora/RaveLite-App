@@ -21,6 +21,8 @@
  */
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {moveForExercise, type MoveId} from '../exercises/moves';
+import {canDo} from '../profile/kit';
+import {loadFacts} from '../profile/repository';
 import type {Exercise, Target, Venue} from '../exercises/types';
 import {seededPick} from '../reminders/scheduler';
 import type {ElementId} from '../../theme/elements';
@@ -120,7 +122,8 @@ export function indoorAlternative(
         !o.targets.includes('Hydration') &&
         !o.targets.includes('Fuel') &&
         !o.targets.includes('Test') &&
-        canGoInside(o),
+        canGoInside(o) &&
+        canDo(o, loadFacts()),
     );
     // Prefer a stand-in of some substance for a long drill: swapping a
     // half-hour run for two minutes of anything is not a swap.

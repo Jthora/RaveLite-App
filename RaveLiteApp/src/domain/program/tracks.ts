@@ -231,7 +231,10 @@ export const TRACKS: Track[] = [
         exerciseId: 'earth.hanging-knee-raise',
         label: 'Hanging knee raises',
         graduateAt: 12,
-        instead: {exerciseId: 'earth.reverse-crunch', label: 'Reverse crunches'},
+        instead: {
+          exerciseId: 'earth.reverse-crunch',
+          label: 'Reverse crunches',
+        },
       },
       {
         exerciseId: 'earth.hanging-leg-raise',

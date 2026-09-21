@@ -31,7 +31,6 @@ export function savePlan(plan: Plan): void {
     try {
       l(plan);
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.warn('[repository] plan listener threw', e);
     }
   }

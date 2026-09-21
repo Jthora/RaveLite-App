@@ -9,12 +9,13 @@ import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {activityInRange} from '../../domain/activity/activity';
 import {
-  SKILL_GROUPS,
   formatCount,
   skillDrill,
+  skillGroupsFor,
   tallyPractice,
   unitFor,
 } from '../../domain/activity/practice';
+import {loadFacts} from '../../domain/profile/repository';
 import type {Exercise} from '../../domain/exercises/types';
 import {moveForExercise} from '../../domain/exercises/moves';
 import {ELEMENTS} from '../../theme/elements';
@@ -44,7 +45,7 @@ export function SkillList({
         Drill one and count it. The count is the record; the minutes are what
         the attributes hear about.
       </Text>
-      {SKILL_GROUPS.map(group => (
+      {skillGroupsFor(loadFacts()).map(group => (
         <View key={group.title} style={styles.group}>
           <Text style={styles.groupTitle}>{group.title.toUpperCase()}</Text>
           {group.ids.map(id => {

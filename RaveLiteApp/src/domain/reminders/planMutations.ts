@@ -51,16 +51,9 @@ export function findWindow(plan: Plan, id: string): Window | undefined {
 
 // ─── Slot-level mutations (slots are positional within a window) ────────
 
-export function addSlot(
-  plan: Plan,
-  windowId: string,
-  slot: CadenceSlot,
-): Plan {
+export function addSlot(plan: Plan, windowId: string, slot: CadenceSlot): Plan {
   return updateWindow(plan, windowId, {
-    slots: [
-      ...(findWindow(plan, windowId)?.slots ?? []),
-      slot,
-    ],
+    slots: [...(findWindow(plan, windowId)?.slots ?? []), slot],
   });
 }
 
@@ -71,19 +64,21 @@ export function updateSlot(
   patch: Partial<CadenceSlot>,
 ): Plan {
   const w = findWindow(plan, windowId);
-  if (!w) {return plan;}
-  if (index < 0 || index >= w.slots.length) {return plan;}
+  if (!w) {
+    return plan;
+  }
+  if (index < 0 || index >= w.slots.length) {
+    return plan;
+  }
   const nextSlots = w.slots.map((s, i) => (i === index ? {...s, ...patch} : s));
   return updateWindow(plan, windowId, {slots: nextSlots});
 }
 
-export function removeSlot(
-  plan: Plan,
-  windowId: string,
-  index: number,
-): Plan {
+export function removeSlot(plan: Plan, windowId: string, index: number): Plan {
   const w = findWindow(plan, windowId);
-  if (!w) {return plan;}
+  if (!w) {
+    return plan;
+  }
   return updateWindow(plan, windowId, {
     slots: w.slots.filter((_, i) => i !== index),
   });
@@ -99,7 +94,9 @@ export function totalSlotCount(plan: Plan): number {
 /** Stable structural equality. Order-sensitive so a re-ordered slot list
  *  registers as dirty. Cheap enough to call on every render. */
 export function plansEqual(a: Plan, b: Plan): boolean {
-  if (a === b) {return true;}
+  if (a === b) {
+    return true;
+  }
   return JSON.stringify(a) === JSON.stringify(b);
 }
 

@@ -1,6 +1,8 @@
 import {POINTS} from '../activity/par';
 import type {ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
+import {canDo} from '../profile/kit';
+import {loadFacts} from '../profile/repository';
 import {TRACKS} from './tracks';
 import {FOCUS_PARTNERS, type AttributeId} from './week';
 import type {
@@ -151,8 +153,10 @@ function toPartner(option: TrackPartner | undefined): Partner | undefined {
     : undefined;
 }
 
+const exerciseById = (id: string) => EXERCISE_LIBRARY.find(e => e.id === id);
+
 const elementOf = (exerciseId: string): ElementId | undefined =>
-  EXERCISE_LIBRARY.find(e => e.id === exerciseId)?.element;
+  exerciseById(exerciseId)?.element;
 
 /**
  * Partner for a round led by `trackId`. Without `balance` it rotates through
@@ -167,7 +171,13 @@ export function partnerFor(
   roundElements: readonly ElementId[] = [],
 ): Partner | undefined {
   const track = TRACKS.find(t => t.id === trackId);
-  const own = track?.partners ?? [];
+  const facts = loadFacts();
+  const possible = (options: readonly TrackPartner[]) =>
+    options.filter(o => {
+      const drill = exerciseById(o.exerciseId);
+      return drill !== undefined && canDo(drill, facts);
+    });
+  const own = possible(track?.partners ?? []);
   const pick = (options: readonly TrackPartner[]) =>
     toPartner(options[(roundIndex - 1) % options.length]);
   if (!balance) {
@@ -189,7 +199,9 @@ export function partnerFor(
     return element !== undefined && lowest.includes(element);
   });
   const options =
-    fitting.length > 0 ? fitting : lowest.flatMap(e => PARTNER_POOL[e]);
+    fitting.length > 0
+      ? fitting
+      : possible(lowest.flatMap(e => PARTNER_POOL[e]));
   return options.length > 0 ? pick(options) : undefined;
 }
 

@@ -19,9 +19,9 @@ function emptyPlan(): Plan {
 
 describe('expandPlanToFires', () => {
   it('returns nothing when plan has no windows', () => {
-    expect(
-      expandPlanToFires(emptyPlan(), ts(MON, 0), ts(MON, 23, 59)),
-    ).toEqual([]);
+    expect(expandPlanToFires(emptyPlan(), ts(MON, 0), ts(MON, 23, 59))).toEqual(
+      [],
+    );
   });
 
   it('returns nothing when range is empty or inverted', () => {

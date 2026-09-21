@@ -104,7 +104,9 @@ export function currentRung(
     if (drill && canDo(drill, facts)) {
       return rung;
     }
-    const stand = rung.instead ? exerciseById(rung.instead.exerciseId) : undefined;
+    const stand = rung.instead
+      ? exerciseById(rung.instead.exerciseId)
+      : undefined;
     if (stand && canDo(stand, facts)) {
       return {...rung, exerciseId: stand.id, label: rung.instead!.label};
     }
