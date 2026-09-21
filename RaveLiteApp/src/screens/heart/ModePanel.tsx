@@ -17,8 +17,18 @@ import {REGIONS} from '../../domain/profile/kit';
 import type {Region} from '../../domain/profile/kit';
 import {MODES, modeLabel, type ModeId} from '../../domain/profile/mode';
 import {clearMode, loadMode, setMode} from '../../domain/profile/repository';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+
+/** One colour and one picture per mode, the same everywhere it appears. */
+export const MODE_SYMBOL: Record<ModeId, SymbolName> = {
+  travelling: 'travelling',
+  injured: 'injured',
+  festival: 'festival',
+  rest: 'resting',
+};
 
 export function ModePanel() {
   const [mode, setLocal] = useState(() => loadMode());
@@ -48,11 +58,25 @@ export function ModePanel() {
     return (
       <View style={styles.root}>
         <Text style={styles.eyebrow}>TODAY I'M…</Text>
-        <View style={[styles.active, {borderColor: accent}]}>
+        <View
+          style={[
+            styles.active,
+            {
+              borderColor: hueOf(MODE_SYMBOL[mode.id]),
+              backgroundColor: tint(hueOf(MODE_SYMBOL[mode.id])),
+            },
+          ]}>
+          <View
+            style={[
+              styles.badge,
+              {backgroundColor: tint(hueOf(MODE_SYMBOL[mode.id]), '29')},
+            ]}>
+            <Symbol name={MODE_SYMBOL[mode.id]} size={20} />
+          </View>
           <View style={styles.rowText}>
             <Text
               testID="mode-active"
-              style={[styles.rowName, {color: accent}]}>
+              style={[styles.rowName, {color: hueOf(MODE_SYMBOL[mode.id])}]}>
               {modeLabel(mode, now)}
             </Text>
             <Text style={styles.rowDetail}>
@@ -91,8 +115,21 @@ export function ModePanel() {
             accessibilityLabel={`Today I'm ${spec.name}. ${spec.detail}`}
             style={[styles.row, asking === spec.id && {borderColor: accent}]}>
             <View style={styles.rowInner}>
+              <View
+                style={[
+                  styles.badge,
+                  {backgroundColor: tint(hueOf(MODE_SYMBOL[spec.id]))},
+                ]}>
+                <Symbol name={MODE_SYMBOL[spec.id]} size={20} />
+              </View>
               <View style={styles.rowText}>
-                <Text style={styles.rowName}>{spec.name}</Text>
+                <Text
+                  style={[
+                    styles.rowName,
+                    asking === spec.id && {color: hueOf(MODE_SYMBOL[spec.id])},
+                  ]}>
+                  {spec.name}
+                </Text>
                 <Text style={styles.rowDetail}>{spec.detail}</Text>
               </View>
               <Text style={styles.means}>
@@ -169,6 +206,13 @@ const styles = StyleSheet.create({
   rowText: {
     flex: 1,
     paddingVertical: spacing.sm,
+  },
+  badge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowName: {
     ...t.subtitle,

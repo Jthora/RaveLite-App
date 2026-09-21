@@ -30,7 +30,8 @@ import {DAILY_PAR} from '../../domain/activity/par';
 import {PACKS, drillsOf} from '../../domain/profile/packs';
 import {loadArchetype} from '../../domain/profile/repository';
 import {applyArchetype} from '../../domain/profile/setup';
-import {ELEMENTS} from '../../theme/elements';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 /** "9 chimes · 5 packs · 142 drills · par 20" — what taking it would mean. */
@@ -58,11 +59,24 @@ function preview(id: ArchetypeId): string {
     .join(' · ');
 }
 
+/** A picture and a colour for each way of training. */
+export const ARCHETYPE_SYMBOL: Record<ArchetypeId, SymbolName> = {
+  raver: 'raver',
+  guardian: 'guardian',
+  monk: 'monk',
+  operator: 'operator',
+  'desk-rebel': 'deskRebel',
+  comeback: 'comeback',
+  'flow-artist': 'flowArtist',
+  'night-shift': 'nightShift',
+  parent: 'parent',
+  'festival-six': 'festivalSix',
+};
+
 export function ArchetypePanel() {
   const [chosen, setChosen] = useState<ArchetypeId | undefined>(loadArchetype);
   /** Tapped once, showing what it would do. */
   const [asking, setAsking] = useState<ArchetypeId | undefined>();
-  const accent = ELEMENTS.heart.accent;
 
   const press = (id: ArchetypeId) => {
     if (asking !== id) {
@@ -99,22 +113,42 @@ export function ArchetypePanel() {
             }`}
             style={[
               styles.row,
-              on && {borderColor: accent, backgroundColor: `${accent}14`},
+              on && {
+                borderColor: hueOf(ARCHETYPE_SYMBOL[archetype.id]),
+                backgroundColor: tint(hueOf(ARCHETYPE_SYMBOL[archetype.id])),
+              },
               open && {borderColor: palette.danger},
             ]}>
-            <View style={styles.rowText}>
-              <Text style={[styles.rowName, on && {color: accent}]}>
-                {archetype.name}
-                {on ? ' · yours' : ''}
-              </Text>
-              <Text style={styles.rowDetail}>
-                For someone who {archetype.forWhom}.
-              </Text>
-              <Text style={[styles.means, open && {color: palette.danger}]}>
-                {open
-                  ? `Tap again to take it — ${preview(archetype.id)}`
-                  : `${archetype.leadsWith} · ${preview(archetype.id)}`}
-              </Text>
+            <View style={styles.rowInner}>
+              <View
+                style={[
+                  styles.badge,
+                  {
+                    backgroundColor: tint(
+                      hueOf(ARCHETYPE_SYMBOL[archetype.id]),
+                    ),
+                  },
+                ]}>
+                <Symbol name={ARCHETYPE_SYMBOL[archetype.id]} size={20} />
+              </View>
+              <View style={styles.rowText}>
+                <Text
+                  style={[
+                    styles.rowName,
+                    on && {color: hueOf(ARCHETYPE_SYMBOL[archetype.id])},
+                  ]}>
+                  {archetype.name}
+                  {on ? ' · yours' : ''}
+                </Text>
+                <Text style={styles.rowDetail}>
+                  For someone who {archetype.forWhom}.
+                </Text>
+                <Text style={[styles.means, open && {color: palette.danger}]}>
+                  {open
+                    ? `Tap again to take it — ${preview(archetype.id)}`
+                    : `${archetype.leadsWith} · ${preview(archetype.id)}`}
+                </Text>
+              </View>
             </View>
           </Tap>
         );
@@ -147,7 +181,22 @@ const styles = StyleSheet.create({
     minHeight: 72,
     justifyContent: 'center',
   },
+  rowInner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+    width: '100%',
+  },
+  badge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
   rowText: {
+    flex: 1,
     paddingVertical: spacing.sm,
     gap: 2,
   },

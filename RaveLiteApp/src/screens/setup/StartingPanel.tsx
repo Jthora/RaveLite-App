@@ -19,8 +19,16 @@ import {
 } from '../../domain/profile/starting';
 import {loadStarting} from '../../domain/profile/repository';
 import {chooseStarting} from '../../domain/profile/setup';
-import {ELEMENTS} from '../../theme/elements';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
+
+/** A seedling, a tree, a weight: where the body is starting from. */
+const STARTING_SYMBOL: Record<StartingPoint, SymbolName> = {
+  new: 'new',
+  returning: 'returning',
+  training: 'training',
+};
 
 export function StartingPanel() {
   const [chosen, setChosen] = useState<StartingPoint>(
@@ -28,7 +36,6 @@ export function StartingPanel() {
   );
   /** True once anything has been logged: the maxes are its own by then. */
   const [settled, setSettled] = useState(false);
-  const accent = ELEMENTS.heart.accent;
 
   const pick = (id: StartingPoint) => {
     if (!chooseStarting(id)) {
@@ -58,13 +65,29 @@ export function StartingPanel() {
             accessibilityLabel={`I'm ${option.name}. ${option.detail}`}
             style={[
               styles.row,
-              on && {borderColor: accent, backgroundColor: `${accent}14`},
+              on && {
+                borderColor: hueOf(STARTING_SYMBOL[option.id]),
+                backgroundColor: tint(hueOf(STARTING_SYMBOL[option.id])),
+              },
             ]}>
-            <View style={styles.rowText}>
-              <Text style={[styles.rowName, on && {color: accent}]}>
-                {option.name}
-              </Text>
-              <Text style={styles.rowDetail}>{option.detail}</Text>
+            <View style={styles.rowInner}>
+              <View
+                style={[
+                  styles.badge,
+                  {backgroundColor: tint(hueOf(STARTING_SYMBOL[option.id]))},
+                ]}>
+                <Symbol name={STARTING_SYMBOL[option.id]} size={20} />
+              </View>
+              <View style={styles.rowText}>
+                <Text
+                  style={[
+                    styles.rowName,
+                    on && {color: hueOf(STARTING_SYMBOL[option.id])},
+                  ]}>
+                  {option.name}
+                </Text>
+                <Text style={styles.rowDetail}>{option.detail}</Text>
+              </View>
             </View>
           </Tap>
         );
@@ -103,7 +126,21 @@ const styles = StyleSheet.create({
     minHeight: 60,
     justifyContent: 'center',
   },
+  rowInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    width: '100%',
+  },
+  badge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   rowText: {
+    flex: 1,
     paddingVertical: spacing.sm,
   },
   rowName: {

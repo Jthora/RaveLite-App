@@ -20,6 +20,8 @@ import {
 } from '../../domain/data/backup';
 import {readExport, restartApp, saveExport} from '../../native/raveLiteDevice';
 import {store} from '../../storage';
+import {Symbol, hueOf} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 type Staged = {backup: Backup; text: string};
@@ -117,8 +119,13 @@ export function DataPanel() {
       </Text>
 
       <View style={styles.row}>
+        <View style={[styles.badge, {backgroundColor: tint(hueOf('export'))}]}>
+          <Symbol name="export" size={20} />
+        </View>
         <View style={styles.rowText}>
-          <Text style={styles.rowTitle}>Export</Text>
+          <Text style={[styles.rowTitle, {color: hueOf('export')}]}>
+            Export
+          </Text>
           <Text style={styles.rowValue}>
             Write it all to a file you pick: journal, streak, levels, tests,
             settings.
@@ -137,8 +144,13 @@ export function DataPanel() {
       </View>
 
       <View style={styles.row}>
+        <View style={[styles.badge, {backgroundColor: tint(hueOf('restore'))}]}>
+          <Symbol name="restore" size={20} />
+        </View>
         <View style={styles.rowText}>
-          <Text style={styles.rowTitle}>Restore</Text>
+          <Text style={[styles.rowTitle, {color: hueOf('restore')}]}>
+            Restore
+          </Text>
           <Text style={styles.rowValue}>
             Read an export back. It replaces what is here — it does not merge.
           </Text>
@@ -194,8 +206,13 @@ export function DataPanel() {
       ) : null}
 
       <View style={styles.row}>
+        <View style={[styles.badge, {backgroundColor: tint(hueOf('erase'))}]}>
+          <Symbol name="erase" size={20} />
+        </View>
         <View style={styles.rowText}>
-          <Text style={styles.rowTitle}>Start over</Text>
+          <Text style={[styles.rowTitle, {color: hueOf('erase')}]}>
+            Start over
+          </Text>
           <Text style={styles.rowValue}>
             Erase everything on this phone and begin again. Export first.
           </Text>
@@ -248,6 +265,13 @@ const styles = StyleSheet.create({
     backgroundColor: palette.surface,
     borderRadius: radius.md,
     padding: spacing.md,
+  },
+  badge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowText: {
     flex: 1,

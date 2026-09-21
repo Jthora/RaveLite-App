@@ -18,6 +18,8 @@ import {
   type Noise,
 } from '../../domain/profile/kit';
 import {loadFacts, setFacts} from '../../domain/profile/repository';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -34,6 +36,21 @@ const NOISE: readonly {id: Noise; name: string; detail: string}[] = [
     detail: 'Jump, skip and spin a staff as you like.',
   },
 ];
+
+/** Kit is physical, so each piece takes the colour of the thing it is. */
+const KIT_SYMBOL: Record<KitItem, SymbolName> = {
+  floor: 'floor',
+  mat: 'mat',
+  wall: 'wall',
+  chair: 'chair',
+  stairs: 'stairs',
+  hangPoint: 'hangPoint',
+  bricks: 'bricks',
+  staff: 'staff',
+  ball: 'ball',
+  yard: 'yard',
+  streets: 'streets',
+};
 
 export function KitPanel() {
   const [facts, setLocal] = useState(loadFacts);
@@ -83,21 +100,31 @@ export function KitPanel() {
               }`}
               style={[
                 styles.tile,
-                has && {borderColor: accent, backgroundColor: `${accent}14`},
+                has && {
+                  borderColor: hueOf(KIT_SYMBOL[item]),
+                  backgroundColor: tint(hueOf(KIT_SYMBOL[item])),
+                },
               ]}>
-              <View>
-                <Text style={[styles.tileName, has && {color: accent}]}>
-                  {KIT_LABELS[item]}
-                </Text>
-                <Text style={styles.tileNote}>
-                  {item === 'floor'
-                    ? 'Always'
-                    : has
-                    ? 'Yours'
-                    : unlocks > 0
-                    ? `+${unlocks} drills`
-                    : 'Nothing new yet'}
-                </Text>
+              <View style={styles.tileInner}>
+                <Symbol name={KIT_SYMBOL[item]} size={18} />
+                <View style={styles.tileText}>
+                  <Text
+                    style={[
+                      styles.tileName,
+                      has && {color: hueOf(KIT_SYMBOL[item])},
+                    ]}>
+                    {KIT_LABELS[item]}
+                  </Text>
+                  <Text style={styles.tileNote}>
+                    {item === 'floor'
+                      ? 'Always'
+                      : has
+                      ? 'Yours'
+                      : unlocks > 0
+                      ? `+${unlocks} drills`
+                      : 'Nothing new yet'}
+                  </Text>
+                </View>
               </View>
             </Tap>
           );
@@ -161,6 +188,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.border,
     backgroundColor: palette.surface,
+  },
+  tileInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    width: '100%',
+  },
+  tileText: {
+    flex: 1,
   },
   tileName: {
     ...t.body,

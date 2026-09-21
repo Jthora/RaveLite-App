@@ -14,29 +14,35 @@ import React, {useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../Tap';
+import {Symbol, type SymbolName} from '../icons/Symbol';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 interface Lesson {
   title: string;
   body: string;
+  symbol: SymbolName;
 }
 
 const LESSONS: readonly Lesson[] = [
   {
     title: 'This is a chime',
+    symbol: 'time',
     body: 'A real one, not a demo. Do it now if you like — it only takes a few seconds, and it counts.',
   },
   {
     title: 'Three taps, and that is all',
+    symbol: 'body',
     body: "Done logs it. +5 min pushes it back when you're mid-something. Skip it says not today, with no guilt attached.",
   },
   {
     title: 'Anything can explain itself',
+    symbol: 'learn',
     body: 'Tap ⓘ on a drill, a track or an attribute to see what it is, how to do it and why it is here.',
   },
   {
     title: "That's it",
+    symbol: 'star',
     body: 'The rest is more of that. The app follows what you actually do — miss a week and it eases off, keep up and it climbs.',
   },
 ];
@@ -59,9 +65,12 @@ export function TutorialCoach({
 
   return (
     <View style={[styles.root, {borderColor: accent}]}>
-      <Text testID="coach-title" style={[styles.title, {color: accent}]}>
-        {lesson.title}
-      </Text>
+      <View style={styles.head}>
+        <Symbol name={lesson.symbol} size={18} />
+        <Text testID="coach-title" style={[styles.title, {color: accent}]}>
+          {lesson.title}
+        </Text>
+      </View>
       <Text style={styles.body}>{lesson.body}</Text>
       <View style={styles.row}>
         <View style={styles.pips}>
@@ -107,6 +116,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: palette.surface,
     padding: spacing.md,
+    gap: spacing.sm,
+  },
+  head: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.sm,
   },
   title: {

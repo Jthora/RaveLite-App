@@ -19,8 +19,18 @@ import {DAILY_PAR} from '../../domain/activity/par';
 import {DAY_SHAPES, densityFor, parFor} from '../../domain/program/density';
 import type {DayShapeId} from '../../domain/program/types';
 import {loadShape, setShape} from '../../domain/profile/repository';
-import {ELEMENTS} from '../../theme/elements';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
+
+/** Each shape is a different kind of day, so each gets its own colour. */
+const SHAPE_SYMBOL: Record<DayShapeId, SymbolName> = {
+  desk: 'desk',
+  office: 'office',
+  shift: 'shift',
+  weekend: 'weekend',
+  custom: 'time',
+};
 
 /** "6 chimes a day · par 15" — what picking this shape would mean. */
 function shapeMeans(id: DayShapeId, rounds: number): string {
@@ -30,7 +40,6 @@ function shapeMeans(id: DayShapeId, rounds: number): string {
 
 export function ShapePanel() {
   const [shape, setLocal] = useState<DayShapeId>(loadShape);
-  const accent = ELEMENTS.heart.accent;
 
   const pick = (id: DayShapeId) => {
     setShape(id);
@@ -61,16 +70,34 @@ export function ShapePanel() {
             )}`}
             style={[
               styles.row,
-              on && {borderColor: accent, backgroundColor: `${accent}14`},
+              on && {
+                borderColor: hueOf(SHAPE_SYMBOL[option.id]),
+                backgroundColor: tint(hueOf(SHAPE_SYMBOL[option.id])),
+              },
             ]}>
             <View style={styles.rowInner}>
+              <View
+                style={[
+                  styles.badge,
+                  {backgroundColor: tint(hueOf(SHAPE_SYMBOL[option.id]))},
+                ]}>
+                <Symbol name={SHAPE_SYMBOL[option.id]} size={20} />
+              </View>
               <View style={styles.rowText}>
-                <Text style={[styles.rowName, on && {color: accent}]}>
+                <Text
+                  style={[
+                    styles.rowName,
+                    on && {color: hueOf(SHAPE_SYMBOL[option.id])},
+                  ]}>
                   {option.name}
                 </Text>
                 <Text style={styles.rowDetail}>{option.detail}</Text>
               </View>
-              <Text style={[styles.means, on && {color: accent}]}>
+              <Text
+                style={[
+                  styles.means,
+                  on && {color: hueOf(SHAPE_SYMBOL[option.id])},
+                ]}>
                 {option.rounds}×
               </Text>
             </View>
@@ -117,6 +144,13 @@ const styles = StyleSheet.create({
   rowText: {
     flex: 1,
     paddingVertical: spacing.sm,
+  },
+  badge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowName: {
     ...t.subtitle,

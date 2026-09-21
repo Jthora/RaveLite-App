@@ -16,12 +16,23 @@ import {StyleSheet, Text, View} from 'react-native';
 import {Tap} from '../../components/Tap';
 import {PACKS, drillsOf, type PackId} from '../../domain/profile/packs';
 import {loadPacks, setPacks} from '../../domain/profile/repository';
-import {ELEMENTS} from '../../theme/elements';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
+
+/** Each curriculum has a colour and a picture, used wherever it appears. */
+export const PACK_SYMBOL: Record<PackId, SymbolName> = {
+  dance: 'dance',
+  martial: 'martial',
+  staff: 'staff',
+  'yoga-taichi': 'yoga',
+  jumps: 'jumps',
+  runs: 'running',
+  'military-tests': 'militaryTests',
+};
 
 export function PacksPanel() {
   const [packs, setLocal] = useState<PackId[]>(loadPacks);
-  const accent = ELEMENTS.heart.accent;
 
   const toggle = (id: PackId) => {
     const next = packs.includes(id)
@@ -55,16 +66,34 @@ export function PacksPanel() {
             }. ${pack.detail}`}
             style={[
               styles.row,
-              on && {borderColor: accent, backgroundColor: `${accent}14`},
+              on && {
+                borderColor: hueOf(PACK_SYMBOL[pack.id]),
+                backgroundColor: tint(hueOf(PACK_SYMBOL[pack.id])),
+              },
             ]}>
             <View style={styles.rowInner}>
+              <View
+                style={[
+                  styles.badge,
+                  {backgroundColor: tint(hueOf(PACK_SYMBOL[pack.id]))},
+                ]}>
+                <Symbol name={PACK_SYMBOL[pack.id]} size={20} />
+              </View>
               <View style={styles.rowText}>
-                <Text style={[styles.rowName, on && {color: accent}]}>
+                <Text
+                  style={[
+                    styles.rowName,
+                    on && {color: hueOf(PACK_SYMBOL[pack.id])},
+                  ]}>
                   {pack.name}
                 </Text>
                 <Text style={styles.rowDetail}>{pack.detail}</Text>
               </View>
-              <Text style={[styles.means, on && {color: accent}]}>
+              <Text
+                style={[
+                  styles.means,
+                  on && {color: hueOf(PACK_SYMBOL[pack.id])},
+                ]}>
                 {on ? `${count}` : `+${count}`}
               </Text>
             </View>
@@ -108,6 +137,13 @@ const styles = StyleSheet.create({
   rowText: {
     flex: 1,
     paddingVertical: spacing.sm,
+  },
+  badge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowName: {
     ...t.subtitle,

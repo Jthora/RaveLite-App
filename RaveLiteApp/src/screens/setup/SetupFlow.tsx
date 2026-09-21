@@ -28,6 +28,8 @@ import {KitPanel} from '../heart/KitPanel';
 import {PacksPanel} from '../heart/PacksPanel';
 import {ShapePanel} from '../heart/ShapePanel';
 import {StartingPanel} from './StartingPanel';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -40,35 +42,42 @@ interface Step {
   /** Why this question is being asked, in the second person. */
   why: string;
   panel: React.ComponentType;
+  /** Drawn beside the question, so the page is not four grey headings. */
+  symbol: SymbolName;
 }
 
 const STEPS: readonly Step[] = [
   {
     key: 'archetype',
+    symbol: 'operator',
     title: 'What are you training for?',
     why: 'Pick the closest one. It fills in everything after this, and you can change any of it.',
     panel: ArchetypePanel,
   },
   {
     key: 'kit',
+    symbol: 'carry',
     title: 'What have you got?',
     why: 'The program only ever asks for things this list says you have.',
     panel: KitPanel,
   },
   {
     key: 'shape',
+    symbol: 'desk',
     title: 'How much day have you got?',
     why: 'Not how hard you want it. How many times a day you can stop and move.',
     panel: ShapePanel,
   },
   {
     key: 'starting',
+    symbol: 'new',
     title: 'Where are you starting?',
     why: 'Only used to pick the first numbers. The app follows what you actually do from there.',
     panel: StartingPanel,
   },
   {
     key: 'packs',
+    symbol: 'learn',
     title: 'Anything you want to learn?',
     why: 'On top of the base program, which you get either way.',
     panel: PacksPanel,
@@ -104,6 +113,19 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
     <Modal visible animationType="slide" onRequestClose={done}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
+          <View
+            style={[
+              styles.badge,
+              {
+                backgroundColor: tint(last ? accent : hueOf(step.symbol), '1F'),
+              },
+            ]}>
+            <Symbol
+              name={last ? 'star' : step.symbol}
+              size={20}
+              color={last ? accent : undefined}
+            />
+          </View>
           <Text style={[styles.title, {color: accent}]}>
             {last ? "Here's your day" : step.title}
           </Text>
@@ -210,6 +232,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     gap: spacing.sm,
+  },
+  badge: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     ...t.title,
