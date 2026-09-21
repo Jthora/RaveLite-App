@@ -5,6 +5,10 @@ records lives on the phone in app-private storage. The only network
 requests it makes are to Open-Meteo, for the forecast and for looking up
 a town by name, carrying a location rounded to about 10 km.
 
+The export in Settings → Your data writes that same storage, verbatim,
+to a file you pick — it is a plain JSON copy of everything the app knows
+about you, so treat it the way you would treat a diary.
+
 That means most classic vulnerabilities do not apply. What is worth
 reporting:
 

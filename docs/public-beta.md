@@ -375,9 +375,14 @@ possible without touching app code.
 
 **In the app**
 
-- [ ] A data and privacy screen: what leaves the phone (a rounded location
-      to Open-Meteo, nothing else), an **export everything** button (JSON),
-      and a **wipe** button.
+- [x] A data and privacy panel in Settings: what leaves the phone (a
+      rounded location to Open-Meteo, nothing else), **Export** (the whole
+      store as JSON, through the system file picker), **Restore** (two-tap,
+      replaces rather than merges) and **Start over** (20 Sep 2026).
+      *Pulled forward from Phase 4:* release builds are debug-signed today,
+      so the first properly signed build would fail to install over an
+      existing app and the only fix would be an uninstall — which takes the
+      journal with it. The export has to exist before the keystore does.
 - [ ] A feedback route that needs no account: export + share sheet, and a
       link to the issue tracker.
 - [ ] A disclaimer on first run, once, in the setup flow.
@@ -391,6 +396,7 @@ possible without touching app code.
 | The ramp stalls on short days | density scaling in §6 |
 | Strangers hurt themselves | conservative defaults, disclaimer, "stop if it hurts" in cues, no archetype that starts hard |
 | The author's app changes under him | the golden test in §11 |
+| A signing-key change orphans an installed app | export/restore shipped before the first signed build; the restore is exact, not a merge |
 | Maintenance load on one person | CONTRIBUTING sets expectations; "beta, no support promised" |
 | Content quality drifts as packs arrive | the library guards stay: every drill needs purpose, cues, dose, venues, a pictogram and an attribute mapping |
 
@@ -400,6 +406,8 @@ possible without touching app code.
 - [x] Apache-2.0, NOTICE, README licence and disclaimer
 - [ ] CONTRIBUTING, code of conduct, issue templates, SECURITY
 - [ ] Screenshots, README rewrite for strangers
+- [x] Export/restore, so a key change can never cost anyone their data
+      (20 Sep 2026)
 - [ ] Firebase project, release keystore off-repo, first tester build
 
 **Phase 1 — not author-only** *(the real work)*
@@ -443,7 +451,7 @@ with the archetypes in Phase 3.
 **Phase 4 — contributors**
 - [ ] Pack format documented; a contributed pack accepted end to end
 - [ ] Locale and units; text scaling pass
-- [ ] Data export and wipe; privacy screen
+- [x] Data export, restore and wipe; privacy copy *(done early — see §12)*
 - [ ] F-Droid submission
 
 ## 15. Open questions for the operator

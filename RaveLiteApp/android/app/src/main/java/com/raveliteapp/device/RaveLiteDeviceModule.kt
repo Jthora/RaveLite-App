@@ -1,8 +1,10 @@
 package com.raveliteapp.device
 
 import android.Manifest
+import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
@@ -17,6 +19,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
+import com.facebook.react.bridge.ActivityEventListener
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -25,6 +28,7 @@ import com.facebook.react.bridge.ReactMethod
 import com.raveliteapp.R
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * RaveLite device bridge — the native capabilities JS can't reach.
@@ -38,12 +42,14 @@ import java.util.concurrent.atomic.AtomicBoolean
  *  - Window backlight override for night mode: the screen stays on
  *    (FLAG_KEEP_SCREEN_ON) but barely lit outside active hours.
  *  - A rough location, once, for sunrise and the forecast.
+ *  - Writing an export out and reading one back, through the system file
+ *    picker, so a year of training can leave the phone and come back.
  *
  * Old-architecture module (newArchEnabled=false), registered manually in
  * MainApplication via [RaveLiteDevicePackage].
  */
 class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
-    ReactContextBaseJavaModule(reactContext) {
+    ReactContextBaseJavaModule(reactContext), ActivityEventListener {
 
   private val audioManager =
       reactContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -74,6 +80,10 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
   private var focusRequest: AudioFocusRequest? = null
   private val releaseFocus = Runnable { abandonFocus() }
 
+  /** The file picker in flight, and the text a save is waiting to write. */
+  private val pendingPicker = AtomicReference<Promise?>(null)
+  private val pendingText = AtomicReference<String?>(null)
+
   init {
     soundPool.setOnLoadCompleteListener { _, sampleId, status ->
       if (status == 0) {
@@ -83,6 +93,7 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     for ((element, res) in cueResources) {
       sampleIds[element] = soundPool.load(reactContext, res, 1)
     }
+    reactContext.addActivityEventListener(this)
   }
 
   override fun getName(): String = NAME
@@ -265,6 +276,133 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * Write [text] out through the system file picker, suggesting [filename].
+   * Resolves the name the file was saved as, or null if the picker was
+   * dismissed. The picker is used rather than a fixed Downloads path so the
+   * backup can land somewhere that outlives the phone — Drive, an SD card —
+   * and so no storage permission is ever needed.
+   */
+  @ReactMethod
+  fun saveExport(filename: String, text: String, promise: Promise) {
+    val intent =
+        Intent(Intent.ACTION_CREATE_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType(JSON_MIME)
+            .putExtra(Intent.EXTRA_TITLE, filename)
+    pendingText.set(text)
+    startPicker(intent, SAVE_REQUEST, promise)
+  }
+
+  /**
+   * Read a chosen file back as text. Resolves null if the picker was
+   * dismissed, and rejects only if the file could not be read at all.
+   */
+  @ReactMethod
+  fun readExport(promise: Promise) {
+    val intent =
+        Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("*/*")
+            .putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(JSON_MIME, "text/plain"))
+    startPicker(intent, OPEN_REQUEST, promise)
+  }
+
+  /**
+   * Relaunch the app from scratch. A restore replaces every stored key
+   * underneath a running app whose screens, caches and scheduled chimes
+   * were all built from the old data; starting the process again is the
+   * only way to be certain nothing stale survives.
+   */
+  @ReactMethod
+  fun restartApp(promise: Promise) {
+    val intent =
+        reactContext.packageManager.getLaunchIntentForPackage(reactContext.packageName)
+    if (intent == null) {
+      promise.resolve(false)
+      return
+    }
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    promise.resolve(true)
+    // Let the bridge deliver that answer before the process goes.
+    mainHandler.postDelayed(
+        {
+          reactContext.startActivity(intent)
+          Runtime.getRuntime().exit(0)
+        },
+        RESTART_DELAY_MS)
+  }
+
+  /** One picker at a time: a second ask cancels the first rather than leaking it. */
+  private fun startPicker(intent: Intent, requestCode: Int, promise: Promise) {
+    val activity = currentActivity
+    if (activity == null) {
+      pendingText.set(null)
+      promise.resolve(null)
+      return
+    }
+    pendingPicker.getAndSet(promise)?.resolve(null)
+    try {
+      activity.startActivityForResult(intent, requestCode)
+    } catch (e: Exception) {
+      pendingText.set(null)
+      pendingPicker.set(null)
+      promise.reject("no_picker", "This phone has no file picker.", e)
+    }
+  }
+
+  override fun onActivityResult(
+      activity: Activity?,
+      requestCode: Int,
+      resultCode: Int,
+      data: Intent?
+  ) {
+    if (requestCode != SAVE_REQUEST && requestCode != OPEN_REQUEST) {
+      return
+    }
+    val promise = pendingPicker.getAndSet(null) ?: return
+    val text = pendingText.getAndSet(null)
+    val uri = data?.data
+    if (resultCode != Activity.RESULT_OK || uri == null) {
+      promise.resolve(null)
+      return
+    }
+    // Both directions touch the filesystem: keep them off the UI thread.
+    Thread {
+          try {
+            if (requestCode == SAVE_REQUEST) {
+              reactContext.contentResolver.openOutputStream(uri)?.use {
+                it.write((text ?: "").toByteArray(Charsets.UTF_8))
+              } ?: throw IllegalStateException("could not open $uri for writing")
+              promise.resolve(displayName(uri))
+            } else {
+              val read =
+                  reactContext.contentResolver.openInputStream(uri)?.use { stream ->
+                    stream.bufferedReader(Charsets.UTF_8).readText()
+                  } ?: throw IllegalStateException("could not open $uri for reading")
+              promise.resolve(read)
+            }
+          } catch (e: Exception) {
+            promise.reject("file_failed", e.message ?: "The file could not be used.", e)
+          }
+        }
+        .start()
+  }
+
+  override fun onNewIntent(intent: Intent?) {}
+
+  /** The name the picker gave the file, for the "saved as" line. */
+  private fun displayName(uri: android.net.Uri): String {
+    return try {
+      reactContext.contentResolver
+          .query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
+          ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+          ?: uri.lastPathSegment ?: "your file"
+    } catch (e: Exception) {
+      uri.lastPathSegment ?: "your file"
+    }
+  }
+
   private fun placeName(location: Location): String? {
     if (!Geocoder.isPresent()) {
       return null
@@ -309,6 +447,9 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     mainHandler.removeCallbacks(releaseFocus)
     abandonFocus()
     soundPool.release()
+    reactContext.removeActivityEventListener(this)
+    pendingPicker.getAndSet(null)?.resolve(null)
+    pendingText.set(null)
     super.invalidate()
   }
 
@@ -320,5 +461,9 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     /** A last-known fix younger than this is good enough for the weather. */
     private const val LAST_FIX_MAX_AGE_MS = 24L * 60 * 60 * 1000
     private const val FIX_TIMEOUT_MS = 20_000L
+    private const val JSON_MIME = "application/json"
+    private const val SAVE_REQUEST = 7301
+    private const val OPEN_REQUEST = 7302
+    private const val RESTART_DELAY_MS = 400L
   }
 }

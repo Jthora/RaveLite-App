@@ -691,6 +691,40 @@ the screen and foreground service at once.
 - A skip from Today writes `reminder.skipped`; `handledPulseIds` keeps the
   schedulers from re-queueing it after a restart.
 
+## Your data (`src/domain/data/backup.ts`, `src/screens/heart/DataPanel.tsx`, since 20 Sep 2026)
+
+No account and no server means the only copy of a year's training is on
+one phone. Settings › Your data is that copy's way out.
+
+- **Export.** `buildBackup()` takes every key in storage verbatim, minus
+  `stats.cache.` and `ambient.session.` (both rebuilt from the log), and
+  stamps it with `format`, the schema version and the time.
+  `backupFilename()` names it `ravelite-YYYY-MM-DD-HHMM.json`.
+- **Restore.** `restoreBackup(text)` **replaces** storage rather than
+  merging it — merging two training logs would invent days that never
+  happened. It refuses a newer `format` or schema, an empty file, and
+  anything that isn't JSON with an `entries` object, and a refusal leaves
+  what is already there untouched. An older export keeps its own schema
+  number, so the migrations run over it on the next launch.
+- **Two taps.** Picking a file only *describes* it ("42 days, 310 logged
+  things, exported 12 Sep"); a second, danger-coloured tap commits.
+- **Then a restart.** A restore pulls the ground out from under a running
+  app whose screens, caches and scheduled chimes were all built from the
+  old data, so `restartApp()` (native) relaunches the process. Where it
+  can't, the panel says to close and reopen.
+- **Start over** wipes storage behind the same two-tap confirm, and
+  restarts the same way.
+
+The files go through the system picker (`ACTION_CREATE_DOCUMENT` /
+`ACTION_OPEN_DOCUMENT` in `RaveLiteDeviceModule`), not a fixed Downloads
+path: no storage permission at any API level, and the backup can land on
+Drive or an SD card, somewhere that outlives the phone.
+
+**Why it exists now** rather than in Phase 4 of the beta plan: release
+builds are currently debug-signed. The first properly signed build can't
+install over an existing one, and the only way through is an uninstall,
+which takes the journal, the streak, the levels and the tests with it.
+
 ## Migrations
 
 - **v2.** On upgrade, a saved plan that differs from the new default

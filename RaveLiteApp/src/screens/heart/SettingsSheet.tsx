@@ -2,8 +2,9 @@
  * SettingsSheet — everything set once and left alone, behind the ⚙ on
  * Today: how chimes sound (with a test per element), what keeps them
  * firing on this phone, the plan editor, restoring a plan the v2
- * migration replaced, motion and the Heart theme. My day is edited from
- * Today's status chip.
+ * migration replaced, motion, the Heart theme, and the export that is the
+ * only backup of a phone-only app. My day is edited from Today's status
+ * chip.
  */
 import React, {useEffect, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -31,6 +32,7 @@ import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {AlivePanel} from './AlivePanel';
 import {ChimesPanel} from './ChimesPanel';
+import {DataPanel} from './DataPanel';
 import {KitPanel} from './KitPanel';
 import {PlanPanel} from './PlanPanel';
 import {StayAlivePanel} from './StayAlivePanel';
@@ -258,6 +260,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
 
           <AlivePanel />
           <ThemePanel />
+          <DataPanel />
         </ScrollView>
 
         <WeatherSheet

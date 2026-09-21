@@ -28,6 +28,10 @@ interface RaveLiteDeviceNative {
   getCoarseLocation?(): Promise<CoarseLocation | null>;
   /** Missing on APKs built before the location switch check. */
   isLocationEnabled?(): Promise<boolean>;
+  /** Missing on APKs built before export/restore. */
+  saveExport?(filename: string, text: string): Promise<string | null>;
+  readExport?(): Promise<string | null>;
+  restartApp?(): Promise<boolean>;
 }
 
 const native: RaveLiteDeviceNative | undefined =
@@ -111,6 +115,61 @@ export async function isLocationEnabled(): Promise<boolean> {
     return await native.isLocationEnabled();
   } catch {
     return true;
+  }
+}
+
+export type PickerResult =
+  | {ok: true; value: string}
+  | {ok: false; why: 'cancelled' | 'unsupported' | string};
+
+/**
+ * Write `text` out through the system file picker. Resolves the name it
+ * was saved as. A dismissed picker is `cancelled`, not an error — the
+ * caller says nothing rather than showing a failure the user caused.
+ */
+export async function saveExport(
+  filename: string,
+  text: string,
+): Promise<PickerResult> {
+  if (!native?.saveExport) {
+    return {ok: false, why: 'unsupported'};
+  }
+  try {
+    const saved = await native.saveExport(filename, text);
+    return saved ? {ok: true, value: saved} : {ok: false, why: 'cancelled'};
+  } catch (e) {
+    return {ok: false, why: (e as Error)?.message ?? 'unsupported'};
+  }
+}
+
+/** Read a chosen file back as text, through the same picker. */
+export async function readExport(): Promise<PickerResult> {
+  if (!native?.readExport) {
+    return {ok: false, why: 'unsupported'};
+  }
+  try {
+    const text = await native.readExport();
+    return text != null
+      ? {ok: true, value: text}
+      : {ok: false, why: 'cancelled'};
+  } catch (e) {
+    return {ok: false, why: (e as Error)?.message ?? 'unsupported'};
+  }
+}
+
+/**
+ * Start the app over. Used after a restore, where every screen and cache
+ * in the running app was built from data that no longer exists. Resolves
+ * false when the build can't do it, so the caller can ask in words.
+ */
+export async function restartApp(): Promise<boolean> {
+  if (!native?.restartApp) {
+    return false;
+  }
+  try {
+    return await native.restartApp();
+  } catch {
+    return false;
   }
 }
 

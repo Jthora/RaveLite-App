@@ -8,6 +8,12 @@ around five elements.
 Android, React Native, no account, no server, no analytics. It is one
 person's app, opened up: **beta, no support promised.**
 
+Because there is no account, there is nothing to recover from: your
+training lives on your phone and nowhere else. Settings → Your data
+writes the whole thing to a file you choose, and reads one back. During
+the beta, take one.
+
+
 > **For Ravers and Super Heroes** — training to be fit for the rave,
 > ready for intensive dancing, able to defend yourself, and of balanced
 > and positively energised spirit.
