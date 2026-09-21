@@ -18,7 +18,12 @@ import {
   restoreBackup,
   type Backup,
 } from '../../domain/data/backup';
-import {readExport, restartApp, saveExport} from '../../native/raveLiteDevice';
+import {
+  readExport,
+  restartApp,
+  saveExport,
+  shareExport,
+} from '../../native/raveLiteDevice';
 import {store} from '../../storage';
 import {Symbol, hueOf} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
@@ -61,6 +66,15 @@ export function DataPanel() {
       setNote(NO_PICKER);
     } else if (result.why !== 'cancelled') {
       setNote('That file could not be written.');
+    }
+  };
+
+  const onShare = async () => {
+    setNote(undefined);
+    const backup = buildBackup();
+    const sent = await shareExport(backupFilename(), JSON.stringify(backup));
+    if (!sent) {
+      setNote('This phone has nothing to share it with.');
     }
   };
 
@@ -140,6 +154,31 @@ export function DataPanel() {
           accessibilityLabel="Export everything to a file"
           style={styles.rowBtn}>
           <Text style={styles.rowBtnText}>Export</Text>
+        </Tap>
+      </View>
+
+      <View style={styles.row}>
+        <View style={[styles.badge, {backgroundColor: tint(hueOf('learn'))}]}>
+          <Symbol name="learn" size={20} />
+        </View>
+        <View style={styles.rowText}>
+          <Text style={[styles.rowTitle, {color: hueOf('learn')}]}>
+            Report a problem
+          </Text>
+          <Text style={styles.rowValue}>
+            Send this file to whoever is looking at it. It is everything the app
+            knows, which is usually enough to find the bug.
+          </Text>
+        </View>
+        <Tap
+          testID="data-share"
+          variant="ghost"
+          color={palette.textDim}
+          onPress={onShare}
+          accessibilityRole="button"
+          accessibilityLabel="Share your data to report a problem"
+          style={styles.rowBtn}>
+          <Text style={styles.rowBtnText}>Send</Text>
         </Tap>
       </View>
 

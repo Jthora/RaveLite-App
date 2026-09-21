@@ -26,7 +26,9 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import androidx.core.content.FileProvider
 import com.raveliteapp.R
+import java.io.File
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -347,6 +349,46 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
           Runtime.getRuntime().exit(0)
         },
         RESTART_DELAY_MS)
+  }
+
+  /**
+   * Hand an export to another app — mail, chat, a bug tracker.
+   *
+   * A tester who finds something wrong has the whole of their state in
+   * one file and, until now, no way to send it. The file is written to
+   * cache/shared, which the FileProvider exposes and nothing else does,
+   * and the share sheet gets read permission for that one URI.
+   */
+  @ReactMethod
+  fun shareExport(filename: String, text: String, promise: Promise) {
+    val activity = currentActivity
+    if (activity == null) {
+      promise.resolve(false)
+      return
+    }
+    try {
+      val dir = File(reactContext.cacheDir, "shared")
+      dir.mkdirs()
+      // Only ever one: a folder of old exports is a folder of old
+      // training logs nobody meant to keep.
+      dir.listFiles()?.forEach { it.delete() }
+      val file = File(dir, filename)
+      file.writeText(text, Charsets.UTF_8)
+
+      val uri =
+          FileProvider.getUriForFile(
+              reactContext, "${reactContext.packageName}.fileprovider", file)
+      val send =
+          Intent(Intent.ACTION_SEND)
+              .setType(JSON_MIME)
+              .putExtra(Intent.EXTRA_STREAM, uri)
+              .putExtra(Intent.EXTRA_SUBJECT, filename)
+              .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+      activity.startActivity(Intent.createChooser(send, "Send your RaveLite data"))
+      promise.resolve(true)
+    } catch (e: Exception) {
+      promise.reject("share_failed", e.message ?: "Could not share that.", e)
+    }
   }
 
   /** One picker at a time: a second ask cancels the first rather than leaking it. */

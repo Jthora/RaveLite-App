@@ -32,6 +32,8 @@ interface RaveLiteDeviceNative {
   saveExport?(filename: string, text: string): Promise<string | null>;
   readExport?(): Promise<string | null>;
   restartApp?(): Promise<boolean>;
+  /** Missing on APKs built before sharing. */
+  shareExport?(filename: string, text: string): Promise<boolean>;
   /** Missing on APKs built before units. */
   getLocale?(): Promise<{language: string; country: string}>;
 }
@@ -141,6 +143,25 @@ export async function saveExport(
     return saved ? {ok: true, value: saved} : {ok: false, why: 'cancelled'};
   } catch (e) {
     return {ok: false, why: (e as Error)?.message ?? 'unsupported'};
+  }
+}
+
+/**
+ * Offer an export to another app through the system share sheet. Returns
+ * false when the build cannot do it, so the caller can say so in words
+ * rather than appearing to do nothing.
+ */
+export async function shareExport(
+  filename: string,
+  text: string,
+): Promise<boolean> {
+  if (!native?.shareExport) {
+    return false;
+  }
+  try {
+    return await native.shareExport(filename, text);
+  } catch {
+    return false;
   }
 }
 

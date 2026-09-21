@@ -50,6 +50,17 @@
         <data android:scheme="ravelite" />
       </intent-filter>
       </activity>
+    <!-- Lets a share sheet read one exported file from cache/shared, and
+         nothing else. See res/xml/file_paths.xml. -->
+    <provider
+      android:name="androidx.core.content.FileProvider"
+      android:authorities="${applicationId}.fileprovider"
+      android:exported="false"
+      android:grantUriPermissions="true">
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" />
+    </provider>
 
       <!-- API 34+ requires a foregroundServiceType on the FGS. We
            override Notifee's bundled <service> declaration to add it. -->

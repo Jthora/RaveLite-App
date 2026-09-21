@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The one folder RaveLite ever hands to another app.
+
+  An export written for sharing goes to cache/shared and nowhere else, so
+  a share sheet can read that file and nothing else this app holds. The
+  cache is the right home: Android reclaims it, and a bug report attached
+  last month should not still be sitting on the phone.
+-->
+<paths>
+  <cache-path name="shared" path="shared/" />
+</paths>

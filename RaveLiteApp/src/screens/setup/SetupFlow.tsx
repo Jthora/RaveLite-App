@@ -27,6 +27,7 @@ import {ArchetypePanel} from '../heart/ArchetypePanel';
 import {KitPanel} from '../heart/KitPanel';
 import {PacksPanel} from '../heart/PacksPanel';
 import {ShapePanel} from '../heart/ShapePanel';
+import {DisclaimerCard} from './DisclaimerCard';
 import {StartingPanel} from './StartingPanel';
 import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
@@ -47,6 +48,13 @@ interface Step {
 }
 
 const STEPS: readonly Step[] = [
+  {
+    key: 'disclaimer',
+    symbol: 'warning',
+    title: 'Before you start',
+    why: 'Thirty seconds, and then it is all training.',
+    panel: DisclaimerCard,
+  },
   {
     key: 'archetype',
     symbol: 'operator',

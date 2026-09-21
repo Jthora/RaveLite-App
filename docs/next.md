@@ -43,6 +43,13 @@ Nothing here needs more building. It needs somebody with the passwords.
 
 In the order they will hit it, not the order it is fun to build.
 
+**Built 21 Sep 2026: all three.** The disclaimer, the feedback route and
+flaws are done; what follows is the plan they came from, kept for the
+reasoning. Next after these is
+[hardening.md](hardening.md) — six passes over everything this wave
+added, because it was all built forward and almost none of it has been
+verified failing.
+
 ### 1. The first-run disclaimer *(small, and it is a promise we made)*
 
 The plan says a disclaimer on first run, once, in setup. It is not built.

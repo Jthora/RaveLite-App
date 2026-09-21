@@ -71,8 +71,21 @@ const byTestId = (tree: renderer.ReactTestRenderer, id: string) =>
 const textOf = (tree: renderer.ReactTestRenderer) =>
   JSON.stringify(tree.toJSON());
 
+it('says the dangerous part before anything else', () => {
+  // First card, not last: somebody who taps Skip on the opening screen
+  // has still had it in front of them.
+  const {tree} = renderFlow();
+  expect(byTestId(tree, 'disclaimer')).toBeDefined();
+  const said = textOf(tree);
+  expect(said).toContain('not a medical device');
+  expect(said).toContain('Stop if it hurts');
+  expect(said).toContain('Talk to a doctor');
+  act(() => tree.unmount());
+});
+
 it('walks the questions, and every one is a panel Settings also uses', () => {
   const {tree} = renderFlow();
+  act(() => byTestId(tree, 'setup-next').props.onPress());
 
   expect(textOf(tree)).toContain('What are you training for?');
   expect(byTestId(tree, 'archetype-raver')).toBeDefined();
@@ -93,7 +106,7 @@ it('walks the questions, and every one is a panel Settings also uses', () => {
 
 it('shows a real day at the end, and Start closes it for good', () => {
   const {tree, onDone} = renderFlow();
-  for (let i = 0; i < 5; i += 1) {
+  for (let i = 0; i < 6; i += 1) {
     act(() => byTestId(tree, 'setup-next').props.onPress());
   }
   expect(textOf(tree)).toContain("Here's your day");
@@ -108,7 +121,7 @@ it('shows a real day at the end, and Start closes it for good', () => {
 
 it('asks where you are starting, and seeds the maxes from the answer', () => {
   const {tree} = renderFlow();
-  for (let i = 0; i < 3; i += 1) {
+  for (let i = 0; i < 4; i += 1) {
     act(() => byTestId(tree, 'setup-next').props.onPress());
   }
   act(() => byTestId(tree, 'starting-new').props.onPress());
@@ -126,6 +139,7 @@ it('the preview is the program, not a promise about it', () => {
 
   // Take the leanest archetype: the numbers under the card have to move.
   const before = line();
+  act(() => byTestId(tree, 'setup-next').props.onPress());
   act(() => byTestId(tree, 'archetype-parent').props.onPress());
   act(() => byTestId(tree, 'archetype-parent').props.onPress());
   act(() => byTestId(tree, 'setup-next').props.onPress());

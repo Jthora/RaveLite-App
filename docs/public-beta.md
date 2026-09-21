@@ -399,9 +399,12 @@ in every element.
       so the first properly signed build would fail to install over an
       existing app and the only fix would be an uninstall — which takes the
       journal with it. The export has to exist before the keystore does.
-- [ ] A feedback route that needs no account: export + share sheet, and a
-      link to the issue tracker.
-- [ ] A disclaimer on first run, once, in the setup flow.
+- [x] A feedback route that needs no account: Settings → Your data →
+      **Report a problem** shares the export through the system share
+      sheet, so a tester can mail it to anybody (21 Sep 2026).
+- [x] A disclaimer on first run — the **first** card in setup rather
+      than the last, so somebody who taps Skip immediately has still had
+      it in front of them (21 Sep 2026).
 
 ## 13. Risks
 

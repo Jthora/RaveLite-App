@@ -13,11 +13,13 @@ jest.mock('../../../native/raveLiteDevice', () => ({
   saveExport: jest.fn(),
   readExport: jest.fn(),
   restartApp: jest.fn(),
+  shareExport: jest.fn(),
 }));
 
 const saveExport = device.saveExport as jest.Mock;
 const readExport = device.readExport as jest.Mock;
 const restartApp = device.restartApp as jest.Mock;
+const shareExport = device.shareExport as jest.Mock;
 
 const NOW = new Date(2026, 8, 20, 9, 0).getTime();
 
@@ -72,6 +74,33 @@ it('hands the whole life to the picker, and says what left', async () => {
     store.getString(KEYS.trainingEntries),
   );
   expect(noteText(tree)).toContain('ravelite-2026-09-20-0900.json');
+  act(() => tree.unmount());
+});
+
+it('can send the whole of a life to whoever is looking at the bug', async () => {
+  aLifeLogged();
+  shareExport.mockResolvedValue(true);
+  const tree = renderPanel();
+
+  await press(tree, 'data-share');
+
+  const [filename, text] = shareExport.mock.calls[0] as [string, string];
+  expect(filename).toMatch(/^ravelite-.*\.json$/);
+  expect(JSON.parse(text).entries[KEYS.trainingEntries]).toBe(
+    store.getString(KEYS.trainingEntries),
+  );
+  // Nothing to say when it worked: the share sheet is the feedback.
+  expect(byTestId(tree, 'data-note')).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('says so when there is nothing to share with', async () => {
+  shareExport.mockResolvedValue(false);
+  const tree = renderPanel();
+
+  await press(tree, 'data-share');
+
+  expect(noteText(tree)).toMatch(/nothing to share it with/);
   act(() => tree.unmount());
 });
 
