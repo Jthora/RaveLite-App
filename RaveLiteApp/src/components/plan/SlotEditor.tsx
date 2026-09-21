@@ -37,12 +37,24 @@ const MAX_SEC_PRESETS: Array<number | null> = [60, 90, 120, 180, null];
 /** All Target values from exercises domain. Kept inline so this file
  *  stays self-contained — the source-of-truth Target union is type-only. */
 const ALL_TAGS: Target[] = [
-  'UCS', 'Hourglass', 'APT',
-  'PFT-Pushups', 'PFT-Situps', 'PFT-Run',
-  'Core', 'Conditioning', 'Grip', 'Agility',
-  'Mobility', 'Strength', 'Coordination',
-  'Flow', 'Breath', 'Presence',
-  'Hydration', 'Fuel',
+  'UCS',
+  'Hourglass',
+  'APT',
+  'PFT-Pushups',
+  'PFT-Situps',
+  'PFT-Run',
+  'Core',
+  'Conditioning',
+  'Grip',
+  'Agility',
+  'Mobility',
+  'Strength',
+  'Coordination',
+  'Flow',
+  'Breath',
+  'Presence',
+  'Hydration',
+  'Fuel',
   'NoFloor',
 ];
 
@@ -74,7 +86,11 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
   const toggleTag = useCallback((tag: Target) => {
     setDraft(d => {
       const cur = new Set(d.requiredTags ?? []);
-      if (cur.has(tag)) {cur.delete(tag);} else {cur.add(tag);}
+      if (cur.has(tag)) {
+        cur.delete(tag);
+      } else {
+        cur.add(tag);
+      }
       const next = Array.from(cur) as CadenceSlot['requiredTags'];
       if (!next || next.length === 0) {
         const {requiredTags: _drop, ...rest} = d;
@@ -91,7 +107,9 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
     () =>
       `Every ${draft.everyMinutes}m · ${
         draft.maxSeconds ? `≤${draft.maxSeconds}s` : 'free length'
-      }${tagsCount > 0 ? ` · ${tagsCount} tag${tagsCount === 1 ? '' : 's'}` : ''}`,
+      }${
+        tagsCount > 0 ? ` · ${tagsCount} tag${tagsCount === 1 ? '' : 's'}` : ''
+      }`,
     [draft.everyMinutes, draft.maxSeconds, tagsCount],
   );
 
@@ -102,7 +120,7 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
       showsVerticalScrollIndicator={false}>
       {/* Header */}
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ▸  {isNew ? 'NEW SLOT' : 'EDIT SLOT'}
+        ▸ {isNew ? 'NEW SLOT' : 'EDIT SLOT'}
       </Text>
       <Text style={styles.summary}>{summary}</Text>
 
@@ -127,7 +145,7 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
                     styles.elPillText,
                     {color: active ? palette.bg : palette.textDim},
                   ]}>
-                  {ELEMENTS[id].glyph}  {ELEMENTS[id].label}
+                  {ELEMENTS[id].glyph} {ELEMENTS[id].name}
                 </Text>
               </Tap>
             );
@@ -201,7 +219,11 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
             color={accentDim}
             onPress={() => setTagsExpanded(v => !v)}>
             <Text style={[styles.toggle, {color: accentDim}]}>
-              {tagsExpanded ? 'hide' : tagsCount > 0 ? `${tagsCount} active` : 'add'}
+              {tagsExpanded
+                ? 'hide'
+                : tagsCount > 0
+                ? `${tagsCount} active`
+                : 'add'}
             </Text>
           </Tap>
         }>
@@ -222,7 +244,10 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
                   <Text
                     style={[
                       styles.chipText,
-                      {color: active ? palette.bg : palette.textDim, fontSize: 11},
+                      {
+                        color: active ? palette.bg : palette.textDim,
+                        fontSize: 11,
+                      },
                     ]}>
                     {tag}
                   </Text>
@@ -246,7 +271,9 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
             color={palette.danger}
             onPress={onDelete}
             style={styles.footerBtn}>
-            <Text style={[styles.footerText, {color: palette.danger}]}>Delete</Text>
+            <Text style={[styles.footerText, {color: palette.danger}]}>
+              Delete
+            </Text>
           </Tap>
         )}
         <Tap
@@ -261,7 +288,8 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
           color={accent}
           onPress={() => onSave(draft)}
           style={styles.footerBtn}>
-          <Text style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
+          <Text
+            style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
             Save
           </Text>
         </Tap>

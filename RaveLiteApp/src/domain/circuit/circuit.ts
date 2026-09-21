@@ -1,4 +1,4 @@
-import {ElementId} from '../theme/elements';
+import {ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {Exercise} from '../exercises/types';
 

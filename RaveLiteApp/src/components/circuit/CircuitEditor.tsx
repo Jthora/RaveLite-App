@@ -31,10 +31,7 @@ interface Props {
   onEngage: (draft: CustomCircuit) => void;
 }
 
-type LegEditingState =
-  | null
-  | {kind: 'edit'; index: number}
-  | {kind: 'new'};
+type LegEditingState = null | {kind: 'edit'; index: number} | {kind: 'new'};
 
 export function CircuitEditor({
   circuit,
@@ -59,7 +56,9 @@ export function CircuitEditor({
   const onLegSave = useCallback(
     (updated: CustomCircuitLeg) => {
       setDraft(d => {
-        if (!editing) {return d;}
+        if (!editing) {
+          return d;
+        }
         if (editing.kind === 'new') {
           return {...d, legs: [...d.legs, updated]};
         }
@@ -75,7 +74,9 @@ export function CircuitEditor({
 
   const onLegDelete = useCallback(() => {
     setDraft(d => {
-      if (!editing || editing.kind !== 'edit') {return d;}
+      if (!editing || editing.kind !== 'edit') {
+        return d;
+      }
       return {...d, legs: d.legs.filter((_, i) => i !== editing.index)};
     });
     setEditing(null);
@@ -88,9 +89,7 @@ export function CircuitEditor({
   // Layer 3 takeover.
   if (editing) {
     const leg: CustomCircuitLeg =
-      editing.kind === 'edit'
-        ? draft.legs[editing.index]
-        : makeBlankLeg();
+      editing.kind === 'edit' ? draft.legs[editing.index] : makeBlankLeg();
     return (
       <LegEditor
         leg={leg}
@@ -111,7 +110,7 @@ export function CircuitEditor({
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ▸  {isNew ? 'NEW CIRCUIT' : 'EDIT CIRCUIT'}
+        ▸ {isNew ? 'NEW CIRCUIT' : 'EDIT CIRCUIT'}
       </Text>
 
       {/* Name */}
@@ -129,10 +128,7 @@ export function CircuitEditor({
       <Section
         label={`Legs (${draft.legs.length}) · ${fmtTotal(total)}`}
         right={
-          <Tap
-            variant="plain"
-            color={accentDim}
-            onPress={onAddLeg}>
+          <Tap variant="plain" color={accentDim} onPress={onAddLeg}>
             <Text style={[styles.toggle, {color: accentDim}]}>+ add leg</Text>
           </Tap>
         }>
@@ -159,7 +155,7 @@ export function CircuitEditor({
           disabled={!canEngage}
           onPress={() => onEngage(draft)}
           style={styles.engageBtn}>
-          <Text style={styles.engageText}>Engage circuit  ⟶</Text>
+          <Text style={styles.engageText}>Engage circuit ⟶</Text>
         </Tap>
       </View>
 
@@ -171,7 +167,9 @@ export function CircuitEditor({
             color={palette.danger}
             onPress={onDelete}
             style={styles.footerBtn}>
-            <Text style={[styles.footerText, {color: palette.danger}]}>Delete</Text>
+            <Text style={[styles.footerText, {color: palette.danger}]}>
+              Delete
+            </Text>
           </Tap>
         )}
         <Tap
@@ -186,7 +184,8 @@ export function CircuitEditor({
           color={accent}
           onPress={() => onSave(draft)}
           style={styles.footerBtn}>
-          <Text style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
+          <Text
+            style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
             Save
           </Text>
         </Tap>
@@ -231,11 +230,9 @@ function LegRow({index, leg, onPress}: LegRowProps) {
       </Text>
       <View style={[styles.legDot, {backgroundColor: c}]} />
       <View style={styles.legBody}>
-        <Text style={styles.legName}>
-          {ex?.name ?? leg.exerciseId}
-        </Text>
+        <Text style={styles.legName}>{ex?.name ?? leg.exerciseId}</Text>
         <Text style={styles.legMeta}>
-          {ELEMENTS[leg.element].label}  ·  {leg.durationSec}s
+          {ELEMENTS[leg.element].name} · {leg.durationSec}s
         </Text>
       </View>
       <Text style={[styles.chevron, {color: c}]}>›</Text>
@@ -245,8 +242,8 @@ function LegRow({index, leg, onPress}: LegRowProps) {
 
 function makeBlankLeg(): CustomCircuitLeg {
   // Default to first air drill — neutral starting point.
-  const first = EXERCISE_LIBRARY.find(e => e.element === 'air')
-    ?? EXERCISE_LIBRARY[0];
+  const first =
+    EXERCISE_LIBRARY.find(e => e.element === 'air') ?? EXERCISE_LIBRARY[0];
   return {
     element: first.element,
     exerciseId: first.id,
@@ -255,9 +252,13 @@ function makeBlankLeg(): CustomCircuitLeg {
 }
 
 function dominantElement(els: ElementId[]): ElementId {
-  if (els.length === 0) {return 'heart';}
+  if (els.length === 0) {
+    return 'heart';
+  }
   const counts: Partial<Record<ElementId, number>> = {};
-  for (const e of els) {counts[e] = (counts[e] ?? 0) + 1;}
+  for (const e of els) {
+    counts[e] = (counts[e] ?? 0) + 1;
+  }
   let best: ElementId = 'heart';
   let bestN = -1;
   for (const id of Object.keys(counts) as ElementId[]) {
@@ -271,11 +272,17 @@ function dominantElement(els: ElementId[]): ElementId {
 }
 
 function fmtTotal(sec: number): string {
-  if (sec === 0) {return '0s';}
+  if (sec === 0) {
+    return '0s';
+  }
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  if (m === 0) {return `${s}s`;}
-  if (s === 0) {return `${m}m`;}
+  if (m === 0) {
+    return `${s}s`;
+  }
+  if (s === 0) {
+    return `${m}m`;
+  }
   return `${m}m ${s}s`;
 }
 

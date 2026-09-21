@@ -369,7 +369,7 @@ possible without touching app code.
 - [ ] `CODE_OF_CONDUCT.md`
 - [ ] A screenshot set for the README (Today, Daily Sets, an info card,
       the character sheet)
-- [ ] Confirm no release keystore, no secrets (`debug.keystore` is the
+- [x] Confirm no release keystore, no secrets (`debug.keystore` is the
       standard public one and is fine)
 - [ ] A `SECURITY.md` pointing at issues, since there is no server
 
@@ -440,7 +440,11 @@ with the archetypes in Phase 3.
       Settings (20 Sep 2026). One deviation from §6: par floors at 10
       rather than rounding freely to 5, because the one-set-per-track
       floor keeps the shortest day at ~⅓ of a full day, not ⅕.
-- [ ] Windows editor with the timeline graphic
+- [x] Windows editor with the timeline graphic — it already existed
+      (`PlanRibbon` + `WindowEditor` + `SlotEditor` + `TimeRangeSlider`);
+      what it needed was to work. `ELEMENTS[id].label` does not exist, so
+      every slot row in it rendered a glyph followed by nothing. Fixed at
+      five call sites, with a guard test (20 Sep 2026).
 - [x] Modes: travelling, injured, festival, rest; ramp pause (20 Sep 2026).
       Deload is not a stored mode — it is computed from the program week,
       so offering it as a thing to switch on would let it disagree with

@@ -21,7 +21,11 @@ export function DayToggle({value, onChange, accent}: Props) {
 
   const toggle = (i: number) => {
     const next = new Set(set);
-    if (next.has(i)) {next.delete(i);} else {next.add(i);}
+    if (next.has(i)) {
+      next.delete(i);
+    } else {
+      next.add(i);
+    }
     onChange(Array.from(next).sort((a, b) => a - b));
   };
 

@@ -32,7 +32,7 @@ export function WindowRow({window: w, onPress}: Props) {
       <View style={styles.body}>
         <Text style={styles.label}>{w.label}</Text>
         <Text style={styles.meta}>
-          {dayLabel}  ·  {w.startTime}–{w.endTime}  ·  {w.slots.length} slot
+          {dayLabel} · {w.startTime}–{w.endTime} · {w.slots.length} slot
           {w.slots.length === 1 ? '' : 's'}
         </Text>
       </View>
@@ -41,10 +41,16 @@ export function WindowRow({window: w, onPress}: Props) {
   );
 }
 
-function dominantElement(w: import('../../domain/reminders/types').Window): ElementId {
-  if (w.slots.length === 0) {return 'heart';}
+function dominantElement(
+  w: import('../../domain/reminders/types').Window,
+): ElementId {
+  if (w.slots.length === 0) {
+    return 'heart';
+  }
   const counts: Partial<Record<ElementId, number>> = {};
-  for (const s of w.slots) {counts[s.element] = (counts[s.element] ?? 0) + 1;}
+  for (const s of w.slots) {
+    counts[s.element] = (counts[s.element] ?? 0) + 1;
+  }
   let best: ElementId = 'heart';
   let bestN = -1;
   for (const id of Object.keys(counts) as ElementId[]) {
@@ -60,7 +66,9 @@ function dominantElement(w: import('../../domain/reminders/types').Window): Elem
 const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 function formatDays(days: number[]): string {
   const set = new Set(days);
-  if (set.size === 7) {return 'Daily';}
+  if (set.size === 7) {
+    return 'Daily';
+  }
   if (
     set.size === 5 &&
     [1, 2, 3, 4, 5].every(d => set.has(d)) &&
@@ -69,7 +77,9 @@ function formatDays(days: number[]): string {
   ) {
     return 'Mon–Fri';
   }
-  if (set.size === 2 && set.has(0) && set.has(6)) {return 'Weekends';}
+  if (set.size === 2 && set.has(0) && set.has(6)) {
+    return 'Weekends';
+  }
   return DAY_LETTERS.map((l, i) => (set.has(i) ? l : '·')).join(' ');
 }
 

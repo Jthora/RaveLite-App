@@ -18,7 +18,7 @@ import {
   View,
 } from 'react-native';
 
-import {palette, radius, spacing} from '../../theme';
+import {palette, spacing} from '../../theme';
 
 interface Props {
   /** "HH:mm" — must be < end. */
@@ -57,7 +57,8 @@ export function TimeRangeSlider({start, end, onChange, accent}: Props) {
   }, []);
 
   const minToPx = useCallback(
-    (m: number) => (widthRef.current === 0 ? 0 : (m / TOTAL_MIN) * widthRef.current),
+    (m: number) =>
+      widthRef.current === 0 ? 0 : (m / TOTAL_MIN) * widthRef.current,
     [],
   );
 
@@ -79,11 +80,7 @@ export function TimeRangeSlider({start, end, onChange, accent}: Props) {
       onPanResponderMove: (_, g) => {
         const deltaMin = pxToMin(g.dx);
         const raw = dragOriginRef.current + deltaMin;
-        const snapped = clamp(
-          snap(raw),
-          0,
-          endMinRef.current - MIN_SEPARATION,
-        );
+        const snapped = clamp(snap(raw), 0, endMinRef.current - MIN_SEPARATION);
         if (snapped !== startMinRef.current) {
           startMinRef.current = snapped;
           onChange(toHM(snapped), toHM(endMinRef.current));
@@ -121,11 +118,15 @@ export function TimeRangeSlider({start, end, onChange, accent}: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.labelRow}>
-        <Text style={[styles.label, {color: accent}]}>{toHM(startMinRef.current)}</Text>
+        <Text style={[styles.label, {color: accent}]}>
+          {toHM(startMinRef.current)}
+        </Text>
         <Text style={[styles.label, {color: palette.textDim}]}>
           {durationLabel(endMinRef.current - startMinRef.current)}
         </Text>
-        <Text style={[styles.label, {color: accent}]}>{toHM(endMinRef.current)}</Text>
+        <Text style={[styles.label, {color: accent}]}>
+          {toHM(endMinRef.current)}
+        </Text>
       </View>
 
       <View style={styles.trackOuter} onLayout={onLayout}>
@@ -138,7 +139,11 @@ export function TimeRangeSlider({start, end, onChange, accent}: Props) {
             style={[
               styles.track,
               styles.fill,
-              {backgroundColor: accent, left: startPx, width: Math.max(0, endPx - startPx)},
+              {
+                backgroundColor: accent,
+                left: startPx,
+                width: Math.max(0, endPx - startPx),
+              },
             ]}
           />
         )}
@@ -146,13 +151,7 @@ export function TimeRangeSlider({start, end, onChange, accent}: Props) {
         {/* Hour ticks at 6/12/18 */}
         {width > 0 &&
           [6, 12, 18].map(h => (
-            <View
-              key={h}
-              style={[
-                styles.tick,
-                {left: minToPx(h * 60)},
-              ]}
-            />
+            <View key={h} style={[styles.tick, {left: minToPx(h * 60)}]} />
           ))}
 
         {/* Start thumb */}
@@ -182,7 +181,9 @@ export function TimeRangeSlider({start, end, onChange, accent}: Props) {
 
       <View style={styles.scaleRow}>
         {['0', '6', '12', '18', '24'].map(h => (
-          <Text key={h} style={styles.scaleLabel}>{h}</Text>
+          <Text key={h} style={styles.scaleLabel}>
+            {h}
+          </Text>
         ))}
       </View>
     </View>
@@ -209,11 +210,17 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 function durationLabel(min: number): string {
-  if (min <= 0) {return '—';}
+  if (min <= 0) {
+    return '—';
+  }
   const h = Math.floor(min / 60);
   const m = min % 60;
-  if (h === 0) {return `${m}m`;}
-  if (m === 0) {return `${h}h`;}
+  if (h === 0) {
+    return `${m}m`;
+  }
+  if (m === 0) {
+    return `${h}h`;
+  }
   return `${h}h ${m}m`;
 }
 

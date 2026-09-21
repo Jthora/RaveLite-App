@@ -37,11 +37,16 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
   const accent = ELEMENTS[draft.element].color;
   const accentDim = ELEMENTS[draft.element].accent;
 
-  const drills = useMemo(() => exercisesForElement(draft.element), [draft.element]);
+  const drills = useMemo(
+    () => exercisesForElement(draft.element),
+    [draft.element],
+  );
 
   const setElement = useCallback((next: ElementId) => {
     setDraft(d => {
-      if (d.element === next) {return d;}
+      if (d.element === next) {
+        return d;
+      }
       const list = exercisesForElement(next);
       const stillValid = list.some(e => e.id === d.exerciseId);
       return {
@@ -60,7 +65,7 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
     setDraft(d => ({...d, durationSec: sec}));
   }, []);
 
-  const summary = `${ELEMENTS[draft.element].label} · ${draft.durationSec}s`;
+  const summary = `${ELEMENTS[draft.element].name} · ${draft.durationSec}s`;
 
   return (
     <ScrollView
@@ -68,7 +73,7 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ▸  {isNew ? 'NEW LEG' : 'EDIT LEG'}
+        ▸ {isNew ? 'NEW LEG' : 'EDIT LEG'}
       </Text>
       <Text style={styles.summary}>{summary}</Text>
 
@@ -93,7 +98,7 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
                     styles.elPillText,
                     {color: active ? palette.bg : palette.textDim},
                   ]}>
-                  {ELEMENTS[id].glyph}  {ELEMENTS[id].label}
+                  {ELEMENTS[id].glyph} {ELEMENTS[id].name}
                 </Text>
               </Tap>
             );
@@ -116,19 +121,27 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
                   styles.drillRow,
                   {
                     borderColor: active ? accent : palette.border,
-                    backgroundColor: active ? withAlpha(accent, 0.08) : palette.surface,
+                    backgroundColor: active
+                      ? withAlpha(accent, 0.08)
+                      : palette.surface,
                   },
                 ]}>
                 <View style={styles.drillBody}>
                   <Text style={styles.drillName}>{ex.name}</Text>
-                  <Text style={styles.drillMeta}>{ex.dose}  ·  ~{ex.approxSeconds}s</Text>
+                  <Text style={styles.drillMeta}>
+                    {ex.dose} · ~{ex.approxSeconds}s
+                  </Text>
                 </View>
-                {active && <Text style={[styles.drillCheck, {color: accent}]}>●</Text>}
+                {active && (
+                  <Text style={[styles.drillCheck, {color: accent}]}>●</Text>
+                )}
               </Tap>
             );
           })}
           {drills.length === 0 && (
-            <Text style={styles.emptyText}>No drills available for this element.</Text>
+            <Text style={styles.emptyText}>
+              No drills available for this element.
+            </Text>
           )}
         </View>
       </Section>
@@ -169,7 +182,9 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
             color={palette.danger}
             onPress={onDelete}
             style={styles.footerBtn}>
-            <Text style={[styles.footerText, {color: palette.danger}]}>Delete</Text>
+            <Text style={[styles.footerText, {color: palette.danger}]}>
+              Delete
+            </Text>
           </Tap>
         )}
         <Tap
@@ -184,7 +199,8 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
           color={accent}
           onPress={() => onSave(draft)}
           style={styles.footerBtn}>
-          <Text style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
+          <Text
+            style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
             Save
           </Text>
         </Tap>
@@ -195,7 +211,10 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
 
 void LEG_DURATION_DEFAULT;
 
-interface SectionProps {label: string; children?: React.ReactNode}
+interface SectionProps {
+  label: string;
+  children?: React.ReactNode;
+}
 function Section({label, children}: SectionProps) {
   return (
     <View style={styles.section}>
@@ -207,7 +226,9 @@ function Section({label, children}: SectionProps) {
 
 function withAlpha(hex: string, alpha: number): string {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.replace(/^#/, ''));
-  if (!m) {return `rgba(255,255,255,${alpha})`;}
+  if (!m) {
+    return `rgba(255,255,255,${alpha})`;
+  }
   const r = parseInt(m[1].slice(0, 2), 16);
   const g = parseInt(m[1].slice(2, 4), 16);
   const b = parseInt(m[1].slice(4, 6), 16);

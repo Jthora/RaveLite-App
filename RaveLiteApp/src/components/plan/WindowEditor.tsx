@@ -36,7 +36,13 @@ type SlotEditingState =
   | {kind: 'edit'; index: number}
   | {kind: 'new'; element: ElementId};
 
-export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Props) {
+export function WindowEditor({
+  window: w,
+  isNew,
+  onSave,
+  onDelete,
+  onCancel,
+}: Props) {
   const [draft, setDraft] = useState<Window>(w);
   const [editing, setEditing] = useState<SlotEditingState>(null);
 
@@ -64,7 +70,9 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
   const onSlotSave = useCallback(
     (updated: CadenceSlot) => {
       setDraft(d => {
-        if (!editing) {return d;}
+        if (!editing) {
+          return d;
+        }
         if (editing.kind === 'new') {
           return {...d, slots: [...d.slots, updated]};
         }
@@ -80,7 +88,9 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
 
   const onSlotDelete = useCallback(() => {
     setDraft(d => {
-      if (!editing || editing.kind !== 'edit') {return d;}
+      if (!editing || editing.kind !== 'edit') {
+        return d;
+      }
       return {...d, slots: d.slots.filter((_, i) => i !== editing.index)};
     });
     setEditing(null);
@@ -89,7 +99,9 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
   // Layer 3 — SlotEditor takeover.
   if (editing) {
     const slot =
-      editing.kind === 'edit' ? draft.slots[editing.index] : makeSlot(editing.element);
+      editing.kind === 'edit'
+        ? draft.slots[editing.index]
+        : makeSlot(editing.element);
     return (
       <SlotEditor
         slot={slot}
@@ -108,7 +120,7 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       <Text style={[styles.eyebrow, {color: accentDim}]}>
-        ▸  {isNew ? 'NEW WINDOW' : 'EDIT WINDOW'}
+        ▸ {isNew ? 'NEW WINDOW' : 'EDIT WINDOW'}
       </Text>
 
       {/* Label */}
@@ -134,7 +146,11 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
 
       {/* Days */}
       <Section label="Days of week">
-        <DayToggle value={draft.daysOfWeek} onChange={setDays} accent={accent} />
+        <DayToggle
+          value={draft.daysOfWeek}
+          onChange={setDays}
+          accent={accent}
+        />
       </Section>
 
       {/* Slots */}
@@ -156,7 +172,9 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
           />
         ))}
         {draft.slots.length === 0 && (
-          <Text style={styles.emptyText}>No slots. Tap + add to schedule one.</Text>
+          <Text style={styles.emptyText}>
+            No slots. Tap + add to schedule one.
+          </Text>
         )}
       </Section>
 
@@ -194,7 +212,9 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
             color={palette.danger}
             onPress={onDelete}
             style={styles.footerBtn}>
-            <Text style={[styles.footerText, {color: palette.danger}]}>Delete</Text>
+            <Text style={[styles.footerText, {color: palette.danger}]}>
+              Delete
+            </Text>
           </Tap>
         )}
         <Tap
@@ -209,7 +229,8 @@ export function WindowEditor({window: w, isNew, onSave, onDelete, onCancel}: Pro
           color={accent}
           onPress={() => onSave(draft)}
           style={styles.footerBtn}>
-          <Text style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
+          <Text
+            style={[styles.footerText, {color: palette.bg, fontWeight: '700'}]}>
             Save
           </Text>
         </Tap>
@@ -231,7 +252,7 @@ function SlotRow({slot, onPress}: SlotRowProps) {
       onPress={onPress}
       style={[styles.slotRow, {borderColor: palette.border}]}>
       <View style={[styles.slotDot, {backgroundColor: c}]} />
-      <Text style={styles.slotLabel}>{ELEMENTS[slot.element].label}</Text>
+      <Text style={styles.slotLabel}>{ELEMENTS[slot.element].name}</Text>
       <Text style={styles.slotMeta}>
         every {slot.everyMinutes}m
         {slot.maxSeconds ? ` · ≤${slot.maxSeconds}s` : ''}
@@ -260,9 +281,13 @@ function Section({label, right, children}: SectionProps) {
 }
 
 function dominantElement(w: Window): ElementId {
-  if (w.slots.length === 0) {return 'heart';}
+  if (w.slots.length === 0) {
+    return 'heart';
+  }
   const counts: Partial<Record<ElementId, number>> = {};
-  for (const s of w.slots) {counts[s.element] = (counts[s.element] ?? 0) + 1;}
+  for (const s of w.slots) {
+    counts[s.element] = (counts[s.element] ?? 0) + 1;
+  }
   let best: ElementId = 'heart';
   let bestN = -1;
   for (const id of Object.keys(counts) as ElementId[]) {

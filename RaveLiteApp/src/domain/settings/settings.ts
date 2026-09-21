@@ -38,7 +38,10 @@ export function getSetting<K extends Key>(key: K): SettingDefs[K] | undefined {
   }
   const asNum = store.getNumber(k);
   if (typeof asNum === 'number') {
-    return asNum as SettingDefs[K];
+    // No SettingDefs value is a number today, so TS can narrow the target
+    // to `never` here and refuse the cast. The branch still has to exist:
+    // a numeric setting added later must read back, not silently vanish.
+    return asNum as unknown as SettingDefs[K];
   }
   return undefined;
 }

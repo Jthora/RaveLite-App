@@ -742,6 +742,31 @@ moves until someone says otherwise; the golden test in
 
 Chosen in Settings › How much day you have.
 
+## The typecheck baseline is zero (20 Sep 2026)
+
+For a long time `tsc --noEmit` reported nine errors in non-test code, and
+"nine" became the number to check against rather than a list to read. One
+of them was hiding a visible bug: `ELEMENTS[id].label` does not exist —
+elements have a `name` — and React renders `undefined` as nothing, so
+every slot row in the window editor and every leg in the circuit editors
+drew a glyph followed by empty space. Five call sites, no crash, no
+failing test.
+
+Another was worse in a quieter way. `domain/circuit/circuit.ts` imported
+`'../theme/elements'`, one `..` short of the real path. That made its
+`ElementId` an error type rather than the real union, which in turn made
+`CircuitChamber`'s perfectly correct `ELEMENTS[leg.element]` look wrong —
+so the fix for a two-error file cleared a third error somewhere else.
+
+All nine are gone. `src/theme/__tests__/elements.test.ts` now scans the
+source for any property read off an element that an element does not
+have, so the class of bug cannot come back silently; it was checked
+against the real bug before being trusted.
+
+The lesson worth keeping: a tolerated error count is a place for real
+bugs to hide, because a baseline is something people compare against
+instead of read.
+
 ## Modes: what is true right now (`src/domain/profile/mode.ts`, since 20 Sep 2026)
 
 Facts gate what is possible, the day shape sizes it, and a mode overrides

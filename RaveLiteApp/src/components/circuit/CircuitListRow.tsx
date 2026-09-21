@@ -30,7 +30,8 @@ export function CircuitListRow({circuit: c, onPress}: Props) {
       <View style={styles.body}>
         <Text style={styles.label}>{c.name || 'Unnamed circuit'}</Text>
         <Text style={styles.meta}>
-          {c.legs.length} leg{c.legs.length === 1 ? '' : 's'}  ·  {fmtTotal(total)}
+          {c.legs.length} leg{c.legs.length === 1 ? '' : 's'} ·{' '}
+          {fmtTotal(total)}
         </Text>
       </View>
       <Text style={[styles.chevron, {color: accent}]}>›</Text>
@@ -39,9 +40,13 @@ export function CircuitListRow({circuit: c, onPress}: Props) {
 }
 
 function dominantElement(els: ElementId[]): ElementId {
-  if (els.length === 0) {return 'heart';}
+  if (els.length === 0) {
+    return 'heart';
+  }
   const counts: Partial<Record<ElementId, number>> = {};
-  for (const e of els) {counts[e] = (counts[e] ?? 0) + 1;}
+  for (const e of els) {
+    counts[e] = (counts[e] ?? 0) + 1;
+  }
   let best: ElementId = 'heart';
   let bestN = -1;
   for (const id of Object.keys(counts) as ElementId[]) {
@@ -55,11 +60,17 @@ function dominantElement(els: ElementId[]): ElementId {
 }
 
 function fmtTotal(sec: number): string {
-  if (sec === 0) {return '—';}
+  if (sec === 0) {
+    return '—';
+  }
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  if (m === 0) {return `${s}s`;}
-  if (s === 0) {return `${m}m`;}
+  if (m === 0) {
+    return `${s}s`;
+  }
+  if (s === 0) {
+    return `${m}m`;
+  }
   return `${m}m ${s}s`;
 }
 

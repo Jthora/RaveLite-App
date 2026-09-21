@@ -170,8 +170,7 @@ export const CircuitChamber: React.FC<Props> = ({
       animationType="fade"
       transparent={false}
       onRequestClose={onLeave}>
-      <SafeAreaView
-        style={[styles.root, {backgroundColor: element.deep}]}>
+      <SafeAreaView style={[styles.root, {backgroundColor: element.deep}]}>
         {/* Element flood — deep at ~0.55 alpha behind everything. */}
         <View
           pointerEvents="none"
@@ -191,7 +190,9 @@ export const CircuitChamber: React.FC<Props> = ({
           </Pressable>
         </View>
 
-        {done ? <FinaleView onClose={onLeave} /> : (
+        {done ? (
+          <FinaleView onClose={onLeave} />
+        ) : (
           <View style={styles.body}>
             {/* Cross-leg flash overlay. */}
             <Animated.View
@@ -210,8 +211,7 @@ export const CircuitChamber: React.FC<Props> = ({
               ]}
             />
 
-            <Text
-              style={[styles.eyebrow, {color: element.color}]}>
+            <Text style={[styles.eyebrow, {color: element.color}]}>
               {element.name.toUpperCase()} · {element.domain.toUpperCase()}
             </Text>
 
@@ -236,15 +236,12 @@ export const CircuitChamber: React.FC<Props> = ({
             {/* palette.text (white) ensures legibility at any flash peak
                 regardless of which element color is flooding the screen. */}
             <Text style={[styles.cue, {color: palette.text}]}>
-              {leg.exercise.cues[0]}
+              {leg.exercise.cues?.[0] ?? leg.exercise.name}
             </Text>
 
             {/* Timer track. */}
             <View
-              style={[
-                styles.track,
-                {backgroundColor: element.color + '22'},
-              ]}>
+              style={[styles.track, {backgroundColor: element.color + '22'}]}>
               <View
                 style={[
                   styles.trackFill,
@@ -262,10 +259,7 @@ export const CircuitChamber: React.FC<Props> = ({
             <View style={styles.controls}>
               <Pressable
                 onPress={() => setPaused(p => !p)}
-                style={[
-                  styles.btn,
-                  {borderColor: element.color},
-                ]}>
+                style={[styles.btn, {borderColor: element.color}]}>
                 <Text style={[styles.btnText, {color: element.color}]}>
                   {paused ? 'Resume' : 'Pause'}
                 </Text>
@@ -308,8 +302,8 @@ const FinaleView: React.FC<{onClose: () => void}> = ({onClose}) => {
       </Animated.Text>
       <Text style={styles.finaleTitle}>Five elements aligned.</Text>
       <Text style={styles.finaleBody}>
-        Penta-lock acquired. Circuit complete — all five legs logged.
-        Re-engage whenever the system needs a full sweep.
+        Penta-lock acquired. Circuit complete — all five legs logged. Re-engage
+        whenever the system needs a full sweep.
       </Text>
       <Pressable
         onPress={onClose}

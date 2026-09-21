@@ -67,7 +67,13 @@ export function PlanRibbon({plan, height = RIBBON_HEIGHT}: Props) {
             y={height + 11}
             fill={palette.textMuted}
             fontSize={6}
-            textAnchor={i === 0 ? 'start' : i === HOUR_LABELS.length - 1 ? 'end' : 'middle'}>
+            textAnchor={
+              i === 0
+                ? 'start'
+                : i === HOUR_LABELS.length - 1
+                ? 'end'
+                : 'middle'
+            }>
             {label}
           </SvgText>
         ))}
@@ -100,7 +106,9 @@ function parseHM(hm: string): number {
 }
 
 function dominantColor(w: Window): string {
-  if (w.slots.length === 0) {return palette.border;}
+  if (w.slots.length === 0) {
+    return palette.border;
+  }
   const counts: Partial<Record<ElementId, number>> = {};
   for (const s of w.slots) {
     counts[s.element] = (counts[s.element] ?? 0) + 1;
