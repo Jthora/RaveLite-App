@@ -17,9 +17,11 @@ import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
 import {
   dayDensity,
   loadFacts,
+  loadStarting,
   rampIsPaused,
   trainsToday,
 } from '../profile/repository';
+import {seededMax, startingFactor} from '../profile/starting';
 import {dayFocus, type DayFocus} from './week';
 
 /**
@@ -29,11 +31,15 @@ import {dayFocus, type DayFocus} from './week';
 
 export function defaultProgram(now: Date = new Date()): ProgramState {
   const tracks = {} as Record<TrackId, TrackState>;
+  // Seeded once, from where this person says they are starting. After
+  // this the ramp and the max tests own these numbers; a week of training
+  // says far more than the question ever could.
+  const factor = startingFactor(loadStarting());
   for (const t of TRACKS) {
     tracks[t.id] = {
       enabled: t.enabledByDefault,
       rung: t.defaultRung,
-      testMax: t.defaultMax,
+      testMax: seededMax(t.defaultMax, factor),
     };
   }
   return {

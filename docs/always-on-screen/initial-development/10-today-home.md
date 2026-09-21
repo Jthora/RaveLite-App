@@ -840,6 +840,30 @@ tested on its own, so any one of them being wrong still leaves the other
 two holding the door. It is decided once, after hydration and migrations
 so it reads real state, and never re-asked.
 
+### Where you're starting (`src/domain/profile/starting.ts`)
+
+Every track ships a `defaultMax` — ten push-ups, three pull-ups, forty
+seconds of plank. Those are one person's honest numbers, and for anyone
+else they are a guess that can be wrong in either direction. Phase 1
+taught the program to ask the room what it can do; this asks the body,
+once: new to this (×0.5), coming back to it (×1, today's behaviour), or
+training already (×1.5). It is not a difficulty setting and it does not
+persist as one — after the first week the ramp and the max tests own
+those numbers entirely, and getting the answer wrong costs about a week.
+
+**A bug worth remembering.** The first version refused to set a starting
+point "once a program exists". That looked right and was useless: the
+setup preview strip calls `previewDay()` on its first render, which reads
+the program, which *seeds and writes it* — so by the time the question
+appeared, the guard had already closed. The answer would have been
+silently discarded for every new user, and nothing would have failed.
+
+So the policy moved into `setup.ts` (the one module that may see both the
+profile and the program) and changed shape: `chooseStarting` is refused
+only once something has been **logged**. An untouched seeded program is
+nobody's numbers yet, so it is re-seeded; numbers that have been trained
+against are yours, and a max test is the honest way to move them.
+
 ### The character sheet waits
 
 Fifteen attributes grown by use are fifteen zeroes on day one, which

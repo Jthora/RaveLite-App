@@ -13,6 +13,8 @@ import {
   setFacts,
 } from '../../../domain/profile/repository';
 import {AUTHOR_FACTS} from '../../../domain/profile/kit';
+import {loadStarting} from '../../../domain/profile/repository';
+import {loadProgram} from '../../../domain/program/repository';
 import {append} from '../../../domain/journal/journal';
 import {store} from '../../../storage';
 
@@ -82,13 +84,16 @@ it('walks the questions, and every one is a panel Settings also uses', () => {
   expect(byTestId(tree, 'shape-desk')).toBeDefined();
 
   act(() => byTestId(tree, 'setup-next').props.onPress());
+  expect(byTestId(tree, 'starting-new')).toBeDefined();
+
+  act(() => byTestId(tree, 'setup-next').props.onPress());
   expect(byTestId(tree, 'pack-dance')).toBeDefined();
   act(() => tree.unmount());
 });
 
 it('shows a real day at the end, and Start closes it for good', () => {
   const {tree, onDone} = renderFlow();
-  for (let i = 0; i < 4; i += 1) {
+  for (let i = 0; i < 5; i += 1) {
     act(() => byTestId(tree, 'setup-next').props.onPress());
   }
   expect(textOf(tree)).toContain("Here's your day");
@@ -98,6 +103,19 @@ it('shows a real day at the end, and Start closes it for good', () => {
   expect(onDone).toHaveBeenCalled();
   __resetProfileCache();
   expect(needsSetup()).toBe(false);
+  act(() => tree.unmount());
+});
+
+it('asks where you are starting, and seeds the maxes from the answer', () => {
+  const {tree} = renderFlow();
+  for (let i = 0; i < 3; i += 1) {
+    act(() => byTestId(tree, 'setup-next').props.onPress());
+  }
+  act(() => byTestId(tree, 'starting-new').props.onPress());
+  __resetProfileCache();
+  expect(loadStarting()).toBe('new');
+  // A beginner's pull-up ladder does not start at the author's three.
+  expect(loadProgram().tracks.pull.testMax).toBeLessThan(3);
   act(() => tree.unmount());
 });
 

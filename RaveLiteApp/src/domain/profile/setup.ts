@@ -12,10 +12,11 @@
  * visible in Settings afterwards, and changing one is an ordinary edit.
  */
 import {TRACKS} from '../program/tracks';
-import {setTrackEnabled} from '../program/repository';
+import {loadProgram, saveProgram, setTrackEnabled} from '../program/repository';
 import type {TrackId} from '../program/types';
 import {archetypeById, type ArchetypeId} from './archetypes';
-import {applyArchetypeToProfile} from './repository';
+import {applyArchetypeToProfile, hasHistory, setStarting} from './repository';
+import {seededMax, startingFactor, type StartingPoint} from './starting';
 
 export function applyArchetype(id: ArchetypeId): void {
   const archetype = archetypeById(id);
@@ -30,4 +31,37 @@ export function applyArchetype(id: ArchetypeId): void {
   for (const track of TRACKS) {
     setTrackEnabled(track.id, !off.has(track.id));
   }
+}
+
+/**
+ * Say where you are starting, and re-seed the maxes from it.
+ *
+ * The re-seed is the whole point. Merely reading the program — which the
+ * setup preview does on its first render, before this question is even
+ * asked — writes a seeded program to storage, so waiting until the first
+ * seed to apply the answer means the answer never applies. Instead the
+ * numbers are rewritten whenever they are still nobody's.
+ *
+ * Refused once anything has been logged: by then those numbers have been
+ * trained against and a max test is the honest way to change them.
+ */
+export function chooseStarting(id: StartingPoint): boolean {
+  if (hasHistory()) {
+    return false;
+  }
+  setStarting(id);
+  const factor = startingFactor(id);
+  const program = loadProgram();
+  const tracks = {...program.tracks};
+  for (const track of TRACKS) {
+    const state = tracks[track.id];
+    if (state) {
+      tracks[track.id] = {
+        ...state,
+        testMax: seededMax(track.defaultMax, factor),
+      };
+    }
+  }
+  saveProgram({...program, tracks});
+  return true;
 }

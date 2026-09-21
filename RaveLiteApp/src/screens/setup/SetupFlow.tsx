@@ -26,6 +26,7 @@ import {ArchetypePanel} from '../heart/ArchetypePanel';
 import {KitPanel} from '../heart/KitPanel';
 import {PacksPanel} from '../heart/PacksPanel';
 import {ShapePanel} from '../heart/ShapePanel';
+import {StartingPanel} from './StartingPanel';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -55,6 +56,12 @@ const STEPS: readonly Step[] = [
     title: 'How much day have you got?',
     why: 'Not how hard you want it. How many times a day you can stop and move.',
     panel: ShapePanel,
+  },
+  {
+    key: 'starting',
+    title: 'Where are you starting?',
+    why: 'Only used to pick the first numbers. The app follows what you actually do from there.',
+    panel: StartingPanel,
   },
   {
     key: 'packs',

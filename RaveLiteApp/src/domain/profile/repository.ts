@@ -6,6 +6,7 @@ import type {DayShapeId} from '../program/types';
 import {AUTHOR_FACTS, type Facts, type KitItem, type Region} from './kit';
 import {archetypeById, type ArchetypeId} from './archetypes';
 import {ALL_PACKS, type PackId} from './packs';
+import type {StartingPoint} from './starting';
 import {
   activeMode,
   densityUnder,
@@ -44,6 +45,8 @@ export interface Profile {
   packs?: PackId[];
   /** Where this program started. Changing anything else does not clear it. */
   archetype?: ArchetypeId;
+  /** Where the body was starting from, used once to seed the maxes. */
+  starting?: StartingPoint;
 }
 
 export function defaultProfile(): Profile {
@@ -136,6 +139,25 @@ export function loadPacks(): PackId[] {
 
 export function setPacks(packs: readonly PackId[]): void {
   saveProfile({...loadProfile(), packs: [...packs]});
+}
+
+/** Where the body was starting from, if anyone said. */
+export function loadStarting(): StartingPoint | undefined {
+  return loadProfile().starting;
+}
+
+/**
+ * Record where you are starting. The policy about *when* this may still
+ * be answered lives in `setup.ts`, which can see the program too — this
+ * only writes it down.
+ */
+export function setStarting(starting: StartingPoint): void {
+  saveProfile({...loadProfile(), starting});
+}
+
+/** Whether anything has ever been logged on this install. */
+export function hasHistory(): boolean {
+  return hasAnyHistory();
 }
 
 /** Where this program started, if anyone said. */

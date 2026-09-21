@@ -442,6 +442,10 @@ in every element.
 - [x] Kit card in Settings: tiles saying what each would unlock, and the
       noise setting
 
+**Closed 20 Sep 2026:** the starting-rung gap below is answered by the
+setup question "where are you starting" (`profile/starting.ts`), which
+scales the seeded maxes once.
+
 **What Phase 1 exposed:** substitution is at the *same step of the
 ladder*, which is right — but the step a track *starts* on is calibrated
 to the author. A flat-dweller's Pull therefore starts at "feet-up towel
@@ -479,7 +483,11 @@ with the archetypes in Phase 3.
 - [ ] The first-chime tutorial
 - [x] Character sheet held back to level 2 — or seven days trained,
       whichever comes first (20 Sep 2026)
-- [ ] Tests: every archetype yields a valid day
+- [x] Tests: every archetype yields a valid day — plus the load-bearing
+      one, that every pack off still leaves a complete program, and three
+      independent guards on who gets shown setup (20 Sep 2026)
+- [x] Starting rungs from setup, closing the gap Phase 1 exposed
+      (20 Sep 2026)
 
 **Phase 4 — contributors**
 - [ ] Pack format documented; a contributed pack accepted end to end
