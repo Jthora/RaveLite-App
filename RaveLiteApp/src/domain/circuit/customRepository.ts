@@ -21,7 +21,9 @@ export function newCircuitId(): string {
 
 function readBlob(): Blob {
   const raw = store.getString(KEYS.circuitsAll);
-  if (!raw) {return {};}
+  if (!raw) {
+    return {};
+  }
   try {
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === 'object' ? (parsed as Blob) : {};

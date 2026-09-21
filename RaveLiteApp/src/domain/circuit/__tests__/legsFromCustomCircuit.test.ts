@@ -1,14 +1,15 @@
 import {EXERCISE_LIBRARY} from '../../exercises/library';
-import {legsFromCustomCircuit, exercisesForElement} from '../legsFromCustomCircuit';
+import {
+  legsFromCustomCircuit,
+  exercisesForElement,
+} from '../legsFromCustomCircuit';
 import {makeCircuit} from '../customRepository';
 
 describe('legsFromCustomCircuit', () => {
   it('resolves exerciseId to library drill', () => {
     const drill = EXERCISE_LIBRARY[0];
     const c = makeCircuit('R');
-    c.legs = [
-      {element: drill.element, exerciseId: drill.id, durationSec: 30},
-    ];
+    c.legs = [{element: drill.element, exerciseId: drill.id, durationSec: 30}];
     const legs = legsFromCustomCircuit(c);
     expect(legs).toHaveLength(1);
     expect(legs[0].exercise.id).toBe(drill.id);

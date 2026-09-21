@@ -80,8 +80,7 @@ export function summarizeHealth(input: HealthInputs): {
   checks.push({
     id: 'exact-alarms',
     title: 'Exact alarms allowed',
-    status:
-      alarms === null ? 'unknown' : alarms === 'disabled' ? 'warn' : 'ok',
+    status: alarms === null ? 'unknown' : alarms === 'disabled' ? 'warn' : 'ok',
     detail:
       alarms === 'disabled'
         ? "Backup chimes can't be scheduled if RaveLite gets killed."
@@ -165,7 +164,9 @@ export function summarizeHealth(input: HealthInputs): {
 
 // ── OS probes ────────────────────────────────────────────────────────
 
-function mapAlarmSetting(value: number | undefined): HealthInputs['exactAlarms'] {
+function mapAlarmSetting(
+  value: number | undefined,
+): HealthInputs['exactAlarms'] {
   if (value === ALARM_ENABLED) {
     return 'enabled';
   }

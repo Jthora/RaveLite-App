@@ -2,10 +2,7 @@
  * Tests for the day and element aggregates behind Progress and History.
  */
 import {append} from '../journal';
-import {
-  completionsByDay,
-  completionsLastNDaysByElement,
-} from '../stats';
+import {completionsByDay, completionsLastNDaysByElement} from '../stats';
 import {store} from '../../../storage';
 import type {ElementId} from '../../../theme/elements';
 

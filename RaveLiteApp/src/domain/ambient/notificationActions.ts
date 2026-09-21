@@ -105,7 +105,6 @@ async function snoozeDetached(
     exact: await exactAlarmsAllowed(),
     kind: 'snooze',
   }).catch(err =>
-    // eslint-disable-next-line no-console
     console.warn('[notificationActions] snooze schedule failed', err),
   );
 }

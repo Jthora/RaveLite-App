@@ -106,16 +106,25 @@ describe('bestEntry', () => {
       {id: 'short', at: now, kindId: holdKind.id, value: 40},
       {id: 'long', at: now - 86400_000, kindId: holdKind.id, value: 95},
     ];
-    expect(bestEntry(entries, holdKind.id, holdKind, 7 * 86400_000, now)?.id).toBe('long');
+    expect(
+      bestEntry(entries, holdKind.id, holdKind, 7 * 86400_000, now)?.id,
+    ).toBe('long');
   });
 
   it('lowest time wins for run kinds', () => {
     const now = Date.now();
     const entries: TrainingLogEntry[] = [
       {id: 'a', at: now - 86400_000, kindId: runKind.id, value: 17 * 60 + 20},
-      {id: 'b', at: now - 2 * 86400_000, kindId: runKind.id, value: 18 * 60 + 13},
+      {
+        id: 'b',
+        at: now - 2 * 86400_000,
+        kindId: runKind.id,
+        value: 18 * 60 + 13,
+      },
     ];
-    expect(bestEntry(entries, runKind.id, runKind, 7 * 86400_000, now)?.id).toBe('a');
+    expect(
+      bestEntry(entries, runKind.id, runKind, 7 * 86400_000, now)?.id,
+    ).toBe('a');
   });
 
   it('highest reps wins for integer kinds', () => {
@@ -124,7 +133,9 @@ describe('bestEntry', () => {
       {id: 'x', at: now, kindId: repsKind.id, value: 21},
       {id: 'y', at: now - 86400_000, kindId: repsKind.id, value: 25},
     ];
-    expect(bestEntry(entries, repsKind.id, repsKind, 7 * 86400_000, now)?.id).toBe('y');
+    expect(
+      bestEntry(entries, repsKind.id, repsKind, 7 * 86400_000, now)?.id,
+    ).toBe('y');
   });
 
   it('ignores entries outside the window', () => {
@@ -133,6 +144,8 @@ describe('bestEntry', () => {
       {id: 'old', at: now - 30 * 86400_000, kindId: runKind.id, value: 14 * 60},
       {id: 'new', at: now - 86400_000, kindId: runKind.id, value: 18 * 60},
     ];
-    expect(bestEntry(entries, runKind.id, runKind, 7 * 86400_000, now)?.id).toBe('new');
+    expect(
+      bestEntry(entries, runKind.id, runKind, 7 * 86400_000, now)?.id,
+    ).toBe('new');
   });
 });

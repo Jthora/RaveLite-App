@@ -80,9 +80,9 @@ export function withinActiveHours(now: Date, config: ActiveHours): boolean {
 
   if (startMin < endMin) {
     // Forward window — single calendar day.
-    return dayEnabled(now, config.daysMask)
-      && nowMin >= startMin
-      && nowMin < endMin;
+    return (
+      dayEnabled(now, config.daysMask) && nowMin >= startMin && nowMin < endMin
+    );
   }
 
   // Wrapped window — spans midnight. We're inside if either:

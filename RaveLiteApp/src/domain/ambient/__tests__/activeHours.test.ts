@@ -14,13 +14,7 @@ import {KEYS} from '../../../storage/keys';
  * Active-hours math is operator-local by definition; tests use the
  * same local-time semantics as production.
  */
-function localDate(
-  y: number,
-  m1: number,
-  d: number,
-  h: number,
-  min = 0,
-): Date {
+function localDate(y: number, m1: number, d: number, h: number, min = 0): Date {
   return new Date(y, m1 - 1, d, h, min, 0, 0);
 }
 

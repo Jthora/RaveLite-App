@@ -31,10 +31,7 @@ describe('enqueue', () => {
   });
 
   it('honors an explicit expiresAt', () => {
-    const {state} = enqueue(
-      emptyQueue(),
-      samplePulse({expiresAt: T0 + 1000}),
-    );
+    const {state} = enqueue(emptyQueue(), samplePulse({expiresAt: T0 + 1000}));
     expect(state.pulses[0].expiresAt).toBe(T0 + 1000);
   });
 
@@ -126,11 +123,7 @@ describe('tick — suppression policy', () => {
     let r = enqueue(emptyQueue(), samplePulse({fireAt: T0}));
     r = tick(r.state, T0 + 1, ALWAYS_PAGE); // fires
     expect(r.state.pulses[0].state).toBe('active');
-    r = tick(
-      r.state,
-      T0 + DEFAULT_ACTIVE_WINDOW_MS + 1,
-      suppressOutsideHours,
-    );
+    r = tick(r.state, T0 + DEFAULT_ACTIVE_WINDOW_MS + 1, suppressOutsideHours);
     expect(r.writes).toEqual([
       expect.objectContaining({
         kind: 'reminder.ignored',
@@ -176,7 +169,9 @@ describe('tick — at-most-one-active invariant', () => {
     r = enqueue(r.state, samplePulse({id: 'b', fireAt: T0 + 1}));
     r = tick(r.state, T0 + 1000, () => 'outside-active-hours');
     expect(r.state.pulses).toHaveLength(0);
-    expect(r.writes.filter(w => w.kind === 'reminder.suppressed')).toHaveLength(2);
+    expect(r.writes.filter(w => w.kind === 'reminder.suppressed')).toHaveLength(
+      2,
+    );
   });
 });
 

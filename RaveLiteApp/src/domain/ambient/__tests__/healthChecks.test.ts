@@ -56,8 +56,10 @@ describe('summarizeHealth', () => {
   });
 
   it('skips Autostart on phones without an OEM power manager', () => {
-    const ids = summarizeHealth({...healthy, powerManagerAvailable: false})
-      .checks.map(c => c.id);
+    const ids = summarizeHealth({
+      ...healthy,
+      powerManagerAvailable: false,
+    }).checks.map(c => c.id);
     expect(ids).not.toContain('autostart');
   });
 

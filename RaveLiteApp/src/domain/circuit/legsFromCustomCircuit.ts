@@ -34,6 +34,8 @@ export function legsFromCustomCircuit(c: CustomCircuit): CircuitLeg[] {
 }
 
 /** Convenience for the editor's exercise picker. */
-export function exercisesForElement(element: import('../../theme/elements').ElementId) {
+export function exercisesForElement(
+  element: import('../../theme/elements').ElementId,
+) {
   return EXERCISE_LIBRARY.filter(e => e.element === element);
 }

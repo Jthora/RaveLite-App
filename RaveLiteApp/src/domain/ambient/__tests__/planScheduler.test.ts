@@ -36,9 +36,15 @@ function nineAm(): number {
 
 describe('reconcilePlan', () => {
   it('produces a stable id with windowId, slotIndex, ts', () => {
-    expect(planPulseId({ts: 123, element: 'air', windowId: 'w1', slotIndex: 0, everyMinutes: 15})).toBe(
-      'plan:w1:0:123',
-    );
+    expect(
+      planPulseId({
+        ts: 123,
+        element: 'air',
+        windowId: 'w1',
+        slotIndex: 0,
+        everyMinutes: 15,
+      }),
+    ).toBe('plan:w1:0:123');
   });
 
   it('returns one fire per slot tick inside the horizon', () => {
@@ -51,7 +57,9 @@ describe('reconcilePlan', () => {
     });
     // 09:00, 09:15, 09:30, 09:45 → 4 fires
     expect(toEnqueue).toHaveLength(4);
-    expect(toEnqueue.map(f => new Date(f.ts).getMinutes())).toEqual([0, 15, 30, 45]);
+    expect(toEnqueue.map(f => new Date(f.ts).getMinutes())).toEqual([
+      0, 15, 30, 45,
+    ]);
   });
 
   it('is idempotent when re-run with the same enqueued set', () => {

@@ -35,7 +35,6 @@ export function syncAmbientService(now: Date = new Date()): void {
   change.catch(err =>
     // A failed start (e.g. notifications revoked) must not crash the app;
     // chimes still work while RaveLite is in the foreground.
-    // eslint-disable-next-line no-console
     console.warn('[ambientLifecycle] service change failed', err),
   );
 }

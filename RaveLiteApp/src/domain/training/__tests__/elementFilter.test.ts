@@ -53,8 +53,18 @@ describe('loadMetricsForElement', () => {
 
 describe('loadEntriesForElement', () => {
   it('filters by entry.element when set', () => {
-    addEntry({at: Date.now(), kindId: 'builtin.run-3mi', value: 1080, element: 'fire'});
-    addEntry({at: Date.now(), kindId: 'builtin.breath-hold', value: 90, element: 'air'});
+    addEntry({
+      at: Date.now(),
+      kindId: 'builtin.run-3mi',
+      value: 1080,
+      element: 'fire',
+    });
+    addEntry({
+      at: Date.now(),
+      kindId: 'builtin.breath-hold',
+      value: 90,
+      element: 'air',
+    });
     expect(loadEntriesForElement('fire')).toHaveLength(1);
     expect(loadEntriesForElement('air')).toHaveLength(1);
     expect(loadEntriesForElement('water')).toHaveLength(0);

@@ -23,19 +23,23 @@ interface SettingDefs {
 
 type Key = keyof SettingDefs;
 
-export function getSetting<K extends Key>(
-  key: K,
-): SettingDefs[K] | undefined {
+export function getSetting<K extends Key>(key: K): SettingDefs[K] | undefined {
   const k = KEYS.setting(key as string);
   // We rely on the caller knowing the type; the store is typed by primitive.
   // For booleans we use getBoolean; for strings, getString.
   // Add explicit type-aware paths only as new types are introduced.
   const asBool = store.getBoolean(k);
-  if (typeof asBool === 'boolean') {return asBool as SettingDefs[K];}
+  if (typeof asBool === 'boolean') {
+    return asBool as SettingDefs[K];
+  }
   const asStr = store.getString(k);
-  if (typeof asStr === 'string') {return asStr as SettingDefs[K];}
+  if (typeof asStr === 'string') {
+    return asStr as SettingDefs[K];
+  }
   const asNum = store.getNumber(k);
-  if (typeof asNum === 'number') {return asNum as SettingDefs[K];}
+  if (typeof asNum === 'number') {
+    return asNum as SettingDefs[K];
+  }
   return undefined;
 }
 

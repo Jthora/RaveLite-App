@@ -40,7 +40,9 @@ const GRADE_TABLE_3MI: Array<{maxSeconds: number; grade: Grade}> = [
  */
 export function gradeFor3Mi(seconds: number): Grade {
   for (const row of GRADE_TABLE_3MI) {
-    if (seconds <= row.maxSeconds) return row.grade;
+    if (seconds <= row.maxSeconds) {
+      return row.grade;
+    }
   }
   return 'F';
 }
@@ -54,24 +56,32 @@ export function gradeForRun(
   distanceMeters: number,
   seconds: number,
 ): {grade: Grade; equivalent3MiSeconds: number} | undefined {
-  if (distanceMeters < MI || seconds <= 0) return undefined;
+  if (distanceMeters < MI || seconds <= 0) {
+    return undefined;
+  }
   const equivalent3MiSeconds = (seconds / distanceMeters) * (3 * MI);
   return {grade: gradeFor3Mi(equivalent3MiSeconds), equivalent3MiSeconds};
 }
 
 /** Pace string `M:SS / mi`. */
 export function formatPace(distanceMeters: number, seconds: number): string {
-  if (distanceMeters <= 0 || seconds <= 0) return '—';
+  if (distanceMeters <= 0 || seconds <= 0) {
+    return '—';
+  }
   const sPerMi = (seconds / distanceMeters) * MI;
   const m = Math.floor(sPerMi / 60);
   const s = Math.round(sPerMi - m * 60);
-  if (s === 60) return `${m + 1}:00 /mi`;
+  if (s === 60) {
+    return `${m + 1}:00 /mi`;
+  }
   return `${m}:${String(s).padStart(2, '0')} /mi`;
 }
 
 /** Duration `MM:SS` for displays — collapses to `H:MM:SS` past an hour. */
 export function formatDuration(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return '—';
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return '—';
+  }
   const total = Math.round(seconds);
   const h = Math.floor(total / 3600);
   const m = Math.floor((total - h * 3600) / 60);
@@ -85,7 +95,9 @@ export function formatDuration(seconds: number): string {
 /** Distance in miles, 2-dp when fractional, integer when round. */
 export function formatMiles(distanceMeters: number): string {
   const mi = distanceMeters / MI;
-  if (Math.abs(mi - Math.round(mi)) < 0.005) return `${Math.round(mi)} mi`;
+  if (Math.abs(mi - Math.round(mi)) < 0.005) {
+    return `${Math.round(mi)} mi`;
+  }
   return `${mi.toFixed(2)} mi`;
 }
 
@@ -138,15 +150,19 @@ export function bestEntry(
   now: number = Date.now(),
 ): TrainingLogEntry | undefined {
   const cutoff = now - windowMs;
-  const candidates = entries.filter(
-    e => e.kindId === kindId && e.at >= cutoff,
-  );
-  if (candidates.length === 0) return undefined;
+  const candidates = entries.filter(e => e.kindId === kindId && e.at >= cutoff);
+  if (candidates.length === 0) {
+    return undefined;
+  }
   const lowerIsBetter =
     kind.category === 'run' || kind.inputMode === 'distance-time';
   return candidates.reduce((best, e) => {
-    if (!best) return e;
-    if (lowerIsBetter) return e.value < best.value ? e : best;
+    if (!best) {
+      return e;
+    }
+    if (lowerIsBetter) {
+      return e.value < best.value ? e : best;
+    }
     return e.value > best.value ? e : best;
   });
 }

@@ -80,7 +80,6 @@ export function syncScreenPolicy(
       try {
         listener(mode);
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.warn('[screenPolicy] listener threw', e);
       }
     }

@@ -28,7 +28,6 @@ function notify() {
     try {
       l();
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.warn('[trainingRepository] listener threw', e);
     }
   }
@@ -95,7 +94,9 @@ export function loadMetrics(): MetricKind[] {
     m => !archived.has(m.id),
   ).map(m => {
     const ov = blob.builtinOverrides[m.id];
-    return ov ? {...m, label: ov.label ?? m.label, notes: ov.notes ?? m.notes} : m;
+    return ov
+      ? {...m, label: ov.label ?? m.label, notes: ov.notes ?? m.notes}
+      : m;
   });
   // Legacy custom entries written before the element field existed
   // default to 'any' so they appear on every Train surface.
@@ -131,14 +132,22 @@ export function getMetric(id: string): MetricKind | undefined {
   const ov = blob.builtinOverrides[id];
   const seed = builtinById(id);
   if (seed) {
-    return ov ? {...seed, label: ov.label ?? seed.label, notes: ov.notes ?? seed.notes} : seed;
+    return ov
+      ? {...seed, label: ov.label ?? seed.label, notes: ov.notes ?? seed.notes}
+      : seed;
   }
   return blob.custom.find(m => m.id === id);
 }
 
-export function addCustomMetric(input: Omit<MetricKind, 'id' | 'builtIn'>): MetricKind {
+export function addCustomMetric(
+  input: Omit<MetricKind, 'id' | 'builtIn'>,
+): MetricKind {
   const blob = loadBlob();
-  const kind: MetricKind = {...input, id: `custom.${randomId()}`, builtIn: false};
+  const kind: MetricKind = {
+    ...input,
+    id: `custom.${randomId()}`,
+    builtIn: false,
+  };
   blob.custom.push(kind);
   saveBlob(blob);
   return kind;
@@ -160,7 +169,9 @@ export function updateMetric(
     };
   } else {
     const idx = blob.custom.findIndex(m => m.id === id);
-    if (idx === -1) return;
+    if (idx === -1) {
+      return;
+    }
     blob.custom[idx] = {...blob.custom[idx], ...patch, id, builtIn: false};
   }
   saveBlob(blob);
@@ -210,10 +221,14 @@ export function unarchiveMetric(id: string): void {
 
 export function loadEntries(): TrainingLogEntry[] {
   const raw = store.getString(KEYS.trainingEntries);
-  if (!raw) return [];
+  if (!raw) {
+    return [];
+  }
   try {
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
     return parsed as TrainingLogEntry[];
   } catch {
     return [];
@@ -226,9 +241,13 @@ export function loadEntries(): TrainingLogEntry[] {
 export function loadEntriesForElement(el: ElementId): TrainingLogEntry[] {
   const entries = loadEntries();
   return entries.filter(e => {
-    if (e.element) {return e.element === el;}
+    if (e.element) {
+      return e.element === el;
+    }
     const kind = getMetric(e.kindId);
-    if (!kind) {return false;}
+    if (!kind) {
+      return false;
+    }
     return kind.element === el || kind.element === 'any';
   });
 }
@@ -240,7 +259,9 @@ function saveEntries(entries: TrainingLogEntry[]): void {
   notify();
 }
 
-export function addEntry(input: Omit<TrainingLogEntry, 'id'>): TrainingLogEntry {
+export function addEntry(
+  input: Omit<TrainingLogEntry, 'id'>,
+): TrainingLogEntry {
   const entry: TrainingLogEntry = {...input, id: randomId()};
   const all = loadEntries();
   all.push(entry);
@@ -254,7 +275,9 @@ export function updateEntry(
 ): void {
   const all = loadEntries();
   const idx = all.findIndex(e => e.id === id);
-  if (idx === -1) return;
+  if (idx === -1) {
+    return;
+  }
   all[idx] = {...all[idx], ...patch, id};
   saveEntries(all);
 }
@@ -268,7 +291,5 @@ export function deleteEntry(id: string): void {
 
 function randomId(): string {
   // Compact, URL-safe, sortable enough for our scale.
-  return (
-    Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8)
-  );
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }

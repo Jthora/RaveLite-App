@@ -229,7 +229,8 @@ export function DailySetsSection({
                     styles.trackNameText,
                     {color: state.enabled ? el.color : palette.textMuted},
                   ]}>
-                  {tr.name} · {currentRung(tr, state, loadFacts())?.label ?? '—'}
+                  {tr.name} ·{' '}
+                  {currentRung(tr, state, loadFacts())?.label ?? '—'}
                 </Text>
               </View>
               <Text style={styles.trackMeta}>

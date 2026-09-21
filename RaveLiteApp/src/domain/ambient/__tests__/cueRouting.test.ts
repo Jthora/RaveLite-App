@@ -83,12 +83,12 @@ describe('pulse notification', () => {
   };
 
   it('posts on the quiet channel only when the cue already played', () => {
-    expect(buildPulseNotification(payload, {quiet: true}).android?.channelId).toBe(
-      'elem.fire.quiet.v1',
-    );
-    expect(buildPulseNotification(payload, {quiet: false}).android?.channelId).toBe(
-      'elem.fire.v3',
-    );
+    expect(
+      buildPulseNotification(payload, {quiet: true}).android?.channelId,
+    ).toBe('elem.fire.quiet.v1');
+    expect(
+      buildPulseNotification(payload, {quiet: false}).android?.channelId,
+    ).toBe('elem.fire.v3');
     expect(channelIdFor('air', true)).toBe('elem.air.quiet.v1');
   });
 

@@ -26,7 +26,14 @@ function compute(s: ScaledSize): Layout {
     s.width < 600 ? 'compact' : s.width < 960 ? 'medium' : 'expanded';
   const columns = size === 'expanded' ? 3 : size === 'medium' ? 2 : 1;
   const isTablet = Math.min(s.width, s.height) >= 600;
-  return {width: s.width, height: s.height, size, isLandscape, columns, isTablet};
+  return {
+    width: s.width,
+    height: s.height,
+    size,
+    isLandscape,
+    columns,
+    isTablet,
+  };
 }
 
 /**
