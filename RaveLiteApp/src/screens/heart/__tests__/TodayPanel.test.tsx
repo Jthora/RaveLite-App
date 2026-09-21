@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text} from 'react-native';
+import {Modal, Text} from 'react-native';
 import renderer, {act, type ReactTestInstance} from 'react-test-renderer';
 import {afterEach, beforeEach, expect, it, jest} from '@jest/globals';
 
@@ -145,6 +145,40 @@ it('stops teaching the moment a chime is answered unaided', () => {
   act(() => byTestId(tree, 'chime-done').props.onPress());
   expect(byTestId(tree, 'coach-title')).toBeUndefined();
   expect(needsTutorial()).toBe(false);
+  act(() => tree.unmount());
+});
+
+it('never has two sheets open at once, whatever order rows are tapped', () => {
+  // Tapping a row sets one sheet's state. Nothing used to clear the
+  // others, so a missed row followed by an upcoming one left the log
+  // sheet open *underneath* an info card. Two stacked modals is the
+  // state this codebase already knows breaks Back and touch on Android,
+  // and from the outside it looks like a tap that flashes and does
+  // nothing.
+  const tree = renderToday();
+  const rows = tree.root
+    .findAll(
+      (n: ReactTestInstance) =>
+        typeof n.props?.testID === 'string' &&
+        n.props.testID.startsWith('day-row-'),
+    )
+    .filter(
+      (n, i, all) =>
+        all.findIndex(o => o.props.testID === n.props.testID) === i,
+    );
+  expect(rows.length).toBeGreaterThan(4);
+
+  const openSheets = () =>
+    tree.root.findAllByType(Modal).filter(m => m.props.visible !== false)
+      .length;
+
+  for (const row of rows) {
+    act(() => row.props.onPress());
+    expect({row: row.props.testID, open: openSheets()}).toEqual({
+      row: row.props.testID,
+      open: 1,
+    });
+  }
   act(() => tree.unmount());
 });
 

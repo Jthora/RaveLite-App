@@ -1,5 +1,6 @@
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
+import {logError} from '../diagnostics/errorLog';
 import {BUILTIN_METRICS, builtinById} from './builtinMetrics';
 import {MetricKind, TrainingLogEntry} from './types';
 import type {ElementId} from '../../theme/elements';
@@ -73,7 +74,11 @@ function loadBlob(): CustomMetricsBlob {
           ? parsed.builtinOverrides
           : {},
     };
-  } catch {
+  } catch (e) {
+    // The whole Train log unreadable is the worst silent failure in the
+    // app: every metric, every test, every logged run. It still falls
+    // back so the app opens, but it stops being a secret.
+    logError('training.load', e);
     return EMPTY_BLOB;
   }
 }

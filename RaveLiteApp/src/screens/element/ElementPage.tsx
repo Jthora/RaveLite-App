@@ -21,6 +21,7 @@ import {ElementGlyph} from '../../components/icons/ElementGlyph';
 import {Tap} from '../../components/Tap';
 import {DayList} from '../../components/today/DayList';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
+import {MissingSheet} from '../../components/today/MissingSheet';
 import {CalendarPicker} from '../../components/training/CalendarPicker';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {subscribeActivity} from '../../domain/activity/activity';
@@ -77,6 +78,8 @@ export function ElementPage({element, onBack}: Props) {
   const [logOpen, setLogOpen] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
   const [logged, setLogged] = useState<DayRow | undefined>();
+  /** A Train row whose entry has since been deleted. */
+  const [gone, setGone] = useState<string | undefined>();
 
   const today = startOfDay(Date.now());
   const isToday = day === today;
@@ -125,9 +128,19 @@ export function ElementPage({element, onBack}: Props) {
     [element.id],
   );
 
-  // A Train entry opens for edit; anything else logged opens to keep or
-  // remove.
+  /**
+   * A Train entry opens for edit; anything else logged opens to keep or
+   * remove. One at a time, and never silently.
+   *
+   * Same two faults Today had: each branch set its own state without
+   * clearing the other, so two sheets could be open at once; and a Train
+   * row whose entry had been deleted did nothing at all, which from the
+   * outside is a tap that flashes and is ignored.
+   */
   const onRowPress = useCallback((row: DayRow) => {
+    setLogged(undefined);
+    setEditing(undefined);
+
     if (row.ref?.store === 'journal') {
       setLogged(row);
       return;
@@ -136,7 +149,9 @@ export function ElementPage({element, onBack}: Props) {
     const entry = id ? loadEntries().find(e => e.id === id) : undefined;
     if (entry) {
       setEditing(entry);
+      return;
     }
+    setGone(row.label);
   }, []);
 
   const removeLogged = useCallback(() => {
@@ -266,6 +281,7 @@ export function ElementPage({element, onBack}: Props) {
         onRemove={removeLogged}
         onClose={() => setLogged(undefined)}
       />
+      <MissingSheet name={gone} onClose={() => setGone(undefined)} />
       <LibrarySheet
         visible={libraryOpen}
         onClose={() => setLibraryOpen(false)}

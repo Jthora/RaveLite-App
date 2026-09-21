@@ -26,6 +26,12 @@ import {
 } from '../../native/raveLiteDevice';
 import {store} from '../../storage';
 import {Symbol, hueOf} from '../../components/icons/Symbol';
+import {
+  clearErrors,
+  errorSummary,
+  readErrors,
+} from '../../domain/diagnostics/errorLog';
+import {diagnostics} from '../../domain/diagnostics/report';
 import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -43,6 +49,8 @@ export function DataPanel() {
   const [note, setNote] = useState<string | undefined>();
   const [staged, setStaged] = useState<Staged | undefined>();
   const [confirmWipe, setConfirmWipe] = useState(false);
+  const [showing, setShowing] = useState(false);
+  const recent = showing ? readErrors().slice(-3).reverse() : [];
 
   /** Restore and Start over both leave the running app holding old data. */
   const startAgain = async (fallback: string) => {
@@ -273,6 +281,68 @@ export function DataPanel() {
         </Tap>
       </View>
 
+      <Tap
+        testID="data-diagnostics"
+        variant="plain"
+        onPress={() => setShowing(s => !s)}
+        accessibilityRole="button"
+        accessibilityState={{expanded: showing}}
+        accessibilityLabel="What state this install is in"
+        style={styles.row}>
+        <View style={styles.rowInner}>
+          <View
+            style={[styles.badge, {backgroundColor: tint(hueOf('measure'))}]}>
+            <Symbol name="measure" size={20} />
+          </View>
+          <View style={styles.rowText}>
+            <Text style={[styles.rowTitle, {color: hueOf('measure')}]}>
+              What state this is in
+            </Text>
+            <Text style={styles.rowValue}>{errorSummary()}</Text>
+          </View>
+          <Text style={styles.chevron}>{showing ? '−' : '+'}</Text>
+        </View>
+      </Tap>
+
+      {showing ? (
+        <View style={styles.readout}>
+          {diagnostics().map(d => (
+            <View key={d.label} style={styles.readoutRow}>
+              <Text style={styles.readoutLabel}>{d.label}</Text>
+              <Text
+                style={[
+                  styles.readoutValue,
+                  d.concern && {color: hueOf('warning')},
+                ]}>
+                {d.value}
+              </Text>
+            </View>
+          ))}
+          {recent.length > 0 ? (
+            <>
+              <Text style={styles.readoutLabel}>Most recent problems</Text>
+              {recent.map(e => (
+                <Text key={`${e.at}${e.where}`} style={styles.readoutValue}>
+                  {e.where}: {e.what}
+                </Text>
+              ))}
+              <Tap
+                testID="data-clear-errors"
+                variant="ghost"
+                color={palette.textDim}
+                onPress={() => {
+                  clearErrors();
+                  setShowing(false);
+                }}
+                accessibilityRole="button"
+                style={styles.rowBtn}>
+                <Text style={styles.rowBtnText}>Forget them</Text>
+              </Tap>
+            </>
+          ) : null}
+        </View>
+      ) : null}
+
       {note ? (
         <Text testID="data-note" style={styles.note}>
           {note}
@@ -356,6 +426,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
   },
+  rowInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    width: '100%',
+  },
+  chevron: {...t.subtitle, color: palette.textDim},
+  readout: {
+    gap: 6,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: spacing.md,
+  },
+  readoutRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  readoutLabel: {...t.caption, color: palette.textMuted, width: 120},
+  readoutValue: {...t.caption, color: palette.textDim, flex: 1},
   note: {
     ...t.caption,
     color: palette.textMuted,

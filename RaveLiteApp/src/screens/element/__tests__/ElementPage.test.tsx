@@ -1,4 +1,5 @@
 import React from 'react';
+import {Modal} from 'react-native';
 import renderer, {act, type ReactTestInstance} from 'react-test-renderer';
 import {afterEach, beforeEach, expect, it, jest} from '@jest/globals';
 
@@ -40,6 +41,33 @@ const trainRows = (tree: renderer.ReactTestRenderer) =>
       typeof node.props.testID === 'string' &&
       node.props.testID.startsWith('day-row-train:'),
   );
+
+it('opens one sheet at a time, and says so when the entry is gone', () => {
+  // Same two faults Today had: two sheets open at once, and a Train row
+  // whose entry was deleted doing nothing at all.
+  const tree = renderPage();
+  const rows = tree.root
+    .findAll(
+      (n: ReactTestInstance) =>
+        typeof n.props?.testID === 'string' &&
+        n.props.testID.startsWith('day-row-'),
+    )
+    .filter(
+      (n, i2, all) =>
+        all.findIndex(o => o.props.testID === n.props.testID) === i2,
+    );
+  const openSheets = () =>
+    tree.root.findAllByType(Modal).filter(m => m.props.visible !== false)
+      .length;
+  for (const row of rows) {
+    act(() => row.props.onPress());
+    expect({row: row.props.testID, open: openSheets()}).toEqual({
+      row: row.props.testID,
+      open: 1,
+    });
+  }
+  act(() => tree.unmount());
+});
 
 it('keeps the focus areas chosen in the library', () => {
   const tree = renderPage();

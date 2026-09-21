@@ -1,5 +1,6 @@
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
+import {logError} from '../diagnostics/errorLog';
 import {DistributiveOmit, JournalEntry} from './types';
 
 /** An entry as callers write it — the journal fills in `id` (and `at` if omitted). */
@@ -88,7 +89,8 @@ function withoutVoided(entries: JournalEntry[]): JournalEntry[] {
 /** Read all entries for a single day, oldest first, minus any taken back. */
 export function entriesForDay(d: Date = new Date()): JournalEntry[] {
   const prefix = KEYS.journalDay(dayKey(d));
-  const keys = store.keysWithPrefix(prefix).sort();
+  // The store returns these sorted already, so no second sort here.
+  const keys = store.keysWithPrefix(prefix);
   const out: JournalEntry[] = [];
   for (const k of keys) {
     const raw = store.getString(k);
@@ -97,8 +99,11 @@ export function entriesForDay(d: Date = new Date()): JournalEntry[] {
     }
     try {
       out.push(JSON.parse(raw) as JournalEntry);
-    } catch {
-      // Skip corrupt entries — append-only log tolerates partial loss.
+    } catch (e) {
+      // An append-only log tolerates losing one entry. It should not
+      // tolerate losing them quietly: one is a blip, four hundred is a
+      // symptom, and only the log can tell the difference.
+      logError('journal.entry', e);
     }
   }
   return withoutVoided(out);

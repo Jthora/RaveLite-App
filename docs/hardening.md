@@ -22,6 +22,8 @@ not a coincidence, and it sets the shape of the passes below.
 | Today crashed on a journal entry with an unknown element | demo mode | **Bad data from our own writer** |
 | A completion without `amount` is not a set | screenshots | **Two writers, one reader, different shapes** |
 | CI would have gone red on first push | asking "how are we doing" | **Checked a subset, assumed the whole** |
+| Taps felt slow: `keysWithPrefix` walked every key, so a 30-day range was 30 full scans | profiling with realistic data | **A helper whose cost nobody measured** |
+| Tapping a row flashed and opened nothing: two sheets could be visible at once, and a deleted Train entry did nothing at all | the operator, then a test that taps every row | **Two pieces of state disagreeing about who owns the screen** |
 
 None of these were logic errors in a function. They were all *seams*.
 
@@ -32,7 +34,7 @@ find, and 6 is worthless before them.
 
 ---
 
-### Pass 1 — Make failure visible
+### Pass 1 — Make failure visible ✅ *(21 Sep 2026)*
 
 **Problem:** when something goes wrong in the app today, the app looks
 fine and the number is quietly wrong. There is no crash reporting, no
@@ -53,6 +55,21 @@ error boundary, and `console.warn` goes nowhere a user can see.
 
 *Done when:* a deliberately corrupted store produces a screen that says
 what is wrong, and an export that says it too.
+
+**What shipped.** `domain/diagnostics/errorLog.ts` (50 entries, capped,
+carried by the export, never throws), `components/Guard.tsx` (a boundary
+per screen — Today and the character sheet), and
+`domain/diagnostics/report.ts` behind **Settings → Your data → What state
+this is in**.
+
+**One judgement call:** not all 36 silent catches were given a voice.
+Most are documented, deliberate tolerance — "corrupt, `getActiveHours`
+already falls back", "emulators throw on vibration patterns" — and
+logging those fills the buffer with noise, which trains everyone to
+ignore it. Two were recorded, both places where data is genuinely
+*discarded*: the whole Train log failing to parse, and a corrupt journal
+entry being skipped. The rule for the rest of this work: **record where
+something is lost, stay quiet where something is handled.**
 
 ---
 
@@ -129,6 +146,13 @@ device script.
 
 ### Pass 5 — The seams this wave created
 
+> **Promoted ahead of 3 and 4 (21 Sep 2026).** Both bugs found since this
+> plan was written were seams of exactly this kind — a helper whose cost
+> nobody had measured, and two pieces of state disagreeing about who owns
+> the screen. Neither was a logic error inside a function, and neither
+> would have been found by hostile input or by an edge-case date. The
+> evidence says do this one next.
+
 Specific, named, because they are new and nothing has stressed them.
 
 - **`loadFacts()` is now four things at once** — room, injury, packs,
@@ -143,6 +167,14 @@ Specific, named, because they are new and nothing has stressed them.
   currently one test.
 - **Modes that expire mid-session.** A rest day at 23:59:59. A travel
   mode that lapses while a chime is queued.
+- **Who owns the screen.** Every handler that opens a sheet should close
+  the others first, and the guard is a test that taps everything and
+  asserts one modal. Today and the element pages have this; Settings has
+  three independent sheet states and Daily Sets nests one, and neither
+  has been checked the same way.
+- **Handlers that can do nothing.** A branch with no `else` is a tap that
+  flashes and is ignored, which is indistinguishable from a broken app.
+  Two were found; the rest have not been looked for.
 - **Archetype switching** rewrites packs, shape and every track's enabled
   flag. Done repeatedly, does anything accumulate?
 

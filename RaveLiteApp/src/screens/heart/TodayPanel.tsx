@@ -121,8 +121,24 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   // A chime still to come opens what it is; a Train entry opens for edit,
   // a missed or skipped chime opens to be logged, and anything else logged
   // opens to keep or remove.
+  /**
+   * One row sheet at a time.
+   *
+   * Each branch below used to set its own state and leave the others
+   * alone, so a missed row followed by an upcoming one left the log sheet
+   * open *underneath* an info card. Two stacked modals is the state this
+   * app already knows breaks Back and touch handling on Android, and from
+   * the outside it looks like a tap that flashes and opens nothing.
+   *
+   * Closing everything first costs a line and removes the whole class.
+   */
   const onRowPress = useCallback(
     (row: DayRow) => {
+      info.close();
+      setLate(undefined);
+      setLogged(undefined);
+      setEditing(undefined);
+
       if (row.status === 'upcoming') {
         info.show(cardForRow(row));
         return;
@@ -139,7 +155,16 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
       const entry = id ? loadEntries().find(e => e.id === id) : undefined;
       if (entry) {
         setEditing(entry);
+        return;
       }
+      // A Train row whose entry has been deleted: say so rather than
+      // flashing and doing nothing, which is indistinguishable from the
+      // app being broken.
+      info.show({
+        title: row.label,
+        element: row.element,
+        what: 'This was logged in the Train log, and that entry is no longer there. Nothing else is affected.',
+      });
     },
     [info],
   );
