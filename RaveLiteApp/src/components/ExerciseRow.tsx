@@ -13,16 +13,27 @@ import {moveForExercise} from '../domain/exercises/moves';
 import {MoveIcon} from './icons/MoveIcon';
 import {elementOf} from '../theme/elements';
 import {palette, radius, spacing, type} from '../theme';
+import {hues} from '../theme/hues';
 import {pulseHaptic} from '../lib/elementHaptics';
 
 interface Props {
   exercise: Exercise;
   /** Optional callback after a manual completion is logged. */
   onCompleted?: () => void;
+  /**
+   * Why this drill is not on offer — "Needs a resistance band". Shown
+   * rather than hiding the drill, because the Library is where somebody
+   * finds out what a band would give them.
+   */
+  unavailable?: string;
 }
 
 /** Compact card representing one exercise/drill in a list. */
-export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
+export const ExerciseRow: React.FC<Props> = ({
+  exercise,
+  onCompleted,
+  unavailable,
+}) => {
   const el = elementOf(exercise.element);
   // Animated seal: 0 = idle, 1 = sealed peak. Drives an overlay fill +
   // the "Logged" label opacity. Replaces the previous setTimeout/state
@@ -78,6 +89,7 @@ export const ExerciseRow: React.FC<Props> = ({exercise, onCompleted}) => {
           <Text style={[styles.dose, {color: el.accent}]}>{exercise.dose}</Text>
         </View>
       </View>
+      {unavailable ? <Text style={styles.needs}>{unavailable}</Text> : null}
       <Text style={styles.purpose}>{exercise.purpose}</Text>
       {exercise.targets.length > 0 && (
         <View style={styles.tagRow}>
@@ -179,6 +191,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
+  },
+  needs: {
+    ...type.caption,
+    color: hues.warning,
+    marginTop: 6,
   },
   purpose: {
     ...type.body,

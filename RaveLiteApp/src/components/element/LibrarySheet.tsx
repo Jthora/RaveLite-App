@@ -9,6 +9,8 @@ import {ExerciseRow} from '../ExerciseRow';
 import {Tap} from '../Tap';
 import {TargetFilterStrip} from '../TargetFilterStrip';
 import {exercisesFor} from '../../domain/exercises/library';
+import {canDo, whyNot} from '../../domain/profile/kit';
+import {loadFacts} from '../../domain/profile/repository';
 import type {Target} from '../../domain/exercises/types';
 import type {ElementIdentity} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
@@ -24,6 +26,10 @@ interface Props {
 /**
  * An element's whole drill library, filtered by focus areas. The focus
  * areas are saved per element and also steer the page's "try this now".
+ *
+ * Drills your places can do come first. The rest stay listed, each
+ * saying what it needs — the Library is where somebody finds out what a
+ * band or a hoop would give them.
  */
 export function LibrarySheet({
   visible,
@@ -40,6 +46,10 @@ export function LibrarySheet({
         : all.filter(ex => ex.targets.some(tg => focus.includes(tg))),
     [all, focus],
   );
+  // Read each time it opens: the kit may have changed in Settings.
+  const facts = useMemo(() => loadFacts(), [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  const yours = shown.filter(ex => canDo(ex, facts));
+  const others = shown.filter(ex => !canDo(ex, facts));
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -78,11 +88,27 @@ export function LibrarySheet({
               No drills match these focus areas. Drop a pill or two.
             </Text>
           ) : (
-            <CardGrid>
-              {shown.map(ex => (
-                <ExerciseRow key={ex.id} exercise={ex} />
-              ))}
-            </CardGrid>
+            <>
+              <CardGrid>
+                {yours.map(ex => (
+                  <ExerciseRow key={ex.id} exercise={ex} />
+                ))}
+              </CardGrid>
+              {others.length > 0 ? (
+                <>
+                  <Text style={styles.eyebrow}>NOT WHERE YOU TRAIN, YET</Text>
+                  <CardGrid>
+                    {others.map(ex => (
+                      <ExerciseRow
+                        key={ex.id}
+                        exercise={ex}
+                        unavailable={whyNot(ex, facts)}
+                      />
+                    ))}
+                  </CardGrid>
+                </>
+              ) : null}
+            </>
           )}
         </ScrollView>
       </SafeAreaView>
@@ -130,6 +156,12 @@ const styles = StyleSheet.create({
   meta: {
     ...t.caption,
     color: palette.textDim,
+  },
+  eyebrow: {
+    ...t.caption,
+    color: palette.textDim,
+    letterSpacing: 1.5,
+    marginTop: spacing.lg,
   },
   empty: {
     ...t.body,

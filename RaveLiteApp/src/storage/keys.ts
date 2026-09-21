@@ -93,5 +93,8 @@ export const KEYS = {
  *   2 — rounds and My day: the default plan drops Desk Hours and Morning
  *       Training (a different saved plan is kept under `planBackupV1`),
  *       and Daily Sets lose their own day window.
+ *   9 — one hang point becomes two (low, high).
+ *  10 — kit becomes places: the flat kit list is split into a room, a
+ *       yard, a porch, the streets…, with its limits on the room.
  */
-export const CURRENT_SCHEMA_VERSION = 8;
+export const CURRENT_SCHEMA_VERSION = 10;

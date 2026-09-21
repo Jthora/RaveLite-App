@@ -1,4 +1,5 @@
 import {drinkTarget} from '../heatWater';
+import {authorProfile, saveProfile} from '../../profile/repository';
 import {store} from '../../../storage';
 import {KEYS} from '../../../storage/keys';
 import {
@@ -61,6 +62,8 @@ const run: CadenceSlot = {
 
 beforeEach(() => {
   store.clearAll();
+  // These are the author's program; a fresh store is now a stranger's.
+  saveProfile(authorProfile());
   runtime.__test.reset();
   planSchedulerTest.reset();
   setSchedulerTest.reset();

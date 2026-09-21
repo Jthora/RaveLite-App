@@ -6,8 +6,8 @@ import {ElementGlyph} from '../icons/ElementGlyph';
 import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {recordDrillTap} from '../../domain/activity/record';
-import {exercisesFor} from '../../domain/exercises/library';
 import {moveForExercise} from '../../domain/exercises/moves';
+import {loadFacts} from '../../domain/profile/repository';
 import {rankDrillsFor, type DrillContext} from '../../domain/exercises/scoring';
 import type {Target} from '../../domain/exercises/types';
 import {completionsTodayEntriesForElement} from '../../domain/journal/stats';
@@ -35,6 +35,7 @@ function contextFor(
     loggedTodayIds: new Set(today.map(e => e.exerciseId)),
     preferredTargets: [...focus],
     recentPickIds: today.slice(0, 5).map(e => e.exerciseId),
+    facts: loadFacts(),
   };
 }
 
@@ -44,21 +45,22 @@ function contextFor(
  * track's current rung), Swap offers the next best, Library opens the rest.
  */
 export function DrillCard({element, focus, version, onOpenLibrary}: Props) {
-  const total = useMemo(() => exercisesFor(element.id).length, [element.id]);
   /** Drills swapped past since the last change; the pick skips them. */
   const [passed, setPassed] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
 
   useEffect(() => setPassed([]), [focus]);
 
-  const pick = useMemo(() => {
-    const ranked = rankDrillsFor(contextFor(element, focus)).map(
-      r => r.exercise,
-    );
-    return ranked.find(ex => !passed.includes(ex.id)) ?? ranked[0];
+  // Only what this person can do where they train: the card is the one
+  // place that says "now", so it must never name a band nobody owns.
+  const ranked = useMemo(
+    () => rankDrillsFor(contextFor(element, focus)).map(r => r.exercise),
     // `version` re-ranks after a drill is logged (logged drills sink).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [element, focus, passed, version]);
+    [element, focus, version],
+  );
+  const total = ranked.length;
+  const pick = ranked.find(ex => !passed.includes(ex.id)) ?? ranked[0];
 
   if (!pick) {
     return null;

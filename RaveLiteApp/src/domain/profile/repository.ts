@@ -3,7 +3,13 @@ import {KEYS} from '../../storage/keys';
 import {DAILY_PAR} from '../activity/par';
 import {densityFor, parFor, roundsFor} from '../program/density';
 import type {DayShapeId} from '../program/types';
-import {AUTHOR_FACTS, type Facts, type KitItem, type Region} from './kit';
+import {
+  AUTHOR_FACTS,
+  DEFAULT_FACTS,
+  type Facts,
+  type KitItem,
+  type Region,
+} from './kit';
 import {archetypeById, type ArchetypeId} from './archetypes';
 import {AUTHOR_PUSHUP_GOAL} from './archetypes';
 import {ALL_PACKS, type PackId} from './packs';
@@ -23,10 +29,10 @@ import {
 /**
  * Who is using the app, and what they have to train with.
  *
- * Until the setup flow lands, an install with nothing stored is assumed
- * to be the author's — the app was his before it was anyone's, and that
- * keeps every existing install exactly as it was. When setup arrives,
- * a fresh install will start from `DEFAULT_FACTS` and ask instead.
+ * An install with nothing stored starts from `DEFAULT_FACTS` — a floor,
+ * a wall, a door and a table — and setup asks for the rest. Installs
+ * from before the profile existed had the author's kit written down by
+ * migration v8, so none of them ever sees this default.
  */
 
 export interface Profile {
@@ -55,8 +61,15 @@ export interface Profile {
 }
 
 export function defaultProfile(): Profile {
-  return {version: 1, facts: {...AUTHOR_FACTS, kit: [...AUTHOR_FACTS.kit]}};
+  return {version: 1, facts: {...DEFAULT_FACTS, kit: [...DEFAULT_FACTS.kit]}};
 }
+
+/** The author's own profile, for installs that predate the profile. */
+export function authorProfile(): Profile {
+  return {version: 1, facts: structuredCopy(AUTHOR_FACTS)};
+}
+
+const structuredCopy = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
 let cached: Profile | undefined;
 
@@ -285,7 +298,7 @@ export function dailyPar(): number {
  * stored profile *and* an unanswered setup *and* nothing ever logged. Any
  * one of those being wrong still leaves the other two guarding the door.
  */
-function hasAnyHistory(): boolean {
+export function hasAnyHistory(): boolean {
   const entries = store.getString(KEYS.trainingEntries);
   if (entries !== undefined && entries !== '[]') {
     return true;

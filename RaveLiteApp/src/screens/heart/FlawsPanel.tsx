@@ -24,12 +24,12 @@ import {
   flawProgress,
   type FlawId,
 } from '../../domain/profile/flaws';
-import {loadFacts, setFacts} from '../../domain/profile/repository';
+import {baseFacts, setFacts} from '../../domain/profile/repository';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 export function FlawsPanel() {
-  const [mine, setMine] = useState<FlawId[]>(() => loadFacts().corrections);
+  const [mine, setMine] = useState<FlawId[]>(() => baseFacts().corrections);
   const [asking, setAsking] = useState<FlawId | undefined>();
 
   /** Sessions of each flaw's work inside its window. */
@@ -50,7 +50,9 @@ export function FlawsPanel() {
 
   const toggle = (id: FlawId) => {
     const next = mine.includes(id) ? mine.filter(f => f !== id) : [...mine, id];
-    setFacts({...loadFacts(), corrections: next});
+    // The real facts, never the mode's: saving loadFacts() while away
+    // from home would write the hotel room over the kit.
+    setFacts({...baseFacts(), corrections: next});
     setMine(next);
     setAsking(undefined);
   };

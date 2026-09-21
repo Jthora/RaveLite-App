@@ -13,6 +13,7 @@
  *     branched in code — to add a new rhythm, edit the table.
  */
 
+import {canDo, type Facts} from '../profile/kit';
 import type {ElementId} from '../../theme/elements';
 import type {Exercise, Target} from './types';
 import {exercisesFor} from './library';
@@ -30,6 +31,12 @@ export interface DrillContext {
   preferredTargets: ReadonlyArray<Target>;
   /** Recent picks to apply variety pressure. Most-recent-first. */
   recentPickIds?: ReadonlyArray<string>;
+  /**
+   * What this person can do where they train. Given, nothing outside it
+   * is ranked at all — "try this now" must never be a band drill for
+   * someone without a band.
+   */
+  facts?: Facts;
 }
 
 type Scorer = (ex: Exercise, ctx: DrillContext) => number;
@@ -177,7 +184,10 @@ const SCORERS: ReadonlyArray<Scorer> = [
 export function rankDrillsFor(
   ctx: DrillContext,
 ): ReadonlyArray<{exercise: Exercise; score: number}> {
-  const candidates = exercisesFor(ctx.element);
+  const facts = ctx.facts;
+  const candidates = exercisesFor(ctx.element).filter(
+    ex => !facts || canDo(ex, facts),
+  );
   return candidates
     .map(ex => ({
       exercise: ex,

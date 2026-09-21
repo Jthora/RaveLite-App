@@ -1,4 +1,5 @@
 import {store} from '../../../storage';
+import {authorProfile, saveProfile} from '../repository';
 import {blockPieces} from '../../program/morning';
 import {defaultProgram, prescriptionsFor} from '../../program/repository';
 import {groupIntoRounds} from '../../program/rounds';
@@ -20,7 +21,11 @@ import {dayFocus} from '../../program/week';
 const MONDAY = new Date(2026, 8, 14);
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-beforeEach(() => store.clearAll());
+beforeEach(() => {
+  store.clearAll();
+  // These are the author's program; a fresh store is now a stranger's.
+  saveProfile(authorProfile());
+});
 
 it("the author's Monday is unchanged", () => {
   const day = prescriptionsFor(defaultProgram(MONDAY), MONDAY);

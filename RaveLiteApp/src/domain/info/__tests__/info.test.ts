@@ -1,8 +1,13 @@
 import {store} from '../../../storage';
+import {authorProfile, saveProfile} from '../../profile/repository';
 import type {SetPrescription} from '../../program/types';
 import {groupCard, infoFor, partsOf, roundCard} from '../info';
 
-beforeEach(() => store.clearAll());
+beforeEach(() => {
+  store.clearAll();
+  // These are the author's program; a fresh store is now a stranger's.
+  saveProfile(authorProfile());
+});
 
 describe('a drill', () => {
   it('says what it is, how to do it, how much, and where it belongs', () => {

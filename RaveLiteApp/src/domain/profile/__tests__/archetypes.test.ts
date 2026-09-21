@@ -12,6 +12,8 @@ import {
   loadArchetype,
   loadFacts,
   loadPacks,
+  authorProfile,
+  saveProfile,
 } from '../repository';
 import {PACKS, groupsFor, inScope} from '../packs';
 import {loadProgram, prescriptionsFor} from '../../program/repository';
@@ -26,6 +28,8 @@ const MONDAY = new Date(2026, 8, 21, 9, 0);
 beforeEach(() => {
   store.clearAll();
   __resetProfileCache();
+  // These are the author's program; a fresh store is now a stranger's.
+  saveProfile(authorProfile());
 });
 
 function dayUnder(id: (typeof ARCHETYPES)[number]['id']) {

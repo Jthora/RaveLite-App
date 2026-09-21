@@ -1,4 +1,5 @@
 import {store} from '../../../storage';
+import {authorProfile, saveProfile} from '../../profile/repository';
 import {EXERCISE_LIBRARY} from '../../exercises/library';
 import {append} from '../../journal/journal';
 import {
@@ -17,7 +18,11 @@ import {countsByElement, hydrationGlasses, streakDays} from '../stats';
 const DAY = 86_400_000;
 const trackName = (id: string) => TRACKS.find(t => t.id === id)!.name;
 
-beforeEach(() => store.clearAll());
+beforeEach(() => {
+  store.clearAll();
+  // These are the author's program; a fresh store is now a stranger's.
+  saveProfile(authorProfile());
+});
 
 function round(extra: Record<string, unknown> = {}) {
   return append({

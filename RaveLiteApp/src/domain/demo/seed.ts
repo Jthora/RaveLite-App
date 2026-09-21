@@ -13,21 +13,39 @@
  */
 import {ELEMENT_ORDER} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
-import {KEYS} from '../../storage/keys';
+import {CURRENT_SCHEMA_VERSION, KEYS} from '../../storage/keys';
 import {TRACKS} from '../program/tracks';
 import {setSizeFor} from '../program/progression';
 import type {TrackState} from '../program/types';
 import type {KeyValueStore} from '../../storage/types';
+import type {Facts} from '../profile/kit';
 
 /** Someone eleven weeks in, training at a desk, not a beginner. */
 export const DEMO_PROFILE = {
   version: 1 as const,
+  // Typed, so a renamed kit item fails here rather than silently
+  // emptying the demo's porch — which is what `hangPoint` did.
   facts: {
-    kit: ['floor', 'wall', 'mat', 'chair', 'stairs', 'hangPoint', 'yard'],
-    noise: 'normal' as const,
-    corrections: ['UCS' as const],
+    kit: ['band', 'poi'],
+    places: [
+      {
+        id: 'room-1',
+        kind: 'room',
+        kit: ['wall', 'doorway', 'table', 'mat', 'chair', 'stairs'],
+        limits: [],
+      },
+      {id: 'yard-1', kind: 'yard', kit: ['yard', 'grass'], limits: []},
+      {
+        id: 'porch-1',
+        kind: 'porch',
+        kit: ['rail', 'hangLow', 'hangHigh'],
+        limits: [],
+      },
+    ],
+    noise: 'normal',
+    corrections: ['UCS'],
     heightInches: 69,
-  },
+  } satisfies Facts,
   shape: 'desk' as const,
   archetype: 'raver' as const,
   packs: ['dance', 'staff', 'yoga-taichi', 'jumps', 'runs'],
@@ -63,7 +81,8 @@ export function seedDemo(store: KeyValueStore, opts: DemoOptions): void {
   const {now, days = 77} = opts;
   store.clearAll();
 
-  store.set(KEYS.schemaVersion, 8);
+  // Written in today's shape, so nothing should ever migrate it.
+  store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
   store.set(KEYS.profile, JSON.stringify(DEMO_PROFILE));
 
   // A program eleven weeks old, with maxes somebody would have by now.

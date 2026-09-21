@@ -1,4 +1,7 @@
 import {Exercise} from './types';
+import {CARRIED_DRILLS} from './kit/carried';
+import {FLOW_DRILLS} from './kit/flow';
+import {PLACE_DRILLS} from './kit/places';
 
 /**
  * Seed library. Curated for the operator's body, kit and goals.
@@ -15,7 +18,8 @@ import {Exercise} from './types';
  * hang from, bricks — and, since 17 Sep 2026, the house (stairs, a sturdy
  * chair, a wall, a hallway) and the neighborhood (a hill, a curb line, a
  * loop of the block). No pool, no weights — drills that need anything
- * else don't belong here (guarded by __tests__/library.test.ts).
+ * else don't belong here (guarded by __tests__/library.test.ts). Drills
+ * for other people's kit — a band, a bench, a hoop — live in `kit/`.
  *
  * Indoors has a low ceiling: nothing in a `house` drill may need height,
  * a run-up or a swinging staff.
@@ -27,7 +31,12 @@ import {Exercise} from './types';
  * Append new drills to the end of their element's section so each
  * element's first drill (the circuit fallback) stays put.
  */
-export const EXERCISE_LIBRARY: Exercise[] = [
+/**
+ * The library as it was built around the author's own kit. Everything
+ * after it (the files in kit/) is for kit the author does not have, gated by
+ * `canDo`, and kept in its own files so this list stays the author's.
+ */
+export const AUTHOR_LIBRARY: Exercise[] = [
   // ─── AIR — Breath & Posture ────────────────────────────────────────────
   {
     id: 'air.eye-break',
@@ -1807,7 +1816,7 @@ export const EXERCISE_LIBRARY: Exercise[] = [
       'Stop while every one still feels fast; this is not conditioning',
     ],
     targets: ['Conditioning', 'Agility'],
-    venues: ['neighborhood'],
+    venues: ['neighborhood', 'yard'],
     approxSeconds: 480,
   },
   {
@@ -3207,6 +3216,13 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     venues: ['yard', 'house', 'standing'],
     approxSeconds: 120,
   },
+];
+
+export const EXERCISE_LIBRARY: Exercise[] = [
+  ...AUTHOR_LIBRARY,
+  ...CARRIED_DRILLS,
+  ...PLACE_DRILLS,
+  ...FLOW_DRILLS,
 ];
 
 export const exercisesFor = (element: Exercise['element']): Exercise[] =>

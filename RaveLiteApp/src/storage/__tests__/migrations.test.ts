@@ -10,6 +10,12 @@ import {
   runMigrations,
 } from '../migrations';
 import {DEFAULT_ACTIVE_HOURS} from '../../domain/ambient/types';
+import {
+  __resetProfileCache,
+  loadProfile,
+  needsSetup,
+} from '../../domain/profile/repository';
+import {AUTHOR_FACTS, usableDrills} from '../../domain/profile/kit';
 
 const NOW = 1_700_000_000_000;
 
@@ -38,6 +44,11 @@ describe('runMigrations', () => {
     runMigrations(NOW);
     expect(store.getNumber(KEYS.schemaVersion)).toBe(CURRENT_SCHEMA_VERSION);
     expect(store.getString(KEYS.planCurrent)).toBeUndefined();
+    // Nor a profile: one stored before setup asks is the reason setup
+    // never showed on a fresh install.
+    expect(store.getString(KEYS.profile)).toBeUndefined();
+    __resetProfileCache();
+    expect(needsSetup()).toBe(true);
     expect(store.getString(KEYS.planBackupV1)).toBeUndefined();
   });
 
@@ -195,4 +206,123 @@ describe('v7', () => {
     runMigrations(NOW);
     expect(json(KEYS.planCurrent)).toEqual(mine);
   });
+});
+
+describe('v8', () => {
+  it("writes the author's kit into an install that has trained", () => {
+    store.set(KEYS.schemaVersion, 7);
+    store.set(
+      KEYS.trainingEntries,
+      JSON.stringify([{id: 'e1', at: NOW, kindId: 'builtin.run-2mi'}]),
+    );
+    runMigrations(NOW);
+    __resetProfileCache();
+    expect(loadProfile().facts).toEqual(AUTHOR_FACTS);
+    expect(needsSetup()).toBe(false);
+  });
+});
+
+describe('v10', () => {
+  /** The author's profile as a phone held it on 20 Sep 2026. */
+  const FLAT = {
+    version: 1,
+    facts: {
+      kit: [
+        'floor',
+        'mat',
+        'wall',
+        'chair',
+        'stairs',
+        'hangPoint',
+        'bricks',
+        'staff',
+        'ball',
+        'yard',
+        'streets',
+      ],
+      noise: 'free',
+      corrections: ['UCS', 'APT', 'Hourglass'],
+    },
+    mode: {id: 'travelling', startedAt: NOW, kit: ['floor', 'hangPoint']},
+  };
+
+  it('turns a flat kit into places, and keeps every drill', () => {
+    store.set(KEYS.schemaVersion, 8);
+    store.set(KEYS.profile, JSON.stringify(FLAT));
+    runMigrations(NOW);
+    const profile = json(KEYS.profile);
+    const kinds = profile.facts.places.map((p: {kind: string}) => p.kind);
+    expect(kinds).toEqual(['room', 'yard', 'porch', 'streets']);
+    // What you carry stays on you.
+    expect(profile.facts.kit).toEqual(['bricks', 'staff', 'ball']);
+    // The old hang point is both heights, as it behaved.
+    const porch = profile.facts.places[2];
+    expect(porch.kit).toEqual(['hangLow', 'hangHigh']);
+    // And the same program comes out of it as out of the author's facts.
+    const ids = (f: typeof AUTHOR_FACTS) =>
+      usableDrills(f)
+        .map(d => d.id)
+        .sort();
+    expect(ids(profile.facts)).toEqual(ids(AUTHOR_FACTS));
+    // A travelling room keeps its flat list, renamed.
+    expect(profile.mode.kit).toEqual(['floor', 'hangLow', 'hangHigh']);
+  });
+
+  it('reaches a phone that ran the hang split as v9', () => {
+    store.set(KEYS.schemaVersion, 9);
+    store.set(
+      KEYS.profile,
+      JSON.stringify({
+        ...FLAT,
+        facts: {
+          ...FLAT.facts,
+          kit: [
+            ...FLAT.facts.kit.filter(k => k !== 'hangPoint'),
+            'hangLow',
+            'hangHigh',
+            'doorway',
+            'table',
+          ],
+        },
+      }),
+    );
+    runMigrations(NOW);
+    const facts = json(KEYS.profile).facts;
+    expect(facts.places.map((p: {kind: string}) => p.kind)).toEqual([
+      'room',
+      'yard',
+      'porch',
+      'streets',
+    ]);
+    expect(facts.places[3].kit).toEqual(['streets', 'kerb', 'hill']);
+  });
+
+  it('leaves a profile that already has places alone', () => {
+    const placed = {version: 1, facts: AUTHOR_FACTS};
+    store.set(KEYS.schemaVersion, 8);
+    store.set(KEYS.profile, JSON.stringify(placed));
+    runMigrations(NOW);
+    expect(json(KEYS.profile)).toEqual(placed);
+  });
+});
+
+it('does not leave the old profile cached once it has migrated it', () => {
+  // Read before migrating — as a background notification handler can —
+  // and the session used to keep the flat kit, and an unknown hangPoint,
+  // until the app was restarted.
+  store.set(KEYS.schemaVersion, 8);
+  store.set(
+    KEYS.profile,
+    JSON.stringify({
+      version: 1,
+      facts: {kit: ['floor', 'streets'], noise: 'normal', corrections: []},
+    }),
+  );
+  __resetProfileCache();
+  expect(loadProfile().facts.places).toBeUndefined();
+  runMigrations(NOW);
+  expect(loadProfile().facts.places?.map(p => p.kind)).toEqual([
+    'room',
+    'streets',
+  ]);
 });

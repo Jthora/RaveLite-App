@@ -1,4 +1,5 @@
 import {EXERCISE_LIBRARY} from '../../exercises/library';
+import {authorProfile, saveProfile} from '../../profile/repository';
 import {doneFields} from '../../ambient/pulsePayload';
 import {defaultProgram, prescriptionsFor} from '../repository';
 import {
@@ -15,6 +16,9 @@ import {
 } from '../schedule';
 import {TRACKS} from '../tracks';
 import type {DayPrescription, TrackId} from '../types';
+
+// The author's program; a fresh store is now a stranger's.
+saveProfile(authorProfile());
 
 // Monday 14 Sep 2026 (local).
 const MONDAY = new Date(2026, 8, 14);

@@ -7,6 +7,7 @@ import notifee from '@notifee/react-native';
 import App from './App';
 import {name as appName} from './app.json';
 import {ensureHydrated} from './src/storage/persistence';
+import {runMigrations} from './src/storage/migrations';
 import {toNotificationAction} from './src/domain/reminders/notifeeScheduler';
 import {handleNotificationAction} from './src/domain/ambient/notificationActions';
 
@@ -18,6 +19,11 @@ notifee.onBackgroundEvent(async event => {
     return;
   }
   await ensureHydrated();
+  // A button pressed on the first chime after an update can start the app
+  // here, before App has migrated anything. Acting on the old shape — or
+  // caching it for the rest of the session — is how an update's first
+  // morning goes wrong. Once current, this returns at once.
+  runMigrations();
   await handleNotificationAction(action);
 });
 

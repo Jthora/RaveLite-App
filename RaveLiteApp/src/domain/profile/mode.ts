@@ -159,9 +159,12 @@ export function factsUnder(facts: Facts, mode: Mode | undefined): Facts {
   if (mode.id !== 'travelling') {
     return facts;
   }
+  // One room, not your places: a hotel has no yard, whatever home has.
   return {
     ...facts,
     kit: [...(mode.kit ?? TRAVEL_KIT)],
+    places: undefined,
+    limits: undefined,
     noise: 'quiet',
   };
 }

@@ -1,4 +1,5 @@
 import {store} from '../../../storage';
+import {authorProfile, saveProfile} from '../../profile/repository';
 import {KEYS} from '../../../storage/keys';
 import {drillForPlanChime} from '../../conditions/weather';
 import {DEFAULT_PLAN} from '../../reminders/defaultPlan';
@@ -36,6 +37,8 @@ function chimesOn(date: Date) {
 
 beforeEach(() => {
   store.clearAll();
+  // These are the author's program; a fresh store is now a stranger's.
+  saveProfile(authorProfile());
   store.set(KEYS.programState, JSON.stringify(defaultProgram(MONDAY)));
 });
 
