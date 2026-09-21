@@ -1,8 +1,14 @@
 # Contributing to RaveLite
 
-RaveLite is one person's training app, opened up. Contributions are
-welcome; so is forking it and making it yours — that is what Apache-2.0
-is for.
+RaveLite is a five-element altar for Ravers and Super Heroes — one
+person's training app, opened up. Contributions are welcome; so is
+forking it and making it yours, which is what Apache-2.0 is for.
+
+Before proposing anything, know what it is aiming at: a ritual companion
+for the raver as urban shaman, not a fitness tracker with a theme. When
+a change could go either way, pick the one that feels more like a rite
+and less like a productivity tool. The README's three working principles
+are the test.
 
 Be warned up front: this is a **beta with no support promise**. Issues
 may sit. A pull request may be declined because it pulls the app away

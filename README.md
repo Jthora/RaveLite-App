@@ -1,32 +1,47 @@
 # RaveLite
 
-A training app that chimes. It spreads small sets of bodyweight work
-across your day, asks for water, teaches drills it explains properly, and
-keeps a character sheet of what all that has made of you — organised
-around five elements.
+> ### For Ravers and Super Heroes
+>
+> Fit for the floor, all night. Ready for intensive dancing. Able to
+> defend yourself. Of balanced and positively energised spirit.
 
-Android, React Native, no account, no server, no analytics. It is one
-person's app, opened up: **beta, no support promised.**
+**A five-element altar that lives in your pocket.** It chimes through the
+day, and each call asks for one small thing — ten push-ups, a minute of
+breath, a glass of water, a kick you are learning. Answer it in three
+seconds from the notification and get on with your life. By evening you
+have trained, without ever having *gone* to train.
+
+It keeps a character sheet of what all of it has made of you: fifteen
+attributes that grow from what you actually did, not from what you
+planned.
+
+RaveLite is **not** a fitness app, a habit tracker, or a notification
+scheduler. Those are surface mechanics. The intent is older and more
+specific:
+
+> **A ritual companion for the raver as urban shaman — reclaiming a
+> desk-broken body for ecstatic practice.**
+
+Android. No account, no server, no analytics, no ads. One person's app,
+opened up: **beta, no support promised.**
 
 Because there is no account, there is nothing to recover from: your
 training lives on your phone and nowhere else. Settings → Your data
 writes the whole thing to a file you choose, and reads one back. During
 the beta, take one.
 
+## Not only for the dance floor
 
-> **For Ravers and Super Heroes** — training to be fit for the rave,
-> ready for intensive dancing, able to defend yourself, and of balanced
-> and positively energised spirit.
+The floor is the destination. The route is yours, and the app meets you
+where you actually live — ten archetypes, from **The Raver** through
+**The Guardian**, **The Monk**, **The Flow Artist** and **The Night
+Shift** to **The Parent** who gets ten minutes at a time. Say how much
+day you have and it sizes everything to fit: nine chimes or two, the
+same proportion of you either way.
+
+A shorter day is a full day's training, not a failed one.
 
 ## Why RaveLite exists
-
-RaveLite is **not** a fitness app, a habit tracker, or a notification
-scheduler. Those are surface mechanics. The intent is older and more
-specific:
-
-> **A ritual companion for the raver as urban shaman — a five-element
-> altar that lives in the pocket and reclaims a desk-broken body for
-> ecstatic practice.**
 
 Three working principles follow from that, and every design decision in
 this repo should be checked against them:

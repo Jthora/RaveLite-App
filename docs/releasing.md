@@ -40,8 +40,9 @@ Two things are out of date:
 
 - **109 commits are unpushed.** Everything from the public-beta work is
   local only. Anyone who finds the repo today sees old code.
-- **The description still says** "A Rave Tool for Communication and Cool
-  Visualizations", which is not what this is any more.
+- **The description is stale.** The public copy was revised on 21 Sep
+  2026 to lead with the identity everywhere — see "What it says it is"
+  below — and the repo description has not caught up.
 
 Both are one command each, and both are in your hands because pushing to
 a public repo is not something to do on someone's behalf. See
@@ -122,6 +123,28 @@ time you signed properly.
 
 ---
 
+## What it says it is
+
+Revised 21 Sep 2026. The decision was to **lead with the rave identity on
+every surface** rather than open with the mechanic and bury the framing.
+
+The line that goes first, everywhere:
+
+> **For Ravers and Super Heroes.** Fit for the floor, all night. Ready
+> for intensive dancing. Able to defend yourself. Of balanced and
+> positively energised spirit.
+
+This is deliberately narrowing. It will turn away people the app would
+serve — a shift nurse, a parent, somebody training for a USAF chart, all
+of whom have an archetype waiting for them. That is the trade: an
+unmistakable voice, and the people who stay are the ones it was built
+for. The breadth is not hidden, it is just second — "Not only for the
+dance floor" sits below the fold in the README and in the store listing.
+
+Surfaces kept in step: `README.md`, `CONTRIBUTING.md`, the fastlane
+`short_description` / `full_description` / changelog, and the GitHub
+description above. If one changes, they all change.
+
 ## 4. F-Droid
 
 See [f-droid.md](f-droid.md). It needs the repo public with tags,
@@ -138,7 +161,7 @@ something public or irreversible.
 | What | Command |
 |---|---|
 | Publish the work so far | `git push -u origin today-home` then open a PR, or `git push origin today-home:main` to go straight in |
-| Fix the repo description | `gh repo edit Jthora/RaveLite-App --description "A training app that chimes: small bodyweight sets across your day, on your phone only." --add-topic android --add-topic react-native --add-topic fitness --add-topic self-hosted` |
+| Fix the repo description | `gh repo edit Jthora/RaveLite-App --description "For Ravers and Super Heroes: a five-element altar that trains you all day." --add-topic android --add-topic react-native --add-topic fitness --add-topic bodyweight --add-topic rave --add-topic privacy-friendly` |
 | Make the signing key | `scripts/make-keystore.sh` |
 | Build | `scripts/build-release.sh` |
 | Send to testers | `scripts/distribute.sh "notes"` |

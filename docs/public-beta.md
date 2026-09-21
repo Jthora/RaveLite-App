@@ -379,15 +379,15 @@ in every element.
 
 - [x] Apache-2.0 licence, NOTICE, README licence section (20 Sep 2026)
 - [x] "No warranty, not medical advice" in the README
-- [ ] `CONTRIBUTING.md` — what is welcome, the check commands, the house
+- [x] `CONTRIBUTING.md` — what is welcome, the check commands, the house
       style (the docs and comments say *why*, tests are named as sentences)
-- [ ] Issue templates: bug, drill suggestion, archetype suggestion
-- [ ] `CODE_OF_CONDUCT.md`
-- [ ] A screenshot set for the README (Today, Daily Sets, an info card,
-      the character sheet)
+- [x] Issue templates: bug, drill suggestion, archetype suggestion
+- [x] `CODE_OF_CONDUCT.md`
+- [x] A screenshot set — automated end to end via demo mode
+      (`scripts/screenshots.py`), so no real training is photographed
 - [x] Confirm no release keystore, no secrets (`debug.keystore` is the
       standard public one and is fine)
-- [ ] A `SECURITY.md` pointing at issues, since there is no server
+- [x] A `SECURITY.md` pointing at issues, since there is no server
 
 **In the app**
 
@@ -420,8 +420,9 @@ in every element.
 
 **Phase 0 — presentable** *(no app changes)*
 - [x] Apache-2.0, NOTICE, README licence and disclaimer
-- [ ] CONTRIBUTING, code of conduct, issue templates, SECURITY
-- [ ] Screenshots, README rewrite for strangers
+- [x] CONTRIBUTING, code of conduct, issue templates, SECURITY
+- [x] README rewritten (21 Sep 2026, leading with the identity);
+      screenshots automated but not yet taken for the README
 - [x] Export/restore, so a key change can never cost anyone their data
       (20 Sep 2026)
 - [ ] Firebase project, release keystore off-repo, first tester build
@@ -513,6 +514,9 @@ with the archetypes in Phase 3.
 
 ## 15. Open questions for the operator
 
+0. ~~**How public should the positioning be?**~~ **Answered 21 Sep
+   2026:** lead with the rave identity on every surface, and the name
+   stays. See `docs/releasing.md` § What it says it is.
 1. **Names** — are Raver / Guardian / Monk / Operator the shipping names,
    and do the six new ones earn their keep?
 2. **Your preset's name** — "The Operator" is what the docs call you.
@@ -523,5 +527,6 @@ with the archetypes in Phase 3.
    Still true in public?
 5. **How much do you want to own?** A public beta brings issues. Is this
    "here it is, no promises", or a project you intend to steward?
-6. **Does the beta include the author's data?** No — but testers will ask
-   what a real sheet looks like. Screenshots, or a demo profile?
+6. ~~**Does the beta include the author's data?**~~ **Answered 21 Sep
+   2026:** a demo profile, seeded into a throwaway store that never
+   touches the real one. `scripts/screenshots.py` uses it.
