@@ -32,7 +32,13 @@ import {startBackupScheduler} from './src/domain/ambient/backupScheduler';
 import {startWeather} from './src/domain/conditions/weather';
 import {ElementShell} from './src/shell/ElementShell';
 import {SetupFlow} from './src/screens/setup/SetupFlow';
-import {needsSetup} from './src/domain/profile/repository';
+import {__resetProfileCache, needsSetup} from './src/domain/profile/repository';
+import {
+  clearSetupRequest,
+  subscribeSetupRequest,
+} from './src/domain/profile/setupRequest';
+import {store} from './src/storage';
+import {resetPlanToDefault} from './src/domain/reminders/repository';
 import {capTextScaling} from './src/lib/textScaling';
 import {handleDemoLink} from './src/domain/demo/demo';
 import {guessUnitsOnce} from './src/domain/settings/units';
@@ -126,6 +132,24 @@ function App(): React.JSX.Element {
     });
   }, []);
 
+  // Settings cannot show the walkthrough itself: both are full-screen
+  // Modals, and a modal over a modal breaks Back on Android. It asks,
+  // closes itself, and the flow opens here with nothing underneath.
+  useEffect(
+    () =>
+      subscribeSetupRequest(reason => {
+        if (reason === 'fresh') {
+          store.clearAll();
+          __resetProfileCache();
+          // A read would seed the default quietly; this says so, so the
+          // chime schedulers drop the old plan's chimes now.
+          resetPlanToDefault();
+        }
+        setSetup(reason !== undefined);
+      }),
+    [],
+  );
+
   // Demo mode (ravelite://demo/on) swaps the whole store, so every screen
   // has to be built again from the new one — the same remount the theme
   // uses, for the same reason.
@@ -149,7 +173,16 @@ function App(): React.JSX.Element {
             <ElementShell key={themeEpoch} />
             <CueWash />
             <NightVeil />
-            {setup ? <SetupFlow onDone={() => setSetup(false)} /> : null}
+            {setup ? (
+              <SetupFlow
+                onDone={() => {
+                  clearSetupRequest();
+                  setSetup(false);
+                  // A wipe took the whole tree's state with it.
+                  setThemeEpoch(e => e + 1);
+                }}
+              />
+            ) : null}
           </>
         ) : (
           <View style={styles.root} />

@@ -30,7 +30,7 @@ export const MODE_SYMBOL: Record<ModeId, SymbolName> = {
   rest: 'resting',
 };
 
-export function ModePanel() {
+export function ModePanel({showTitle = true}: {showTitle?: boolean} = {}) {
   const [mode, setLocal] = useState(() => loadMode());
   /** Which mode is waiting on a region before it starts. */
   const [asking, setAsking] = useState<ModeId | undefined>();
@@ -57,7 +57,7 @@ export function ModePanel() {
   if (mode) {
     return (
       <View style={styles.root}>
-        <Text style={styles.eyebrow}>TODAY I'M…</Text>
+        {showTitle ? <Text style={styles.eyebrow}>TODAY I'M…</Text> : null}
         <View
           style={[
             styles.active,
@@ -100,7 +100,7 @@ export function ModePanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>TODAY I'M…</Text>
+      {showTitle ? <Text style={styles.eyebrow}>TODAY I'M…</Text> : null}
       <Text style={styles.caption}>
         Nothing here sticks. Each one says when it ends as you pick it, so the
         app bends round a week instead of you working round the app.

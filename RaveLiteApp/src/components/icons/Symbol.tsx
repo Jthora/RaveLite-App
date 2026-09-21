@@ -153,6 +153,11 @@ const SYMBOLS = {
   pack: [Package, 'secret'],
   carry: [Backpack, 'cloth'],
   body: [PersonStanding, 'stone'],
+
+  // Settings groups — each its own colour, none of them grey: a grey
+  // row on that index reads as switched off.
+  you: [PersonStanding, 'jumps'],
+  program: [GraduationCap, 'running'],
 } as const satisfies Record<string, readonly [LucideIcon, HueName]>;
 
 export type SymbolName = keyof typeof SYMBOLS;

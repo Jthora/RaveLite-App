@@ -18,9 +18,14 @@ import {
   finishSetup,
   loadMode,
   needsTutorial,
+  clearMode,
   setMode,
 } from '../../../domain/profile/repository';
 import {SettingsSheet} from '../SettingsSheet';
+import {
+  clearSetupRequest,
+  pendingSetup,
+} from '../../../domain/profile/setupRequest';
 import {InfoCardView} from '../../../components/info/InfoSheet';
 import {TodayPanel} from '../TodayPanel';
 import {WeatherSheet} from '../WeatherSheet';
@@ -179,6 +184,75 @@ it('never has two sheets open at once, whatever order rows are tapped', () => {
       open: 1,
     });
   }
+  act(() => tree.unmount());
+});
+
+it('opens Settings on an index, not a page you have to scroll', () => {
+  // ~4.5 screens of continuous scroll with fourteen sections and no way
+  // to jump was the complaint. Four groups, one tap to each.
+  const tree = renderToday();
+  act(() => byTestId(tree, 'settings-open').props.onPress());
+
+  for (const id of ['you', 'day', 'program', 'app']) {
+    expect(byTestId(tree, `settings-group-${id}`)).toBeDefined();
+  }
+  // Nothing from inside a group is on the index.
+  expect(byTestId(tree, 'kit-mat')).toBeUndefined();
+  expect(byTestId(tree, 'archetype-raver')).toBeUndefined();
+  expect(byTestId(tree, 'data-export')).toBeUndefined();
+
+  // One tap in, and Back returns rather than closing the sheet.
+  act(() => byTestId(tree, 'settings-group-you').props.onPress());
+  expect(byTestId(tree, 'kit-mat')).toBeDefined();
+  expect(byTestId(tree, 'settings-group-you')).toBeUndefined();
+
+  act(() => byTestId(tree, 'settings-back').props.onPress());
+  expect(byTestId(tree, 'settings-group-you')).toBeDefined();
+  act(() => tree.unmount());
+});
+
+it('puts modes behind one row that says what is on', () => {
+  // The whole mode panel on the index pushed the four groups below the
+  // fold on a Redmi A3 — one row keeps the front page on one screen.
+  const tree = renderToday();
+  act(() => byTestId(tree, 'settings-open').props.onPress());
+  expect(byTestId(tree, 'mode-travelling')).toBeUndefined();
+
+  act(() => byTestId(tree, 'settings-mode').props.onPress());
+  expect(byTestId(tree, 'mode-travelling')).toBeDefined();
+  expect(byTestId(tree, 'settings-group-you')).toBeUndefined();
+
+  act(() => byTestId(tree, 'mode-rest').props.onPress());
+  act(() => byTestId(tree, 'settings-back').props.onPress());
+  expect(byTestId(tree, 'settings-mode').props.accessibilityLabel).toBe(
+    "Today I'm Taking the day off · today",
+  );
+  clearMode();
+  act(() => tree.unmount());
+});
+
+it('can be asked to walk through the questions again', () => {
+  const tree = renderToday();
+  act(() => byTestId(tree, 'settings-open').props.onPress());
+  act(() => byTestId(tree, 'settings-revisit').props.onPress());
+
+  // It asks rather than showing it: Settings is a modal, and a modal
+  // over a modal breaks Back on Android.
+  expect(pendingSetup()).toBe('revisit');
+  clearSetupRequest();
+  act(() => tree.unmount());
+});
+
+it('will not erase everything on one tap', () => {
+  const tree = renderToday();
+  act(() => byTestId(tree, 'settings-open').props.onPress());
+
+  act(() => byTestId(tree, 'settings-fresh').props.onPress());
+  expect(pendingSetup()).toBeUndefined();
+
+  act(() => byTestId(tree, 'settings-fresh').props.onPress());
+  expect(pendingSetup()).toBe('fresh');
+  clearSetupRequest();
   act(() => tree.unmount());
 });
 

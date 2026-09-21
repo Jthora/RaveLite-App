@@ -12,7 +12,7 @@ import {DEFAULT_PLAN} from './defaultPlan';
 export function loadPlan(): Plan {
   const raw = store.getString(KEYS.planCurrent);
   if (!raw) {
-    savePlan(DEFAULT_PLAN);
+    seedDefault();
     store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
     return DEFAULT_PLAN;
   }
@@ -20,13 +20,31 @@ export function loadPlan(): Plan {
     return JSON.parse(raw) as Plan;
   } catch {
     // Corrupt — fall back to defaults rather than crash on launch.
-    savePlan(DEFAULT_PLAN);
+    seedDefault();
     return DEFAULT_PLAN;
   }
 }
 
+/**
+ * Write the default without telling anyone.
+ *
+ * Seeding is not an edit: every reader of an empty store gets the default
+ * either way. And a read is what seeds — during render, often, Today's
+ * model being the first reader after a fresh install — so notifying from
+ * here runs every listener's setState inside another component's render,
+ * which React rejects. Code that empties the store on purpose and needs
+ * the schedulers to hear calls `resetPlanToDefault()`.
+ */
+function seedDefault(): void {
+  store.set(KEYS.planCurrent, JSON.stringify(DEFAULT_PLAN));
+}
+
 export function savePlan(plan: Plan): void {
   store.set(KEYS.planCurrent, JSON.stringify(plan));
+  notifyPlan(plan);
+}
+
+function notifyPlan(plan: Plan): void {
   for (const l of planListeners) {
     try {
       l(plan);

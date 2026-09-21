@@ -1,10 +1,12 @@
 /**
- * SettingsSheet — everything set once and left alone, behind the ⚙ on
- * Today: how chimes sound (with a test per element), what keeps them
- * firing on this phone, the plan editor, restoring a plan the v2
- * migration replaced, motion, the Heart theme, and the export that is the
- * only backup of a phone-only app. My day is edited from Today's status
- * chip.
+ * SettingsSheet — an index of one-line rows, each opening a page inside
+ * the same sheet.
+ *
+ * It used to be four and a half screens of panels in one scroll. Now the
+ * front page fits on a phone without scrolling: what today is (a mode),
+ * the four groups the model is made of, and the two ways to be walked
+ * through it again. Pages render in this sheet rather than as sheets of
+ * their own, because a modal over a modal breaks Back on Android.
  */
 import React, {useEffect, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -30,13 +32,18 @@ import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {tint} from '../../theme/hues';
+import {requestSetup} from '../../domain/profile/setupRequest';
+import {loadMode} from '../../domain/profile/repository';
+import {modeLabel} from '../../domain/profile/mode';
 import {AlivePanel} from './AlivePanel';
 import {ArchetypePanel} from './ArchetypePanel';
 import {ChimesPanel} from './ChimesPanel';
 import {DataPanel} from './DataPanel';
 import {FlawsPanel} from './FlawsPanel';
 import {KitPanel} from './KitPanel';
-import {ModePanel} from './ModePanel';
+import {MODE_SYMBOL, ModePanel} from './ModePanel';
 import {PacksPanel} from './PacksPanel';
 import {ShapePanel} from './ShapePanel';
 import {PlanPanel} from './PlanPanel';
@@ -74,7 +81,44 @@ function replacedPlanAt(): number | undefined {
     : undefined;
 }
 
+/** The four boxes the app is actually built from, plus the app itself. */
+type Page = 'index' | 'mode' | 'you' | 'day' | 'program' | 'app';
+
+const GROUPS: readonly {
+  id: Exclude<Page, 'index'>;
+  title: string;
+  holds: string;
+  symbol: SymbolName;
+}[] = [
+  {
+    id: 'you',
+    title: 'You',
+    holds: 'What you train with, how loud you can be, what a desk did to you',
+    symbol: 'you',
+  },
+  {
+    id: 'day',
+    title: 'The day',
+    holds: 'My day, chimes, how much day you have, weather, the plan',
+    symbol: 'time',
+  },
+  {
+    id: 'program',
+    title: 'The program',
+    holds: "What you're training for, and what you're here to learn",
+    symbol: 'program',
+  },
+  {
+    id: 'app',
+    title: 'The app',
+    holds: 'Theme, motion, and your data',
+    symbol: 'pack',
+  },
+];
+
 export function SettingsSheet({visible, onClose, permission}: Props) {
+  const [page, setPage] = useState<Page>('index');
+  const [confirmFresh, setConfirmFresh] = useState(false);
   const [plan, setPlan] = useState(loadPlan);
   const [planOpen, setPlanOpen] = useState(false);
   const [weatherOpen, setWeatherOpen] = useState(false);
@@ -114,10 +158,32 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={() => (page === 'index' ? onClose() : setPage('index'))}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>Settings</Text>
+          {page === 'index' ? null : (
+            <Tap
+              testID="settings-back"
+              variant="plain"
+              onPress={() => setPage('index')}
+              accessibilityRole="button"
+              accessibilityLabel="Back to Settings"
+              style={styles.close}>
+              <Text style={[styles.closeText, {color: accent}]}>
+                ‹ Settings
+              </Text>
+            </Tap>
+          )}
+          <Text style={[styles.title, {color: accent}]} numberOfLines={1}>
+            {page === 'index'
+              ? 'Settings'
+              : page === 'mode'
+              ? "Today I'm…"
+              : GROUPS.find(g => g.id === page)?.title ?? 'Settings'}
+          </Text>
           <Tap
             variant="plain"
             onPress={onClose}
@@ -127,6 +193,9 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
           </Tap>
         </View>
         <ScrollView
+          // Keyed by page so each one opens at its top — Back from a
+          // scrolled page otherwise lands on the index part-way down.
+          key={page}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}>
           {permission === 'denied' ? (
@@ -139,138 +208,315 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
             </View>
           ) : null}
 
-          <View style={styles.row}>
-            <View style={styles.rowText}>
-              <Text style={styles.rowTitle}>My day</Text>
-              <Text style={styles.rowValue}>
-                {myDay.start}–{myDay.end} · {daysLabel(myDay.daysMask)} · chimes
-                and a bright screen
-              </Text>
-            </View>
-            <Tap
-              testID="myday-edit"
-              variant="ghost"
-              color={palette.textDim}
-              onPress={() => setMyDayOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Edit My day"
-              style={styles.rowBtn}>
-              <Text style={styles.rowBtnText}>Edit</Text>
-            </Tap>
-          </View>
-
-          <View style={styles.stack}>
-            <Text style={styles.rowTitle}>
-              {paused && pauseUntil !== undefined
-                ? `Chimes paused until ${formatHM(pauseUntil)}`
-                : 'Pause chimes'}
-            </Text>
-            <View style={styles.pills}>
-              {paused ? (
-                <Tap
-                  testID="pause-off"
-                  variant="ghost"
-                  color={palette.textDim}
-                  onPress={() => pause('off')}
-                  accessibilityRole="button"
-                  style={styles.pill}>
-                  <Text style={styles.rowBtnText}>Resume</Text>
-                </Tap>
-              ) : (
-                PAUSES.map(option => (
+          {page === 'index' ? (
+            <>
+              {/* Temporary and frequently used, so it is the first row —
+                  but one row, saying what is on, not the whole panel. */}
+              {(() => {
+                const mode = loadMode();
+                const symbol: SymbolName = mode
+                  ? MODE_SYMBOL[mode.id]
+                  : 'travelling';
+                return (
                   <Tap
-                    key={option.key}
-                    testID={`pause-${option.key}`}
-                    variant="ghost"
-                    color={palette.textDim}
-                    onPress={() => pause(option.key)}
+                    testID="settings-mode"
+                    variant="plain"
+                    onPress={() => setPage('mode')}
                     accessibilityRole="button"
-                    accessibilityLabel={`Pause chimes for ${option.label}`}
-                    style={styles.pill}>
-                    <Text style={styles.rowBtnText}>{option.label}</Text>
+                    accessibilityLabel={
+                      mode
+                        ? `Today I'm ${modeLabel(mode, Date.now())}`
+                        : "Today I'm… Nothing on"
+                    }
+                    style={[
+                      styles.navRow,
+                      mode && {borderWidth: 1, borderColor: hueOf(symbol)},
+                    ]}>
+                    <View style={styles.groupRow}>
+                      <View
+                        style={[
+                          styles.badge,
+                          {backgroundColor: tint(hueOf(symbol))},
+                        ]}>
+                        <Symbol name={symbol} size={20} />
+                      </View>
+                      <View style={styles.rowText}>
+                        <Text style={[styles.rowTitle, {color: hueOf(symbol)}]}>
+                          Today I'm…
+                        </Text>
+                        <Text style={styles.rowValue}>
+                          {mode
+                            ? modeLabel(mode, Date.now())
+                            : 'Away, hurt, at a festival, or taking the day off'}
+                        </Text>
+                      </View>
+                      <Text style={styles.chevron}>›</Text>
+                    </View>
                   </Tap>
-                ))
-              )}
-            </View>
-          </View>
+                );
+              })()}
 
-          <View style={styles.row}>
-            <View style={styles.rowText}>
-              <Text style={styles.rowTitle}>Weather & place</Text>
-              <Text style={styles.rowValue}>
-                {place
-                  ? `${place.name}: sunrise, rain, heat and bugs`
-                  : 'Set your place for sunrise and weather'}
-              </Text>
-            </View>
-            <Tap
-              testID="weather-open"
-              variant="ghost"
-              color={palette.textDim}
-              onPress={() => setWeatherOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Open weather and place"
-              style={styles.rowBtn}>
-              <Text style={styles.rowBtnText}>{place ? 'Open' : 'Set'}</Text>
-            </Tap>
-          </View>
+              {GROUPS.map(group => (
+                <Tap
+                  key={group.id}
+                  testID={`settings-group-${group.id}`}
+                  variant="plain"
+                  onPress={() => setPage(group.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${group.title}. ${group.holds}`}
+                  style={styles.navRow}>
+                  <View style={styles.groupRow}>
+                    <View
+                      style={[
+                        styles.badge,
+                        {backgroundColor: tint(hueOf(group.symbol))},
+                      ]}>
+                      <Symbol name={group.symbol} size={20} />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text
+                        style={[styles.rowTitle, {color: hueOf(group.symbol)}]}>
+                        {group.title}
+                      </Text>
+                      <Text style={styles.rowValue}>{group.holds}</Text>
+                    </View>
+                    <Text style={styles.chevron}>›</Text>
+                  </View>
+                </Tap>
+              ))}
 
-          <ModePanel />
-          <ShapePanel />
-          <ArchetypePanel />
-          <PacksPanel />
-          <FlawsPanel />
-          <KitPanel />
-          <ChimesPanel />
-          <StayAlivePanel />
-
-          <View style={styles.row}>
-            <View style={styles.rowText}>
-              <Text style={styles.rowTitle}>Plan</Text>
-              <Text style={styles.rowValue}>
-                {plan.windows.map(w => w.label).join(' · ') || 'no windows'}
-              </Text>
-            </View>
-            <Tap
-              variant="ghost"
-              color={palette.textDim}
-              onPress={() => setPlanOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Open the plan editor"
-              style={styles.rowBtn}>
-              <Text style={styles.rowBtnText}>Open</Text>
-            </Tap>
-          </View>
-
-          {replacedAt !== undefined ? (
-            <View style={styles.row}>
-              <View style={styles.rowText}>
-                <Text style={styles.rowTitle}>Previous plan</Text>
-                <Text style={styles.rowValue}>
-                  Replaced by the leaner default on{' '}
-                  {new Date(replacedAt).toLocaleDateString()}.
-                </Text>
-              </View>
+              <Text style={styles.eyebrow}>IF YOU ARE NOT SURE</Text>
               <Tap
-                variant="ghost"
-                color={confirmRestore ? palette.danger : palette.textDim}
-                onPress={onRestore}
+                testID="settings-revisit"
+                variant="plain"
+                onPress={() => {
+                  requestSetup('revisit');
+                  onClose();
+                }}
                 accessibilityRole="button"
-                style={styles.rowBtn}>
-                <Text
-                  style={[
-                    styles.rowBtnText,
-                    confirmRestore && {color: palette.danger},
-                  ]}>
-                  {confirmRestore ? 'Tap to confirm' : 'Restore'}
-                </Text>
+                accessibilityLabel="Walk me through my settings"
+                style={styles.navRow}>
+                <View style={styles.groupRow}>
+                  <View
+                    style={[
+                      styles.badge,
+                      {backgroundColor: tint(hueOf('learn'))},
+                    ]}>
+                    <Symbol name="learn" size={20} />
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text style={[styles.rowTitle, {color: hueOf('learn')}]}>
+                      Walk me through it
+                    </Text>
+                    <Text style={styles.rowValue}>
+                      The questions setup asked, filled in with your answers.
+                      Change anything or skip straight out.
+                    </Text>
+                  </View>
+                  <Text style={styles.chevron}>›</Text>
+                </View>
               </Tap>
-            </View>
+              <Tap
+                testID="settings-fresh"
+                variant="plain"
+                onPress={() => {
+                  if (!confirmFresh) {
+                    setConfirmFresh(true);
+                    return;
+                  }
+                  requestSetup('fresh');
+                  onClose();
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  confirmFresh
+                    ? 'Tap again to erase everything and set up from scratch'
+                    : 'Set up from scratch'
+                }
+                style={[
+                  styles.navRow,
+                  confirmFresh && {borderWidth: 1, borderColor: palette.danger},
+                ]}>
+                <View style={styles.groupRow}>
+                  <View
+                    style={[
+                      styles.badge,
+                      {backgroundColor: tint(hueOf('erase'))},
+                    ]}>
+                    <Symbol name="erase" size={20} />
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text
+                      style={[
+                        styles.rowTitle,
+                        {color: confirmFresh ? palette.danger : hueOf('erase')},
+                      ]}>
+                      {confirmFresh ? 'Tap to confirm' : 'Set up from scratch'}
+                    </Text>
+                    <Text style={styles.rowValue}>
+                      {confirmFresh
+                        ? 'This erases everything on this phone first. Export your data before you do this.'
+                        : 'Start again as a new install. Erases everything first.'}
+                    </Text>
+                  </View>
+                </View>
+              </Tap>
+            </>
           ) : null}
 
-          <AlivePanel />
-          <ThemePanel />
-          <DataPanel />
+          {page === 'mode' ? <ModePanel showTitle={false} /> : null}
+
+          {page === 'you' ? (
+            <>
+              <KitPanel />
+              <FlawsPanel />
+            </>
+          ) : null}
+
+          {page === 'program' ? (
+            <>
+              <ArchetypePanel />
+              <PacksPanel />
+            </>
+          ) : null}
+
+          {page === 'app' ? (
+            <>
+              <AlivePanel />
+              <ThemePanel />
+              <DataPanel />
+            </>
+          ) : null}
+
+          {page === 'day' ? (
+            <>
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text style={styles.rowTitle}>My day</Text>
+                  <Text style={styles.rowValue}>
+                    {myDay.start}–{myDay.end} · {daysLabel(myDay.daysMask)} ·
+                    chimes and a bright screen
+                  </Text>
+                </View>
+                <Tap
+                  testID="myday-edit"
+                  variant="ghost"
+                  color={palette.textDim}
+                  onPress={() => setMyDayOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Edit My day"
+                  style={styles.rowBtn}>
+                  <Text style={styles.rowBtnText}>Edit</Text>
+                </Tap>
+              </View>
+
+              <View style={styles.stack}>
+                <Text style={styles.rowTitle}>
+                  {paused && pauseUntil !== undefined
+                    ? `Chimes paused until ${formatHM(pauseUntil)}`
+                    : 'Pause chimes'}
+                </Text>
+                <View style={styles.pills}>
+                  {paused ? (
+                    <Tap
+                      testID="pause-off"
+                      variant="ghost"
+                      color={palette.textDim}
+                      onPress={() => pause('off')}
+                      accessibilityRole="button"
+                      style={styles.pill}>
+                      <Text style={styles.rowBtnText}>Resume</Text>
+                    </Tap>
+                  ) : (
+                    PAUSES.map(option => (
+                      <Tap
+                        key={option.key}
+                        testID={`pause-${option.key}`}
+                        variant="ghost"
+                        color={palette.textDim}
+                        onPress={() => pause(option.key)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Pause chimes for ${option.label}`}
+                        style={styles.pill}>
+                        <Text style={styles.rowBtnText}>{option.label}</Text>
+                      </Tap>
+                    ))
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text style={styles.rowTitle}>Weather & place</Text>
+                  <Text style={styles.rowValue}>
+                    {place
+                      ? `${place.name}: sunrise, rain, heat and bugs`
+                      : 'Set your place for sunrise and weather'}
+                  </Text>
+                </View>
+                <Tap
+                  testID="weather-open"
+                  variant="ghost"
+                  color={palette.textDim}
+                  onPress={() => setWeatherOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open weather and place"
+                  style={styles.rowBtn}>
+                  <Text style={styles.rowBtnText}>
+                    {place ? 'Open' : 'Set'}
+                  </Text>
+                </Tap>
+              </View>
+
+              <ShapePanel />
+              <ChimesPanel />
+              <StayAlivePanel />
+
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text style={styles.rowTitle}>Plan</Text>
+                  <Text style={styles.rowValue}>
+                    {plan.windows.map(w => w.label).join(' · ') || 'no windows'}
+                  </Text>
+                </View>
+                <Tap
+                  variant="ghost"
+                  color={palette.textDim}
+                  onPress={() => setPlanOpen(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open the plan editor"
+                  style={styles.rowBtn}>
+                  <Text style={styles.rowBtnText}>Open</Text>
+                </Tap>
+              </View>
+
+              {replacedAt !== undefined ? (
+                <View style={styles.row}>
+                  <View style={styles.rowText}>
+                    <Text style={styles.rowTitle}>Previous plan</Text>
+                    <Text style={styles.rowValue}>
+                      Replaced by the leaner default on{' '}
+                      {new Date(replacedAt).toLocaleDateString()}.
+                    </Text>
+                  </View>
+                  <Tap
+                    variant="ghost"
+                    color={confirmRestore ? palette.danger : palette.textDim}
+                    onPress={onRestore}
+                    accessibilityRole="button"
+                    style={styles.rowBtn}>
+                    <Text
+                      style={[
+                        styles.rowBtnText,
+                        confirmRestore && {color: palette.danger},
+                      ]}>
+                      {confirmRestore ? 'Tap to confirm' : 'Restore'}
+                    </Text>
+                  </Tap>
+                </View>
+              ) : null}
+            </>
+          ) : null}
         </ScrollView>
 
         <WeatherSheet
@@ -396,6 +642,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+  },
+  // A tappable row. Not `row`: Tap wraps its children in one inner view,
+  // and a row-direction container shrinks that view to its content — the
+  // text column then gets no width at all, which on a phone renders as a
+  // tall empty card.
+  navRow: {
+    backgroundColor: palette.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  groupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  badge: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chevron: {
+    ...t.subtitle,
+    color: palette.textDim,
+  },
+  eyebrow: {
+    ...t.caption,
+    color: palette.textDim,
+    letterSpacing: 1.5,
+    marginTop: spacing.lg,
   },
   pill: {
     minHeight: 44,
