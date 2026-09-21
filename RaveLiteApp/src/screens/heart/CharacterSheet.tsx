@@ -21,7 +21,7 @@ import {
 } from '../../domain/activity/activity';
 import {isHarmony} from '../../domain/activity/par';
 import {dailyPar} from '../../domain/profile/repository';
-import {pointsByElement} from '../../domain/activity/stats';
+import {daysTrained, pointsByElement} from '../../domain/activity/stats';
 import {MODALITIES, type Modality} from '../../domain/attributes/attributes';
 import {PRACTICE_CAP} from '../../domain/attributes/levels';
 import {
@@ -120,6 +120,10 @@ function ElementRow({
   );
 }
 
+/** The sheet opens at this level, or after this many days trained. */
+const UNLOCK_LEVEL = 2;
+const UNLOCK_DAYS = 7;
+
 export function CharacterSheet({
   onInfo,
 }: {onInfo?: (ref: InfoRef) => void} = {}) {
@@ -146,6 +150,12 @@ export function CharacterSheet({
 
   const {level, into, needs} = sheet.character;
   const par = dailyPar();
+  // A grid of fifteen zeroes is not a character sheet, it is a reproach.
+  // It opens at level 2, or after a week of training — days trained, not
+  // days since installing, because a week of owning an app is not a week
+  // of training and this is a record of the second one.
+  const days = daysTrained();
+  const locked = level < UNLOCK_LEVEL && days < UNLOCK_DAYS;
   const harmony = isHarmony(points, par);
   const bonus = Math.round((sheet.multiplier - 1) * 100);
 
@@ -209,16 +219,32 @@ export function CharacterSheet({
         ))}
       </View>
 
-      {rows.map(({element, standings}) => (
-        <ElementRow
-          key={element}
-          element={element}
-          standings={standings}
-          points={points[element] ?? 0}
-          par={par}
-          onOpen={onInfo}
-        />
-      ))}
+      {locked ? (
+        <View testID="sheet-locked" style={styles.locked}>
+          <Text style={styles.lockedTitle}>Your sheet is still filling in</Text>
+          <Text style={styles.lockedBody}>
+            Fifteen attributes, grown by what you actually do — so on day one
+            they are fifteen zeroes, which tells you nothing. It opens at level
+            2, or after a week of training.
+          </Text>
+          <Text style={styles.lockedBody}>
+            {days === 0
+              ? 'Nothing logged yet. Answer one chime.'
+              : `${days} ${days === 1 ? 'day' : 'days'} in.`}
+          </Text>
+        </View>
+      ) : (
+        rows.map(({element, standings}) => (
+          <ElementRow
+            key={element}
+            element={element}
+            standings={standings}
+            points={points[element] ?? 0}
+            par={par}
+            onOpen={onInfo}
+          />
+        ))
+      )}
 
       <Text style={styles.note}>
         Cardinal starts, fixed holds, mutable changes — so a column is one kind
@@ -354,6 +380,23 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.textDim,
     lineHeight: 17,
+  },
+  locked: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  lockedTitle: {
+    ...t.subtitle,
+    color: palette.text,
+  },
+  lockedBody: {
+    ...t.caption,
+    color: palette.textDim,
+    lineHeight: 18,
   },
   note: {
     ...t.caption,

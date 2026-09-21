@@ -4,6 +4,7 @@ import {DAILY_PAR} from '../activity/par';
 import {densityFor, parFor, roundsFor} from '../program/density';
 import type {DayShapeId} from '../program/types';
 import {AUTHOR_FACTS, type Facts, type KitItem, type Region} from './kit';
+import {archetypeById, type ArchetypeId} from './archetypes';
 import {ALL_PACKS, type PackId} from './packs';
 import {
   activeMode,
@@ -41,6 +42,8 @@ export interface Profile {
   mode?: Mode;
   /** Which curricula this person carries. Absent means all of them. */
   packs?: PackId[];
+  /** Where this program started. Changing anything else does not clear it. */
+  archetype?: ArchetypeId;
 }
 
 export function defaultProfile(): Profile {
@@ -133,6 +136,31 @@ export function loadPacks(): PackId[] {
 
 export function setPacks(packs: readonly PackId[]): void {
   saveProfile({...loadProfile(), packs: [...packs]});
+}
+
+/** Where this program started, if anyone said. */
+export function loadArchetype(): ArchetypeId | undefined {
+  return loadProfile().archetype;
+}
+
+/**
+ * The profile half of taking an archetype — packs and the day shape. The
+ * tracks are turned off by `setup.ts`, which is the one module allowed to
+ * reach both here and into the program (this file must not import the
+ * program: the program already imports this one).
+ */
+export function applyArchetypeToProfile(id: ArchetypeId): void {
+  const archetype = archetypeById(id);
+  if (!archetype) {
+    return;
+  }
+  saveProfile({
+    ...loadProfile(),
+    archetype: id,
+    packs: [...archetype.packs],
+    shape: archetype.shape,
+    customRounds: undefined,
+  });
 }
 
 /** What the room is really like, with no mode over the top. */

@@ -31,6 +31,7 @@ import {KEYS} from '../../storage/keys';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {AlivePanel} from './AlivePanel';
+import {ArchetypePanel} from './ArchetypePanel';
 import {ChimesPanel} from './ChimesPanel';
 import {DataPanel} from './DataPanel';
 import {KitPanel} from './KitPanel';
@@ -215,6 +216,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
 
           <ModePanel />
           <ShapePanel />
+          <ArchetypePanel />
           <PacksPanel />
           <KitPanel />
           <ChimesPanel />

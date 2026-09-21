@@ -143,3 +143,15 @@ export function streakDays(
   }
   return streak;
 }
+
+/**
+ * Days with anything logged on them, in the last `n` days.
+ *
+ * Used to decide whether the character sheet has earned its grid. "Day 7"
+ * is counted in days trained rather than days since installing, because a
+ * week of owning an app is not a week of training and the sheet is a
+ * record of the second one.
+ */
+export function daysTrained(n: number = 30, now: Date = new Date()): number {
+  return countsByDay(n, now).filter(day => day > 0).length;
+}

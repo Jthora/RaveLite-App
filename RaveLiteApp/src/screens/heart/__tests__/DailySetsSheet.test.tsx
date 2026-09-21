@@ -2,6 +2,7 @@ import React from 'react';
 import {Modal} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
 
+import {addEntry} from '../../../domain/training/repository';
 import {store} from '../../../storage';
 import {CharacterSheet} from '../CharacterSheet';
 import {DailySetsSheet} from '../DailySetsSheet';
@@ -51,6 +52,16 @@ it("shows today's focus, its morning block, and the week ahead", () => {
 });
 
 it("opens the character sheet from today's focus, and Back comes home", () => {
+  // The sheet stays closed until there is something on it to read (see
+  // CharacterSheet), so give it a week of training before asking for the
+  // grid — otherwise this tests the locked card instead.
+  for (let ago = 0; ago < 7; ago += 1) {
+    addEntry({
+      at: Date.now() - ago * 86_400_000,
+      kindId: 'builtin.staff-session',
+      value: 10 * 60,
+    });
+  }
   const onClose = jest.fn();
   let tree: renderer.ReactTestRenderer | undefined;
   act(() => {

@@ -468,13 +468,15 @@ with the archetypes in Phase 3.
 - [x] Tests: density, injured, and every mode's own promise
 
 **Phase 3 — someone else's app**
-- [ ] Archetypes (10) as data, with the picker card
+- [x] Archetypes (10) as data, with the picker card and a two-tap take
+      (20 Sep 2026). `tracksOff` is subtraction, not a whitelist.
 - [x] Packs as data (7 of 10 — see §10), gated through `canDo`, with the
       curriculum derived from them so the two lists cannot drift
       (20 Sep 2026)
 - [ ] Goals per archetype; the push-up goal off 200
 - [ ] Setup flow, the live preview strip, the first-chime tutorial
-- [ ] Character sheet held back to level 2
+- [x] Character sheet held back to level 2 — or seven days trained,
+      whichever comes first (20 Sep 2026)
 - [ ] Tests: every archetype yields a valid day
 
 **Phase 4 — contributors**

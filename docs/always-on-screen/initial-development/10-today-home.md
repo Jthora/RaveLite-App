@@ -767,6 +767,62 @@ The lesson worth keeping: a tolerated error count is a place for real
 bugs to hide, because a baseline is something people compare against
 instead of read.
 
+## Packs and archetypes (`src/domain/profile/`, since 20 Sep 2026)
+
+Four dials, coarsest last: the **room** decides what is possible
+(`kit.ts`), the **day shape** sizes it (`density.ts`), a **mode**
+overrides it for a while (`mode.ts`), and a **pack** decides whether a
+whole curriculum is part of this person's app (`packs.ts`).
+
+**The rule that makes packs honest:** a drill in no pack is always there.
+The base program — push, pull, squat, hinge, breath, posture, stillness,
+mobility — belongs to everyone. Turning every pack off leaves a complete
+program with five-plus drills in every element, and a test asserts it. If
+that were false, packs would not be optional content; they would be the
+app, and a switch would be a way to break someone's training.
+
+Seven packs ship: dance, martial, staff, yoga-taichi, jumps,
+military-tests, runs. Three from the plan were dropped and why is in
+`docs/public-beta.md` §10 — briefly, two duplicated kit gating and one
+was the base program wearing a hat.
+
+The practice curriculum is **derived** from the packs, not listed beside
+them. Two lists that say the same thing are two lists that will disagree:
+a drill added to a pack but not the curriculum is simply never taught,
+and nothing fails.
+
+Gating rides the seam modes already built — `Facts.packs`, stamped by
+`loadFacts()` and honoured by `canDo` — so all eight drill pickers
+inherit it. Absent means everything.
+
+**Archetypes** (`archetypes.ts`) are bundles: packs, a day shape, tracks
+to switch off. Ten of them, and taking one writes exactly the fields the
+panels write, so every dial it moved stays visible and changing one
+afterwards is an ordinary edit. `tracksOff` is subtraction rather than a
+whitelist, so a track added to the app later turns up in every archetype
+instead of silently in none.
+
+`setup.ts` exists because `applyArchetype` needs both the profile and the
+program, and the program already imports the profile — the profile
+importing back would be a cycle, which shows up at runtime as a module
+being undefined nowhere near the cause. One module is allowed to reach
+both ways.
+
+Taking an archetype is **two taps**, with a concrete preview on the first
+(`9 chimes · at a desk · 5 packs · +142 drills · par 20`). It replaces a
+tuned program, and nobody should lose one to a mis-tap on a list.
+
+### The character sheet waits
+
+Fifteen attributes grown by use are fifteen zeroes on day one, which
+tells a new person nothing and reads as a reproach. The grid opens at
+**character level 2, or after seven days trained** — days with something
+logged on them, not days since installing, because a week of owning an
+app is not a week of training and this is a record of the second one
+(`daysTrained` in `activity/stats.ts`). Until then the card says what is
+coming and how far in they are. The level, the balance row and the
+explanation stay visible throughout; only the grid waits.
+
 ## Modes: what is true right now (`src/domain/profile/mode.ts`, since 20 Sep 2026)
 
 Facts gate what is possible, the day shape sizes it, and a mode overrides
