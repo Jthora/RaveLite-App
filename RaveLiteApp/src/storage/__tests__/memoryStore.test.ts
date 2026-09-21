@@ -73,7 +73,12 @@ it('no longer costs the whole store to ask for one day', () => {
   expect(store.keysWithPrefix('').length).toBe(4000);
 
   const oneDay = () => store.keysWithPrefix('journal.2026-100.');
-  const everything = () => store.keysWithPrefix('');
+  // The old way: every key, tested one by one. Not `keysWithPrefix('')`,
+  // which hands back the sorted list without scanning — the first version
+  // of this test compared against that, and sat at a ratio of 3.9 against
+  // a threshold of 4.
+  const allKeys = store.keysWithPrefix('');
+  const scan = () => allKeys.filter(k => k.startsWith('journal.2026-100.'));
   expect(oneDay()).toHaveLength(20);
 
   const timed = (fn: () => unknown, runs: number) => {
@@ -89,9 +94,15 @@ it('no longer costs the whole store to ask for one day', () => {
   // the clock. An absolute threshold fails on a busy machine, and a
   // guard that fails for no reason is a guard somebody deletes — while
   // the ratio holds however loaded the box is, because both halves slow
-  // down together.
-  const day = timed(oneDay, 200);
-  const all = timed(everything, 200);
+  // down together. Interleaved, and the fastest of each kept: a pause
+  // landing in one half once still failed it when the suites ran side
+  // by side.
+  let day = Infinity;
+  let all = Infinity;
+  for (let trial = 0; trial < 7; trial++) {
+    day = Math.min(day, timed(oneDay, 40));
+    all = Math.min(all, timed(scan, 40));
+  }
 
   expect({fasterThanAFullScan: day * 4 < all}).toEqual({
     fasterThanAFullScan: true,
