@@ -477,10 +477,12 @@ with the archetypes in Phase 3.
 - [x] Packs as data (7 of 10 — see §10), gated through `canDo`, with the
       curriculum derived from them so the two lists cannot drift
       (20 Sep 2026)
-- [ ] Goals per archetype; the push-up goal off 200
+- [x] Goals per archetype; the push-up goal off 200 (20 Sep 2026). The
+      test group follows the `military-tests` pack.
 - [x] Setup flow and the live preview strip (20 Sep 2026) — the cards are
       the Settings panels themselves, so there is no second UI
-- [ ] The first-chime tutorial
+- [x] The first-chime tutorial — a real chime, not a slideshow
+      (20 Sep 2026)
 - [x] Character sheet held back to level 2 — or seven days trained,
       whichever comes first (20 Sep 2026)
 - [x] Tests: every archetype yields a valid day — plus the load-bearing

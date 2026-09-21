@@ -26,7 +26,13 @@ import {CatchUpSheet} from '../../components/today/CatchUpSheet';
 import {LateLogSheet} from '../../components/today/LateLogSheet';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
-import {clearMode, loadMode} from '../../domain/profile/repository';
+import {
+  clearMode,
+  finishTutorial,
+  loadMode,
+  needsTutorial,
+} from '../../domain/profile/repository';
+import {TutorialCoach} from '../../components/today/TutorialCoach';
 import {ModeChip} from '../../components/today/ModeChip';
 import {SessionBanner, SessionSheet} from '../../components/today/SessionSheet';
 import {SetsMeters} from '../../components/today/SetsMeters';
@@ -78,6 +84,8 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [weatherOpen, setWeatherOpen] = useState(false);
   /** Re-read whenever Settings closes, since that is where one is picked. */
   const [mode, setMode] = useState(() => loadMode());
+  /** First run only; ends the moment a chime is answered unaided. */
+  const [teaching, setTeaching] = useState(needsTutorial);
   /** A missed or skipped chime being logged after the fact. */
   const [late, setLate] = useState<DayRow | undefined>();
   /** A logged row being kept or removed. */
@@ -89,6 +97,14 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   // from the journal on its own.
   const onDone = useCallback((adjust: DoneAdjust) => {
     sealActive(adjust);
+    // Answering a chime is the lesson. Once it has been done unaided,
+    // carrying on explaining it would be a lecture.
+    setTeaching(teachingNow => {
+      if (teachingNow) {
+        finishTutorial();
+      }
+      return false;
+    });
   }, []);
   const onDeferNext = useCallback(() => {
     if (next) {
@@ -184,7 +200,14 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           weather={model.weather}
           onPress={() => setWeatherOpen(true)}
         />
-        {/* Renders nothing at all unless a mode is running. */}
+        {/* Both render nothing at all unless they are wanted. */}
+        <TutorialCoach
+          visible={teaching}
+          onDone={() => {
+            finishTutorial();
+            setTeaching(false);
+          }}
+        />
         <ModeChip
           mode={mode}
           now={model.now}

@@ -45,6 +45,12 @@ export interface Archetype {
   tracksOff?: readonly TrackId[];
   /** Weeks, for the two that have a finish line. */
   blockWeeks?: number;
+  /**
+   * Push-ups a day to aim at. 200 is one person's number and a wall for
+   * most people; an unreachable goal is not motivating, it is just a
+   * number that never moves.
+   */
+  pushupGoal: number;
 }
 
 export const ARCHETYPES: readonly Archetype[] = [
@@ -55,6 +61,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     leadsWith: 'Dance, stamina, flow, water',
     packs: ['dance', 'staff', 'yoga-taichi', 'jumps', 'runs'],
     shape: 'desk',
+    pushupGoal: 100,
   },
   {
     id: 'guardian',
@@ -63,6 +70,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     leadsWith: 'Strikes, blocks, kicks, strength',
     packs: ['martial', 'jumps', 'runs'],
     shape: 'desk',
+    pushupGoal: 200,
   },
   {
     id: 'monk',
@@ -72,6 +80,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     packs: ['yoga-taichi'],
     shape: 'office',
     tracksOff: ['kicks'],
+    pushupGoal: 50,
   },
   {
     id: 'operator',
@@ -88,6 +97,7 @@ export const ARCHETYPES: readonly Archetype[] = [
       'runs',
     ],
     shape: 'desk',
+    pushupGoal: 200,
   },
   {
     id: 'desk-rebel',
@@ -97,6 +107,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     packs: ['yoga-taichi'],
     shape: 'office',
     tracksOff: ['kicks'],
+    pushupGoal: 100,
   },
   {
     id: 'comeback',
@@ -107,6 +118,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     shape: 'shift',
     tracksOff: ['kicks', 'flow'],
     blockWeeks: 12,
+    pushupGoal: 50,
   },
   {
     id: 'flow-artist',
@@ -115,6 +127,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     leadsWith: 'Dexterity, off-hand parity, presence',
     packs: ['staff', 'dance', 'yoga-taichi'],
     shape: 'desk',
+    pushupGoal: 100,
   },
   {
     id: 'night-shift',
@@ -123,6 +136,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     leadsWith: 'Light timing, sleep, steady work',
     packs: ['yoga-taichi', 'runs'],
     shape: 'shift',
+    pushupGoal: 100,
   },
   {
     id: 'parent',
@@ -132,6 +146,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     packs: [],
     shape: 'weekend',
     tracksOff: ['kicks', 'flow'],
+    pushupGoal: 50,
   },
   {
     id: 'festival-six',
@@ -141,6 +156,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     packs: ['dance', 'yoga-taichi', 'runs'],
     shape: 'desk',
     blockWeeks: 6,
+    pushupGoal: 100,
   },
 ];
 
@@ -151,3 +167,10 @@ export const archetypeById = (id: ArchetypeId): Archetype | undefined =>
 
 /** The one the app assumes when nobody has been asked. */
 export const DEFAULT_ARCHETYPE: ArchetypeId = 'operator';
+
+/**
+ * The number this app was written around, kept for any install that has
+ * never been asked — so nobody already training toward it wakes up to a
+ * smaller goal.
+ */
+export const AUTHOR_PUSHUP_GOAL = 200;

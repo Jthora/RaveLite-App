@@ -13,7 +13,13 @@ import {DailySetsSheet} from '../DailySetsSheet';
 import {SessionSheet} from '../../../components/today/SessionSheet';
 import {addEntry} from '../../../domain/training/repository';
 import {startSession} from '../../../domain/training/session';
-import {loadMode, setMode} from '../../../domain/profile/repository';
+import {
+  __resetProfileCache,
+  finishSetup,
+  loadMode,
+  needsTutorial,
+  setMode,
+} from '../../../domain/profile/repository';
 import {SettingsSheet} from '../SettingsSheet';
 import {InfoCardView} from '../../../components/info/InfoSheet';
 import {TodayPanel} from '../TodayPanel';
@@ -26,6 +32,10 @@ beforeEach(() => {
   jest.useFakeTimers();
   jest.setSystemTime(TEN_AM);
   store.clearAll();
+  // The profile is cached in a module, and clearing storage does not
+  // clear that — so without this a test that finishes the tutorial leaks
+  // `taughtAt` into the next one.
+  __resetProfileCache();
   runtime.__test.reset();
 });
 
@@ -100,6 +110,41 @@ it('Done answers the chime that is sounding', () => {
     byTestId(tree, 'chime-done').props.onPress();
   });
   expect(runtime.getActivePulseSummary()).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('teaches the three taps only on a first run, and only once', () => {
+  // Nobody who has trained ever sees it.
+  expect(byTestId(renderToday(), 'coach-title')).toBeUndefined();
+
+  store.clearAll();
+  __resetProfileCache();
+  finishSetup();
+  const tree = renderToday();
+  expect(byTestId(tree, 'coach-title').props.children).toBe('This is a chime');
+
+  // Four lessons, then it is gone for good.
+  for (let i = 0; i < 4; i += 1) {
+    act(() => byTestId(tree, 'coach-next').props.onPress());
+  }
+  expect(byTestId(tree, 'coach-title')).toBeUndefined();
+  expect(needsTutorial()).toBe(false);
+  act(() => tree.unmount());
+});
+
+it('stops teaching the moment a chime is answered unaided', () => {
+  store.clearAll();
+  __resetProfileCache();
+  finishSetup();
+  act(() => {
+    runtime.enqueueNow({element: 'air', exerciseId: 'air.chin-tuck'});
+  });
+  const tree = renderToday();
+  expect(byTestId(tree, 'coach-title')).toBeDefined();
+
+  act(() => byTestId(tree, 'chime-done').props.onPress());
+  expect(byTestId(tree, 'coach-title')).toBeUndefined();
+  expect(needsTutorial()).toBe(false);
   act(() => tree.unmount());
 });
 

@@ -5,6 +5,7 @@ import {densityFor, parFor, roundsFor} from '../program/density';
 import type {DayShapeId} from '../program/types';
 import {AUTHOR_FACTS, type Facts, type KitItem, type Region} from './kit';
 import {archetypeById, type ArchetypeId} from './archetypes';
+import {AUTHOR_PUSHUP_GOAL} from './archetypes';
 import {ALL_PACKS, type PackId} from './packs';
 import type {StartingPoint} from './starting';
 import {
@@ -47,6 +48,10 @@ export interface Profile {
   archetype?: ArchetypeId;
   /** Where the body was starting from, used once to seed the maxes. */
   starting?: StartingPoint;
+  /** Push-ups a day, when it has been set by hand. */
+  pushupGoal?: number;
+  /** When the first-chime tutorial was finished or skipped. */
+  taughtAt?: number;
 }
 
 export function defaultProfile(): Profile {
@@ -139,6 +144,32 @@ export function loadPacks(): PackId[] {
 
 export function setPacks(packs: readonly PackId[]): void {
   saveProfile({...loadProfile(), packs: [...packs]});
+}
+
+/**
+ * Push-ups a day to aim at.
+ *
+ * Falls back through the archetype to 200 — the number this app was
+ * written around. An install that has never been asked keeps it, so
+ * nothing moves for anyone who was already training toward it.
+ *
+ * The archetype's number is a fallback, not an override: taking one later
+ * does not undo a goal set by hand. Packs and the day shape *are* what an
+ * archetype is, so those get rewritten; this is a number somebody chose.
+ */
+export function loadPushupGoal(): number {
+  const profile = loadProfile();
+  if (profile.pushupGoal !== undefined) {
+    return profile.pushupGoal;
+  }
+  const archetype = profile.archetype
+    ? archetypeById(profile.archetype)
+    : undefined;
+  return archetype?.pushupGoal ?? AUTHOR_PUSHUP_GOAL;
+}
+
+export function setPushupGoal(reps: number): void {
+  saveProfile({...loadProfile(), pushupGoal: Math.max(1, Math.round(reps))});
 }
 
 /** Where the body was starting from, if anyone said. */
@@ -275,6 +306,45 @@ export function needsSetup(): boolean {
 /** Mark setup answered, so it is never shown again. */
 export function finishSetup(now: number = Date.now()): void {
   saveProfile({...loadProfile(), setUpAt: now});
+}
+
+/**
+ * Whether the three taps still need teaching.
+ *
+ * Only ever offered to somebody who has just finished setup, and only
+ * while they have not answered a chime yet — the moment they answer one
+ * unaided, the lesson has been learnt and showing it would be a lecture.
+ */
+export function needsTutorial(): boolean {
+  const profile = loadProfile();
+  if (profile.taughtAt !== undefined || profile.setUpAt === undefined) {
+    return false;
+  }
+  return !hasAnswered();
+}
+
+/**
+ * Whether the person has done something, as opposed to the app having
+ * done something.
+ *
+ * `hasAnyHistory` counts any trace at all, which is right for setup —
+ * there, being wrong means showing a first-run screen to somebody with a
+ * year of training, so anything at all is reason enough to stay away. It
+ * is wrong here, because firing the tutorial's own chime writes a
+ * `reminder.fired` entry: the lesson would switch itself off by starting.
+ */
+function hasAnswered(): boolean {
+  const entries = store.getString(KEYS.trainingEntries);
+  if (entries !== undefined && entries !== '[]') {
+    return true;
+  }
+  return store
+    .keysWithPrefix(KEYS.journalPrefix)
+    .some(key => (store.getString(key) ?? '').includes('"completion"'));
+}
+
+export function finishTutorial(now: number = Date.now()): void {
+  saveProfile({...loadProfile(), taughtAt: now});
 }
 
 /** Only for tests: forget what was read. */

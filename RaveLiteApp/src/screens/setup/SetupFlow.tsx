@@ -22,6 +22,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {Tap} from '../../components/Tap';
 import {previewDay, previewLine} from '../../domain/profile/preview';
 import {finishSetup} from '../../domain/profile/repository';
+import {enqueueNow} from '../../domain/ambient/pulseRuntime';
 import {ArchetypePanel} from '../heart/ArchetypePanel';
 import {KitPanel} from '../heart/KitPanel';
 import {PacksPanel} from '../heart/PacksPanel';
@@ -29,6 +30,9 @@ import {ShapePanel} from '../heart/ShapePanel';
 import {StartingPanel} from './StartingPanel';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+
+/** Needs no kit, no floor and no room: safe to fire at anybody. */
+const TUTORIAL_DRILL = 'air.chin-tuck';
 
 interface Step {
   key: string;
@@ -79,6 +83,10 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
 
   const done = useCallback(() => {
     finishSetup();
+    // The tutorial is a real chime, so fire one: chin tucks need no kit,
+    // no floor and no room, which makes them the one drill that is safe
+    // to promise before knowing anything about where this person is.
+    enqueueNow({element: 'air', exerciseId: TUTORIAL_DRILL});
     onDone();
   }, [onDone]);
 

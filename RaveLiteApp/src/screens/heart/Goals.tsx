@@ -35,7 +35,8 @@ import {
 import {windowStart} from '../../domain/activity/stats';
 import {setsToday} from '../../domain/ambient/setScheduler';
 import {lastWeekDone} from '../../domain/program/adapt';
-import {PUSHUP_GOAL, pushupDay} from '../../domain/program/pushups';
+import {pushupDay} from '../../domain/program/pushups';
+import {loadPacks, loadPushupGoal} from '../../domain/profile/repository';
 import {pushupRamp, type PushupRamp} from '../../domain/program/ramp';
 import {runFor} from '../../domain/program/morning';
 import {
@@ -108,17 +109,17 @@ function futureDate(at: number): string {
   );
 }
 
-/** How soon today's push-up sets could reach 200 a day. */
-function rampLine(ramp: PushupRamp): string {
+/** How soon today's push-up sets could reach the day's goal. */
+function rampLine(ramp: PushupRamp, goal: number): string {
   switch (ramp.kind) {
     case 'reached':
-      return `Today's sets already reach ${PUSHUP_GOAL} a day.`;
+      return `Today's sets already reach ${goal} a day.`;
     case 'on-pace':
-      return `Keeping up every week, the sets reach ${PUSHUP_GOAL} a day around ${futureDate(
+      return `Keeping up every week, the sets reach ${goal} a day around ${futureDate(
         ramp.at,
       )} (${ramp.weeks} weeks).`;
     case 'capped':
-      return `At today's push-up max the sets top out at ${ramp.most} a day; a tested max of ${ramp.needMax} reaches ${PUSHUP_GOAL}.`;
+      return `At today's push-up max the sets top out at ${ramp.most} a day; a tested max of ${ramp.needMax} reaches ${goal}.`;
   }
 }
 
@@ -228,7 +229,8 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
       pushups: pushupDay(today, setsToday(now).prescriptions),
       rows,
       height,
-      ramp: pushupRamp(program, now),
+      goal: loadPushupGoal(),
+      ramp: pushupRamp(program, now, loadPushupGoal()),
       active: {
         today: activeMinutes(today),
         // Today counts as one of the seven, finished or not.
@@ -256,9 +258,15 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version]);
 
-  const {pushups, ramp, active, run} = view;
-  // Today's sets are the day's target; 200 a day is where the ramp leads.
-  const dayTarget = pushups.planned > 0 ? pushups.planned : PUSHUP_GOAL;
+  const {pushups, ramp, active, run, goal} = view;
+  // Today's sets are the day's target; the goal is where the ramp leads.
+  const dayTarget = pushups.planned > 0 ? pushups.planned : goal;
+  // The fitness tests belong to the military-tests pack. Without it they
+  // are somebody else's chart, so the whole group goes rather than
+  // sitting there greyed out.
+  const groups = GOAL_GROUPS.filter(
+    g => g !== 'tests' || loadPacks().includes('military-tests'),
+  );
 
   return (
     <>
@@ -292,11 +300,11 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
           </Text>
           <Text style={styles.caption}>
             {pushups.planned > 0
-              ? `Today's sets add up to ${pushups.planned}. They grow as you keep up with them and your tested max rises, toward ${PUSHUP_GOAL} a day.`
-              : `The long-term goal is ${PUSHUP_GOAL} a day.`}
+              ? `Today's sets add up to ${pushups.planned}. They grow as you keep up with them and your tested max rises, toward ${goal} a day.`
+              : `The long-term goal is ${goal} a day.`}
           </Text>
           <Text testID="pushups-ramp" style={styles.projection}>
-            {rampLine(ramp)}
+            {rampLine(ramp, goal)}
           </Text>
         </View>
 
@@ -369,7 +377,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
           ) : null}
         </View>
 
-        {GOAL_GROUPS.map((group, index) => (
+        {groups.map((group, index) => (
           <View key={group} testID={`goals-${group}`} style={styles.section}>
             <Text style={[styles.sectionTitle, {color: groupColor(group)}]}>
               {groupTitle(group)}

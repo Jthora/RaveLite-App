@@ -742,6 +742,22 @@ moves until someone says otherwise; the golden test in
 
 Chosen in Settings › How much day you have.
 
+### Goals follow the person
+
+`PUSHUP_GOAL` was 200 for everybody. That is one person's number and a
+wall for most, and a goal that never moves is not a goal. Each archetype
+now carries its own (`50` for the Monk, Parent and Comeback, `100` for
+most, `200` for the Guardian and Operator), and `loadPushupGoal()` falls
+back through the archetype to 200 — so an install that was never asked
+keeps exactly what it had. A number set by hand wins over both: the
+archetype's is a fallback for people who never said, not an override for
+people who did. `pushupRamp` takes the goal as an argument and stays pure.
+
+The fitness-test goals belong to the `military-tests` pack. Without it
+the whole group goes from the Goals page rather than sitting there greyed
+out — somebody who is not training for a USMC chart should not have to
+scroll past one.
+
 ## The typecheck baseline is zero (20 Sep 2026)
 
 For a long time `tsc --noEmit` reported nine errors in non-test code, and
@@ -863,6 +879,35 @@ profile and the program) and changed shape: `chooseStarting` is refused
 only once something has been **logged**. An untouched seeded program is
 nobody's numbers yet, so it is re-seeded; numbers that have been trained
 against are yours, and a max test is the honest way to move them.
+
+### The tutorial is a real chime
+
+Not a slideshow. Setup's Start fires a genuine chime for chin tucks — no
+kit, no floor, no room, the one drill safe to promise before knowing
+anything about where somebody is — and `TutorialCoach` sits above it
+naming the three taps that are the whole app: Done, +5 min, Skip it. The
+chime underneath stays live, so answering it *is* the lesson, and doing
+so ends the tutorial rather than interrupting it.
+
+Four short cards, skippable from the first, and it renders `null` once
+taught.
+
+**The bug it had first.** Firing the tutorial's chime writes a
+`reminder.fired` journal entry, and `needsTutorial` was checking
+`hasAnyHistory()` — so the lesson switched itself off by starting. Two
+questions that looked like one:
+
+- `hasAnyHistory()` — *any* trace at all. Right for `needsSetup`, where
+  being wrong means showing a first-run screen to somebody with a year of
+  training, so anything is reason enough to stay away.
+- `hasAnswered()` — did the **person** do something: a training entry, or
+  a journal entry of kind `completion`. What the tutorial needs, because
+  the app's own noise must not count as the user having learnt anything.
+
+It also caught something worth knowing generally: `store.clearAll()` does
+**not** clear the module-level profile cache, so a test that finished the
+tutorial leaked `taughtAt` into the next one. `__resetProfileCache()`
+belongs beside `store.clearAll()` in any suite that touches the profile.
 
 ### The character sheet waits
 

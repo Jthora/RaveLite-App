@@ -5,7 +5,7 @@ import type {ProgramState} from './types';
 
 /**
  * The push-up ramp ahead — pure. How soon Push and Variants sets could add
- * up to 200 a day at today's tested maxes, climbing as fast as the
+ * up to `goal` a day at today's tested maxes, climbing as fast as the
  * adaptive ramp allows (85% or more every week: a set more a week, holding
  * on deload weeks). Sets top out at each track's most, so past that only a
  * higher max test (bigger sets) gets closer; then it says what max does.
@@ -22,7 +22,11 @@ export type PushupRamp =
   /** At the most sets, today's maxes reach `most` a day; a push-up max of `needMax` reaches 200. */
   | {kind: 'capped'; most: number; needMax: number};
 
-export function pushupRamp(program: ProgramState, now: number): PushupRamp {
+export function pushupRamp(
+  program: ProgramState,
+  now: number,
+  goal: number = PUSHUP_GOAL,
+): PushupRamp {
   const push = trackById('push');
   const variants = trackById('push-variants');
   const pushState = program.tracks.push;
@@ -37,19 +41,19 @@ export function pushupRamp(program: ProgramState, now: number): PushupRamp {
     variantState.sets ?? variants.baseSets,
   );
   const perDay = () => pushSets * pushSize + variantSets * variantSize;
-  if (perDay() >= PUSHUP_GOAL) {
+  if (perDay() >= goal) {
     return {kind: 'reached'};
   }
 
   const variantMost = variants.maxSets * variantSize;
   const most = push.maxSets * pushSize + variantMost;
-  if (most < PUSHUP_GOAL) {
+  if (most < goal) {
     let needMax = Math.max(1, pushState.testMax);
     while (
       push.maxSets * setSizeFor(push, {...pushState, testMax: needMax}) +
         variantMost <
-        PUSHUP_GOAL &&
-      needMax < PUSHUP_GOAL
+        goal &&
+      needMax < goal
     ) {
       needMax++;
     }
@@ -63,7 +67,7 @@ export function pushupRamp(program: ProgramState, now: number): PushupRamp {
     }
     pushSets = Math.min(push.maxSets, pushSets + 1);
     variantSets = Math.min(variants.maxSets, variantSets + 1);
-    if (perDay() >= PUSHUP_GOAL) {
+    if (perDay() >= goal) {
       return {kind: 'on-pace', weeks: ahead, at: now + ahead * 7 * DAY_MS};
     }
   }
