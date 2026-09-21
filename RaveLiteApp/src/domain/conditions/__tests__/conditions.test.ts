@@ -203,3 +203,18 @@ describe('conditions', () => {
     expect(conditionsAt(at(13), {buggyToday: true}).bugs).toBe('high');
   });
 });
+
+it('knows thunder from rain, by the WMO code', () => {
+  const f = forecast([
+    hour(15, {code: 61, rainChance: 90}),
+    hour(16, {code: 95, rainChance: 90}),
+  ]);
+  expect(conditionsAt(at(15), {forecast: f})).toMatchObject({
+    rain: true,
+    storm: false,
+  });
+  expect(conditionsAt(at(16), {forecast: f})).toMatchObject({
+    rain: true,
+    storm: true,
+  });
+});

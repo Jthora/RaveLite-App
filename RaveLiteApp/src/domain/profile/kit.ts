@@ -38,6 +38,7 @@ export type KitItem =
   | 'bench'
   | 'rail' // a railing, a post, a fence
   | 'beam' // something narrow to balance on: a log, a low wall, a 2×4
+  | 'mirror' // big enough to see yourself move in
   | 'kerb'
   | 'hill'
   // To hang from — asked as a question, not two tiles; see `Hang`
@@ -66,7 +67,12 @@ export type KitItem =
   | 'wand'
   | 'ropeDart'
   | 'contactBall'
-  | 'buugeng';
+  | 'buugeng'
+  | 'dragonStaff'
+  | 'flags'
+  | 'gloves' // light gloves: gloving
+  | 'juggling' // balls, bean bags or clubs
+  | 'devilSticks';
 
 /**
  * What a place takes away.
@@ -140,6 +146,11 @@ export const CARRIED: ReadonlySet<KitItem> = new Set<KitItem>([
   'ropeDart',
   'contactBall',
   'buugeng',
+  'dragonStaff',
+  'flags',
+  'gloves',
+  'juggling',
+  'devilSticks',
 ]);
 
 /** What a place *is*. Its kind puts one in; nobody ticks it. */
@@ -180,6 +191,7 @@ export const PLACE_GROUPS: readonly KitGroup[] = [
       'beam',
       'kerb',
       'hill',
+      'mirror',
     ],
   },
   {title: 'To hang from', items: ['hangLow', 'hangHigh', 'frame']},
@@ -200,6 +212,11 @@ export const CARRIED_GROUPS: readonly KitGroup[] = [
       'ropeDart',
       'contactBall',
       'buugeng',
+      'dragonStaff',
+      'flags',
+      'gloves',
+      'juggling',
+      'devilSticks',
     ],
   },
 ];
@@ -228,6 +245,7 @@ export const KIT_LABELS: Readonly<Record<KitItem, string>> = {
   bench: 'A bench',
   rail: 'A railing or post',
   beam: 'A beam or log',
+  mirror: 'A big mirror',
   kerb: 'A kerb',
   hill: 'A hill',
   // One hang point used to mean two very different rooms. A low bar
@@ -255,6 +273,11 @@ export const KIT_LABELS: Readonly<Record<KitItem, string>> = {
   ropeDart: 'A rope dart',
   contactBall: 'A contact ball',
   buugeng: 'Buugeng',
+  dragonStaff: 'A dragon staff',
+  flags: 'Flow flags',
+  gloves: 'Light gloves',
+  juggling: 'Juggling balls or clubs',
+  devilSticks: 'Devil sticks',
 };
 
 /** What each one is for, when the label alone is not obvious. */
@@ -266,8 +289,11 @@ export const KIT_NOTES: Readonly<Partial<Record<KitItem, string>>> = {
   kerb: 'A step down at the roadside — calf and ankle work.',
   beam: 'Anything narrow and solid to walk along. A 2×4 on the floor counts.',
   frame: 'Monkey bars and parallel bars.',
+  mirror: 'Full-length, or big enough to see yourself move in.',
   jugs: 'Full ones, with handles. About 4 kg (9 lb) each.',
   bricks: 'Or books in a backpack — anything heavy you can carry.',
+  gloves: 'LED gloves — gloving needs no room at all, even at a desk.',
+  staff: 'Any staff you spin: a bo, a contact staff, a light-up staff.',
 };
 
 /** How loud you can be where you train. */
@@ -324,7 +350,7 @@ export const PLACE_KINDS: readonly PlaceKindSpec[] = [
     detail: 'A bedroom, a living room, a corner with a mat.',
     outdoor: false,
     starts: ['wall', 'doorway', 'table'],
-    offers: ['mat', 'wall', 'doorway', 'table', 'chair', 'beam'],
+    offers: ['mat', 'wall', 'doorway', 'table', 'chair', 'mirror', 'beam'],
     hangs: true,
     limits: [],
   },
@@ -334,7 +360,16 @@ export const PLACE_KINDS: readonly PlaceKindSpec[] = [
     detail: 'Room to move, but not upward.',
     outdoor: false,
     starts: ['wall', 'mat'],
-    offers: ['mat', 'wall', 'doorway', 'chair', 'table', 'stairs', 'beam'],
+    offers: [
+      'mat',
+      'wall',
+      'doorway',
+      'chair',
+      'table',
+      'stairs',
+      'mirror',
+      'beam',
+    ],
     hangs: true,
     limits: ['lowCeiling'],
   },
@@ -344,7 +379,16 @@ export const PLACE_KINDS: readonly PlaceKindSpec[] = [
     detail: 'Stairs, a hallway, the furniture.',
     outdoor: false,
     starts: ['wall', 'doorway', 'chair', 'table', 'stairs'],
-    offers: ['stairs', 'hallway', 'chair', 'table', 'wall', 'doorway', 'mat'],
+    offers: [
+      'stairs',
+      'hallway',
+      'chair',
+      'table',
+      'wall',
+      'doorway',
+      'mat',
+      'mirror',
+    ],
     hangs: false,
     limits: [],
   },
@@ -540,6 +584,7 @@ const VENUES_FOR: Readonly<Record<KitItem, readonly Venue[]>> = {
   bench: [],
   rail: [],
   beam: [],
+  mirror: [],
   kerb: ['neighborhood'],
   hill: [],
   // Either kind of hang point opens the porch; which drills it allows is
@@ -566,6 +611,11 @@ const VENUES_FOR: Readonly<Record<KitItem, readonly Venue[]>> = {
   ropeDart: [],
   contactBall: [],
   buugeng: [],
+  dragonStaff: [],
+  flags: [],
+  gloves: [],
+  juggling: [],
+  devilSticks: [],
 };
 
 /**
@@ -600,6 +650,21 @@ const FLOW_TOYS: readonly KitItem[] = [
   'contactBall',
   'buugeng',
   'doubleStaff',
+  'dragonStaff',
+  'flags',
+  'gloves',
+  'juggling',
+  'devilSticks',
+];
+/** Props that spin in planes — the ones a mirror can square up. */
+const PLANE_PROPS: readonly KitItem[] = [
+  'staff',
+  'doubleStaff',
+  'poi',
+  'hoop',
+  'fans',
+  'buugeng',
+  'flags',
 ];
 
 /**
@@ -735,6 +800,24 @@ const NEEDS: Readonly<Record<string, readonly Need[]>> = {
   'water.double-staff-windmill': ['doubleStaff'],
   'water.double-staff-weave': ['doubleStaff'],
   'water.flow-toy-round': [FLOW_TOYS],
+  'water.gloving-finger-rolls': ['gloves'],
+  'water.gloving-tracing': ['gloves'],
+  'water.gloving-tutting': ['gloves'],
+  'water.flag-spins': ['flags'],
+  'water.flag-weave': ['flags'],
+  'water.dragon-staff-rolls': ['dragonStaff'],
+  'water.dragon-staff-pass': ['dragonStaff'],
+  'water.juggling-cascade': ['juggling'],
+  'water.juggling-two-in-one': ['juggling'],
+  'water.devil-stick-idle': ['devilSticks'],
+  'water.devil-stick-flip': ['devilSticks'],
+
+  // Seeing yourself move (kit/mirror.ts)
+  'air.mirror-posture-check': ['mirror'],
+  'earth.mirror-squat-check': ['mirror'],
+  'water.mirror-groove-check': ['mirror'],
+  'water.mirror-plane-check': ['mirror', PLANE_PROPS],
+  'fire.mirror-guard-check': ['mirror'],
 };
 
 /**

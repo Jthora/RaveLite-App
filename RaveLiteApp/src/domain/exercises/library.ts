@@ -1,6 +1,8 @@
 import {Exercise} from './types';
 import {CARRIED_DRILLS} from './kit/carried';
 import {FLOW_DRILLS} from './kit/flow';
+import {MORE_FLOW_DRILLS} from './kit/flowMore';
+import {MIRROR_DRILLS} from './kit/mirror';
 import {PLACE_DRILLS} from './kit/places';
 
 /**
@@ -3223,6 +3225,8 @@ export const EXERCISE_LIBRARY: Exercise[] = [
   ...CARRIED_DRILLS,
   ...PLACE_DRILLS,
   ...FLOW_DRILLS,
+  ...MORE_FLOW_DRILLS,
+  ...MIRROR_DRILLS,
 ];
 
 export const exercisesFor = (element: Exercise['element']): Exercise[] =>

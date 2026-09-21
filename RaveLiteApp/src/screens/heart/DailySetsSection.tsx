@@ -59,7 +59,7 @@ import {formatDuration} from '../../domain/training/grading';
 import type {InfoRef} from '../../domain/info/info';
 import {loadFacts} from '../../domain/profile/repository';
 import {TodayFocus, WeekFocus} from './FocusWeek';
-import {blockPieces, runFor} from '../../domain/program/morning';
+import {blockPieces, runFor, blockTitle} from '../../domain/program/morning';
 
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -103,7 +103,13 @@ export function DailySetsSection({
         const day = new Date(date);
         day.setHours(12, 0, 0, 0);
         day.setDate(day.getDate() + i);
-        return {date: day, focus: focusFor(day), run: runFor(day, now)};
+        const focus = focusFor(day);
+        return {
+          date: day,
+          focus,
+          run: runFor(day, now),
+          title: blockTitle(focus.block, blockPieces(day, now)),
+        };
       }),
       pieces: blockPieces(date, now),
     };

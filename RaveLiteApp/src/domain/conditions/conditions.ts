@@ -3,6 +3,7 @@
  *
  *   Dark   before first light (civil dawn) or after last light
  *   Rain   rain chance 50% or more, or rain falling that hour
+ *   Storm  thunder forecast that hour — inside whatever you think of rain
  *   Heat   feels-like 32 °C+ is caution, 39 °C+ danger (the heat index's
  *          "extreme caution" and "danger" bands)
  *   Cold   feels-like 0 °C or below; icy with snow or freezing rain
@@ -32,6 +33,8 @@ const DAWN_DUSK_MS = 90 * 60_000;
 const ICY_CODES: ReadonlySet<number> = new Set([
   56, 57, 66, 67, 71, 73, 75, 77, 85, 86,
 ]);
+/** WMO codes: thunderstorm, and thunderstorm with hail. */
+const STORM_CODES: ReadonlySet<number> = new Set([95, 96, 99]);
 
 export type HeatLevel = 'none' | 'caution' | 'danger';
 export type BugLevel = 'low' | 'medium' | 'high';
@@ -44,6 +47,8 @@ export interface Conditions {
   firstLight?: number;
   rain: boolean;
   rainChance?: number;
+  /** Thunder. Training in the rain is a choice; lightning is not. */
+  storm: boolean;
   tempC?: number;
   feelsC?: number;
   heat: HeatLevel;
@@ -90,6 +95,7 @@ export function conditionsAt(
       dark,
       firstLight,
       rain: false,
+      storm: false,
       heat: 'none',
       cold: false,
       icy: false,
@@ -107,6 +113,7 @@ export function conditionsAt(
     firstLight,
     rain: hour.rainChance >= RAIN_CHANCE_PCT || hour.rainMm >= RAIN_MM,
     rainChance: hour.rainChance,
+    storm: STORM_CODES.has(hour.code),
     tempC: hour.tempC,
     feelsC: hour.feelsC,
     heat: heatLevel(hour.feelsC),

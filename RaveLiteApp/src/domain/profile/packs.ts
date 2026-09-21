@@ -9,7 +9,7 @@
  * The base program — push, pull, squat, plank, hinge, breath, posture,
  * stillness, mobility — belongs to everyone, and nothing here can take it
  * away. Packs only add specialisms on top: the dancing, the fighting, the
- * staff, the tests. Turning every pack off leaves a complete program, and
+ * flow props, the tests. Turning every pack off leaves a complete program, and
  * that is the test of whether the split is honest.
  *
  * **Three packs from the plan are not here, deliberately.**
@@ -77,6 +77,8 @@ export const PACKS: readonly Pack[] = [
           'water.freeze-hold',
           'water.beat-step',
           'water.groove-combo',
+          'water.mirror-groove-check',
+          'heart.film-and-watch',
         ],
       },
     ],
@@ -114,23 +116,95 @@ export const PACKS: readonly Pack[] = [
           'earth.stance-transitions',
           'fire.combo-flow',
           'fire.shadow-strikes',
+          'fire.mirror-guard-check',
+          'heart.film-and-watch',
         ],
+      },
+      {
+        // Fighting with a staff lives here, not in Flow arts: a staff is a
+        // flow prop first, and somebody who spins one for the joy of it
+        // should never be handed strikes and blocks for having it.
+        title: 'With a staff',
+        ids: ['water.sword-form-slow', 'water.staff-combat-rounds'],
       },
     ],
   },
   {
+    // The id stays 'staff' because stored profiles name it; the pack is
+    // every flow prop now. Practice only lists the props you have.
     id: 'staff',
-    name: 'Staff and flow',
-    detail: 'Spins, locks and forms. Needs something long to hold.',
+    name: 'Flow arts',
+    detail:
+      'Staff, poi, hoop and the rest: spins, weaves and flow. No fighting.',
     groups: [
       {
-        title: 'Staff and flow',
+        title: 'Staff',
+        ids: ['water.figure-8', 'water.beat-locks', 'water.album-no-drop'],
+      },
+      {
+        title: 'Double staff',
+        ids: ['water.double-staff-windmill', 'water.double-staff-weave'],
+      },
+      {
+        title: 'Poi',
+        ids: ['water.poi-weave', 'water.poi-butterfly', 'water.poi-flowers'],
+      },
+      {
+        title: 'Hoop',
         ids: [
-          'water.figure-8',
-          'water.beat-locks',
-          'water.sword-form-slow',
-          'water.staff-combat-rounds',
-          'water.album-no-drop',
+          'water.hoop-waist',
+          'water.hoop-isolation',
+          'water.hoop-flow-round',
+        ],
+      },
+      {title: 'Fans', ids: ['water.fan-reels', 'water.fan-isolations']},
+      {
+        title: 'Levitation wand',
+        ids: ['water.wand-float', 'water.wand-orbit'],
+      },
+      {
+        title: 'Rope dart',
+        ids: ['water.rope-dart-wheel', 'water.rope-dart-wraps'],
+      },
+      {
+        title: 'Contact ball',
+        ids: [
+          'water.contact-palm-spin',
+          'water.contact-isolation',
+          'water.contact-butterfly',
+        ],
+      },
+      {
+        title: 'Buugeng',
+        ids: ['water.buugeng-flips', 'water.buugeng-isolations'],
+      },
+      {
+        title: 'Dragon staff',
+        ids: ['water.dragon-staff-rolls', 'water.dragon-staff-pass'],
+      },
+      {title: 'Flags', ids: ['water.flag-spins', 'water.flag-weave']},
+      {
+        title: 'Light gloves',
+        ids: [
+          'water.gloving-finger-rolls',
+          'water.gloving-tracing',
+          'water.gloving-tutting',
+        ],
+      },
+      {
+        title: 'Juggling',
+        ids: ['water.juggling-cascade', 'water.juggling-two-in-one'],
+      },
+      {
+        title: 'Devil sticks',
+        ids: ['water.devil-stick-idle', 'water.devil-stick-flip'],
+      },
+      {
+        title: 'Any prop',
+        ids: [
+          'water.flow-toy-round',
+          'water.mirror-plane-check',
+          'heart.film-and-watch',
         ],
       },
     ],

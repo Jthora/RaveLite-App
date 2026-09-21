@@ -21,6 +21,7 @@ const clear: Conditions = {
   dark: false,
   rain: false,
   rainChance: 0,
+  storm: false,
   tempC: 18,
   feelsC: 18,
   heat: 'none',
@@ -155,5 +156,44 @@ describe('adaptDrill', () => {
     expect(adaptDrill(staff, wet, prefs, seed)).toEqual(
       adaptDrill(staff, wet, prefs, seed),
     );
+  });
+});
+
+describe('training in the rain, by choice', () => {
+  const wet = {...clear, rain: true, rainChance: 80};
+
+  it('runs stay out when you run in it; the rest still moves in', () => {
+    const runs = {...prefs, rain: 'runs' as const};
+    const out = adaptDrill(run, wet, runs, seed);
+    expect(out.drill.id).toBe(run.id);
+    expect(out.note).toBe(
+      'Rain 80% — out in it: shorter stride, something bright',
+    );
+    expect(adaptDrill(staff, wet, runs, seed).drill.id).not.toBe(staff.id);
+  });
+
+  it('nothing moves when you train in it', () => {
+    const train = {...prefs, rain: 'train' as const};
+    expect(adaptDrill(run, wet, train, seed).drill.id).toBe(run.id);
+    const flow = adaptDrill(staff, wet, train, seed);
+    expect(flow.drill.id).toBe(staff.id);
+    expect(flow.note).toContain('out in it');
+  });
+
+  it('thunder sends everybody in, whatever they chose', () => {
+    const train = {...prefs, rain: 'train' as const};
+    const storm = {...wet, storm: true};
+    const out = adaptDrill(run, storm, train, seed);
+    expect(out.drill.id).not.toBe(run.id);
+    expect(out.note).toMatch(/^Thunder — /);
+  });
+
+  it('still waits for light on a dark wet morning, unless you run in the dark', () => {
+    const runs = {...prefs, rain: 'runs' as const};
+    const darkWet = {...wet, dark: true};
+    expect(adaptDrill(run, darkWet, runs, seed).drill.id).not.toBe(run.id);
+    expect(
+      adaptDrill(run, darkWet, {...runs, runInDark: true}, seed).drill.id,
+    ).toBe(run.id);
   });
 });

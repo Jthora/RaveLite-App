@@ -2,6 +2,8 @@ import {store} from '../../../storage';
 import {AUTHOR_LIBRARY, EXERCISE_LIBRARY} from '../../exercises/library';
 import {CARRIED_DRILLS} from '../../exercises/kit/carried';
 import {FLOW_DRILLS} from '../../exercises/kit/flow';
+import {MIRROR_DRILLS} from '../../exercises/kit/mirror';
+import {MORE_FLOW_DRILLS} from '../../exercises/kit/flowMore';
 import {PLACE_DRILLS} from '../../exercises/kit/places';
 import {factsUnder, startMode} from '../mode';
 import {defaultProgram, prescriptionsFor} from '../../program/repository';
@@ -400,9 +402,14 @@ describe('places', () => {
 describe('the new kit', () => {
   it('every drill written for new kit needs that kit', () => {
     // A drill in kit/ with no need would be offered to everybody.
-    const free = [...CARRIED_DRILLS, ...PLACE_DRILLS, ...FLOW_DRILLS].filter(
-      d => !neededDrillIds().includes(d.id),
-    );
+    // Filming a round needs only a phone; packs gate that one instead.
+    const free = [
+      ...CARRIED_DRILLS,
+      ...PLACE_DRILLS,
+      ...FLOW_DRILLS,
+      ...MORE_FLOW_DRILLS,
+      ...MIRROR_DRILLS.filter(d => d.id !== 'heart.film-and-watch'),
+    ].filter(d => !neededDrillIds().includes(d.id));
     expect(free.map(d => d.id)).toEqual([]);
   });
 
@@ -416,7 +423,7 @@ describe('the new kit', () => {
     // jugs, a sandbag or any other flow toy.
     const mine = new Set(usableDrills(AUTHOR_FACTS).map(d => d.id));
     expect(
-      [...CARRIED_DRILLS, ...FLOW_DRILLS]
+      [...CARRIED_DRILLS, ...FLOW_DRILLS, ...MORE_FLOW_DRILLS]
         .filter(d => mine.has(d.id))
         .map(d => d.id)
         .sort(),

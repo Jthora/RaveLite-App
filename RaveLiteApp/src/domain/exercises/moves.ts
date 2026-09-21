@@ -325,6 +325,28 @@ const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
   'water.double-staff-windmill': 'staff',
   'water.double-staff-weave': 'staff',
   'water.flow-toy-round': 'staff',
+  // More flow props (kit/flowMore.ts). Gloving and juggling need no swing
+  // room; flags, a dragon staff and devil sticks do.
+  'water.gloving-finger-rolls': 'activity',
+  'water.gloving-tracing': 'activity',
+  'water.gloving-tutting': 'activity',
+  'water.flag-spins': 'staff',
+  'water.flag-weave': 'staff',
+  'water.dragon-staff-rolls': 'staff',
+  'water.dragon-staff-pass': 'staff',
+  'water.juggling-cascade': 'activity',
+  'water.juggling-two-in-one': 'activity',
+  'water.devil-stick-idle': 'staff',
+  'water.devil-stick-flip': 'staff',
+
+  // Seeing yourself move (kit/mirror.ts)
+  'air.mirror-posture-check': 'posture',
+  'earth.mirror-squat-check': 'squat',
+  'water.mirror-groove-check': 'activity',
+  'water.mirror-plane-check': 'staff',
+  // Kicks in it: an office or a tight room says no.
+  'fire.mirror-guard-check': 'kick',
+  'heart.film-and-watch': 'presence',
 };
 
 const BY_METRIC: Readonly<Record<string, MoveId>> = {

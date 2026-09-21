@@ -8,10 +8,13 @@
  * Only drills that can happen in the yard adapt; porch, mat and desk work
  * stays as it is. In order:
  *
- *   Rain, icy, or dangerous heat: outside is off. A drill that fits
+ *   Thunder, icy, or dangerous heat: outside is off. A drill that fits
  *     indoors moves inside; one that doesn't swaps for an indoor drill of
  *     the same element (a run becomes Fire conditioning, staff flow
  *     becomes Water mobility).
+ *   Rain: the same — unless the operator trains in it. Some people run
+ *     in the rain on purpose, as the harder session; that is theirs to
+ *     choose, per runs or for everything. Thunder is never a choice.
  *   Dark: a run swaps for indoor Fire conditioning and waits for first
  *     light, unless the operator runs in the dark (then: headlamp).
  *   Bugs likely: static work moves inside; the run and staff flow stay
@@ -29,8 +32,17 @@ import type {ElementId} from '../../theme/elements';
 import type {Conditions} from './conditions';
 import {clockHM, formatTemp} from './format';
 
+/** What rain does: move you inside, or not. */
+export type RainChoice = 'inside' | 'runs' | 'train';
+
 export interface WeatherPrefs {
   units: 'C' | 'F';
+  /**
+   * Inside (the default), run in it (runs stay out, the rest moves in),
+   * or train in it (everything stays out). Thunder moves everything
+   * inside whatever this says.
+   */
+  rain: RainChoice;
   /** Run in the dark with a headlamp instead of waiting for light. */
   runInDark: boolean;
   /** Move static yard work inside when bugs are likely. */
@@ -44,6 +56,7 @@ export interface WeatherPrefs {
 
 export const DEFAULT_WEATHER_PREFS: WeatherPrefs = {
   units: 'C',
+  rain: 'inside',
   runInDark: false,
   bugsMoveInside: true,
   airConditioned: true,
@@ -157,14 +170,21 @@ export function adaptDrill(
       : {drill, note: `${why} — only if it's safe out`, swapped: false};
   };
 
+  const rainText =
+    c.rainChance !== undefined && c.rainChance > 0
+      ? `Rain ${c.rainChance}%`
+      : 'Rain';
+  // Training in the rain is chosen, per runs or for everything.
+  const outInRain =
+    prefs.rain === 'train' || (prefs.rain === 'runs' && isRun(drill));
   const off = c.icy
     ? 'Icy out'
     : c.heat === 'danger'
     ? `Feels ${temp(c.feelsC)}`
-    : c.rain
-    ? c.rainChance !== undefined && c.rainChance > 0
-      ? `Rain ${c.rainChance}%`
-      : 'Rain'
+    : c.storm
+    ? 'Thunder'
+    : c.rain && !outInRain
+    ? rainText
     : undefined;
   if (off) {
     return inside
@@ -184,6 +204,15 @@ export function adaptDrill(
       `Dark${until}`,
       alt => `${alt.name} inside; run after first light`,
     );
+  }
+  if (c.rain) {
+    return {
+      drill,
+      note: isRun(drill)
+        ? `${rainText} — out in it: shorter stride, something bright`
+        : `${rainText} — out in it: watch your footing and your grip`,
+      swapped: false,
+    };
   }
   if (c.bugs === 'high' && prefs.bugsMoveInside) {
     return {

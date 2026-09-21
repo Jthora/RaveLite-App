@@ -42,6 +42,12 @@ export interface MorningBlock {
   title: string;
   /** Library drill ids, one per morning chime, in order. */
   pieces: readonly string[];
+  /**
+   * What the block is called once stand-ins have replaced its pieces —
+   * a raver doing grooves on a Friday is not doing "Strikes, blocks and
+   * stances". See `STAND_INS` in morning.ts.
+   */
+  standInTitle?: string;
 }
 
 export type SaturdayTestId = 'usaf' | 'usmc-pft' | 'usmc-cft' | 'max';
@@ -125,6 +131,7 @@ export const FOCUS_WHEEL: readonly WheelDay[] = [
     focus: ['power', 'mobility', 'presence'],
     block: {
       title: 'Kicks and flips',
+      standInTitle: 'Power and flight',
       pieces: [
         'fire.roundhouse-kick',
         'fire.kick-flip-foundations',
@@ -136,6 +143,7 @@ export const FOCUS_WHEEL: readonly WheelDay[] = [
     focus: ['speed', 'dexterity', 'balance'],
     block: {
       title: 'Strides and staff',
+      standInTitle: 'Strides and flow',
       pieces: [
         'fire.backyard-strides',
         'water.staff-combat-rounds',
@@ -165,6 +173,7 @@ export const FOCUS_WHEEL: readonly WheelDay[] = [
     focus: ['power', 'dexterity', 'balance'],
     block: {
       title: 'Strikes, blocks and stances',
+      standInTitle: 'Power, hands and balance',
       pieces: [
         'fire.jab-cross',
         'fire.block-drill',

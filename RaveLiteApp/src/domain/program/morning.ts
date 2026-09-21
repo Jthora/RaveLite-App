@@ -1,4 +1,5 @@
 import {EXERCISE_LIBRARY} from '../exercises/library';
+import type {MorningBlock} from './week';
 import type {Exercise} from '../exercises/types';
 import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import type {CadenceSlot, Window} from '../reminders/types';
@@ -28,7 +29,58 @@ export interface BlockPiece {
   exerciseId: string;
   /** The run plan's run, when this piece is it. */
   run?: RunDay;
+  /** The block's own piece, when this one is standing in for it. */
+  standsInFor?: string;
 }
+
+/**
+ * What to do instead of a piece this person can't — or wouldn't — do,
+ * in order; the first one they can do wins.
+ *
+ * The week was written around the author, who fights with a staff. Not
+ * everybody who raves wants to: without Martial basics a Friday used to
+ * be an empty block, and an empty block threw the moment its chime
+ * fired. So each fighting piece has a flow or dance piece first, and
+ * every list ends in base drills that almost any room can do.
+ */
+const STAND_INS: Readonly<Record<string, readonly string[]>> = {
+  'fire.roundhouse-kick': [
+    'water.beat-step',
+    'fire.jump-squat',
+    'fire.pushup-groove',
+    'fire.burpee',
+    'air.shadow-rope',
+  ],
+  'fire.kick-flip-foundations': [
+    'fire.tuck-jump',
+    'water.freeze-hold',
+    'earth.hollow-rock',
+    'earth.single-leg-balance',
+  ],
+  'water.staff-combat-rounds': [
+    'water.beat-locks',
+    'water.flow-toy-round',
+    'water.groove-combo',
+    'water.juggle-toss',
+  ],
+  'fire.backyard-strides': [
+    'fire.skater-bound',
+    'fire.mountain-climbers',
+    'air.shadow-rope',
+  ],
+  'fire.jab-cross': [
+    'water.groove-combo',
+    'fire.burpee',
+    'fire.pushup-groove',
+    'air.shadow-rope',
+  ],
+  'fire.block-drill': [
+    'water.arm-wave',
+    'water.flow-toy-round',
+    'water.juggle-toss',
+  ],
+  'earth.stance-transitions': ['earth.tree-pose', 'earth.single-leg-balance'],
+};
 
 /** The run plan's run for `date`, from the Train log, if the day has one. */
 export function runFor(
@@ -55,16 +107,39 @@ export function blockPieces(
   const {block} = focusFor(date);
   const run = runFor(date, now);
   const facts = loadFacts();
-  return block.pieces
-    .map(id =>
+  const doable = (id: string) => {
+    const drill = exerciseById(id);
+    return drill !== undefined && canDo(drill, facts);
+  };
+  const out: BlockPiece[] = [];
+  for (const id of block.pieces) {
+    const piece: BlockPiece =
       run && id === run.replaces
         ? {exerciseId: run.exerciseId, run}
-        : {exerciseId: id},
-    )
-    .filter(piece => {
-      const drill = exerciseById(piece.exerciseId);
-      return drill !== undefined && canDo(drill, facts);
-    });
+        : {exerciseId: id};
+    if (doable(piece.exerciseId)) {
+      out.push(piece);
+      continue;
+    }
+    // Never the same drill twice in one morning.
+    const standIn = (STAND_INS[id] ?? []).find(
+      alt => doable(alt) && !out.some(p => p.exerciseId === alt),
+    );
+    if (standIn) {
+      out.push({exerciseId: standIn, standsInFor: id});
+    }
+  }
+  return out;
+}
+
+/** What the morning is called, given the pieces it actually has. */
+export function blockTitle(
+  block: MorningBlock,
+  pieces: readonly BlockPiece[],
+): string {
+  return pieces.some(p => p.standsInFor)
+    ? block.standInTitle ?? block.title
+    : block.title;
 }
 
 /** Which of the day's chimes of `slot` falls at `ts`, from 0. */
@@ -94,14 +169,19 @@ export function plannedDrill(
     const date = new Date(ts);
     const {block} = focusFor(date);
     const pieces = blockPieces(date, ts);
+    // A block with nothing this person can do falls through to the plan's
+    // own pick below, rather than reading pieces[-1].
     const i = Math.min(chimeIndex(window, slot, ts), pieces.length - 1);
-    const piece = pieces[i];
-    const drill = EXERCISE_LIBRARY.find(e => e.id === piece.exerciseId);
-    if (drill) {
+    const piece = i >= 0 ? pieces[i] : undefined;
+    const drill = piece
+      ? EXERCISE_LIBRARY.find(e => e.id === piece.exerciseId)
+      : undefined;
+    if (piece && drill) {
       const which = `${i + 1} of ${pieces.length}`;
+      const title = blockTitle(block, pieces);
       return {
         drill,
-        detail: `${piece.run ? piece.run.short : block.title} · ${which}`,
+        detail: `${piece.run ? piece.run.short : title} · ${which}`,
       };
     }
   }

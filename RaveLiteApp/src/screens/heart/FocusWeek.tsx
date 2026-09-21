@@ -2,6 +2,7 @@
  * The focus wheel on the Daily Sets page: today's focus with its morning
  * block, and the week ahead (see `domain/program/week.ts`).
  */
+import {blockTitle} from '../../domain/program/morning';
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
@@ -72,7 +73,7 @@ export function TodayFocus({
       </View>
       <Attributes ids={focus.focus} style={styles.focusLine} />
       <Text style={styles.blockTitle}>
-        Morning: {focus.block.title}
+        Morning: {blockTitle(focus.block, shown)}
         {focus.test && focus.test.name !== focus.block.title
           ? ` · ${focus.test.name}`
           : ''}
@@ -117,12 +118,18 @@ export function TodayFocus({
 export function WeekFocus({
   days,
 }: {
-  days: readonly {date: Date; focus: DayFocus; run?: RunDay}[];
+  days: readonly {
+    date: Date;
+    focus: DayFocus;
+    run?: RunDay;
+    /** The morning's name once stand-ins are counted. */
+    title?: string;
+  }[];
 }) {
   return (
     <View testID="week-focus">
       <Text style={styles.section}>This week</Text>
-      {days.map(({date, focus, run}, i) => (
+      {days.map(({date, focus, run, title}, i) => (
         <View
           key={date.toDateString()}
           style={[styles.row, i === 0 && styles.today]}>
@@ -132,7 +139,7 @@ export function WeekFocus({
           <View style={styles.rowBody}>
             <Attributes ids={focus.focus} style={styles.rowFocus} />
             <Text style={styles.caption} numberOfLines={1}>
-              {(focus.test ? focus.test.name : focus.block.title) +
+              {(focus.test ? focus.test.name : title ?? focus.block.title) +
                 (run ? ` · ${run.short}` : '')}
             </Text>
           </View>

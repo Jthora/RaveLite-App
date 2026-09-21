@@ -46,6 +46,7 @@ import {
   setWeatherPrefs,
   subscribeWeather,
 } from '../../domain/conditions/weather';
+import type {RainChoice} from '../../domain/conditions/adapt';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -351,6 +352,34 @@ export function WeatherSheet({visible, onClose}: Props) {
               }
               accent={accent}
             />
+            <Text style={styles.toggleTitle}>In the rain</Text>
+            <Text style={styles.caption}>
+              {RAIN_CHOICES.find(r => r.id === prefs.rain)?.detail}
+            </Text>
+            <View style={styles.rainRow}>
+              {RAIN_CHOICES.map(choice => {
+                const on = prefs.rain === choice.id;
+                return (
+                  <Tap
+                    key={choice.id}
+                    testID={`rain-${choice.id}`}
+                    variant={on ? 'solid' : 'ghost'}
+                    color={on ? ELEMENTS.water.color : palette.textDim}
+                    onPress={() => setWeatherPrefs({rain: choice.id})}
+                    accessibilityRole="button"
+                    accessibilityState={{selected: on}}
+                    style={styles.rainPill}>
+                    <Text
+                      style={[
+                        styles.rainPillText,
+                        on && {color: palette.bg, fontWeight: '700'},
+                      ]}>
+                      {choice.name}
+                    </Text>
+                  </Tap>
+                );
+              })}
+            </View>
             <Toggle
               title="Run in the dark"
               detail={
@@ -374,18 +403,42 @@ export function WeatherSheet({visible, onClose}: Props) {
           </View>
 
           <Text style={styles.footnote}>
-            Rain, heat and ice move yard work inside or swap it for indoor
-            drills that fit a low ceiling; nothing that needs running, hanging,
-            jumping or staff flow is sent indoors. Hot days add hourly water
-            calls and raise the Drink target. The bug level is an estimate from
-            warmth, humidity, wind, recent rain and dawn or dusk. Your place is
-            only sent to Open-Meteo, rounded to about 10 km.
+            Thunder, ice and dangerous heat always move yard work inside or swap
+            it for indoor drills that fit a low ceiling; rain does too, unless
+            you train in it. Nothing that needs running, hanging, jumping or
+            staff flow is sent indoors. Hot days add hourly water calls and
+            raise the Drink target. The bug level is an estimate from warmth,
+            humidity, wind, recent rain and dawn or dusk. Your place is only
+            sent to Open-Meteo, rounded to about 10 km.
           </Text>
         </ScrollView>
       </SafeAreaView>
     </Modal>
   );
 }
+
+const RAIN_CHOICES: readonly {
+  id: RainChoice;
+  name: string;
+  detail: string;
+}[] = [
+  {
+    id: 'inside',
+    name: 'Inside',
+    detail: 'Rain moves yard work inside, or swaps it for indoor work.',
+  },
+  {
+    id: 'runs',
+    name: 'Run in it',
+    detail: 'Runs stay out in the rain; everything else moves inside.',
+  },
+  {
+    id: 'train',
+    name: 'Train in it',
+    detail:
+      'Rain changes nothing — the harder session, on purpose. Thunder still sends you in.',
+  },
+];
 
 const capitalize = (word: string) =>
   word.charAt(0).toUpperCase() + word.slice(1);
@@ -601,5 +654,20 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.textMuted,
     lineHeight: 17,
+  },
+  rainRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  rainPill: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rainPillText: {
+    ...t.caption,
+    color: palette.textDim,
   },
 });

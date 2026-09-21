@@ -3,12 +3,18 @@ import {Modal} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
 
 import {addEntry} from '../../../domain/training/repository';
+import {authorProfile, saveProfile} from '../../../domain/profile/repository';
 import {store} from '../../../storage';
 import {CharacterSheet} from '../CharacterSheet';
 import {DailySetsSheet} from '../DailySetsSheet';
 import {Goals} from '../Goals';
 
-beforeEach(() => store.clearAll());
+beforeEach(() => {
+  store.clearAll();
+  // The author's week; a fresh store is a stranger's bare room, whose
+  // kicks have stand-ins.
+  saveProfile(authorProfile());
+});
 
 it('shows Goals in the same sheet; Back returns to Daily Sets, then closes', () => {
   const onClose = jest.fn();

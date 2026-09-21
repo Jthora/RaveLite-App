@@ -94,7 +94,7 @@ it('the author has everything, and everything is reachable', () => {
 it('the curriculum follows the packs you carry', () => {
   expect(groupsFor([]).length).toBe(0);
   const titles = groupsFor(['martial']).map(g => g.title);
-  expect(titles).toEqual(['Kicks', 'Strikes and blocks']);
+  expect(titles).toEqual(['Kicks', 'Strikes and blocks', 'With a staff']);
   expect(groupsFor(ALL_PACKS).length).toBeGreaterThan(titles.length);
 });
 
@@ -148,4 +148,17 @@ describe('through the profile', () => {
     setPacks([]);
     expect(skillGroupsFor(loadFacts(), loadPacks())).toEqual([]);
   });
+});
+
+it('keeps fighting out of Flow arts', () => {
+  // Plenty of people who spin a staff never want to fight with it. The
+  // staff's combat drills belong to Martial basics, so a raver carrying
+  // Flow arts and not Martial is never handed strikes and blocks.
+  const flow = PACKS.find(p => p.id === 'staff')!;
+  const ids = flow.groups.flatMap(g => [...g.ids]);
+  expect(ids).not.toContain('water.staff-combat-rounds');
+  expect(ids).not.toContain('water.sword-form-slow');
+  expect(inScope('water.staff-combat-rounds', ['staff', 'dance'])).toBe(false);
+  expect(inScope('water.staff-combat-rounds', ['martial'])).toBe(true);
+  expect(inScope('water.poi-weave', ['staff'])).toBe(true);
 });

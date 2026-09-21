@@ -326,3 +326,52 @@ on; balcony went, because a porch or balcony is a place, not a tile.
 - Time of day could guess which place you are in.
 - Dragon staff, a speaker and a mirror were left out: no drills yet that
   would be honest.
+
+---
+
+# Round three — flow without fighting, rain, a mirror — 21 Sep 2026
+
+The operator: *the system is pro flow props, and not everybody training
+is training to fight — some are good-vibes ravers. Other flow props are
+welcome.*
+
+## Flow and fighting are separate packs now
+
+- **Flow arts** (the pack id is still `staff`, which stored profiles
+  name) is every flow prop: staff, double staff, poi, hoop, fans, wand,
+  rope dart, contact ball, buugeng, dragon staff, flags, light gloves,
+  juggling, devil sticks. Practice lists only the props you have.
+- **Staff combat rounds** and the **one-handed sword form** moved to
+  Martial basics, under "With a staff". A Raver or a Flow Artist (neither
+  carries Martial) is never handed strikes and blocks for owning a staff.
+- **Morning blocks have stand-ins.** Found while checking the above:
+  without Martial, Friday's "Strikes, blocks and stances" emptied, and an
+  empty block **threw** when its chime fired — every Friday, for every
+  non-combat archetype. Each fighting piece now has a flow or dance
+  stand-in first and base drills after, the block is renamed when they
+  are used ("Power, hands and balance"), and an empty block falls back to
+  the plan's own pick instead of crashing.
+
+## Rain is a choice
+
+Weather → *In the rain*: **Inside** (the default, as before), **Run in
+it** (runs stay out), or **Train in it** (nothing moves). Some people run
+in the rain on purpose, as the harder session. **Thunder** — WMO codes
+95, 96, 99 — sends everybody in whatever they chose, like ice and
+dangerous heat.
+
+## A mirror, yes; a speaker, no
+
+- **A big mirror** is a tile (full-length, or big enough to see yourself
+  move in). It opens a posture check, a squat check, a groove check, a
+  flow-plane check and a guard check. Mirror Presence stays open to
+  everyone: any bathroom mirror does, so gating it would be the towel
+  mistake again.
+- **A speaker** was meant as music for beat drills. Everybody who has the
+  app has a phone that plays music, so it would be a tile nobody unticks.
+  Headphones versus a speaker only matters for noise, which *Neighbours
+  below* and *How loud you can be* already cover. The music question is
+  the beat recognizer's, later — not the kit's.
+- **Filming yourself** is the camera as a mirror: *Film one round, watch
+  it once* sits in Dance, Flow arts and Martial. It needs no tile — every
+  phone has a camera — and nothing in it is for posting.
