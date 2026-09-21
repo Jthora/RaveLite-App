@@ -113,14 +113,22 @@ issues read not triaged, PRs welcome but unhurried, no timelines, forking
 encouraged. Said plainly in both the README and CONTRIBUTING so nobody
 feels ignored by a slow reply.
 
-**Still undecided, and deliberately so:** how much of the wider EIN
-ecosystem — Starcom, Navcom, Arch Angel Agency, the Raver Angel
-Initiative — belongs in public copy. PLURL is in the README because it
-explains the app's values and needs no other knowledge. The organisation
-names are provenance rather than purpose, and a stranger meets them as
-unexplained proper nouns. See the brainstorm in the session notes; the
-conservative version shipped, and going further is a deliberate choice
-rather than a default.
+**How the ecosystem got resolved (21 Sep 2026).** The question was how
+much of EIN, Navcom, Arch Angel Agency and the Raver Angel Initiative
+belongs in public copy. The answer turned out not to be a dial setting.
+
+PLURL is near the top of the README because it explains the app's values
+and needs no other knowledge to land. The Earth Intelligence Network
+appears once, in the author's own account of using the app — as the job
+he is doing while it chimes at him, not as a claim the app makes. That
+is the right register for all of it: **provenance arrives through use,
+not through an org chart.**
+
+If the wider body of work ever wants a public page it should be its own
+(`docs/ein.md`), linked in one line from the colophon, so the curious get
+everything and nobody is gated by it. It only belongs above the fold if
+it becomes load-bearing — a shared account, a Navcom integration — at
+which point it is a feature rather than a lineage.
 
 ---
 

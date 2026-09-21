@@ -58,6 +58,23 @@ your phone and is sent nowhere. The only network request is to
 Open-Meteo for the forecast, carrying a location rounded to about 10 km.
 Settings has an export that writes the whole thing to a file you choose.
 
+<b>From the author</b>
+
+"I keep a cheap phone on a mount beside my workstation, plugged in all
+day, and look over when I have a minute. It is what I do instead of
+scrolling TikTok. The morning workout was never the hard part — the hard
+part is the other fourteen hours: staying active, drinking water, not
+folding into the chair.
+
+It is gamified enough that I want all my pips in before bed, and that is
+the whole of the self-management I need. When something derails me, the
+missed chimes are still there to catch up on. That used to cost me weeks.
+Now it costs an afternoon.
+
+And it fits the situation I actually have. The backyard is full of
+mosquitos, the basement has a low ceiling, and I own no equipment. The
+app knows all three and stops asking for what I cannot do."
+
 <b>Beta</b>
 
 One person's app, opened up. It is not a medical device and gives no

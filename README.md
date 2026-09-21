@@ -49,6 +49,37 @@ same proportion of you either way.
 
 A shorter day is a full day's training, not a failed one.
 
+## How the author actually uses it
+
+I keep a cheap Android phone on a mount beside my workstation, plugged in
+all day. When the AIs are busy and I have a minute, I look over. It is
+what I do instead of scrolling TikTok, and it is most of why this app is
+shaped the way it is: always on, glanceable, and never asking me to open
+anything.
+
+I am working toward a **B+ on the military PFTs** — not to enlist, but to
+stay strong enough to hold up on the Raver Field. The morning workout was
+never the hard part, though. The hard part is the other fourteen hours:
+staying active, drinking water, not folding into the chair. This handles
+those, so training stops falling off the edge of the day while I am
+working as a Cyber Investigator at the Earth Intelligence Network.
+
+It is gamified enough that I want all my pips in before bed, and that
+turns out to be the whole of the self-management I need. When something
+derails me — and something always derails me — the missed chimes are
+still sitting there to catch up on. That kind of interruption used to
+cost me weeks. Now it costs an afternoon.
+
+Everything is colour-coded and built on the five elements, which keeps
+Mind, Body, Spirit and Soul in view together instead of one at a time.
+
+And it fits the situation I actually have. The backyard is full of
+mosquitos. The basement has a low ceiling. I own no equipment, so
+everything is bodyweight. The app knows all three and stops asking for
+what I cannot do. I am a complete beginner at kicky flips and need to
+drill them daily; the Tai Chi and Yoga work is what is making the flow
+and the dexterity come.
+
 ## Why RaveLite exists
 
 Three working principles follow from that, and every design decision in
