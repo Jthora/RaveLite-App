@@ -63,8 +63,8 @@ it('handles prefixes that are whole keys, and near-misses', () => {
 });
 
 it('no longer costs the whole store to ask for one day', () => {
-  // Four thousand entries across two hundred days, which is what a year
-  // of real use looks like.
+  // Four thousand entries across two hundred days, which is roughly what
+  // a year of real use looks like.
   for (let day = 0; day < 200; day++) {
     for (let n = 0; n < 20; n++) {
       store.set(`journal.2026-${String(day).padStart(3, '0')}.${n}`, '{}');
@@ -73,17 +73,27 @@ it('no longer costs the whole store to ask for one day', () => {
   expect(store.keysWithPrefix('').length).toBe(4000);
 
   const oneDay = () => store.keysWithPrefix('journal.2026-100.');
+  const everything = () => store.keysWithPrefix('');
   expect(oneDay()).toHaveLength(20);
 
-  const t0 = process.hrtime.bigint();
-  for (let i = 0; i < 200; i++) {
-    oneDay();
-  }
-  const perCall = Number(process.hrtime.bigint() - t0) / 1e6 / 200;
+  const timed = (fn: () => unknown, runs: number) => {
+    fn();
+    const t0 = process.hrtime.bigint();
+    for (let i = 0; i < runs; i++) {
+      fn();
+    }
+    return Number(process.hrtime.bigint() - t0) / runs;
+  };
 
-  // A full scan of 4000 keys is ~0.15 ms here; a binary search plus 20
-  // matches is an order of magnitude under that. The threshold is loose
-  // on purpose — this guards against the O(n) scan coming back, not
-  // against a slow afternoon on the build machine.
-  expect({perCall: perCall < 0.05}).toEqual({perCall: true});
+  // Measured against a full scan of the same store rather than against
+  // the clock. An absolute threshold fails on a busy machine, and a
+  // guard that fails for no reason is a guard somebody deletes — while
+  // the ratio holds however loaded the box is, because both halves slow
+  // down together.
+  const day = timed(oneDay, 200);
+  const all = timed(everything, 200);
+
+  expect({fasterThanAFullScan: day * 4 < all}).toEqual({
+    fasterThanAFullScan: true,
+  });
 });
