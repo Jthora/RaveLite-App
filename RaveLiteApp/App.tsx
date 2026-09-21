@@ -31,6 +31,8 @@ import {startSetScheduler} from './src/domain/ambient/setScheduler';
 import {startBackupScheduler} from './src/domain/ambient/backupScheduler';
 import {startWeather} from './src/domain/conditions/weather';
 import {ElementShell} from './src/shell/ElementShell';
+import {SetupFlow} from './src/screens/setup/SetupFlow';
+import {needsSetup} from './src/domain/profile/repository';
 import {NightVeil} from './src/components/alive/NightVeil';
 import {CueWash} from './src/components/alive/CueWash';
 import {startAliveBridge} from './src/domain/ambient/aliveBridge';
@@ -64,6 +66,11 @@ function App(): React.JSX.Element {
   // in place and we want every captured value (StyleSheet creations,
   // useMemo results, etc.) to refresh.
   const [themeEpoch, setThemeEpoch] = useState(0);
+  // First run only. Decided once, after hydration and migrations, so it
+  // reads the real stored state rather than defaults — and never again,
+  // because a setup screen that can reappear is a setup screen that can
+  // reappear over a year of training.
+  const [setup, setSetup] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,6 +84,7 @@ function App(): React.JSX.Element {
       // schema version.
       runMigrations();
       if (!cancelled) {
+        setSetup(needsSetup());
         setHydrated(true);
         // Reminders pipeline: now that persisted state is available,
         // start the runtime, both producers (Plan cadence + Daily Sets),
@@ -112,6 +120,7 @@ function App(): React.JSX.Element {
             <ElementShell key={themeEpoch} />
             <CueWash />
             <NightVeil />
+            {setup ? <SetupFlow onDone={() => setSetup(false)} /> : null}
           </>
         ) : (
           <View style={styles.root} />

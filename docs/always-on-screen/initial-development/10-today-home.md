@@ -812,6 +812,34 @@ Taking an archetype is **two taps**, with a concrete preview on the first
 (`9 chimes · at a desk · 5 packs · +142 drills · par 20`). It replaces a
 tuned program, and nobody should lose one to a mis-tap on a list.
 
+### Setup (`src/screens/setup/SetupFlow.tsx`, since 20 Sep 2026)
+
+Four questions and a day: what you're training for, what you've got, how
+much day you have, what you want to learn. **Every card is a panel
+Settings already uses** — there is no second UI to keep in step, and
+somebody who finishes setup has been taught where everything lives,
+because the screen they change it on later is the screen they set it on
+now.
+
+Under every card is the same line, recomputed from the real program as
+tiles are tapped: `9 chimes · 16 tracks · 142 drills · par 20`
+(`preview.ts`). It is not a description of what the answers will do; it
+is what they have already done. The preview and the thing are one object,
+which is the only way a preview cannot lie. `previewDiff` gives the
+"+14 drills · 2 more chimes" form for Settings.
+
+It is skippable at any point, and skipping leaves a working program. An
+app that will not let you in until you have answered it is worse than one
+that guesses.
+
+**`needsSetup()` is deliberately paranoid.** Showing setup to someone
+with a year of training would be the worst bug this app could have, so it
+requires three things at once: setup unanswered, *and* no stored profile,
+*and* nothing ever logged (training entries or journal). Each guard is
+tested on its own, so any one of them being wrong still leaves the other
+two holding the door. It is decided once, after hydration and migrations
+so it reads real state, and never re-asked.
+
 ### The character sheet waits
 
 Fifteen attributes grown by use are fifteen zeroes on day one, which

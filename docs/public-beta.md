@@ -474,7 +474,9 @@ with the archetypes in Phase 3.
       curriculum derived from them so the two lists cannot drift
       (20 Sep 2026)
 - [ ] Goals per archetype; the push-up goal off 200
-- [ ] Setup flow, the live preview strip, the first-chime tutorial
+- [x] Setup flow and the live preview strip (20 Sep 2026) — the cards are
+      the Settings panels themselves, so there is no second UI
+- [ ] The first-chime tutorial
 - [x] Character sheet held back to level 2 — or seven days trained,
       whichever comes first (20 Sep 2026)
 - [ ] Tests: every archetype yields a valid day

@@ -224,6 +224,37 @@ export function dailyPar(): number {
   return parFor(dayDensity(), DAILY_PAR);
 }
 
+/**
+ * Whether this install has never been used by anybody.
+ *
+ * Deliberately paranoid, because showing setup to someone with a year of
+ * training would be the worst bug this app could have: it asks for a
+ * stored profile *and* an unanswered setup *and* nothing ever logged. Any
+ * one of those being wrong still leaves the other two guarding the door.
+ */
+function hasAnyHistory(): boolean {
+  const entries = store.getString(KEYS.trainingEntries);
+  if (entries !== undefined && entries !== '[]') {
+    return true;
+  }
+  return store.keysWithPrefix(KEYS.journalPrefix).length > 0;
+}
+
+export function needsSetup(): boolean {
+  if (loadProfile().setUpAt !== undefined) {
+    return false;
+  }
+  if (store.getString(KEYS.profile) !== undefined) {
+    return false;
+  }
+  return !hasAnyHistory();
+}
+
+/** Mark setup answered, so it is never shown again. */
+export function finishSetup(now: number = Date.now()): void {
+  saveProfile({...loadProfile(), setUpAt: now});
+}
+
 /** Only for tests: forget what was read. */
 export function __resetProfileCache(): void {
   cached = undefined;
