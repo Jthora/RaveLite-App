@@ -262,6 +262,21 @@ count every chime in the preview; name the element tiles and bring
 Settings and Practice up; pages inside sheets instead of sheets over
 sheets; one ledger per question.
 
+*Done 22 Sep 2026* (8034013 through 04d4b6c). Letter grades only with
+the military tests pack; no assumed 27:00 run, and 30 active minutes a
+day for anyone set up since; plain names for codes, "My corrections"
+from the person's own, Air's default from them too; porch, MARSOC and
+belly-fat copy gone; setup's preview counts every chime and explains
+points and Harmony; the notification prompt waits for setup; new people
+get the tiles named and the doors pointed out (the author's Today is
+unchanged); Weather and the plan are pages in Settings; Back unwinds the
+circuit editor; + Log push-ups count on the Push meter; attribute cards
+lead with plain words; travel keeps carried props; a stale forecast and
+demo mode say so. Still open: the global "Quiet flat" switch beside
+per-place limits (two switches for one thing), indoor swaps that still
+assume a low basement ceiling, Undo living under every sheet, and the
+tests pack's male and ages 35–40 defaults.
+
 **Phase 4 — everyone can use it.**
 Contrast (`textMuted` for borders only), TalkBack labels, roles and
 headings, a live region on the chime card, non-colour cues, reduce-motion
