@@ -32,6 +32,7 @@ import {loadPlan, subscribePlan} from '../reminders/repository';
 import type {Plan} from '../reminders/types';
 import {doneByTrack, firedSetIds} from '../program/progress';
 import {
+  excuseSets,
   loadProgram,
   prescriptionsFor,
   recordPrescribed,
@@ -40,8 +41,8 @@ import {
 } from '../program/repository';
 import {plannedDrill} from '../program/morning';
 import {programWeek} from '../program/progression';
-import {dailyPar, dayRounds} from '../profile/repository';
-import {groupIntoRounds} from '../program/rounds';
+import {dailyPar, dayRounds, noteRestDays} from '../profile/repository';
+import {groupIntoRounds, movesOf} from '../program/rounds';
 import {placeRounds, selectUpcomingRounds} from '../program/schedule';
 import {
   SETS_WINDOW_ID,
@@ -60,8 +61,10 @@ import {
   cancelQueued,
   enqueue,
   hasPulse,
+  onPulseSuppressed,
   queuedPulseIds,
   queuedPulses,
+  type PulseSuppressedEvent,
 } from './pulseRuntime';
 
 /** Rounds up to a minute late still get enqueued (reconcile granularity). */
@@ -241,6 +244,9 @@ export function reconcileSetsNow(now: number = Date.now()): void {
     enqueuedDay = day;
     enqueuedIds = new Set();
   }
+  // Rest is written down while it is happening, so tomorrow's review
+  // reads it as rest (`profile/restDays.ts`).
+  noteRestDays(now);
   // Once a day each track's sets move by what got done (`program/adapt.ts`);
   // today's asks are kept for tomorrow's review.
   reviewProgram(now);
@@ -293,6 +299,7 @@ export function startSetScheduler(): void {
   reconcileSetsNow();
   timer = setInterval(() => reconcileSetsNow(), SET_RECONCILE_MS);
   unsubs = [
+    onPulseSuppressed(excuseSuppressedRound),
     subscribeProgram(relay),
     subscribePlan(relay),
     subscribeActiveHours(relay),
@@ -305,6 +312,24 @@ export function startSetScheduler(): void {
       }
     }),
   ];
+}
+
+/** `sets:2026-09-21:round:3` → `2026-09-21`. */
+const ROUND_DAY = /^sets:(\d{4}-\d{2}-\d{2}):/;
+
+/** A round that never sounded asked nothing of its day. */
+export function excuseSuppressedRound(event: PulseSuppressedEvent): void {
+  const day = ROUND_DAY.exec(event.pulseId)?.[1];
+  if (!day || !event.prescription) {
+    return;
+  }
+  excuseSets(
+    day,
+    movesOf(event.prescription).map(m => ({
+      trackId: m.trackId,
+      amount: m.amount,
+    })),
+  );
 }
 
 export function stopSetScheduler(): void {

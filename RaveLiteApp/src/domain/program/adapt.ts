@@ -17,8 +17,9 @@ import type {ReviewChange, Track, TrackState} from './types';
  * to where it was takes a set every three days at 85% or more.
  *
  * Deload weeks hold: lighter on purpose, so they neither raise nor cut.
- * Modes that pause the ramp (`profile/mode.ts`) hold harder still: they
- * are checked before the break, and they freeze the step clock.
+ * While a mode that pauses the ramp is on (`profile/mode.ts`), it holds,
+ * checked before the break. Days that were rest never reach a review at
+ * all: the caller leaves them out.
  * Set size stays at about half the tested max (`progression.ts`), so
  * growth comes as more small sets across the day, and from max tests.
  */
@@ -116,12 +117,13 @@ export function reviewTrack(input: ReviewInput): TrackState {
   }
   // Before the break check, not after it: an injury or a rest day is the
   // app's own instruction, and three days of following it would otherwise
-  // look exactly like three days of quitting. Moving `steppedOn` to today
-  // freezes the step clock too, so when the mode lifts the ramp waits a
-  // full week of real training before it passes judgement — rather than
-  // reading the paused days and cutting what was earned.
+  // look exactly like three days of quitting. The step clock keeps
+  // running: the rest days themselves are left out of `days` (the program
+  // repository reads the rest-day log), so once the mode lifts the ramp
+  // judges only the days that were training — and a day off no longer
+  // pushes the next step up back by a week.
   if (paused) {
-    return review('paused', {steppedOn: today});
+    return review('paused');
   }
   const sets = state.sets;
   const floor = Math.min(FLOOR_SETS, track.baseSets);

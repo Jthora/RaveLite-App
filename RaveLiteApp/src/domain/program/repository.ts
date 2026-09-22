@@ -27,6 +27,8 @@ import {
   trainsToday,
 } from '../profile/repository';
 import {seededMax, startingFactor} from '../profile/starting';
+import {restDaySet} from '../profile/restDays';
+import {myDayRunsOn} from '../ambient/activeHours';
 import {dayFocus, type DayFocus} from './week';
 
 /**
@@ -157,8 +159,9 @@ export function prescriptionsFor(
   // A rest day asks for nothing. Not one set scaled to nothing — nothing,
   // so the day is empty on purpose rather than looking like a day that
   // went wrong. Water and the evening review still chime; they are not
-  // Daily Sets.
-  if (!trainsToday(date.getTime())) {
+  // Daily Sets. A day My day is switched off is the same: not a training
+  // day the person failed, but one they said they would not train.
+  if (!trainsToday(date.getTime()) || !myDayRunsOn(date)) {
     return [];
   }
   const out: DayPrescription[] = [];
@@ -241,11 +244,68 @@ export function recordPrescribed(
   store.set(KEYS.programDays, JSON.stringify(next));
 }
 
+type ExcusedLog = Record<string, Partial<Record<TrackId, number>>>;
+
+function loadExcused(): ExcusedLog {
+  const raw = store.getString(KEYS.programExcused);
+  if (!raw) {
+    return {};
+  }
+  try {
+    return JSON.parse(raw) as ExcusedLog;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Sets in a round that never sounded — paused, or outside My day — are
+ * not held against the day that asked them. Called when the round is
+ * suppressed.
+ */
+export function excuseSets(
+  day: string,
+  moves: readonly {trackId: TrackId; amount: number}[],
+): void {
+  const log = loadExcused();
+  const excused = {...(log[day] ?? {})};
+  for (const move of moves) {
+    excused[move.trackId] = (excused[move.trackId] ?? 0) + move.amount;
+  }
+  const kept = Object.keys(log)
+    .filter(k => k !== day)
+    .sort()
+    .slice(-(DAY_HISTORY_DAYS - 1));
+  const next: ExcusedLog = Object.fromEntries(kept.map(k => [k, log[k]]));
+  next[day] = excused;
+  store.set(KEYS.programExcused, JSON.stringify(next));
+}
+
+/**
+ * What a track was asked on a day, for its review.
+ *
+ * A day with a record is taken at its word: a track missing from it was
+ * not asked — switched off, out of reach on the road, or a rest day — and
+ * asked nothing, rather than everything. Only a day with no record at
+ * all (the app never ran) falls back to what the track would have asked.
+ * Sets that never sounded are taken off.
+ */
+function askedOn(
+  record: Partial<Record<TrackId, number>> | undefined,
+  excused: Partial<Record<TrackId, number>> | undefined,
+  trackId: TrackId,
+  would: number,
+): number {
+  const asked = record ? record[trackId] ?? 0 : would;
+  return Math.max(0, asked - (excused?.[trackId] ?? 0));
+}
+
 /**
  * Once a day, move each track's sets by what got done over the week before
- * today (see `adapt.ts`). Reads the journal and each day's recorded asks;
- * a day with no record counts what the track would have asked. Returns the
- * program, reviewed.
+ * today (see `adapt.ts`). Reads the journal, each day's recorded asks and
+ * the rest-day log: days that were rest are left out entirely, so a day
+ * off, a festival or an injury never reads as quitting once it is over.
+ * Returns the program, reviewed.
  */
 export function reviewProgram(now: number = Date.now()): ProgramState {
   const date = new Date(now);
@@ -271,6 +331,8 @@ export function reviewProgram(now: number = Date.now()): ProgramState {
     }
   }
   const history = loadDayHistory();
+  const excused = loadExcused();
+  const rest = restDaySet();
   const done = window.map(day => doneByTrack(entriesForDay(day)));
   const deload =
     phaseForWeek(programWeek(program.startDay, yesterday)) === 'deload';
@@ -283,24 +345,22 @@ export function reviewProgram(now: number = Date.now()): ProgramState {
       continue;
     }
     const days: DayWork[] = window.flatMap((day, i) => {
-      if (!trainsOn(track, day)) {
+      const key = localDayKey(day.getTime());
+      if (!trainsOn(track, day) || rest.has(key)) {
         return [];
       }
-      const key = localDayKey(day.getTime());
-      const would = prescribeDay(
-        track,
-        state,
-        program,
-        day,
-        loadFacts(),
-        dayDensity(),
-      );
+      const would = history[key]
+        ? undefined
+        : prescribeDay(track, state, program, day, loadFacts(), dayDensity());
       return [
         {
           day: key,
-          prescribed:
-            history[key]?.[track.id] ??
-            (would ? would.setSize * would.sets : 0),
+          prescribed: askedOn(
+            history[key],
+            excused[key],
+            track.id,
+            would ? would.setSize * would.sets : 0,
+          ),
           done: done[i][track.id]?.amount ?? 0,
         },
       ];

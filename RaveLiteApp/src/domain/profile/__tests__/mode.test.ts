@@ -126,9 +126,11 @@ it('the ramp stops reading the days a mode asked you to take off', () => {
   });
   expect(paused.lastReview?.change).toBe('paused');
   expect(paused.sets).toBe(6);
-  // And the step clock is frozen, so lifting the mode doesn't hand the
-  // ramp a week of rest to pass judgement on.
-  expect(paused.steppedOn).toBe('2026-09-20');
+  // The step clock is not frozen: the rest days are left out of the
+  // review once the mode lifts (`profile/restDays.ts`), so there is no
+  // week of rest to pass judgement on, and a day off no longer pushes
+  // the next step up back by a week.
+  expect(paused.steppedOn).toBe('2026-09-01');
 });
 
 it('a rest day asks for nothing at all, and then it is over', () => {

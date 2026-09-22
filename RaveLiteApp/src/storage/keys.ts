@@ -58,6 +58,10 @@ export const KEYS = {
   programState: 'program.state',
   /** `{day: {trackId: amount}}` JSON — what each recent day asked, read by the daily review. */
   programDays: 'program.days',
+  /** `{day: {trackId: amount}}` JSON — sets in rounds that never sounded (paused, outside My day), not held against that day. */
+  programExcused: 'program.excused',
+  /** `{day: RestReason[]}` JSON — days that were rest (a mode, an injury, My day off). See `profile/restDays.ts`. */
+  restDays: 'program.rest',
 
   // ── Who is using it: kit, room, and what they train for ─────────
   /** `Profile` JSON — facts about the person, and any temporary mode. */

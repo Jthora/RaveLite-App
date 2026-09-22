@@ -86,6 +86,29 @@ export function onPulseFired(
   };
 }
 
+/** A pulse that never sounded: paused, outside My day, battery saver. */
+export interface PulseSuppressedEvent {
+  pulseId: string;
+  at: number;
+  prescription?: SetPrescription;
+}
+
+const suppressedListeners = new Set<(event: PulseSuppressedEvent) => void>();
+
+/**
+ * Fires for each pulse suppressed instead of chiming. Daily Sets uses it
+ * so a round nobody heard is not held against the day. Returns an
+ * unsubscribe fn.
+ */
+export function onPulseSuppressed(
+  listener: (event: PulseSuppressedEvent) => void,
+): () => void {
+  suppressedListeners.add(listener);
+  return () => {
+    suppressedListeners.delete(listener);
+  };
+}
+
 function drillFor(p: Pick<Pulse, 'exerciseId'>) {
   return p.exerciseId
     ? EXERCISE_LIBRARY.find(e => e.id === p.exerciseId)
@@ -159,9 +182,28 @@ async function chime(payload: ReminderPayload): Promise<void> {
   await notifeeScheduler.fireNow({...payload, silent});
 }
 
-function commit(writes: ReturnType<typeof queueTick>['writes']): void {
+function commit(
+  writes: ReturnType<typeof queueTick>['writes'],
+  /** The pulses before this change: a suppressed one is already gone. */
+  before: readonly Pulse[] = state.pulses,
+): void {
   for (const w of writes) {
     append(w);
+    if (w.kind === 'reminder.suppressed') {
+      const event: PulseSuppressedEvent = {
+        pulseId: w.pulseId,
+        at: w.at,
+        prescription: before.find(p => p.id === w.pulseId)?.prescription,
+      };
+      for (const listener of suppressedListeners) {
+        try {
+          listener(event);
+        } catch (e) {
+          console.warn('[pulseRuntime] pulse-suppressed listener threw', e);
+        }
+      }
+      continue;
+    }
     if (w.kind !== 'reminder.fired') {
       continue;
     }
@@ -290,8 +332,9 @@ export function tickNow(now: number = Date.now()): void {
   if (result.writes.length === 0 && result.state === state) {
     return;
   }
+  const before = state.pulses;
   state = result.state;
-  commit(result.writes);
+  commit(result.writes, before);
   notify();
 }
 

@@ -99,6 +99,14 @@ export function withinActiveHours(now: Date, config: ActiveHours): boolean {
   return false;
 }
 
+/** Whether My day runs on `date`'s weekday at all. */
+export function myDayRunsOn(
+  date: Date,
+  config: ActiveHours = getActiveHours(),
+): boolean {
+  return dayEnabled(date, config.daysMask);
+}
+
 /** Read the operator's active-hours config; default if unset/invalid. */
 export function getActiveHours(): ActiveHours {
   const raw = store.getString(KEYS.activeHours);

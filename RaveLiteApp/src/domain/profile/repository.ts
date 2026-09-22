@@ -26,6 +26,8 @@ import {
   type Mode,
   type ModeId,
 } from './mode';
+import {markRest} from './restDays';
+import {myDayRunsOn} from '../ambient/activeHours';
 
 /**
  * Who is using the app, and what they have to train with.
@@ -46,6 +48,8 @@ export interface Profile {
    * a stored one still counts — see `loadInjured`.)
    */
   injured?: Region;
+  /** When the injury was set, so its days can be marked as rest. */
+  injuredAt?: number;
   /** Set once setup has been answered, so it is never shown twice. */
   setUpAt?: number;
   /**
@@ -141,12 +145,14 @@ export function setMode(
 ): void {
   if (id === 'injured') {
     if (opts.region) {
-      setInjury(opts.region);
+      setInjury(opts.region, now);
     }
     return;
   }
   const mode = buildMode(id, now, opts);
   if (mode) {
+    // The mode being replaced has its days written down first.
+    noteRestDays(now);
     const profile = loadProfile();
     // A hurt mode from before injuries stacked is carried over, not lost.
     const injured = profile.injured ?? injuredRegion(profile.mode);
@@ -155,7 +161,8 @@ export function setMode(
 }
 
 /** End the mode. An injury stays until it is cleared on its own. */
-export function clearMode(): void {
+export function clearMode(now: number = Date.now()): void {
+  noteRestDays(now);
   const profile = loadProfile();
   saveProfile({...profile, mode: undefined});
 }
@@ -165,22 +172,46 @@ const withoutOldHurtMode = (mode: Mode | undefined) =>
   mode?.id === 'injured' ? undefined : mode;
 
 /** Protect a part of the body until it is cleared by hand. */
-export function setInjury(region: Region): void {
+export function setInjury(region: Region, now: number = Date.now()): void {
   const profile = loadProfile();
   saveProfile({
     ...profile,
     injured: region,
+    injuredAt: profile.injured ? profile.injuredAt ?? now : now,
     mode: withoutOldHurtMode(profile.mode),
   });
+  noteRestDays(now);
 }
 
-export function clearInjury(): void {
+export function clearInjury(now: number = Date.now()): void {
+  noteRestDays(now);
   const profile = loadProfile();
   saveProfile({
     ...profile,
     injured: undefined,
+    injuredAt: undefined,
     mode: withoutOldHurtMode(profile.mode),
   });
+}
+
+/**
+ * Write down which days are rest — the mode's days, the injury's days and
+ * a day My day is off — so the ramp, the streak and attribute decay read
+ * them as rest after the mode has gone. Cheap to call often; it only
+ * writes when something new is marked.
+ */
+export function noteRestDays(now: number = Date.now()): void {
+  const profile = loadProfile();
+  const mode = profile.mode;
+  if (mode && mode.startedAt <= now) {
+    markRest(mode.id, mode.startedAt, Math.min(now, mode.expiresAt ?? now));
+  }
+  if (profile.injured) {
+    markRest('injured', profile.injuredAt ?? now, now);
+  }
+  if (!myDayRunsOn(new Date(now))) {
+    markRest('day-off', now, now);
+  }
 }
 
 /**
