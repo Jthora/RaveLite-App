@@ -167,3 +167,72 @@ it('says something useful about rubbish, rather than throwing', () => {
     'is not an object',
   );
 });
+
+it('survives a pack written to break it', () => {
+  // Pass 3: the validator is good, and had never been fed anything
+  // hostile. Every one of these must come back as problems, not a throw.
+  const circular: Record<string, unknown> = {id: 'loop', name: 'Loop'};
+  circular.self = circular;
+  const hostile: [name: string, pack: unknown][] = [
+    ['null', null],
+    ['a string', 'a pack, honest'],
+    ['a number', 7],
+    ['an array', []],
+    ['empty', {}],
+    ['a pack of nulls', {id: null, name: null, detail: null, drills: null}],
+    ['drills as an object', {id: 'x', name: 'X', detail: 'x'.repeat(20), drills: {}}],
+    [
+      'a drill that is a string',
+      {id: 'x', name: 'X', detail: 'x'.repeat(20), drills: ['just a name']},
+    ],
+    [
+      'a group of nothing',
+      {
+        id: 'x',
+        name: 'X',
+        detail: 'x'.repeat(20),
+        groups: [{title: null, ids: null}],
+      },
+    ],
+    ['a circular reference', circular],
+    [
+      'ten thousand ids in one group',
+      {
+        id: 'big',
+        name: 'Big',
+        detail: 'A pack with far too much in it, for the test.',
+        groups: [
+          {title: 'Everything', ids: Array.from({length: 10_000}, (_, i) => `made.up.${i}`)},
+        ],
+      },
+    ],
+    [
+      'an id trying to be a path',
+      {
+        id: '../../etc/passwd',
+        name: 'X',
+        detail: 'A pack whose id is trying to be somewhere else.',
+        drills: [],
+      },
+    ],
+  ];
+  for (const [name, pack] of hostile) {
+    let problems: ReturnType<typeof validatePack> = [];
+    expect({name, threw: false}).toEqual({
+      name,
+      threw: (() => {
+        try {
+          problems = validatePack(pack);
+          return false;
+        } catch {
+          return true;
+        }
+      })(),
+    });
+    expect({name, said: problems.length > 0}).toEqual({name, said: true});
+    // And it can be told to somebody, in words.
+    expect({name, lines: explainProblems(problems).every(l => l.length > 5)}).toEqual(
+      {name, lines: true},
+    );
+  }
+});

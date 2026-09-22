@@ -111,7 +111,7 @@ Core now, and said once in the error log.
 
 ---
 
-### Pass 3 — Hostile input
+### Pass 3 — Hostile input ✅ *(22 Sep 2026)*
 
 **Problem:** every input from outside the app is currently trusted more
 than it should be.
@@ -132,6 +132,26 @@ than it should be.
   bad data rather than only against the real library.
 
 *Done when:* there is a fuzz corpus in the repo and it runs in CI.
+
+**What it found** (d7a4272, 99b8aa2 and the validator corpus). The
+corpora live beside the code they attack — twenty bad files for restore,
+ten nonsense answers plus a hang and a 500 for the forecast, a dozen
+packs written to break the validator — so CI runs them.
+
+- **A file with no schema** wrote `undefined` where the version goes and
+  failed with a confusing message. It is read as the oldest version now,
+  so the migrations run over it.
+- **Tests reached the internet.** Node has a real `fetch`, so a test that
+  set a place sent its coordinates to the weather API for real. The setup
+  file refuses network calls now.
+- **The suite depended on the machine's clock.** It passes in UTC — which
+  nobody had tried, since nothing is pushed — but failed in Kathmandu,
+  Kiritimati and Lord Howe. Tests run in one zone by default, and CI runs
+  them a second time in Australia/Lord_Howe.
+- Restore, the forecast parser and the pack validator each refused
+  everything thrown at them, in words, without losing what was there.
+- The two days a year that are not 24 hours long hold: day keys, a seven
+  day window, a streak, the bars, and the plan's chimes.
 
 ---
 
