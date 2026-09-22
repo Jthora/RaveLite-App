@@ -487,3 +487,17 @@ it('names the element tiles for somebody new, and not for anyone else', () => {
   expect(names(fresh)).toBe(true);
   act(() => fresh.unmount());
 });
+
+it('opens Weather and the plan as pages in Settings, and Back returns to The day', () => {
+  const tree = renderToday();
+  act(() => byTestId(tree, 'settings-open').props.onPress());
+  act(() => byTestId(tree, 'settings-group-day').props.onPress());
+  act(() => byTestId(tree, 'weather-open').props.onPress());
+  expect(byTestId(tree, 'weather-place')).toBeDefined();
+  // No sheet over the sheet: Back goes to The day, then to Settings.
+  act(() => byTestId(tree, 'settings-back').props.onPress());
+  expect(byTestId(tree, 'weather-open')).toBeDefined();
+  act(() => byTestId(tree, 'settings-back').props.onPress());
+  expect(byTestId(tree, 'settings-group-day')).toBeDefined();
+  act(() => tree.unmount());
+});

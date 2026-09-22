@@ -77,7 +77,38 @@ function fetchLine(
   return `Updated ${formatHM(fetchedAt ?? report!.at)}.`;
 }
 
+/**
+ * The weather sheet, for Today's conditions line. Settings shows the same
+ * panel as one of its own pages, so it never opens a sheet over itself.
+ */
 export function WeatherSheet({visible, onClose}: Props) {
+  const accent = ELEMENTS.heart.accent;
+  return (
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+        <View style={styles.header}>
+          <Text style={[styles.title, {color: accent}]}>Weather</Text>
+          <Tap
+            variant="plain"
+            onPress={onClose}
+            accessibilityRole="button"
+            style={styles.close}>
+            <Text style={styles.closeText}>Close</Text>
+          </Tap>
+        </View>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <WeatherPanel />
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+/** Your place, the next hours, rain and heat choices. */
+export function WeatherPanel() {
   const [, setVersion] = useState(0);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PlaceResult[] | undefined>();
@@ -155,265 +186,245 @@ export function WeatherSheet({visible, onClose}: Props) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-        <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>Weather</Text>
+    <View style={styles.body}>
+      <View style={styles.card}>
+        <Text style={styles.eyebrow}>YOUR PLACE</Text>
+        <Text testID="weather-place" style={styles.cardTitle}>
+          {place ? place.name : 'Not set'}
+        </Text>
+        <Text style={styles.caption}>
+          {place
+            ? `${place.region ? `${place.region} · ` : ''}${
+                place.source === 'detected' ? 'Detected' : 'Typed'
+              } · rounded to about 10 km`
+            : 'Set a rough place to see sunrise, rain, heat and bugs.'}
+        </Text>
+        <View style={styles.searchRow}>
+          <TextInput
+            testID="weather-search"
+            value={query}
+            onChangeText={setQuery}
+            onSubmitEditing={onSearch}
+            placeholder="Type a town"
+            placeholderTextColor={palette.textMuted}
+            returnKeyType="search"
+            autoCorrect={false}
+            style={styles.input}
+          />
           <Tap
-            variant="plain"
-            onPress={onClose}
+            variant="ghost"
+            color={accent}
+            onPress={onSearch}
+            disabled={busy !== undefined || query.trim().length < 2}
             accessibilityRole="button"
-            style={styles.close}>
-            <Text style={styles.closeText}>Close</Text>
+            style={styles.button}>
+            <Text style={[styles.buttonText, {color: accent}]}>
+              {busy === 'search' ? '…' : 'Search'}
+            </Text>
           </Tap>
         </View>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.card}>
-            <Text style={styles.eyebrow}>YOUR PLACE</Text>
-            <Text testID="weather-place" style={styles.cardTitle}>
-              {place ? place.name : 'Not set'}
-            </Text>
-            <Text style={styles.caption}>
-              {place
-                ? `${place.region ? `${place.region} · ` : ''}${
-                    place.source === 'detected' ? 'Detected' : 'Typed'
-                  } · rounded to about 10 km`
-                : 'Set a rough place to see sunrise, rain, heat and bugs.'}
-            </Text>
-            <View style={styles.searchRow}>
-              <TextInput
-                testID="weather-search"
-                value={query}
-                onChangeText={setQuery}
-                onSubmitEditing={onSearch}
-                placeholder="Type a town"
-                placeholderTextColor={palette.textMuted}
-                returnKeyType="search"
-                autoCorrect={false}
-                style={styles.input}
-              />
-              <Tap
-                variant="ghost"
-                color={accent}
-                onPress={onSearch}
-                disabled={busy !== undefined || query.trim().length < 2}
-                accessibilityRole="button"
-                style={styles.button}>
-                <Text style={[styles.buttonText, {color: accent}]}>
-                  {busy === 'search' ? '…' : 'Search'}
-                </Text>
-              </Tap>
+        {results?.map(result => (
+          <Tap
+            key={`${result.lat},${result.lon}`}
+            variant="plain"
+            color={accent}
+            onPress={() => onPick(result)}
+            accessibilityRole="button"
+            style={styles.result}>
+            <View>
+              <Text style={styles.resultName}>{result.name}</Text>
+              {result.region ? (
+                <Text style={styles.caption}>{result.region}</Text>
+              ) : null}
             </View>
-            {results?.map(result => (
-              <Tap
-                key={`${result.lat},${result.lon}`}
-                variant="plain"
-                color={accent}
-                onPress={() => onPick(result)}
-                accessibilityRole="button"
-                style={styles.result}>
-                <View>
-                  <Text style={styles.resultName}>{result.name}</Text>
-                  {result.region ? (
-                    <Text style={styles.caption}>{result.region}</Text>
-                  ) : null}
-                </View>
-              </Tap>
-            ))}
-            <Tap
-              testID="weather-detect"
-              variant="ghost"
-              color={palette.textDim}
-              onPress={onDetect}
-              disabled={busy !== undefined}
-              accessibilityRole="button"
-              style={styles.button}>
-              <Text style={styles.buttonText}>
-                {busy === 'detect' ? 'Finding location…' : 'Use my location'}
-              </Text>
-            </Tap>
-            {message ? <Text style={styles.message}>{message}</Text> : null}
-            {place ? (
-              <Text testID="weather-report" style={styles.caption}>
-                {fetchLine(report, forecast?.fetchedAt)}
-              </Text>
-            ) : null}
-          </View>
-
-          {place && sun ? (
-            <View style={styles.card}>
-              <Text style={styles.eyebrow}>TODAY</Text>
-              <View style={styles.facts}>
-                <Fact
-                  label="First light"
-                  value={sun.civilDawn ? clockHM(sun.civilDawn) : '—'}
-                />
-                <Fact
-                  label="Sunrise"
-                  value={sun.sunrise ? clockHM(sun.sunrise) : '—'}
-                />
-                <Fact
-                  label="Sunset"
-                  value={sun.sunset ? clockHM(sun.sunset) : '—'}
-                />
-                <Fact
-                  label="Daylight"
-                  value={formatDayLength(sun.dayLengthMin)}
-                />
-              </View>
-              <Text style={styles.caption}>
-                {capitalize(seasonAt(now, place.lat))}
-                {sun.dayLengthMin < SHORT_DAY_MIN ? ' · short days' : ''}
-                {' · '}
-                {forecast
-                  ? `forecast from ${clockHM(forecast.fetchedAt)}`
-                  : 'no forecast yet'}
-              </Text>
-              {hours.map(hour => {
-                const c = conditionsFor(hour.ts);
-                const flags = [
-                  c?.dark ? 'dark' : undefined,
-                  c?.icy ? 'icy' : undefined,
-                  c?.heat === 'danger'
-                    ? 'too hot'
-                    : c?.heat === 'caution'
-                    ? 'hot'
-                    : undefined,
-                ].filter(Boolean);
-                return (
-                  <View key={hour.ts} style={styles.hour}>
-                    <Text style={styles.hourTime}>{clockHM(hour.ts)}</Text>
-                    <Text style={styles.hourTemp}>
-                      {formatTemp(hour.tempC, prefs.units)}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.hourCell,
-                        (c?.rain ?? false) && {color: ELEMENTS.water.color},
-                      ]}>
-                      rain {hour.rainChance}%
-                    </Text>
-                    <Text
-                      style={[
-                        styles.hourCell,
-                        c?.bugs === 'high' && {color: ELEMENTS.air.color},
-                      ]}>
-                      bugs {c?.bugs ?? '—'}
-                    </Text>
-                    <Text style={styles.hourFlags}>{flags.join(' · ')}</Text>
-                  </View>
-                );
-              })}
-              <Tap
-                variant="ghost"
-                color={palette.textDim}
-                onPress={onRefresh}
-                disabled={busy !== undefined}
-                accessibilityRole="button"
-                style={styles.button}>
-                <Text style={styles.buttonText}>
-                  {busy === 'refresh' ? 'Refreshing…' : 'Refresh forecast'}
-                </Text>
-              </Tap>
-            </View>
-          ) : null}
-
-          <View style={styles.card}>
-            <Text style={styles.eyebrow}>HOW WEATHER CHANGES THE DAY</Text>
-            <Toggle
-              title="Buggy today"
-              detail="Treat today as buggy, whatever the estimate says."
-              on={isBuggyDay(now)}
-              onPress={() => setBuggyToday(!isBuggyDay(now))}
-              accent={accent}
-            />
-            <Toggle
-              title="Move outdoor work inside when buggy"
-              detail="Stretches and balance move inside. Runs and staff flow stay out: use repellent."
-              on={prefs.bugsMoveInside}
-              onPress={() =>
-                setWeatherPrefs({bugsMoveInside: !prefs.bugsMoveInside})
-              }
-              accent={accent}
-            />
-            <Toggle
-              title="Central air"
-              detail={
-                prefs.airConditioned
-                  ? 'On: hot days add water only for time spent outside.'
-                  : 'Off: hot days add water all day. The house is hot too.'
-              }
-              on={prefs.airConditioned}
-              onPress={() =>
-                setWeatherPrefs({airConditioned: !prefs.airConditioned})
-              }
-              accent={accent}
-            />
-            <Text style={styles.toggleTitle}>In the rain</Text>
-            <Text style={styles.caption}>
-              {RAIN_CHOICES.find(r => r.id === prefs.rain)?.detail}
-            </Text>
-            <View style={styles.rainRow}>
-              {RAIN_CHOICES.map(choice => {
-                const on = prefs.rain === choice.id;
-                return (
-                  <Tap
-                    key={choice.id}
-                    testID={`rain-${choice.id}`}
-                    variant={on ? 'solid' : 'ghost'}
-                    color={on ? ELEMENTS.water.color : palette.textDim}
-                    onPress={() => setWeatherPrefs({rain: choice.id})}
-                    accessibilityRole="button"
-                    accessibilityState={{selected: on}}
-                    style={styles.rainPill}>
-                    <Text
-                      style={[
-                        styles.rainPillText,
-                        on && {color: palette.bg, fontWeight: '700'},
-                      ]}>
-                      {choice.name}
-                    </Text>
-                  </Tap>
-                );
-              })}
-            </View>
-            <Toggle
-              title="Run in the dark"
-              detail={
-                prefs.runInDark
-                  ? 'On: dark runs stay, with a headlamp and reflective gear reminder.'
-                  : 'Off: runs before first light become indoor Fire work.'
-              }
-              on={prefs.runInDark}
-              onPress={() => setWeatherPrefs({runInDark: !prefs.runInDark})}
-              accent={accent}
-            />
-            <Toggle
-              title="Fahrenheit"
-              detail={prefs.units === 'F' ? 'Showing °F.' : 'Showing °C.'}
-              on={prefs.units === 'F'}
-              onPress={() =>
-                setWeatherPrefs({units: prefs.units === 'F' ? 'C' : 'F'})
-              }
-              accent={accent}
-            />
-          </View>
-
-          <Text style={styles.footnote}>
-            Thunder, ice and dangerous heat always move outdoor work inside, or
-            swap it for indoor drills that fit a low ceiling. Rain does too,
-            unless you choose to train in it. Drills that need running, hanging,
-            jumping or staff flow are never moved indoors. Hot days add hourly
-            water reminders and raise the Drink target. The bug level is
-            estimated from warmth, humidity, wind, recent rain and dawn or dusk.
-            Your place is sent only to Open-Meteo, rounded to about 10 km.
+          </Tap>
+        ))}
+        <Tap
+          testID="weather-detect"
+          variant="ghost"
+          color={palette.textDim}
+          onPress={onDetect}
+          disabled={busy !== undefined}
+          accessibilityRole="button"
+          style={styles.button}>
+          <Text style={styles.buttonText}>
+            {busy === 'detect' ? 'Finding location…' : 'Use my location'}
           </Text>
-        </ScrollView>
-      </SafeAreaView>
-    </Modal>
+        </Tap>
+        {message ? <Text style={styles.message}>{message}</Text> : null}
+        {place ? (
+          <Text testID="weather-report" style={styles.caption}>
+            {fetchLine(report, forecast?.fetchedAt)}
+          </Text>
+        ) : null}
+      </View>
+
+      {place && sun ? (
+        <View style={styles.card}>
+          <Text style={styles.eyebrow}>TODAY</Text>
+          <View style={styles.facts}>
+            <Fact
+              label="First light"
+              value={sun.civilDawn ? clockHM(sun.civilDawn) : '—'}
+            />
+            <Fact
+              label="Sunrise"
+              value={sun.sunrise ? clockHM(sun.sunrise) : '—'}
+            />
+            <Fact
+              label="Sunset"
+              value={sun.sunset ? clockHM(sun.sunset) : '—'}
+            />
+            <Fact label="Daylight" value={formatDayLength(sun.dayLengthMin)} />
+          </View>
+          <Text style={styles.caption}>
+            {capitalize(seasonAt(now, place.lat))}
+            {sun.dayLengthMin < SHORT_DAY_MIN ? ' · short days' : ''}
+            {' · '}
+            {forecast
+              ? `forecast from ${clockHM(forecast.fetchedAt)}`
+              : 'no forecast yet'}
+          </Text>
+          {hours.map(hour => {
+            const c = conditionsFor(hour.ts);
+            const flags = [
+              c?.dark ? 'dark' : undefined,
+              c?.icy ? 'icy' : undefined,
+              c?.heat === 'danger'
+                ? 'too hot'
+                : c?.heat === 'caution'
+                ? 'hot'
+                : undefined,
+            ].filter(Boolean);
+            return (
+              <View key={hour.ts} style={styles.hour}>
+                <Text style={styles.hourTime}>{clockHM(hour.ts)}</Text>
+                <Text style={styles.hourTemp}>
+                  {formatTemp(hour.tempC, prefs.units)}
+                </Text>
+                <Text
+                  style={[
+                    styles.hourCell,
+                    (c?.rain ?? false) && {color: ELEMENTS.water.color},
+                  ]}>
+                  rain {hour.rainChance}%
+                </Text>
+                <Text
+                  style={[
+                    styles.hourCell,
+                    c?.bugs === 'high' && {color: ELEMENTS.air.color},
+                  ]}>
+                  bugs {c?.bugs ?? '—'}
+                </Text>
+                <Text style={styles.hourFlags}>{flags.join(' · ')}</Text>
+              </View>
+            );
+          })}
+          <Tap
+            variant="ghost"
+            color={palette.textDim}
+            onPress={onRefresh}
+            disabled={busy !== undefined}
+            accessibilityRole="button"
+            style={styles.button}>
+            <Text style={styles.buttonText}>
+              {busy === 'refresh' ? 'Refreshing…' : 'Refresh forecast'}
+            </Text>
+          </Tap>
+        </View>
+      ) : null}
+
+      <View style={styles.card}>
+        <Text style={styles.eyebrow}>HOW WEATHER CHANGES THE DAY</Text>
+        <Toggle
+          title="Buggy today"
+          detail="Treat today as buggy, whatever the estimate says."
+          on={isBuggyDay(now)}
+          onPress={() => setBuggyToday(!isBuggyDay(now))}
+          accent={accent}
+        />
+        <Toggle
+          title="Move outdoor work inside when buggy"
+          detail="Stretches and balance move inside. Runs and staff flow stay out: use repellent."
+          on={prefs.bugsMoveInside}
+          onPress={() =>
+            setWeatherPrefs({bugsMoveInside: !prefs.bugsMoveInside})
+          }
+          accent={accent}
+        />
+        <Toggle
+          title="Central air"
+          detail={
+            prefs.airConditioned
+              ? 'On: hot days add water only for time spent outside.'
+              : 'Off: hot days add water all day. The house is hot too.'
+          }
+          on={prefs.airConditioned}
+          onPress={() =>
+            setWeatherPrefs({airConditioned: !prefs.airConditioned})
+          }
+          accent={accent}
+        />
+        <Text style={styles.toggleTitle}>In the rain</Text>
+        <Text style={styles.caption}>
+          {RAIN_CHOICES.find(r => r.id === prefs.rain)?.detail}
+        </Text>
+        <View style={styles.rainRow}>
+          {RAIN_CHOICES.map(choice => {
+            const on = prefs.rain === choice.id;
+            return (
+              <Tap
+                key={choice.id}
+                testID={`rain-${choice.id}`}
+                variant={on ? 'solid' : 'ghost'}
+                color={on ? ELEMENTS.water.color : palette.textDim}
+                onPress={() => setWeatherPrefs({rain: choice.id})}
+                accessibilityRole="button"
+                accessibilityState={{selected: on}}
+                style={styles.rainPill}>
+                <Text
+                  style={[
+                    styles.rainPillText,
+                    on && {color: palette.bg, fontWeight: '700'},
+                  ]}>
+                  {choice.name}
+                </Text>
+              </Tap>
+            );
+          })}
+        </View>
+        <Toggle
+          title="Run in the dark"
+          detail={
+            prefs.runInDark
+              ? 'On: dark runs stay, with a headlamp and reflective gear reminder.'
+              : 'Off: runs before first light become indoor Fire work.'
+          }
+          on={prefs.runInDark}
+          onPress={() => setWeatherPrefs({runInDark: !prefs.runInDark})}
+          accent={accent}
+        />
+        <Toggle
+          title="Fahrenheit"
+          detail={prefs.units === 'F' ? 'Showing °F.' : 'Showing °C.'}
+          on={prefs.units === 'F'}
+          onPress={() =>
+            setWeatherPrefs({units: prefs.units === 'F' ? 'C' : 'F'})
+          }
+          accent={accent}
+        />
+      </View>
+
+      <Text style={styles.footnote}>
+        Thunder, ice and dangerous heat always move outdoor work inside, or swap
+        it for indoor drills that fit a low ceiling. Rain does too, unless you
+        choose to train in it. Drills that need running, hanging, jumping or
+        staff flow are never moved indoors. Hot days add hourly water reminders
+        and raise the Drink target. The bug level is estimated from warmth,
+        humidity, wind, recent rain and dawn or dusk. Your place is sent only to
+        Open-Meteo, rounded to about 10 km.
+      </Text>
+    </View>
   );
 }
 
@@ -514,6 +525,8 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
+  },
+  body: {
     gap: spacing.md,
   },
   card: {

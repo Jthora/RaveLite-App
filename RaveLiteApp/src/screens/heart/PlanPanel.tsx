@@ -46,9 +46,11 @@ interface Props {
    *  notifeeScheduler.applyPlan() — keeps native side effects out of
    *  this purely-presentational panel. */
   onPlanCommitted?: (plan: Plan) => void;
+  /** False inside a page that already scrolls (Settings). */
+  scroll?: boolean;
 }
 
-export function PlanPanel({onPlanCommitted}: Props) {
+export function PlanPanel({onPlanCommitted, scroll = true}: Props) {
   const [committed, setCommitted] = useState<Plan>(() => loadPlan());
   const [draft, setDraft] = useState<Plan>(committed);
   const [editingWindowId, setEditingWindowId] = useState<string | null>(null);
@@ -128,11 +130,16 @@ export function PlanPanel({onPlanCommitted}: Props) {
     // to the overview rather than rendering an empty editor.
   }
 
+  const Body = scroll ? ScrollView : View;
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <Body
+      {...(scroll
+        ? {
+            style: styles.scroll,
+            contentContainerStyle: styles.content,
+            showsVerticalScrollIndicator: false,
+          }
+        : {})}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>
@@ -211,7 +218,7 @@ export function PlanPanel({onPlanCommitted}: Props) {
         style={styles.dangerRow}>
         <Text style={styles.dangerText}>Reset to factory defaults</Text>
       </Tap>
-    </ScrollView>
+    </Body>
   );
 }
 

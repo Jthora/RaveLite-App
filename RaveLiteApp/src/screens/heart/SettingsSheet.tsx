@@ -47,7 +47,7 @@ import {ShapePanel} from './ShapePanel';
 import {PlanPanel} from './PlanPanel';
 import {StayAlivePanel} from './StayAlivePanel';
 import {ThemePanel} from './ThemePanel';
-import {WeatherSheet} from './WeatherSheet';
+import {WeatherPanel} from './WeatherSheet';
 
 const WARN = '#FFD60A';
 
@@ -80,10 +80,29 @@ function replacedPlanAt(): number | undefined {
 }
 
 /** The four boxes the app is actually built from, plus the app itself. */
-type Page = 'index' | 'mode' | 'you' | 'day' | 'program' | 'app';
+type Page =
+  | 'index'
+  | 'mode'
+  | 'you'
+  | 'day'
+  | 'program'
+  | 'app'
+  | 'weather'
+  | 'plan';
+
+/**
+ * Pages that open from another page, and the page Back returns to.
+ * Weather and the plan used to be sheets over this one — the pattern that
+ * loses Back on the phone.
+ */
+const PARENT: Partial<Record<Page, Page>> = {weather: 'day', plan: 'day'};
+const SUB_TITLE: Partial<Record<Page, string>> = {
+  weather: 'Weather',
+  plan: 'Plan',
+};
 
 const GROUPS: readonly {
-  id: Exclude<Page, 'index'>;
+  id: Exclude<Page, 'index' | 'weather' | 'plan'>;
   title: string;
   holds: string;
   symbol: SymbolName;
@@ -132,8 +151,6 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
     }
   }, [visible]);
   const [plan, setPlan] = useState(loadPlan);
-  const [planOpen, setPlanOpen] = useState(false);
-  const [weatherOpen, setWeatherOpen] = useState(false);
   const place = getPlace();
   const [myDayOpen, setMyDayOpen] = useState(false);
   const [, setVersion] = useState(0);
@@ -173,19 +190,23 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
     <Modal
       visible={visible}
       animationType="slide"
-      onRequestClose={() => (page === 'index' ? onClose() : setPage('index'))}>
+      onRequestClose={() =>
+        page === 'index' ? onClose() : setPage(PARENT[page] ?? 'index')
+      }>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
           {page === 'index' ? null : (
             <Tap
               testID="settings-back"
               variant="plain"
-              onPress={() => setPage('index')}
+              onPress={() => setPage(PARENT[page] ?? 'index')}
               accessibilityRole="button"
-              accessibilityLabel="Back to Settings"
+              accessibilityLabel={
+                PARENT[page] ? 'Back to The day' : 'Back to Settings'
+              }
               style={styles.close}>
               <Text style={[styles.closeText, {color: accent}]}>
-                ‹ Settings
+                {PARENT[page] ? '‹ The day' : '‹ Settings'}
               </Text>
             </Tap>
           )}
@@ -194,7 +215,9 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
               ? 'Settings'
               : page === 'mode'
               ? "Today I'm…"
-              : GROUPS.find(g => g.id === page)?.title ?? 'Settings'}
+              : SUB_TITLE[page] ??
+                GROUPS.find(g => g.id === page)?.title ??
+                'Settings'}
           </Text>
           <Tap
             variant="plain"
@@ -208,6 +231,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
           // Keyed by page so each one opens at its top — Back from a
           // scrolled page otherwise lands on the index part-way down.
           key={page}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}>
           {permission === 'denied' ? (
@@ -378,6 +402,8 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
           ) : null}
 
           {page === 'mode' ? <ModePanel showTitle={false} /> : null}
+          {page === 'weather' ? <WeatherPanel /> : null}
+          {page === 'plan' ? <PlanPanel scroll={false} /> : null}
 
           {page === 'you' ? (
             <>
@@ -471,7 +497,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                   testID="weather-open"
                   variant="ghost"
                   color={palette.textDim}
-                  onPress={() => setWeatherOpen(true)}
+                  onPress={() => setPage('weather')}
                   accessibilityRole="button"
                   accessibilityLabel="Open weather and place"
                   style={styles.rowBtn}>
@@ -495,7 +521,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                 <Tap
                   variant="ghost"
                   color={palette.textDim}
-                  onPress={() => setPlanOpen(true)}
+                  onPress={() => setPage('plan')}
                   accessibilityRole="button"
                   accessibilityLabel="Open the plan editor"
                   style={styles.rowBtn}>
@@ -556,10 +582,6 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
           ) : null}
         </ScrollView>
 
-        <WeatherSheet
-          visible={weatherOpen}
-          onClose={() => setWeatherOpen(false)}
-        />
         <MyDaySheet
           visible={myDayOpen}
           value={myDay}
@@ -569,24 +591,6 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
             setMyDayOpen(false);
           }}
         />
-        <Modal
-          visible={planOpen}
-          animationType="slide"
-          onRequestClose={() => setPlanOpen(false)}>
-          <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-            <View style={styles.header}>
-              <Text style={[styles.title, {color: accent}]}>Plan</Text>
-              <Tap
-                variant="plain"
-                onPress={() => setPlanOpen(false)}
-                accessibilityRole="button"
-                style={styles.close}>
-                <Text style={styles.closeText}>Close</Text>
-              </Tap>
-            </View>
-            <PlanPanel />
-          </SafeAreaView>
-        </Modal>
       </SafeAreaView>
     </Modal>
   );
