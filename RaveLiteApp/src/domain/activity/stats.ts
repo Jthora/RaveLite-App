@@ -3,6 +3,7 @@ import {dayKey, entriesForDay} from '../journal/journal';
 import {localDayKey} from '../training/grading';
 import {loadEntries} from '../training/repository';
 import {activityInRange, buildActivity, type ActivityItem} from './activity';
+import {restDaySet} from '../profile/restDays';
 
 /** Streaks stop counting back after a year. */
 const STREAK_LOOKBACK_DAYS = 365;
@@ -120,7 +121,14 @@ function tallyByElementByDay(
   return out;
 }
 
-/** Consecutive days, ending today, with at least one thing done. */
+/**
+ * Consecutive days with at least one thing done, ending today.
+ *
+ * Today counts once something is done, and does not break the streak
+ * before then: at 06:00 it is not yet a day off. A rest day (a mode, an
+ * injury, My day off — `profile/restDays.ts`) with nothing done keeps the
+ * streak going without adding to it, as the rest mode promises.
+ */
 export function streakDays(
   now: Date = new Date(),
   element?: ElementId,
@@ -132,17 +140,20 @@ export function streakDays(
       .filter(matches)
       .map(item => localDayKey(item.at)),
   );
+  const rest = restDaySet();
   let streak = 0;
   const cursor = new Date(now);
   cursor.setHours(0, 0, 0, 0);
   for (let i = 0; i < STREAK_LOOKBACK_DAYS; i++) {
+    const key = dayKey(cursor);
     const has =
-      trainDays.has(dayKey(cursor)) ||
+      trainDays.has(key) ||
       buildActivity({journal: entriesForDay(cursor), train: []}).some(matches);
-    if (!has) {
+    if (has) {
+      streak++;
+    } else if (i > 0 && !rest.has(key)) {
       break;
     }
-    streak++;
     cursor.setDate(cursor.getDate() - 1);
   }
   return streak;

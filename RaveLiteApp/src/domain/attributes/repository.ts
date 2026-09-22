@@ -25,6 +25,7 @@ import {
   type Progress,
 } from './levels';
 import {xpFromActivity} from './trains';
+import {restDaySet} from '../profile/restDays';
 
 /**
  * Attributes over time. One stored blob, rolled forward a day at a time
@@ -93,15 +94,22 @@ const daysApart = (from: string, to: string): number =>
       86_400_000,
   );
 
+const nextDay = (key: string): string =>
+  localDayKey(new Date(`${key}T12:00:00`).getTime() + 86_400_000);
+
 /**
  * One day's work, poured in. Pure but for the phase test: `deload` weeks
- * are rest by design, so nothing slides during them.
+ * are rest by design, so nothing slides during them. A rest day (a mode,
+ * an injury, My day off — `profile/restDays.ts`) is not a day idle at
+ * all: the neglect clock stands still, so an injury does not cost levels
+ * on top of the injury.
  */
 function applyDay(
   state: AttributesState,
   key: string,
   items: readonly ActivityItem[],
   deload: boolean,
+  rest = false,
 ): void {
   const focus = progressOf(state, 'focus').level;
   const multiplier = focusMultiplier(focus);
@@ -116,6 +124,13 @@ function applyDay(
       continue;
     }
     if (deload || !before.lastFedDay) {
+      continue;
+    }
+    if (rest) {
+      state.byId[attribute.id] = {
+        ...before,
+        lastFedDay: nextDay(before.lastFedDay),
+      };
       continue;
     }
     if (losesLevelAfter(daysApart(before.lastFedDay, key))) {
@@ -168,6 +183,7 @@ export function reviewAttributes(now: number = Date.now()): AttributesState {
     }
   }
 
+  const rest = restDaySet();
   for (const day = new Date(from); ; day.setDate(day.getDate() + 1)) {
     const key = localDayKey(day.getTime());
     if (key > through) {
@@ -175,7 +191,7 @@ export function reviewAttributes(now: number = Date.now()): AttributesState {
     }
     const deload =
       phaseForWeek(programWeek(program.startDay, day)) === 'deload';
-    applyDay(state, key, byDay.get(key) ?? [], deload);
+    applyDay(state, key, byDay.get(key) ?? [], deload, rest.has(key));
   }
 
   state.throughDay = through;

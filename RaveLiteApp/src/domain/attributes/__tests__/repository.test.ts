@@ -4,6 +4,7 @@ import {append} from '../../journal/journal';
 import {defaultProgram} from '../../program/repository';
 import {addEntry} from '../../training/repository';
 import {attributeSheet, loadAttributes, reviewAttributes} from '../repository';
+import {markRest} from '../../profile/restDays';
 import type {AttributeId} from '../attributes';
 
 const DAY = 86_400_000;
@@ -93,4 +94,16 @@ it('slides an attribute that has been left alone for a fortnight', () => {
   expect(before).toBeGreaterThan(0);
   expect(after.level).toBeLessThan(before);
   expect(after.lastFedDay).toBe('2026-08-23');
+});
+
+it('does not slide through an injury', () => {
+  // The same fortnight and more away, but hurt the whole time.
+  for (let back = 23; back <= 25; back++) {
+    round(back);
+  }
+  const before = reviewAttributes(NOW - 20 * DAY).byId.strength!.level;
+  store.delete(KEYS.attributesState);
+  markRest('injured', NOW - 22 * DAY, NOW - DAY);
+  const after = reviewAttributes(NOW).byId.strength!;
+  expect(after.level).toBe(before);
 });

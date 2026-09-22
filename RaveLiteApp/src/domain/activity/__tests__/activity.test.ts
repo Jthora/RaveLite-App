@@ -77,9 +77,12 @@ describe('Train log entries', () => {
     });
     updateEntry(entry.id, {at: Date.now() - DAY});
     expect(activityForDay()).toEqual([]);
-    expect(streakDays()).toBe(0);
+    // Yesterday's run still counts: today is not over, so it has not
+    // broken anything yet.
+    expect(streakDays()).toBe(1);
     deleteEntry(entry.id);
     expect(activityForDay(new Date(Date.now() - DAY))).toEqual([]);
+    expect(streakDays()).toBe(0);
   });
 });
 
