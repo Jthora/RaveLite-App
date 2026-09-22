@@ -108,7 +108,10 @@ export async function restoreBackup(text: string): Promise<RestoreResult> {
       why: 'That export came from a newer RaveLite. Update the app first.',
     };
   }
-  if (backup.schema > CURRENT_SCHEMA_VERSION) {
+  // A file with no schema — hand-edited, or from before it was written
+  // down — is read as the oldest one, so the migrations run over it.
+  const schema = typeof backup.schema === 'number' ? backup.schema : 0;
+  if (schema > CURRENT_SCHEMA_VERSION) {
     return {
       ok: false,
       why: `That export is from schema v${backup.schema}; this app reads up to v${CURRENT_SCHEMA_VERSION}.`,
@@ -123,7 +126,7 @@ export async function restoreBackup(text: string): Promise<RestoreResult> {
   // An older export runs through the migrations on the next launch.
   const withSchema: [string, Value][] = [
     ...entries.filter(([k]) => k !== KEYS.schemaVersion),
-    [KEYS.schemaVersion, backup.schema],
+    [KEYS.schemaVersion, schema],
   ];
   const result = await replaceStoredData(withSchema);
   if (!result.ok) {

@@ -59,3 +59,12 @@ jest.mock('@notifee/react-native', () => ({
   },
   TriggerType: {TIMESTAMP: 0, INTERVAL: 1},
 }));
+
+// No test reaches the internet. Node has a real `fetch`, so a test that
+// set a place used to send its coordinates to the weather API for real —
+// slow, flaky offline, and not something a test run should do. Anything
+// that needs a response passes its own `fetchImpl`.
+/* global globalThis */
+globalThis.fetch = jest.fn(() =>
+  Promise.reject(new Error('no network in tests: pass a fetchImpl')),
+);
