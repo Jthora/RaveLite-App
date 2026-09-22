@@ -1,7 +1,10 @@
-First public beta.
+First public release.
 
 A five-element altar that chimes through the day: Daily Sets across
-seventeen tracks, chimes that bend to weather and daylight, seven
-curricula from dance to military standards, ten archetypes, a character
-sheet of fifteen attributes, and an export so your training can leave
-the phone.
+seventeen tracks, chimes that bend to the weather, the daylight and the
+room you are in, eight curricula from dance to military test standards,
+eleven archetypes to start from, a character sheet of fifteen
+attributes, and an export so your training can leave the phone.
+
+Set up asks five questions and takes about a minute. Nothing leaves your
+phone except a forecast for a place rounded to about ten kilometres.
