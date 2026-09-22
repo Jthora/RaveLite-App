@@ -38,10 +38,11 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: RaveLiteApp/android/app/build/outputs/apk/release/app-release.apk
+          files: RaveLiteApp/android/app/build/outputs/apk/release/app-*-release.apk
           body: |
             Built from ${{ github.ref_name }}.
 
-            This APK is debug-signed by CI and cannot update a properly
-            signed install. It is here to be inspected and built upon, not
-            to be the way you get the app.
+            One APK per architecture, plus a universal one that runs on
+            all of them. These are debug-signed by CI and cannot update a
+            properly signed install. They are here to be inspected and
+            built upon, not to be the way you get the app.

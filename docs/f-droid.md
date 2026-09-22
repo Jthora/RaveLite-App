@@ -72,16 +72,30 @@ CurrentVersionCode: 1
 Treat that as a starting point; F-Droid's reviewers will say what is
 wrong with it, and they are generally good about it.
 
-## One thing worth deciding first
+## APK size: split by architecture
 
-The release APK is **24 MB**, and about half of that is native libraries
-for four ABIs — including `x86` and `x86_64`, which on phones only matter
-to emulators. Per-ABI splits would roughly halve what a tester downloads.
+*Done 22 Sep 2026.* The release build makes one APK per ABI plus a
+universal one:
 
-F-Droid handles this itself, so it does not block submission. It matters
-for the Firebase App Distribution beta, where testers download the whole
-thing every update. It is a build-system change that needs each split
-installed and checked, so it has not been made yet.
+| APK | Size |
+|---|---|
+| `app-armeabi-v7a-release.apk` | 11.8 MB |
+| `app-arm64-v8a-release.apk` | 12.7 MB |
+| `app-x86_64-release.apk` | 13.0 MB |
+| `app-universal-release.apk` | about 25 MB |
+
+Before this there was one 25 MB APK carrying all four ABIs. Setting
+`reactNativeArchitectures` never shrank it, because React Native's
+prebuilt libraries ship for every ABI whatever that says.
+
+Pick by the phone, not the chip. The Redmi A3 has a 64-bit chip but runs
+32-bit Android (`adb shell getprop ro.product.cpu.abilist` gives
+`armeabi-v7a,armeabi`), so the arm64 APK will not install on it. Budget
+phones do this often. `scripts/distribute.sh` sends the universal APK
+for that reason.
+
+Every APK shares one `versionCode`, so any of them can replace any other.
+F-Droid builds its own APKs and does not use these.
 
 ## Signing
 

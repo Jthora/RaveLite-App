@@ -10,7 +10,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 APP="RaveLiteApp"
-APK="$APP/android/app/build/outputs/apk/release/app-release.apk"
+OUT="$APP/android/app/build/outputs/apk/release"
+# One APK per architecture, plus a universal one (see app/build.gradle).
+APK="$OUT/app-universal-release.apk"
 
 export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home}"
 export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetools}"
@@ -22,8 +24,12 @@ export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetool
     -q )
 
 echo
-echo "APK: $APK"
-ls -lh "$APK" | awk '{print "     " $5}'
+for f in "$OUT"/app-*-release.apk; do
+  printf '%-32s %s\n' "$(basename "$f")" "$(ls -lh "$f" | awk '{print $5}')"
+done
+echo
+echo "Which one a phone takes: adb shell getprop ro.product.cpu.abilist"
+echo "(the first entry). Unsure? The universal APK runs on all of them."
 
 # Which key signed it, so a surprise is never silent.
 if command -v apksigner >/dev/null 2>&1; then

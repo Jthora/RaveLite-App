@@ -14,7 +14,9 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-APK="RaveLiteApp/android/app/build/outputs/apk/release/app-release.apk"
+# The universal APK: testers' phones differ, and budget phones often run
+# 32-bit Android on a 64-bit chip, so no single split fits them all.
+APK="RaveLiteApp/android/app/build/outputs/apk/release/app-universal-release.apk"
 ENV_FILE="${RAVELITE_FIREBASE_ENV:-$HOME/.ravelite/firebase.env}"
 NOTES="${1:-}"
 

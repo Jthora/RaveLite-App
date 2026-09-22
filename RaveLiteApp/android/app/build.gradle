@@ -89,6 +89,25 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    // One APK per architecture, each about half the size of one carrying
+    // them all, plus that universal one (all four ABIs) for anyone unsure
+    // which phone they have. Budget phones often run 32-bit Android on a
+    // 64-bit chip (the Redmi A3 does), so armeabi-v7a is not only for old
+    // phones: check `adb shell getprop ro.product.cpu.abilist` first.
+    // Every APK shares one versionCode, so any of them can replace any
+    // other; F-Droid builds its own.
+    //
+    // x86 stays in the universal APK on purpose. Excluding it does not
+    // work: React Native's pick-first libraries override the exclude and
+    // leave a half-empty lib/x86 that would crash on an x86 device.
+    splits {
+        abi {
+            enable true
+            reset()
+            include "armeabi-v7a", "arm64-v8a", "x86_64"
+            universalApk true
+        }
+    }
     // The release keystore never lives in this repo. Put its details in
     // ~/.gradle/gradle.properties (see scripts/make-keystore.sh) and the
     // release build picks them up; leave them out and it stays
