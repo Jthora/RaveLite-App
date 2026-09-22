@@ -10,7 +10,6 @@
  */
 import React, {useCallback, useMemo, useState} from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
-import {Settings} from 'lucide-react-native';
 
 import {Tap} from '../../components/Tap';
 import {BalanceStrip} from '../../components/today/BalanceStrip';
@@ -65,6 +64,8 @@ import {palette, radius, spacing, type as t} from '../../theme';
 import {DailySetsSheet} from './DailySetsSheet';
 import {SettingsSheet} from './SettingsSheet';
 import {WeatherSheet} from './WeatherSheet';
+import {DoorMark} from '../../components/icons/DoorMark';
+import {DOOR_COLOR, type DoorId} from '../../components/icons/doorMarks';
 
 /** +5 on the next chime pushes it back by this much. */
 const PLUS_FIVE_MS = 5 * 60_000;
@@ -312,46 +313,36 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         <DayList rows={model.rows} onRowPress={onRowPress} />
 
         <View style={styles.links}>
-          <Tap
-            variant="ghost"
+          <Door
+            door="log"
             color={accent}
+            label="+ Log"
             onPress={() => setLogOpen(true)}
-            accessibilityRole="button"
             accessibilityLabel="Log a session"
-            style={styles.link}>
-            <Text style={[styles.linkText, {color: accent}]}>+ Log</Text>
-          </Tap>
-          <Tap
+          />
+          <Door
             testID="session-open"
-            variant="ghost"
-            color={accent}
+            door="session"
+            color={DOOR_COLOR.session}
+            label="Session"
             onPress={() => setSessionOpen(true)}
-            accessibilityRole="button"
             accessibilityLabel="Time a session"
-            style={styles.link}>
-            <Text style={[styles.linkText, {color: accent}]}>Session</Text>
-          </Tap>
-          <Tap
-            variant="ghost"
-            color={palette.textDim}
+          />
+          <Door
+            door="practice"
+            color={DOOR_COLOR.practice}
+            label="Practice"
             onPress={() => setPracticeOpen(true)}
-            accessibilityRole="button"
-            style={styles.link}>
-            <Text style={styles.linkText}>Practice</Text>
-          </Tap>
-          <Tap
+            accessibilityLabel="Practice"
+          />
+          <Door
             testID="settings-open"
-            variant="ghost"
-            color={palette.textDim}
+            door="settings"
+            color={DOOR_COLOR.settings}
+            label="Settings"
             onPress={() => setSettingsOpen(true)}
-            accessibilityRole="button"
             accessibilityLabel="Settings"
-            style={styles.link}>
-            <View style={styles.linkRow}>
-              <Settings size={14} color={palette.textDim} strokeWidth={2} />
-              <Text style={styles.linkText}>Settings</Text>
-            </View>
-          </Tap>
+          />
         </View>
 
         <InfoSheet stack={info} />
@@ -427,6 +418,39 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   );
 }
 
+/** One of Today's four doors: its own mark and colour, and a label. */
+function Door({
+  door,
+  color,
+  label,
+  onPress,
+  accessibilityLabel,
+  testID,
+}: {
+  door: DoorId;
+  color: string;
+  label: string;
+  onPress: () => void;
+  accessibilityLabel: string;
+  testID?: string;
+}) {
+  return (
+    <Tap
+      testID={testID}
+      variant="ghost"
+      color={color}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={styles.link}>
+      <View style={styles.linkRow}>
+        <DoorMark door={door} size={18} color={color} />
+        <Text style={[styles.linkText, {color}]}>{label}</Text>
+      </View>
+    </Tap>
+  );
+}
+
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
@@ -484,6 +508,6 @@ const styles = StyleSheet.create({
   linkRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.sm,
   },
 });
