@@ -38,8 +38,9 @@ The repo is already public at **github.com/Jthora/RaveLite-App**, and
 
 Two things are out of date:
 
-- **109 commits are unpushed.** Everything from the public-beta work is
-  local only. Anyone who finds the repo today sees old code.
+- **About 190 commits are unpushed.** Everything from the public-beta
+  work, the audit and the hardening passes is local only. Anyone who
+  finds the repo today sees old code.
 - **The description is stale.** The public copy was revised on 21 Sep
   2026 to lead with the identity everywhere — see "What it says it is"
   below — and the repo description has not caught up.

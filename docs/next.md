@@ -6,9 +6,9 @@ It worked, and it is done. This one is about getting it in front of them.
 
 Four things are true and shape everything below:
 
-- **The app is ready and nobody has it.** 651 tests, no typecheck errors,
-  every phase verified on hardware — and 109 commits that exist only on
-  one laptop.
+- **The app is ready and nobody has it.** 948 tests, no typecheck errors
+  anywhere (tests included, since 22 Sep), every phase verified on
+  hardware — and about 190 commits that exist only on one laptop.
 - **Release builds are still debug-signed.** Fixing that costs an
   uninstall, which is why export/restore exists.
 - **The positioning is now decided**: lead with the rave identity
@@ -21,8 +21,11 @@ Four things are true and shape everything below:
 
 Nothing here needs more building. It needs somebody with the passwords.
 
-1. **Push.** 109 commits, and the public repo currently shows stale
-   `main`. `git push origin today-home:main`, or open a PR first.
+1. **Push.** About 190 commits, and the public repo currently shows stale
+   `main`. `git push origin today-home:main`, or open a PR first. The
+   checks that run on arrival — typecheck, lint, tests, tests again in
+   another timezone — all pass here first; two of them would have failed
+   before 22 Sep.
 2. **Set the repo description and topics.** Command in
    [releasing.md](releasing.md).
 3. **Make the signing key.** `scripts/make-keystore.sh`. Export your data
@@ -45,10 +48,12 @@ In the order they will hit it, not the order it is fun to build.
 
 **Built 21 Sep 2026: all three.** The disclaimer, the feedback route and
 flaws are done; what follows is the plan they came from, kept for the
-reasoning. Next after these is
+reasoning. Next after these was
 [hardening.md](hardening.md) — six passes over everything this wave
-added, because it was all built forward and almost none of it has been
-verified failing.
+added, because it was all built forward and almost none of it had been
+verified failing. **Passes 1 to 5 are done (21–22 Sep), and 6 has its
+numbers**; what is left of 6 is the always-on case, which only the phone
+can answer.
 
 ### 1. The first-run disclaimer *(small, and it is a promise we made)*
 
@@ -95,9 +100,6 @@ somebody is training to keep their job.
   components that currently hold it inline.
 - **F-Droid submission.** Audited and prepared; needs the repo public
   with tags, screenshots, and a GitLab account.
-- **Per-ABI APK splits.** 24 MB, about half of it native libraries for
-  four ABIs including x86 emulator builds. Would roughly halve a tester's
-  download. A build change that needs each split installed and checked.
 - **Marks** — achievements derived from the journal rather than stored,
   so they cannot drift from the truth. The safe half of "perks".
 - **Choosing a flaw to work on** — the one real decision the character
