@@ -33,6 +33,7 @@ import {
   loadInjured,
   loadMode,
   needsTutorial,
+  setInjury,
 } from '../../domain/profile/repository';
 import {TutorialCoach} from '../../components/today/TutorialCoach';
 import {ModeChip} from '../../components/today/ModeChip';
@@ -294,6 +295,13 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           onDone={onDone}
           onSnooze={() => snoozeActive()}
           onSkip={() => resolveActive('skipped')}
+          onHurt={region => {
+            // The injury first: it marks today as rest, so the ramp does
+            // not read a pain-skip as quitting.
+            setInjury(region);
+            resolveActive('skipped', Date.now(), 'hurt');
+            setInjured(loadInjured());
+          }}
           onDeferNext={onDeferNext}
           onSkipNext={onSkipNext}
           onInfo={info.show}

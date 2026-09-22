@@ -19,9 +19,13 @@ import {
   loadMode,
   needsTutorial,
   clearMode,
+  loadInjured,
   setInjury,
   setMode,
 } from '../../../domain/profile/repository';
+import {entriesForDay} from '../../../domain/journal/journal';
+import {isRestDay} from '../../../domain/profile/restDays';
+import {localDayKey} from '../../../domain/training/grading';
 import {SettingsSheet} from '../SettingsSheet';
 import {
   clearSetupRequest,
@@ -499,5 +503,38 @@ it('opens Weather and the plan as pages in Settings, and Back returns to The day
   expect(byTestId(tree, 'weather-open')).toBeDefined();
   act(() => byTestId(tree, 'settings-back').props.onPress());
   expect(byTestId(tree, 'settings-group-day')).toBeDefined();
+  act(() => tree.unmount());
+});
+
+it('asks why on Skip: "It hurts" starts hurt mode and is not read as quitting', () => {
+  act(() => {
+    runtime.enqueueNow({element: 'fire', exerciseId: 'fire.pushup-groove'});
+  });
+  const tree = renderToday();
+  act(() => byTestId(tree, 'chime-skip').props.onPress());
+  expect(byTestId(tree, 'chime-hurts')).toBeDefined();
+  act(() => byTestId(tree, 'chime-hurts').props.onPress());
+  act(() => byTestId(tree, 'hurt-wrist').props.onPress());
+
+  expect(loadInjured()).toBe('wrist');
+  const skip = entriesForDay(TEN_AM).find(e => e.kind === 'reminder.skipped');
+  expect(skip).toMatchObject({reason: 'hurt'});
+  // Today is rest now, so tomorrow's review leaves it out.
+  expect(isRestDay(localDayKey(TEN_AM.getTime()))).toBe(true);
+  expect(byTestId(tree, 'chime-done')).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('still skips plainly from the same question', () => {
+  act(() => {
+    runtime.enqueueNow({element: 'fire', exerciseId: 'fire.pushup-groove'});
+  });
+  const tree = renderToday();
+  act(() => byTestId(tree, 'chime-skip').props.onPress());
+  act(() => byTestId(tree, 'chime-just-skip').props.onPress());
+  expect(loadInjured()).toBeUndefined();
+  const skip = entriesForDay(TEN_AM).find(e => e.kind === 'reminder.skipped');
+  expect(skip).toBeDefined();
+  expect(skip).not.toHaveProperty('reason');
   act(() => tree.unmount());
 });

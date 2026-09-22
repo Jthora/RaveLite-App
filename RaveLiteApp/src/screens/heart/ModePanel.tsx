@@ -17,7 +17,12 @@ import {StyleSheet, Text, View} from 'react-native';
 import {Tap} from '../../components/Tap';
 import {REGIONS} from '../../domain/profile/kit';
 import type {Region} from '../../domain/profile/kit';
-import {MODES, modeLabel, type ModeId} from '../../domain/profile/mode';
+import {
+  MODES,
+  SEE_SOMEONE,
+  modeLabel,
+  type ModeId,
+} from '../../domain/profile/mode';
 import {
   clearInjury,
   clearMode,
@@ -39,9 +44,7 @@ export const MODE_SYMBOL: Record<ModeId, SymbolName> = {
   rest: 'resting',
 };
 
-/** Said wherever an injury is on. */
-export const SEE_SOMEONE =
-  'If it is sharp, numb, or no better in a week, see a doctor or physio.';
+export {SEE_SOMEONE};
 
 export function ModePanel({showTitle = true}: {showTitle?: boolean} = {}) {
   const [, setVersion] = useState(0);

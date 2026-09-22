@@ -238,6 +238,8 @@ export function resolve(
   pulseId: string,
   outcome: PulseOutcome,
   now: number,
+  /** Why, when the person said: 'hurt' for a skip that was pain. */
+  reason?: string,
 ): QueueResult {
   if (outcome === 'snoozed') {
     // Snoozes go through `snooze()`, not `resolve()`.
@@ -265,6 +267,7 @@ export function resolve(
       at: now,
       pulseId: target.id,
       respondedAfterMs,
+      ...(reason ? {reason} : {}),
     });
   } else if (outcome === 'ignored') {
     writes.push({

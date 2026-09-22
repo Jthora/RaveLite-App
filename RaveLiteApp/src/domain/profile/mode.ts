@@ -191,6 +191,10 @@ export function factsUnder(facts: Facts, mode: Mode | undefined): Facts {
   };
 }
 
+/** Said wherever an injury is set or shown. */
+export const SEE_SOMEONE =
+  'If it is sharp, numb, or no better in a week, see a doctor or physio.';
+
 /** The part that must not be loaded, if any. */
 export function injuredRegion(mode: Mode | undefined): Region | undefined {
   return mode?.id === 'injured' ? mode.region : undefined;

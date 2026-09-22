@@ -396,12 +396,13 @@ export function sealActive(
 export function resolveActive(
   outcome: PulseOutcome,
   at: number = Date.now(),
+  reason?: string,
 ): void {
   const active = findActive();
   if (!active) {
     return;
   }
-  const result = queueResolve(state, active.id, outcome, at);
+  const result = queueResolve(state, active.id, outcome, at, reason);
   state = result.state;
   commit(result.writes);
   dismiss(active.id);

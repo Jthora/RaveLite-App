@@ -32,6 +32,8 @@ import {
 import {formatSetAmount} from '../../domain/program/progress';
 import type {SetMove, SetUnit, TrackId} from '../../domain/program/types';
 import type {DayRow} from '../../domain/today/dayList';
+import {REGIONS, type Region} from '../../domain/profile/kit';
+import {SEE_SOMEONE} from '../../domain/profile/mode';
 import {ELEMENTS, type ElementIdentity} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -51,6 +53,11 @@ export interface ChimeCardProps {
   onDone: (adjust: DoneAdjust) => void;
   onSnooze: () => void;
   onSkip: () => void;
+  /**
+   * Skip because it hurts: starts hurt mode for that part, and the day is
+   * not read as quitting. Offered from Skip, so the card looks the same.
+   */
+  onHurt?: (region: Region) => void;
   onDeferNext: () => void;
   onSkipNext: () => void;
   /** Chimes are paused until then. */
@@ -138,9 +145,12 @@ function ActiveCard({
   onDone,
   onSnooze,
   onSkip,
+  onHurt,
   onInfo,
 }: ChimeCardProps & {active: ActivePulseSummary}) {
   const el = ELEMENTS[active.element];
+  /** Skip asks why first, when "it hurts" can be answered. */
+  const [asking, setAsking] = useState<'no' | 'why' | 'where'>('no');
   const rx = active.prescription;
   const moves = rx?.moves;
   const [amounts, setAmounts] = useState<Partial<Record<TrackId, number>>>(() =>
@@ -270,37 +280,101 @@ function ActiveCard({
         />
       </View>
 
-      <View style={styles.actions}>
-        <Tap
-          testID="chime-done"
-          variant="solid"
-          color={el.color}
-          onPress={done}
-          accessibilityRole="button"
-          style={styles.done}>
-          <Text style={styles.doneText}>Done</Text>
-        </Tap>
-        {/* One +5 a chime. */}
-        {active.snoozed ? null : (
+      {asking === 'why' ? (
+        <View style={styles.actions}>
           <Tap
+            testID="chime-just-skip"
             variant="ghost"
-            color={el.color}
-            onPress={onSnooze}
+            color={palette.textDim}
+            onPress={onSkip}
             accessibilityRole="button"
-            accessibilityLabel="Remind me in 5 minutes"
-            style={styles.secondary}>
-            <Text style={[styles.secondaryText, {color: el.color}]}>+5</Text>
+            style={styles.secondaryWide}>
+            <Text style={styles.secondaryText}>Skip</Text>
           </Tap>
-        )}
-        <Tap
-          variant="ghost"
-          color={palette.textDim}
-          onPress={onSkip}
-          accessibilityRole="button"
-          style={styles.secondary}>
-          <Text style={styles.secondaryText}>Skip</Text>
-        </Tap>
-      </View>
+          <Tap
+            testID="chime-hurts"
+            variant="ghost"
+            color={palette.danger}
+            onPress={() => setAsking('where')}
+            accessibilityRole="button"
+            style={styles.secondaryWide}>
+            <Text style={[styles.secondaryText, {color: palette.danger}]}>
+              It hurts
+            </Text>
+          </Tap>
+          <Tap
+            variant="plain"
+            onPress={() => setAsking('no')}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            style={styles.secondary}>
+            <Text style={styles.secondaryText}>‹</Text>
+          </Tap>
+        </View>
+      ) : asking === 'where' ? (
+        <View style={styles.where}>
+          <Text style={styles.whereTitle}>Where does it hurt?</Text>
+          <View style={styles.wherePills}>
+            {REGIONS.map(region => (
+              <Tap
+                key={region}
+                testID={`hurt-${region}`}
+                variant="ghost"
+                color={palette.textDim}
+                onPress={() => onHurt?.(region)}
+                accessibilityRole="button"
+                accessibilityLabel={`It hurts: ${region}`}
+                style={styles.wherePill}>
+                <Text style={styles.secondaryText}>{region}</Text>
+              </Tap>
+            ))}
+          </View>
+          <Text style={styles.whereNote}>
+            Drills that load it are skipped until you end hurt mode.{' '}
+            {SEE_SOMEONE}
+          </Text>
+          <Tap
+            variant="plain"
+            onPress={() => setAsking('why')}
+            accessibilityRole="button"
+            style={styles.whereBack}>
+            <Text style={styles.secondaryText}>‹ Back</Text>
+          </Tap>
+        </View>
+      ) : (
+        <View style={styles.actions}>
+          <Tap
+            testID="chime-done"
+            variant="solid"
+            color={el.color}
+            onPress={done}
+            accessibilityRole="button"
+            style={styles.done}>
+            <Text style={styles.doneText}>Done</Text>
+          </Tap>
+          {/* One +5 a chime. */}
+          {active.snoozed ? null : (
+            <Tap
+              variant="ghost"
+              color={el.color}
+              onPress={onSnooze}
+              accessibilityRole="button"
+              accessibilityLabel="Remind me in 5 minutes"
+              style={styles.secondary}>
+              <Text style={[styles.secondaryText, {color: el.color}]}>+5</Text>
+            </Tap>
+          )}
+          <Tap
+            testID="chime-skip"
+            variant="ghost"
+            color={palette.textDim}
+            onPress={() => (onHurt ? setAsking('why') : onSkip())}
+            accessibilityRole="button"
+            style={styles.secondary}>
+            <Text style={styles.secondaryText}>Skip</Text>
+          </Tap>
+        </View>
+      )}
     </View>
   );
 }
@@ -666,6 +740,34 @@ const styles = StyleSheet.create({
     minWidth: 64,
     minHeight: 52,
     borderRadius: radius.pill,
+  },
+  where: {
+    marginTop: spacing.md,
+    gap: spacing.sm,
+  },
+  whereTitle: {
+    ...t.subtitle,
+    color: palette.text,
+  },
+  wherePills: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  wherePill: {
+    minHeight: 44,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+  },
+  whereNote: {
+    ...t.caption,
+    color: palette.textDim,
+    lineHeight: 17,
+  },
+  whereBack: {
+    minHeight: 44,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
   },
   secondaryWide: {
     flex: 1,
