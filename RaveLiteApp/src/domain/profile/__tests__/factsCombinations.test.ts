@@ -22,7 +22,7 @@ import {
 } from '../repository';
 import {trainsUnder} from '../mode';
 import type {ModeId} from '../mode';
-import type {Region} from '../loads';
+import type {Region} from '../kit';
 
 // Monday, mid-morning, in program week 1.
 const NOW = new Date(2026, 8, 14, 10).getTime();

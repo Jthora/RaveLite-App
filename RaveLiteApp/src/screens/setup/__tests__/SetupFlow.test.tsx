@@ -47,7 +47,13 @@ describe('who gets asked', () => {
   });
 
   it('never asks someone with a journal, even with no training log', () => {
-    append({kind: 'water', at: Date.now()});
+    // Any journal entry at all counts as a life already lived here.
+    append({
+      kind: 'reminder.fired',
+      at: Date.now(),
+      element: 'fire',
+      pulseId: 'p1',
+    });
     __resetProfileCache();
     expect(needsSetup()).toBe(false);
   });

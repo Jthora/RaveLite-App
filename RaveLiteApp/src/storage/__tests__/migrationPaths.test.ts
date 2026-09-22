@@ -86,7 +86,7 @@ for (let v = 0; v < CURRENT_SCHEMA_VERSION; v++) {
     // windows, a program, and a day it can build.
     __resetProfileCache();
     expect(loadProfile().facts).toBeDefined();
-    expect(toPlaces(loadFacts(NOW)).places.length).toBeGreaterThan(0);
+    expect(toPlaces(loadFacts(NOW)).places!.length).toBeGreaterThan(0);
     expect(loadPlan().windows.length).toBeGreaterThan(0);
     expect(
       Object.keys(loadProgram(new Date(NOW)).tracks).length,

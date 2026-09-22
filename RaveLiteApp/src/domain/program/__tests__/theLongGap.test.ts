@@ -27,7 +27,11 @@ function trainedThenGone(gap: number): void {
   saveProfile(authorProfile());
   const started = new Date(NOW.getTime() - (gap + 30) * DAY_MS);
   const program = defaultProgram(started);
-  program.tracks.push = {...program.tracks.push, sets: 8, steppedOn: '2025-01-01'};
+  program.tracks.push = {
+    ...program.tracks.push,
+    sets: 8,
+    steppedOn: '2025-01-01',
+  };
   store.set(KEYS.programState, JSON.stringify(program));
   // A month of training, ending `gap` days ago.
   for (let back = gap + 30; back > gap; back--) {

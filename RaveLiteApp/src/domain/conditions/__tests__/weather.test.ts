@@ -54,7 +54,13 @@ function saveForecast(
   }));
   store.set(
     KEYS.weatherForecast,
-    JSON.stringify({fetchedAt: at(4), lat: place.lat, lon: place.lon, hours, days: []}),
+    JSON.stringify({
+      fetchedAt: at(4),
+      lat: place.lat,
+      lon: place.lon,
+      hours,
+      days: [],
+    }),
   );
 }
 

@@ -44,9 +44,9 @@ function aDayOfEntries(): void {
       append({
         kind: 'completion',
         at: at.getTime(),
-        exerciseId: track.exerciseIds?.[0] ?? 'fire.pushups',
+        exerciseId: 'fire.pushups',
         element,
-        source: 'pulse',
+        source: 'notification',
         moves: TRACKS.filter(() => r() > 0.7).map(t => ({
           trackId: t.id,
           amount: Math.floor(r() * 30),

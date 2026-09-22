@@ -180,7 +180,10 @@ it('survives a pack written to break it', () => {
     ['an array', []],
     ['empty', {}],
     ['a pack of nulls', {id: null, name: null, detail: null, drills: null}],
-    ['drills as an object', {id: 'x', name: 'X', detail: 'x'.repeat(20), drills: {}}],
+    [
+      'drills as an object',
+      {id: 'x', name: 'X', detail: 'x'.repeat(20), drills: {}},
+    ],
     [
       'a drill that is a string',
       {id: 'x', name: 'X', detail: 'x'.repeat(20), drills: ['just a name']},
@@ -202,7 +205,10 @@ it('survives a pack written to break it', () => {
         name: 'Big',
         detail: 'A pack with far too much in it, for the test.',
         groups: [
-          {title: 'Everything', ids: Array.from({length: 10_000}, (_, i) => `made.up.${i}`)},
+          {
+            title: 'Everything',
+            ids: Array.from({length: 10_000}, (_, i) => `made.up.${i}`),
+          },
         ],
       },
     ],
@@ -231,8 +237,9 @@ it('survives a pack written to break it', () => {
     });
     expect({name, said: problems.length > 0}).toEqual({name, said: true});
     // And it can be told to somebody, in words.
-    expect({name, lines: explainProblems(problems).every(l => l.length > 5)}).toEqual(
-      {name, lines: true},
-    );
+    expect({
+      name,
+      lines: explainProblems(problems).every(l => l.length > 5),
+    }).toEqual({name, lines: true});
   }
 });

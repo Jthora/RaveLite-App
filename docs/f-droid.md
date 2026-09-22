@@ -59,7 +59,8 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm
-    init: cd $$SRCDIR/../.. && npm ci
+      - npm install -g yarn
+    init: cd $$SRCDIR/../.. && yarn install --frozen-lockfile
     gradle:
       - release
 

@@ -16,10 +16,18 @@ jest.mock('../../../native/raveLiteDevice', () => ({
   shareExport: jest.fn(),
 }));
 
-const saveExport = device.saveExport as jest.Mock;
-const readExport = device.readExport as jest.Mock;
-const restartApp = device.restartApp as jest.Mock;
-const shareExport = device.shareExport as jest.Mock;
+const saveExport = device.saveExport as jest.MockedFunction<
+  typeof device.saveExport
+>;
+const readExport = device.readExport as jest.MockedFunction<
+  typeof device.readExport
+>;
+const restartApp = device.restartApp as jest.MockedFunction<
+  typeof device.restartApp
+>;
+const shareExport = device.shareExport as jest.MockedFunction<
+  typeof device.shareExport
+>;
 
 const NOW = new Date(2026, 8, 20, 9, 0).getTime();
 

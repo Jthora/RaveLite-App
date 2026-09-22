@@ -36,15 +36,9 @@ function nineAm(): number {
 
 describe('reconcilePlan', () => {
   it('produces a stable id with windowId, slotIndex, ts', () => {
-    expect(
-      planPulseId({
-        ts: 123,
-        element: 'air',
-        windowId: 'w1',
-        slotIndex: 0,
-        everyMinutes: 15,
-      }),
-    ).toBe('plan:w1:0:123');
+    expect(planPulseId({ts: 123, windowId: 'w1', slotIndex: 0})).toBe(
+      'plan:w1:0:123',
+    );
   });
 
   it('returns one fire per slot tick inside the horizon', () => {

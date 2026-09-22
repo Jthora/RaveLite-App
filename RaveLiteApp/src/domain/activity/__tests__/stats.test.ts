@@ -13,6 +13,7 @@ const doneAt = (
   id,
   at: NOON.getTime() - daysBack * DAY,
   element,
+  points: 1,
   source: 'manual',
   label: 'Drill',
   ref: {store: 'journal', id},

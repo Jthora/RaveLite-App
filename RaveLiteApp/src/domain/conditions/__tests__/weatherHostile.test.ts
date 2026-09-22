@@ -18,7 +18,12 @@ import {store} from '../../../storage';
 import {KEYS} from '../../../storage/keys';
 
 const NOW = new Date(2026, 8, 20, 9).getTime();
-const PLACE = {name: 'Somewhere', lat: 51.5, lon: -0.1};
+const PLACE = {
+  name: 'Somewhere',
+  lat: 51.5,
+  lon: -0.1,
+  source: 'typed' as const,
+};
 
 /** A fetch that answers with `body`, or fails the way the argument says. */
 function fetchOf(body: unknown, opts: {status?: number; hang?: boolean} = {}) {

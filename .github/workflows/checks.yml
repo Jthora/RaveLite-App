@@ -22,10 +22,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
-          cache-dependency-path: RaveLiteApp/package-lock.json
+          cache: yarn
+          cache-dependency-path: RaveLiteApp/yarn.lock
 
-      - run: npm ci
+      - run: yarn install --frozen-lockfile
 
       # Types first: the cheapest check, and the one that caught a bug
       # rendering blank labels for months.
