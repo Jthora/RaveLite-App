@@ -368,6 +368,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
 
         <View style={styles.links}>
           <Door
+            testID="log-open"
             door="log"
             color={accent}
             label="+ Log"
@@ -383,6 +384,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             accessibilityLabel="Time a session"
           />
           <Door
+            testID="practice-open"
             door="practice"
             color={DOOR_COLOR.practice}
             label="Practice"
