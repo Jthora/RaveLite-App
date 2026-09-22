@@ -83,7 +83,7 @@ export interface StandardEvent {
 }
 
 export const STANDARDS_NOTE =
-  'Targets are a B+ on every test that uses the event. Grades run evenly from the passing minimum (D−) to the max (A+), ages 35–40, from 2025–2026 calculator and news sites and a Space Force chart: the official charts would not load. Close, not final. Tap a target to change it.';
+  'Targets are a B+ on every test that uses the event. Grades run evenly from the passing minimum (D−) to the max (A+), from 2025–2026 calculator and news sites and a Space Force chart: the official charts would not load. Close, not final. Tap a target to change it.';
 
 export const MARKS_NOTE =
   "No official charts for these: the marks are RaveLite's own. D− is a start, A+ is strong, and B+ is the goal. Tap a target to change it.";
@@ -548,6 +548,20 @@ function readTargets(): Record<string, number> {
   } catch {
     return {};
   }
+}
+
+/** The charts the person picked, if they have picked. */
+export function chosenSex(): Sex | undefined {
+  const sex = store.getString(KEYS.standardsPrimary);
+  return sex === 'male' || sex === 'female' ? sex : undefined;
+}
+
+/** The only age group whose charts the app has. */
+export const AGE_GROUP = '35–40';
+
+/** A table's top score, or halfway between the two when none is known. */
+export function topFor(event: StandardEvent, sex: Sex | undefined): number {
+  return sex ? event.top[sex] : (event.top.male + event.top.female) / 2;
 }
 
 /** The table that leads; male unless the operator chose otherwise. */

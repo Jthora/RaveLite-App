@@ -18,6 +18,7 @@ import {
   setPrimarySex,
   setTarget,
   targetFor,
+  topFor,
 } from '../standards';
 
 const event = (id: string) => STANDARD_EVENTS.find(e => e.id === id)!;
@@ -191,4 +192,12 @@ it('measures progress both ways', () => {
     1080 / 1518.75,
   );
   expect(progressToward(event('run-3mi'), 1000, 1080)).toBe(1);
+});
+
+it('uses halfway between the two top scores when no table is known', () => {
+  const pullups = event('pullups');
+  expect(topFor(pullups, 'male')).toBe(pullups.top.male);
+  expect(topFor(pullups, undefined)).toBe(
+    (pullups.top.male + pullups.top.female) / 2,
+  );
 });

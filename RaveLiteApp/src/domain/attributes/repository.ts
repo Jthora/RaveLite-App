@@ -8,7 +8,7 @@ import {
   STANDARD_EVENTS,
   bestResult,
   getHeightInches,
-  getPrimarySex,
+  topFor,
 } from '../standards/standards';
 import {localDayKey} from '../training/grading';
 import {getMetric, loadEntries} from '../training/repository';
@@ -26,6 +26,7 @@ import {
 } from './levels';
 import {xpFromActivity} from './trains';
 import {restDaySet} from '../profile/restDays';
+import {gradingTable} from '../profile/repository';
 
 /**
  * Attributes over time. One stored blob, rolled forward a day at a time
@@ -235,7 +236,8 @@ function testedLevel(
     return {};
   }
   const entries = loadEntries();
-  const sex = getPrimarySex();
+  // Nobody is assumed male: without a table, halfway between the two.
+  const sex = gradingTable();
   const height = getHeightInches();
   let out: Pick<AttributeStanding, 'tested' | 'testedBy'> = {};
   for (const eventId of attribute.events) {
@@ -247,7 +249,7 @@ function testedLevel(
     if (!best) {
       continue;
     }
-    const level = levelFromResult(best.value, event.top[sex], event.better);
+    const level = levelFromResult(best.value, topFor(event, sex), event.better);
     if (out.tested === undefined || level > out.tested) {
       out = {
         tested: level,

@@ -37,6 +37,7 @@ import {
   activeGoal,
   loadPacks,
   loadPushupGoal,
+  needsTable,
   showsGrades,
 } from '../../domain/profile/repository';
 import {pushupRamp, type PushupRamp} from '../../domain/program/ramp';
@@ -66,7 +67,6 @@ import {
   progressToward,
   resultsFor,
   setHeightInches,
-  setPrimarySex,
   setTarget,
   targetFor,
   type EventScale,
@@ -84,6 +84,7 @@ import {
 } from '../../domain/training/repository';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {TablePicker} from './TablePicker';
 
 const LETTER: Record<Sex, string> = {male: 'M', female: 'F'};
 
@@ -201,6 +202,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
     const program = loadProgram(new Date(now));
     const done = lastWeekDone(Object.values(program.tracks));
     const graded = showsGrades();
+    const askTable = needsTable();
     const height = getHeightInches();
     const rows: GoalRow[] = STANDARD_EVENTS.map(event => {
       const target = targetFor(event);
@@ -233,6 +235,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
     return {
       sex,
       graded,
+      askTable,
       activeGoal: activeGoal(),
       pushups: pushupDay(today, setsToday(now).prescriptions),
       rows,
@@ -415,36 +418,16 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
             </Text>
             {group === 'tests' ? (
               <>
-                <View style={styles.tableRow}>
-                  {(['male', 'female'] as const).map(sex => {
-                    const on = view.sex === sex;
-                    return (
-                      <Tap
-                        key={sex}
-                        testID={`table-${sex}`}
-                        variant="ghost"
-                        color={on ? accent : palette.textDim}
-                        onPress={() => {
-                          setPrimarySex(sex);
-                          bump();
-                        }}
-                        accessibilityRole="radio"
-                        accessibilityState={{selected: on}}
-                        style={styles.pill}>
-                        <Text style={[styles.pillText, on && {color: accent}]}>
-                          {sex === 'male' ? 'Male first' : 'Female first'}
-                        </Text>
-                      </Tap>
-                    );
-                  })}
-                </View>
+                <TablePicker onPick={bump} />
                 <Text style={styles.note}>{STANDARDS_NOTE}</Text>
               </>
             ) : view.graded && index === (groups[0] === 'tests' ? 1 : 0) ? (
               <Text style={styles.note}>{MARKS_NOTE}</Text>
             ) : null}
             {view.rows
+              // No grades or targets until the charts are chosen.
               .filter(row => row.event.group === group)
+              .filter(row => row.event.group !== 'tests' || !view.askTable)
               .map(row => (
                 <GoalCard
                   key={row.event.id}
@@ -911,10 +894,6 @@ const styles = StyleSheet.create({
     ...t.caption,
     color: palette.text,
     lineHeight: 17,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
   },
   pill: {
     flex: 1,

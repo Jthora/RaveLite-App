@@ -10,15 +10,16 @@
  * promise this screen has to keep, so it says so rather than hiding an
  * empty state behind a warning.
  */
-import React, {useState} from 'react';
+import React, {useReducer, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../../components/Tap';
 import {PACKS, drillsOf, type PackId} from '../../domain/profile/packs';
-import {loadPacks, setPacks} from '../../domain/profile/repository';
+import {loadPacks, needsTable, setPacks} from '../../domain/profile/repository';
 import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {TablePicker} from './TablePicker';
 
 /** Each curriculum has a colour and a picture, used wherever it appears. */
 export const PACK_SYMBOL: Record<PackId, SymbolName> = {
@@ -34,6 +35,7 @@ export const PACK_SYMBOL: Record<PackId, SymbolName> = {
 
 export function PacksPanel() {
   const [packs, setLocal] = useState<PackId[]>(loadPacks);
+  const [, redraw] = useReducer((n: number) => n + 1, 0);
 
   const toggle = (id: PackId) => {
     const next = packs.includes(id)
@@ -56,51 +58,55 @@ export function PacksPanel() {
       {PACKS.map(pack => {
         const on = packs.includes(pack.id);
         const count = drillsOf(pack).length;
+        // The tests pack asks for its charts as it is turned on.
+        const asks = pack.id === 'military-tests' && on && needsTable();
         return (
-          <Tap
-            key={pack.id}
-            testID={`pack-${pack.id}`}
-            variant="plain"
-            onPress={() => toggle(pack.id)}
-            accessibilityRole="button"
-            accessibilityState={{selected: on}}
-            accessibilityLabel={`${pack.name}${
-              on ? ', on' : `, would add ${count} drills`
-            }. ${pack.detail}`}
-            style={[
-              styles.row,
-              on && {
-                borderColor: hueOf(PACK_SYMBOL[pack.id]),
-                backgroundColor: tint(hueOf(PACK_SYMBOL[pack.id])),
-              },
-            ]}>
-            <View style={styles.rowInner}>
-              <View
-                style={[
-                  styles.badge,
-                  {backgroundColor: tint(hueOf(PACK_SYMBOL[pack.id]))},
-                ]}>
-                <Symbol name={PACK_SYMBOL[pack.id]} size={20} />
-              </View>
-              <View style={styles.rowText}>
+          <React.Fragment key={pack.id}>
+            <Tap
+              testID={`pack-${pack.id}`}
+              variant="plain"
+              onPress={() => toggle(pack.id)}
+              accessibilityRole="button"
+              accessibilityState={{selected: on}}
+              accessibilityLabel={`${pack.name}${
+                on ? ', on' : `, would add ${count} drills`
+              }. ${pack.detail}`}
+              style={[
+                styles.row,
+                on && {
+                  borderColor: hueOf(PACK_SYMBOL[pack.id]),
+                  backgroundColor: tint(hueOf(PACK_SYMBOL[pack.id])),
+                },
+              ]}>
+              <View style={styles.rowInner}>
+                <View
+                  style={[
+                    styles.badge,
+                    {backgroundColor: tint(hueOf(PACK_SYMBOL[pack.id]))},
+                  ]}>
+                  <Symbol name={PACK_SYMBOL[pack.id]} size={20} />
+                </View>
+                <View style={styles.rowText}>
+                  <Text
+                    style={[
+                      styles.rowName,
+                      on && {color: hueOf(PACK_SYMBOL[pack.id])},
+                    ]}>
+                    {pack.name}
+                  </Text>
+                  <Text style={styles.rowDetail}>{pack.detail}</Text>
+                </View>
                 <Text
                   style={[
-                    styles.rowName,
+                    styles.means,
                     on && {color: hueOf(PACK_SYMBOL[pack.id])},
                   ]}>
-                  {pack.name}
+                  {on ? `${count}` : `+${count}`}
                 </Text>
-                <Text style={styles.rowDetail}>{pack.detail}</Text>
               </View>
-              <Text
-                style={[
-                  styles.means,
-                  on && {color: hueOf(PACK_SYMBOL[pack.id])},
-                ]}>
-                {on ? `${count}` : `+${count}`}
-              </Text>
-            </View>
-          </Tap>
+            </Tap>
+            {asks ? <TablePicker onPick={redraw} /> : null}
+          </React.Fragment>
         );
       })}
     </View>

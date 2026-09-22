@@ -9,15 +9,16 @@ import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {Exercise, Venue} from '../exercises/types';
 import {prescribeDay} from '../program/progression';
 import {loadProgram} from '../program/repository';
-import {dayDensity, loadFacts} from '../profile/repository';
+import {dayDensity, gradingTable, loadFacts} from '../profile/repository';
 import {TRACKS} from '../program/tracks';
 import {moveForExercise, moveForMetric, moveForTrack} from '../exercises/moves';
 import type {MoveId} from '../exercises/moves';
 import type {SetPrescription, TrackId} from '../program/types';
 import {
+  AGE_GROUP,
   STANDARD_EVENTS,
-  getPrimarySex,
   markFor,
+  type Sex,
   type StandardEvent,
 } from '../standards/standards';
 import {BUILTIN_METRICS} from '../training/builtinMetrics';
@@ -327,11 +328,28 @@ function eventCard(id: string): InfoCard | undefined {
   if (!event) {
     return undefined;
   }
-  const sex = getPrimarySex();
-  const marks = (event.scales ?? []).map(scale => {
+  // Both tables until the person has said which one is theirs.
+  const table = gradingTable();
+  const tables: Sex[] = table ? [table] : ['male', 'female'];
+  const official = (event.scales ?? []).some(scale => scale.test);
+  const marks = (event.scales ?? []).flatMap(scale => {
     const name = scale.test ? scale.test.toUpperCase() : 'Marks';
-    const at = (grade: 'D−' | 'B+' | 'A+') => markFor(event, scale, sex, grade);
-    return `${name}: pass ${at('D−')} · B+ ${at('B+')} · top ${at('A+')}`;
+    const same =
+      scale.min.male === scale.min.female &&
+      scale.max.male === scale.max.female;
+    return (same ? tables.slice(0, 1) : tables).map(sex => {
+      const whose =
+        tables.length > 1 && !same
+          ? sex === 'male'
+            ? ' (men)'
+            : ' (women)'
+          : '';
+      const at = (grade: 'D−' | 'B+' | 'A+') =>
+        markFor(event, scale, sex, grade);
+      return `${name}${whose}: pass ${at('D−')} · B+ ${at('B+')} · top ${at(
+        'A+',
+      )}`;
+    });
   });
   return {
     title: event.name,
@@ -343,6 +361,15 @@ function eventCard(id: string): InfoCard | undefined {
       ...marks,
       marks.length > 0
         ? 'Grades run evenly from the passing minimum to the top score.'
+        : '',
+      official
+        ? `${
+            table === 'male'
+              ? "Men's charts, "
+              : table === 'female'
+              ? "Women's charts, "
+              : ''
+          }ages ${AGE_GROUP}.`
         : '',
     ].filter(Boolean),
     relatedTitle: 'Log it with',

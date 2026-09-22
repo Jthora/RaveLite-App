@@ -7,7 +7,11 @@ import {addEntry} from '../../../domain/training/repository';
 import {ELEMENTS} from '../../../theme/elements';
 import {Goals} from '../Goals';
 import {beginSetup} from '../../../domain/profile/setup';
-import {__resetProfileCache} from '../../../domain/profile/repository';
+import {
+  __resetProfileCache,
+  setPacks,
+  showsGrades,
+} from '../../../domain/profile/repository';
 
 beforeEach(() => {
   store.clearAll();
@@ -125,5 +129,38 @@ it('grades nobody without the military tests pack, and assumes no run', () => {
   expect(json).toContain('No runs yet.');
   // A stranger's day is not the author's two and a half hours.
   expect(json).toContain('" / ","30"," min"');
+  act(() => tree.unmount());
+});
+
+it('asks a new install which charts grade them, rather than assuming male', () => {
+  beginSetup();
+  setPacks(['military-tests']);
+  addEntry({at: Date.now(), kindId: 'builtin.pullups-amrap', value: 8});
+  const tree = render();
+  let json = JSON.stringify(tree.toJSON());
+  expect(json).toContain('Which charts grade your tests?');
+  expect(json).toContain('The app has the charts for ages 35–40 only.');
+  // No targets or grades until they answer.
+  expect(json).not.toContain('Best 8');
+  expect(showsGrades()).toBe(false);
+  act(() => {
+    tree.root
+      .findAll(node => node.props.testID === 'table-female')[0]
+      .props.onPress();
+  });
+  json = JSON.stringify(tree.toJSON());
+  expect(json).not.toContain('Which charts grade your tests?');
+  expect(json).toContain('Best 8');
+  expect(json).toContain('USMC: D− 3 · B+ 9 · A+ 10');
+  expect(showsGrades()).toBe(true);
+  act(() => tree.unmount());
+});
+
+it("keeps the men's charts on the author's install without asking", () => {
+  const tree = render();
+  expect(JSON.stringify(tree.toJSON())).not.toContain(
+    'Which charts grade your tests?',
+  );
+  expect(showsGrades()).toBe(true);
   act(() => tree.unmount());
 });

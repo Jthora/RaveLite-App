@@ -34,6 +34,7 @@ import {
   type BlockPhase,
 } from './blocks';
 import {myDayRunsOn} from '../ambient/activeHours';
+import {chosenSex, type Sex} from '../standards/standards';
 
 /**
  * Who is using the app, and what they have to train with.
@@ -492,7 +493,24 @@ export function needsSetup(): boolean {
  * else a result is measured against their own goal, never failed.
  */
 export function showsGrades(): boolean {
-  return loadPacks().includes('military-tests');
+  return loadPacks().includes('military-tests') && gradingTable() !== undefined;
+}
+
+/**
+ * The charts that grade this person. Installs from before setup asked
+ * keep the men's charts they always had; anyone set up since is asked
+ * rather than assumed male, and has no table until they answer.
+ */
+export function gradingTable(): Sex | undefined {
+  return (
+    chosenSex() ??
+    (loadProfile().startedSetupAt === undefined ? 'male' : undefined)
+  );
+}
+
+/** The tests pack is on and still needs to know which charts to use. */
+export function needsTable(): boolean {
+  return loadPacks().includes('military-tests') && gradingTable() === undefined;
 }
 
 /**
