@@ -21,6 +21,7 @@ import {
 } from '../../domain/circuit/customTypes';
 import {ELEMENTS, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {useBackHandler} from '../BackStack';
 
 interface Props {
   circuit: CustomCircuit;
@@ -43,6 +44,8 @@ export function CircuitEditor({
 }: Props) {
   const [draft, setDraft] = useState<CustomCircuit>(circuit);
   const [editing, setEditing] = useState<LegEditingState>(null);
+  // Back in a leg closes the leg, not the circuit.
+  useBackHandler(editing !== null, () => setEditing(null));
 
   // Accent: dominant element of current legs, fallback heart.
   const dom = dominantElement(draft.legs.map(l => l.element));

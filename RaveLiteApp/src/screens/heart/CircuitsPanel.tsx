@@ -26,6 +26,7 @@ import {
   saveCircuit,
 } from '../../domain/circuit/customRepository';
 import type {CustomCircuit} from '../../domain/circuit/customTypes';
+import {useBackHandler} from '../../components/BackStack';
 
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -43,6 +44,8 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
   const [list, setList] = useState<CustomCircuit[]>(() => listCircuits());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
+  /** A new circuit, not saved until Save: Back used to leave "Untitled". */
+  const [draft, setDraft] = useState<CustomCircuit | null>(null);
 
   const accent = ELEMENTS.heart.color;
   const accentDim = ELEMENTS.heart.accent;
@@ -50,11 +53,11 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
   const refresh = useCallback(() => setList(listCircuits()), []);
 
   const onNewCircuit = useCallback(() => {
-    const fresh = saveCircuit(makeCircuit('Untitled'));
-    refresh();
+    const fresh = makeCircuit('Untitled');
+    setDraft(fresh);
     setNewlyAddedId(fresh.id);
     setEditingId(fresh.id);
-  }, [refresh]);
+  }, []);
 
   const onCircuitSave = useCallback(
     (updated: CustomCircuit) => {
@@ -62,6 +65,7 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
       refresh();
       setEditingId(null);
       setNewlyAddedId(null);
+      setDraft(null);
     },
     [refresh],
   );
@@ -74,18 +78,20 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
     refresh();
     setEditingId(null);
     setNewlyAddedId(null);
+    setDraft(null);
   }, [editingId, refresh]);
 
   const onCircuitCancel = useCallback(() => {
-    // Newly-added blank circuits get cleaned up so the list doesn't
-    // accumulate empty drafts.
-    if (newlyAddedId) {
-      deleteCircuit(newlyAddedId);
-      refresh();
-    }
+    // A new circuit was never saved, so there is nothing to clean up; one
+    // that was run (and so saved) stays.
+    refresh();
     setEditingId(null);
     setNewlyAddedId(null);
-  }, [newlyAddedId, refresh]);
+    setDraft(null);
+  }, [refresh]);
+
+  // Android Back closes the editor, not the whole Practice sheet.
+  useBackHandler(editingId !== null, onCircuitCancel);
 
   const onCircuitEngage = useCallback(
     (draft: CustomCircuit) => {
@@ -103,7 +109,10 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
 
   // Layer 2 — Editor takeover.
   if (editingId) {
-    const circuit = loadCircuit(editingId);
+    const circuit =
+      draft?.id === editingId
+        ? loadCircuit(editingId) ?? draft
+        : loadCircuit(editingId);
     if (circuit) {
       return (
         <CircuitEditor
@@ -166,6 +175,7 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
 
       {/* + New circuit */}
       <Tap
+        testID="circuit-new"
         variant="ghost"
         color={accentDim}
         onPress={onNewCircuit}

@@ -19,6 +19,7 @@ import {exercisesFor} from '../../domain/exercises/library';
 import {CircuitsPanel} from '../../screens/heart/CircuitsPanel';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
+import {useBackStack} from '../BackStack';
 
 interface Props {
   visible: boolean;
@@ -43,6 +44,7 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
   const [path, setPath] = useState<DisciplineId | undefined>();
   const [logged, setLogged] = useState<string | undefined>();
   const [version, setVersion] = useState(0);
+  const backStack = useBackStack();
 
   // Every opening starts on the list.
   useEffect(() => {
@@ -58,89 +60,93 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
       visible={visible}
       animationType="slide"
       onRequestClose={() =>
-        drilling
+        backStack.back()
+          ? undefined
+          : drilling
           ? setDrilling(undefined)
           : path
           ? setPath(undefined)
           : onClose()
       }>
-      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-        <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>
-            {drilling ? 'Drill it' : 'Practice'}
-          </Text>
-          <Tap
-            variant="plain"
-            onPress={onClose}
-            accessibilityRole="button"
-            style={styles.close}>
-            <Text style={styles.closeText}>Close</Text>
-          </Tap>
-        </View>
-        {drilling ? (
-          <PracticeRunner
-            exercise={drilling.exercise}
-            chart={drilling.chart}
-            dose={drilling.dose}
-            onDone={summary => {
-              setLogged(summary);
-              setVersion(v => v + 1);
-              setDrilling(undefined);
-            }}
-            onCancel={() => setDrilling(undefined)}
-          />
-        ) : path && disciplineById(path) ? (
-          <View style={styles.path}>
-            {logged ? (
-              <Text testID="practice-logged" style={styles.logged}>
-                Logged: {logged}
-              </Text>
-            ) : null}
-            <DisciplineView
-              discipline={disciplineById(path)!}
-              version={version}
-              onPick={(exercise, chart, dose) =>
-                setDrilling({exercise, chart, dose})
-              }
-              onBack={() => {
-                setPath(undefined);
-                setLogged(undefined);
-              }}
-            />
+      <backStack.Provider>
+        <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+          <View style={styles.header}>
+            <Text style={[styles.title, {color: accent}]}>
+              {drilling ? 'Drill it' : 'Practice'}
+            </Text>
+            <Tap
+              variant="plain"
+              onPress={onClose}
+              accessibilityRole="button"
+              style={styles.close}>
+              <Text style={styles.closeText}>Close</Text>
+            </Tap>
           </View>
-        ) : (
-          <CircuitsPanel
-            onEngageLegs={onEngageLegs}
-            header={
-              <View>
-                {logged ? (
-                  <Text testID="practice-logged" style={styles.logged}>
-                    Logged: {logged}
-                  </Text>
-                ) : null}
-                <SkillList
-                  version={version}
-                  onPick={exercise => setDrilling({exercise})}
-                  onOpenDiscipline={id => {
-                    setLogged(undefined);
-                    setPath(id);
-                  }}
-                />
-              </View>
-            }
-            footer={
-              <View style={styles.drills}>
-                <Text style={styles.sectionLabel}>HEART DRILLS</Text>
-                <CardGrid>
-                  {exercisesFor('heart').map(ex => (
-                    <ExerciseRow key={ex.id} exercise={ex} />
-                  ))}
-                </CardGrid>
-              </View>
-            }
-          />
-        )}
-      </SafeAreaView>
+          {drilling ? (
+            <PracticeRunner
+              exercise={drilling.exercise}
+              chart={drilling.chart}
+              dose={drilling.dose}
+              onDone={summary => {
+                setLogged(summary);
+                setVersion(v => v + 1);
+                setDrilling(undefined);
+              }}
+              onCancel={() => setDrilling(undefined)}
+            />
+          ) : path && disciplineById(path) ? (
+            <View style={styles.path}>
+              {logged ? (
+                <Text testID="practice-logged" style={styles.logged}>
+                  Logged: {logged}
+                </Text>
+              ) : null}
+              <DisciplineView
+                discipline={disciplineById(path)!}
+                version={version}
+                onPick={(exercise, chart, dose) =>
+                  setDrilling({exercise, chart, dose})
+                }
+                onBack={() => {
+                  setPath(undefined);
+                  setLogged(undefined);
+                }}
+              />
+            </View>
+          ) : (
+            <CircuitsPanel
+              onEngageLegs={onEngageLegs}
+              header={
+                <View>
+                  {logged ? (
+                    <Text testID="practice-logged" style={styles.logged}>
+                      Logged: {logged}
+                    </Text>
+                  ) : null}
+                  <SkillList
+                    version={version}
+                    onPick={exercise => setDrilling({exercise})}
+                    onOpenDiscipline={id => {
+                      setLogged(undefined);
+                      setPath(id);
+                    }}
+                  />
+                </View>
+              }
+              footer={
+                <View style={styles.drills}>
+                  <Text style={styles.sectionLabel}>HEART DRILLS</Text>
+                  <CardGrid>
+                    {exercisesFor('heart').map(ex => (
+                      <ExerciseRow key={ex.id} exercise={ex} />
+                    ))}
+                  </CardGrid>
+                </View>
+              }
+            />
+          )}
+        </SafeAreaView>
+      </backStack.Provider>
     </Modal>
   );
 }
