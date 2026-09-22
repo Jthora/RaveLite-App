@@ -249,10 +249,11 @@ and left out of the ramp, the streak and attribute decay; a day's
 recorded asks are taken at their word; My day's days are honoured;
 chimes that never sounded (paused, outside My day, app closed) are their
 own row and out of Catch up; Skip lets its sets go; the setup day starts
-at setup. Still open: a boot receiver, so chimes come back after a
-reboot without opening the app (native, needs a reboot test on the
-phone), and the Comeback and Festival Six block programs, which are
-described but not built.
+at setup. The Comeback and Festival Six are real block programs since 22 Sep
+(b81dc5f): a 4-week ramp-in, and a build to an event date with a
+lighter final week and a recovery day. Still open: a boot receiver, so
+chimes come back after a reboot without opening the app (written,
+waiting on its reboot test on the phone).
 
 **Phase 3 — say it plainly, and un-personalise.**
 No letter grades outside the military pack; take the author's numbers out
@@ -272,10 +273,14 @@ get the tiles named and the doors pointed out (the author's Today is
 unchanged); Weather and the plan are pages in Settings; Back unwinds the
 circuit editor; + Log push-ups count on the Push meter; attribute cards
 lead with plain words; travel keeps carried props; a stale forecast and
-demo mode say so. Still open: the global "Quiet flat" switch beside
-per-place limits (two switches for one thing), indoor swaps that still
-assume a low basement ceiling, Undo living under every sheet, and the
-tests pack's male and ages 35–40 defaults.
+demo mode say so. The four left open here were closed on 22 Sep: "Quiet flat"
+quiets indoor places only (79ff96f); indoor weather swaps read the
+person's own places (34a78d1); Undo shows inside the sheet you logged
+from (268e8d2); and the tests pack asks whose charts grade you, saying
+the app has the 35–40 charts only (413d325). Also closed from theme 4
+and 6: a warm-up before a sharp first morning piece, aerial tricks
+that keep their rests on every chart (4a9f4ce), and the Water page
+listing the prop and dance paths (4e00185).
 
 **Phase 4 — everyone can use it.**
 Contrast (`textMuted` for borders only), TalkBack labels, roles and
