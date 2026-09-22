@@ -148,6 +148,9 @@ function Stepper({
   return (
     <View style={styles.stepper}>
       <Text style={styles.stepperLabel}>{label}</Text>
+      {/* The time on its own line: beside two 48 dp buttons it ran past
+          the card on a phone. */}
+      <Text style={styles.stepperValue}>{value}</Text>
       <View style={styles.stepperRow}>
         <Tap
           variant="ghost"
@@ -157,7 +160,6 @@ function Stepper({
           style={styles.stepperBtn}>
           <Text style={styles.stepperBtnText}>−</Text>
         </Tap>
-        <Text style={styles.stepperValue}>{value}</Text>
         <Tap
           variant="ghost"
           color={palette.textDim}
@@ -257,6 +259,7 @@ const styles = StyleSheet.create({
     ...t.title,
     color: palette.text,
     fontVariant: ['tabular-nums'],
+    marginTop: spacing.xs,
   },
   note: {
     ...t.caption,

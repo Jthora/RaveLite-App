@@ -227,6 +227,14 @@ regions per drill, a neck region, "End" not "Done", injury stacking under
 other modes, a see-a-professional line; safety cues always shown first;
 beginners start at rung 0 and every track can step back down.
 
+*Done 21 Sep 2026* (fa74d7e, 8ba15f8, 1593554, c13d772, 5d04b80, cbe2a82).
+Checked on the Redmi: the author's phone kept its alarm route, its plan
+and its meal check-ins, and Today did not change; a throwaway install
+walked setup (Back steps back, an overnight day saves) and landed on a
+six-chime base program. Still open from this list: the notification
+prompt shows over setup and again after it (Phase 3, with the other
+first-run items).
+
 **Phase 2 — make the mercy real.**
 Record per-day rest (mode, pause, My-day day off) and skip those days in
 the ramp, the streak and attribute decay; honour My day's days in the

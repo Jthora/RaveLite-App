@@ -28,8 +28,7 @@ export function MyDayPanel() {
     <View style={styles.root}>
       <Text style={styles.eyebrow}>MY DAY</Text>
       <Text style={styles.caption}>
-        Chimes only sound between these times. Set the start to when you get up.
-        It can end after midnight.
+        Set the start to when you get up. It can end after midnight.
       </Text>
       <MyDayFields value={value} onChange={change} />
     </View>
