@@ -1,10 +1,13 @@
 /**
  * What the answers so far add up to.
  *
- * Setup asks four questions and then has to prove it was listening. This
- * is the line under every card — `9 chimes · 6 tracks · 142 drills · par
- * 20` — recomputed from the real program each time a tile is tapped, so
- * the preview is the thing itself rather than a description of it.
+ * Setup asks its questions and then has to prove it was listening. This
+ * is the line under every card — `20 chimes a day · 142 drills` —
+ * recomputed from the real program each time a tile is tapped, so the
+ * preview is the thing itself rather than a description of it. It counts
+ * every chime the day will make, not only the Daily Sets rounds: a
+ * preview that said 9 for a day of 20 was the first thing a new person
+ * would find to be untrue.
  *
  * It exists as its own module because Settings shows the same numbers,
  * and two ways of counting the same day is how a preview starts lying.
@@ -14,9 +17,15 @@ import {dailyPar, dayRounds, loadFacts, loadPacks} from './repository';
 import {groupsFor} from './packs';
 import {loadProgram, prescriptionsFor} from '../program/repository';
 import {groupIntoRounds} from '../program/rounds';
+import {getActiveHours, withinActiveHours} from '../ambient/activeHours';
+import {setsToday} from '../ambient/setScheduler';
+import {expandPlanToFires, planPulseId} from '../reminders/expandPlan';
+import {loadPlan} from '../reminders/repository';
 
 export interface Preview {
-  /** Chimes the day will actually carry, after grouping. */
+  /** Every chime the day makes: rounds and plan chimes inside My day. */
+  chimes: number;
+  /** Daily Sets rounds, after grouping. */
   rounds: number;
   /** Tracks asking for something today. */
   tracks: number;
@@ -27,10 +36,31 @@ export interface Preview {
   par: number;
 }
 
+/** Plan chimes inside My day that do not ride along with a round. */
+function planChimes(date: Date, absorbed: ReadonlySet<string>): number {
+  const midnight = new Date(date);
+  midnight.setHours(0, 0, 0, 0);
+  const hours = getActiveHours();
+  return expandPlanToFires(
+    loadPlan(),
+    midnight.getTime(),
+    midnight.getTime() + 86_399_999,
+  ).filter(
+    f =>
+      withinActiveHours(new Date(f.ts), hours) && !absorbed.has(planPulseId(f)),
+  ).length;
+}
+
 export function previewDay(date: Date = new Date()): Preview {
   const prescriptions = prescriptionsFor(loadProgram(date), date);
+  const rounds = groupIntoRounds(prescriptions, {rounds: dayRounds()}).length;
+  // A whole day, whatever the hour setup is answered at.
+  const noon = new Date(date);
+  noon.setHours(12, 0, 0, 0);
+  const sets = setsToday(noon.getTime());
   return {
-    rounds: groupIntoRounds(prescriptions, {rounds: dayRounds()}).length,
+    chimes: sets.fires.length + planChimes(noon, new Set(sets.absorbedPlanIds)),
+    rounds,
     tracks: prescriptions.length,
     drills: usableDrills(loadFacts(date.getTime())).length,
     lessons: groupsFor(loadPacks()).length,
@@ -38,15 +68,13 @@ export function previewDay(date: Date = new Date()): Preview {
   };
 }
 
-/** "9 chimes · 16 tracks · 142 drills · par 20". */
+/** "20 chimes a day · 142 drills". Plain words only: no tracks, no par. */
 export function previewLine(preview: Preview): string {
   const plural = (n: number, one: string, many = `${one}s`) =>
     `${n} ${n === 1 ? one : many}`;
   return [
-    plural(preview.rounds, 'chime'),
-    plural(preview.tracks, 'track'),
+    `${plural(preview.chimes, 'chime')} a day`,
     plural(preview.drills, 'drill'),
-    `par ${preview.par}`,
   ].join(' · ');
 }
 
@@ -66,7 +94,7 @@ export function previewDiff(before: Preview, after: Preview): string {
     parts.push(`${delta > 0 ? '+' : '−'}${n} ${n === 1 ? one : many}`);
   };
   say(before.drills, after.drills, 'drill');
-  say(before.rounds, after.rounds, 'chime');
+  say(before.chimes, after.chimes, 'chime');
   say(before.tracks, after.tracks, 'track');
   say(before.lessons, after.lessons, 'lesson');
   if (before.par !== after.par) {

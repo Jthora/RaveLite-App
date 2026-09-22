@@ -41,8 +41,14 @@ import {MyDayPanel} from './MyDayPanel';
 import {StartingPanel} from './StartingPanel';
 import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
-import {ELEMENTS} from '../../theme/elements';
+import {ELEMENT_ORDER, ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+
+/** "Fire, Air, Core, Earth and Water", in the balance strip's order. */
+const ELEMENT_NAMES = ((names: string[]) =>
+  `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`)(
+  ELEMENT_ORDER.map(id => ELEMENTS[id].name),
+);
 
 /** Needs no kit, no floor and no room: safe to fire at anybody. */
 const TUTORIAL_DRILL = 'air.chin-tuck';
@@ -197,20 +203,26 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
           showsVerticalScrollIndicator={false}>
           {last ? (
             <View style={styles.card}>
-              <Text style={styles.big}>{preview.rounds}</Text>
-              <Text style={styles.cardLine}>
-                chimes a day, across {preview.tracks}{' '}
-                {preview.tracks === 1 ? 'track' : 'tracks'}.
+              <Text style={styles.big}>{preview.chimes}</Text>
+              <Text style={styles.cardLine}>chimes a day.</Text>
+              <Text style={styles.why}>
+                {preview.rounds} of them are short sets of exercises, spread
+                through your day. The rest are water, a morning start and an
+                evening review.
               </Text>
               <Text style={styles.why}>
-                {preview.drills} drills fit what you have, and{' '}
+                {preview.drills} drills fit what you have
                 {preview.lessons > 0
-                  ? `${preview.lessons} ${
-                      preview.lessons === 1 ? 'section' : 'sections'
-                    } of lessons to work through`
-                  : 'the base program to work through'}
-                . Each element has a goal of {preview.par} points a day. Reach
-                it in all five for a Harmony day.
+                  ? `, and ${preview.lessons} ${
+                      preview.lessons === 1 ? 'lesson' : 'lessons'
+                    } to learn`
+                  : ''}
+                .
+              </Text>
+              <Text style={styles.why}>
+                Each drill earns points for its element: {ELEMENT_NAMES}. Aim
+                for {preview.par} points in each, every day. All five in one day
+                is a Harmony day.
               </Text>
               <Text style={styles.why}>
                 Answer the chimes. The app adjusts to what you do.

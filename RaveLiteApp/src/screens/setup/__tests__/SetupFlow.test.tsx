@@ -141,7 +141,7 @@ it('asks where you are starting, and seeds the maxes from the answer', () => {
 it('the preview is the program, not a promise about it', () => {
   const {tree} = renderFlow();
   const line = () => byTestId(tree, 'setup-preview').props.children as string;
-  expect(line()).toMatch(/\d+ chimes · \d+ tracks · \d+ drills · par \d+/);
+  expect(line()).toMatch(/^\d+ chimes a day · \d+ drills$/);
 
   // Take the leanest archetype: the numbers under the card have to move.
   const before = line();
