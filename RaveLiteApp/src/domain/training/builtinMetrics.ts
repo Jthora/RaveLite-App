@@ -464,3 +464,14 @@ export const BUILTIN_METRICS: MetricKind[] = [
 export function builtinById(id: string): MetricKind | undefined {
   return BUILTIN_METRICS.find(m => m.id === id);
 }
+
+/**
+ * Kinds that only mean something in a military fitness test. They stay in
+ * the log for somebody carrying that pack, and for an entry already
+ * logged; for anyone else they were a list of Marine events in the way.
+ */
+export const TEST_ONLY_KINDS: ReadonlySet<string> = new Set([
+  'builtin.cft-mtc',
+  'builtin.cft-acl',
+  'builtin.cft-manuf',
+]);

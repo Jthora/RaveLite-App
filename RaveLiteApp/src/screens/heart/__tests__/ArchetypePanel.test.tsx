@@ -55,8 +55,8 @@ it('says what taking one would cost before it costs it', () => {
   const label = byTestId(tree, 'archetype-parent').props.accessibilityLabel;
 
   // The preview has to be concrete, or it is decoration.
-  expect(label).toMatch(/\d+ chimes/);
-  expect(label).toMatch(/par \d+/);
+  expect(label).toMatch(/\d+ rounds? of sets/);
+  expect(label).toMatch(/goal \d+ points/);
   expect(label).toContain('ten minutes at a time');
 });
 

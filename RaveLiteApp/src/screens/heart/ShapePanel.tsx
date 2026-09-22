@@ -35,7 +35,9 @@ const SHAPE_SYMBOL: Record<DayShapeId, SymbolName> = {
 /** "6 chimes a day · par 15" — what picking this shape would mean. */
 function shapeMeans(id: DayShapeId, rounds: number): string {
   const par = parFor(densityFor(id), DAILY_PAR);
-  return `${rounds} ${rounds === 1 ? 'chime' : 'chimes'} a day · par ${par}`;
+  return `${rounds} ${
+    rounds === 1 ? 'round' : 'rounds'
+  } of sets a day · goal ${par} points`;
 }
 
 export function ShapePanel() {
@@ -50,8 +52,8 @@ export function ShapePanel() {
     <View style={styles.root}>
       <Text style={styles.eyebrow}>WHAT YOUR DAY IS LIKE</Text>
       <Text style={styles.caption}>
-        Pick how many times a day you can stop and move. Chimes, sets and par
-        all scale to fit. A short day still counts in full.
+        Pick how many times a day you can stop and move. Chimes, sets and point
+        goals all scale to fit. A short day still counts in full.
       </Text>
       {DAY_SHAPES.map(option => {
         const on = shape === option.id;

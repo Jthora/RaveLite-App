@@ -98,7 +98,7 @@ export function previewDiff(before: Preview, after: Preview): string {
   say(before.tracks, after.tracks, 'track');
   say(before.lessons, after.lessons, 'lesson');
   if (before.par !== after.par) {
-    parts.push(`par ${after.par}`);
+    parts.push(`goal ${after.par} points`);
   }
   return parts.join(' · ');
 }

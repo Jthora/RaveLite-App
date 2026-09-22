@@ -37,6 +37,7 @@ import {
   updateWindow,
 } from '../../domain/reminders/planMutations';
 import type {Plan, Window} from '../../domain/reminders/types';
+import {DEFAULT_PLAN} from '../../domain/reminders/defaultPlan';
 
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -143,7 +144,10 @@ export function PlanPanel({onPlanCommitted, scroll = true}: Props) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>
-          ▸ PLAN · {draft.name.toUpperCase()}
+          ▸ PLAN
+          {draft.name && draft.name !== DEFAULT_PLAN.name
+            ? ` · ${draft.name.toUpperCase()}`
+            : ''}
         </Text>
         <Text style={styles.subtitle}>
           {draft.windows.length} window{draft.windows.length === 1 ? '' : 's'} ·{' '}

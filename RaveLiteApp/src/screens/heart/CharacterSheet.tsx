@@ -200,8 +200,8 @@ export function CharacterSheet({
         </View>
         <Text style={styles.caption}>
           {harmony
-            ? 'Every element reached par today. This is a Harmony day.'
-            : 'Reach par in all five elements in one day for Harmony. Everything you finish adds XP to the attributes it trains.'}
+            ? 'Every element reached its goal today. This is a Harmony day.'
+            : 'Reach the goal in all five elements in one day for a Harmony day. Everything you finish adds XP to the attributes it trains.'}
         </Text>
         {bonus > 0 ? (
           <Text style={styles.note}>

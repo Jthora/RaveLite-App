@@ -15,6 +15,7 @@ import {elementOf} from '../theme/elements';
 import {palette, radius, spacing, type} from '../theme';
 import {hues} from '../theme/hues';
 import {pulseHaptic} from '../lib/elementHaptics';
+import {targetName} from '../domain/exercises/targetNames';
 
 interface Props {
   exercise: Exercise;
@@ -100,7 +101,9 @@ export const ExerciseRow: React.FC<Props> = ({
                 styles.tag,
                 {backgroundColor: el.tint, borderColor: el.color},
               ]}>
-              <Text style={[styles.tagText, {color: el.color}]}>{t}</Text>
+              <Text style={[styles.tagText, {color: el.color}]}>
+                {targetName(t)}
+              </Text>
             </View>
           ))}
         </View>

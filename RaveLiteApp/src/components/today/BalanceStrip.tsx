@@ -50,7 +50,7 @@ export function BalanceStrip({
             color={el.color}
             onPress={() => onElementPress?.(id)}
             accessibilityRole="button"
-            accessibilityLabel={`${el.name}: ${n} of ${par} points today; par on ${parDays} of the last 7 days. Open`}
+            accessibilityLabel={`${el.name}: ${n} of ${par} points today; reached the goal on ${parDays} of the last 7 days. Open`}
             style={[styles.cell, lit && {borderColor: el.color}]}>
             {/* Tap's inner view stretches its children; center the mark. */}
             <View style={styles.mark}>

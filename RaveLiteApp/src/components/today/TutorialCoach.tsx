@@ -43,7 +43,7 @@ const LESSONS: readonly Lesson[] = [
   {
     title: 'The ⓘ button',
     symbol: 'learn',
-    body: 'Tap ⓘ on a drill, a track or an attribute to see what it is, how to do it and why it is here.',
+    body: 'Tap ⓘ on a drill, a set or an attribute to see what it is, how to do it and why it is here.',
   },
   {
     title: "That's it",

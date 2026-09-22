@@ -203,7 +203,7 @@ export const ATTRIBUTES: readonly Attribute[] = [
     modality: 'mutable',
     sign: 'Pisces',
     gist: 'How your body adapts and restores.',
-    how: 'Drinking water, easy walks, soft tissue work, sleep, deload weeks.',
+    how: 'Drinking water, easy walks, soft tissue work, sleep, easy weeks.',
     events: [],
   },
 ];

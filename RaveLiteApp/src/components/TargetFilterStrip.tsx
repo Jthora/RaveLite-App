@@ -1,16 +1,16 @@
 /**
  * Toggle row of focus-area pills for filtering drills.
  *
- * Empty selection means "no filter — show all". The default state is
- * the operator's three active corrections (UCS / Hourglass / APT),
- * surfaced via a quick-toggle "MY CORRECTIONS" pill at the head of the
- * row.
+ * Empty selection means "no filter — show all". A "MY CORRECTIONS" pill
+ * at the head of the row turns on the corrections this person marked
+ * (Settings › You) — only theirs, and only when they marked any.
  *
  * Used by an element's Library sheet (focus areas saved per element).
  */
 import React from 'react';
 import {Pressable, ScrollView, StyleSheet, Text} from 'react-native';
 import type {Target} from '../domain/exercises/types';
+import {targetName} from '../domain/exercises/targetNames';
 import {palette, radius, spacing} from '../theme';
 
 /** Focus areas offered as pills — corrections first, then training
@@ -35,22 +35,24 @@ export const FOCUS_TARGETS: ReadonlyArray<Target> = [
   'NoFloor',
 ];
 
-/** The operator's three active corrections — the "MY CORRECTIONS" preset. */
-export const CORRECTIONS_PRESET: ReadonlyArray<Target> = [
-  'UCS',
-  'Hourglass',
-  'APT',
-];
-
 interface Props {
   active: ReadonlyArray<Target>;
   onChange: (next: Target[]) => void;
   /** Element accent — drives active pill color. */
   color: string;
+  /** The corrections this person marked; the preset pill turns them on. */
+  corrections: ReadonlyArray<Target>;
 }
 
-export function TargetFilterStrip({active, onChange, color}: Props) {
-  const allCorrectionsOn = CORRECTIONS_PRESET.every(t => active.includes(t));
+export function TargetFilterStrip({
+  active,
+  onChange,
+  color,
+  corrections: CORRECTIONS_PRESET,
+}: Props) {
+  const allCorrectionsOn =
+    CORRECTIONS_PRESET.length > 0 &&
+    CORRECTIONS_PRESET.every(t => active.includes(t));
 
   const toggle = (t: Target) => {
     if (active.includes(t)) {
@@ -75,17 +77,19 @@ export function TargetFilterStrip({active, onChange, color}: Props) {
       showsHorizontalScrollIndicator={false}
       style={styles.strip}
       contentContainerStyle={styles.row}>
-      <Pill
-        label="⌖  MY CORRECTIONS"
-        active={allCorrectionsOn}
-        onPress={togglePreset}
-        color={color}
-        accent
-      />
+      {CORRECTIONS_PRESET.length > 0 ? (
+        <Pill
+          label="⌖  MY CORRECTIONS"
+          active={allCorrectionsOn}
+          onPress={togglePreset}
+          color={color}
+          accent
+        />
+      ) : null}
       {FOCUS_TARGETS.map(t => (
         <Pill
           key={t}
-          label={t}
+          label={targetName(t)}
           active={active.includes(t)}
           onPress={() => toggle(t)}
           color={color}

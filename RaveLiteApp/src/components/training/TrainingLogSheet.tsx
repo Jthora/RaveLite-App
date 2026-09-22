@@ -54,6 +54,7 @@ import {NumberPad} from './NumberPad';
 import {CalendarPicker} from './CalendarPicker';
 import {METERS_PER_MILE, MS_PER_DAY} from '../../lib/constants';
 import {showsGrades} from '../../domain/profile/repository';
+import {TEST_ONLY_KINDS} from '../../domain/training/builtinMetrics';
 
 const MI_PER_M = 1 / METERS_PER_MILE;
 
@@ -93,8 +94,16 @@ export function TrainingLogSheet({
   /* eslint-disable react-hooks/exhaustive-deps */
   const metrics = useMemo(
     () =>
-      defaultElement ? loadMetricsForElement(defaultElement) : loadMetrics(),
-    [tick, defaultElement],
+      (defaultElement
+        ? loadMetricsForElement(defaultElement)
+        : loadMetrics()
+      ).filter(
+        m =>
+          !TEST_ONLY_KINDS.has(m.id) ||
+          showsGrades() ||
+          m.id === editing?.kindId,
+      ),
+    [tick, defaultElement, editing?.kindId],
   );
   const editingKind = useMemo(
     () => (editing ? getMetric(editing.kindId) : undefined),

@@ -1009,7 +1009,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
   {
     id: 'earth.rkc-plank',
     element: 'earth',
-    name: 'RKC Plank',
+    name: 'Full-Tension Plank',
     purpose: 'A short, hard plank with every muscle squeezed at once.',
     dose: '3 × 20 sec',
     cues: [
@@ -1272,7 +1272,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     element: 'fire',
     name: 'Pushups (PFT pace)',
     purpose: 'USSF PFT event: as many push-ups as you can in 1 minute.',
-    dose: '1 min AMRAP',
+    dose: '1 min, as many as you can',
     cues: [
       STOP_LINE,
       'Hands shoulder-width, body in one line, ribs down',
@@ -1288,7 +1288,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     element: 'fire',
     name: 'Situps (PFT pace)',
     purpose: 'USSF PFT: most sit-ups in 1 minute, without gripping your belly.',
-    dose: '1 min AMRAP',
+    dose: '1 min, as many as you can',
     cues: [
       STOP_LINE,
       'Breathe out on the way up; do not suck in your belly',

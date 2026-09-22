@@ -127,14 +127,14 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>▸ CIRCUITS</Text>
         <Text style={styles.subtitle}>
-          The built-in Pentagram, plus circuits you make.
+          The Five Elements circuit, plus circuits you make.
         </Text>
       </View>
 
       {/* Built-in pentagram card */}
       <View style={[styles.card, {borderColor: accent}]}>
         <Text style={[styles.cardEyebrow, {color: accentDim}]}>▸ BUILT-IN</Text>
-        <Text style={styles.cardTitle}>The Pentagram</Text>
+        <Text style={styles.cardTitle}>Five Elements</Text>
         <Text style={styles.cardMeta}>
           Air → Fire → Earth → Water → Heart · ~3 minutes
         </Text>

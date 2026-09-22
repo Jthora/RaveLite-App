@@ -10,7 +10,7 @@ import {Tap} from '../Tap';
 import {TargetFilterStrip} from '../TargetFilterStrip';
 import {exercisesFor} from '../../domain/exercises/library';
 import {canDo, whyNot} from '../../domain/profile/kit';
-import {loadFacts} from '../../domain/profile/repository';
+import {baseFacts, loadFacts} from '../../domain/profile/repository';
 import type {Target} from '../../domain/exercises/types';
 import type {ElementIdentity} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
@@ -76,6 +76,7 @@ export function LibrarySheet({
             active={focus}
             onChange={onFocusChange}
             color={element.color}
+            corrections={baseFacts().corrections}
           />
           <Text style={styles.meta}>
             {shown.length} of {all.length} {element.name.toLowerCase()} drills

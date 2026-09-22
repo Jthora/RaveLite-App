@@ -20,6 +20,7 @@ import type {CadenceSlot} from '../../domain/reminders/types';
 import type {Target} from '../../domain/exercises/types';
 import {ELEMENTS, ELEMENT_ORDER, type ElementId} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {targetName} from '../../domain/exercises/targetNames';
 
 interface Props {
   slot: CadenceSlot;
@@ -233,7 +234,7 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
               const active = draft.requiredTags?.includes(tag) ?? false;
               return (
                 <Tap
-                  key={tag}
+                  key={targetName(tag)}
                   variant="pill"
                   color={active ? accent : palette.border}
                   onPress={() => toggleTag(tag)}

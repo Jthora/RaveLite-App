@@ -11,6 +11,7 @@ import type {ElementId} from '../../theme/elements';
 import type {Target} from '../exercises/types';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
+import {baseFacts} from '../profile/repository';
 
 export interface ElementPrefs {
   /** Focus areas for this element. Empty = no filter. */
@@ -19,12 +20,19 @@ export interface ElementPrefs {
   focusLocked: boolean;
 }
 
-/** First-run defaults. Air starts on the posture corrections plus breath
- *  work; the other elements start unfiltered. */
+/**
+ * First-run defaults. Air starts on the posture corrections this person
+ * marked that Air works on, plus breath work — and unfiltered for anyone
+ * who marked none. It used to start on the author's own corrections for
+ * everybody. The other elements start unfiltered.
+ */
 function defaultPrefs(element: ElementId): ElementPrefs {
-  const airDefaults: Target[] = ['UCS', 'Hourglass', 'Breath'];
+  const own =
+    element === 'air'
+      ? baseFacts().corrections.filter(c => c === 'UCS' || c === 'Hourglass')
+      : [];
   return {
-    focusTargets: element === 'air' ? airDefaults : [],
+    focusTargets: own.length > 0 ? [...own, 'Breath'] : [],
     focusLocked: false,
   };
 }

@@ -171,7 +171,8 @@ export function DailySetsSection({
     <View>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accent}]}>
-          ▸ WEEK {week} · {phase === 'deload' ? 'DELOAD + TEST WEEK' : 'BUILD'}
+          ▸ WEEK {week} ·{' '}
+          {phase === 'deload' ? 'EASY WEEK + MAX TESTS' : 'BUILD'}
         </Text>
         <Text style={styles.subtitle}>
           {setsDone} of {setsTotal} sets · My day {myDay.start}–{myDay.end}
@@ -553,7 +554,7 @@ export function reviewLine(review: TrackReview): string {
     case 'rebuild':
       return `Back from a break at ${sets}. One more set every 3 good days.`;
     case 'deload':
-      return 'Deload week: lighter sets on purpose. They go back up after it.';
+      return 'Easy week: lighter sets on purpose. They go back up after it.';
     case 'paused':
       return `Held at ${sets} while a mode is on. These days don't count.`;
     case 'hold':

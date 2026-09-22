@@ -40,7 +40,7 @@ import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
 
-/** "9 chimes · 5 packs · 142 drills · par 20" — what taking it would mean. */
+/** "9 rounds of sets · 5 packs · +142 drills · goal 20 points". */
 function preview(id: ArchetypeId): string {
   const archetype = archetypeById(id);
   if (!archetype) {
@@ -53,13 +53,13 @@ function preview(id: ArchetypeId): string {
   );
   const shape = DAY_SHAPES.find(s => s.id === archetype.shape);
   return [
-    `${rounds} chimes`,
+    `${rounds} ${rounds === 1 ? 'round' : 'rounds'} of sets`,
     shape ? shape.name.toLowerCase() : '',
     `${archetype.packs.length} ${
       archetype.packs.length === 1 ? 'pack' : 'packs'
     }`,
     `+${drills} drills`,
-    `par ${parFor(densityFor(archetype.shape), DAILY_PAR)}`,
+    `goal ${parFor(densityFor(archetype.shape), DAILY_PAR)} points`,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -104,8 +104,8 @@ export function ArchetypePanel() {
     <View style={styles.root}>
       <Text style={styles.eyebrow}>WHAT YOU'RE TRAINING FOR</Text>
       <Text style={styles.caption}>
-        Picking one sets your packs, your day and your tracks. You can change
-        any of them later.
+        Picking one sets your packs, your day and your daily sets. You can
+        change any of them later.
       </Text>
       {ARCHETYPES.map(archetype => {
         const on = chosen === archetype.id;
