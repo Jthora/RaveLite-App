@@ -8,6 +8,7 @@ import {
   takeBack,
   type UndoNotice,
 } from '../domain/activity/corrections';
+import {onStoreReset} from '../storage';
 import {ELEMENTS} from '../theme/elements';
 import {palette, radius, spacing, type as t} from '../theme';
 
@@ -22,6 +23,9 @@ let timer: ReturnType<typeof setTimeout> | undefined;
 let undoOff: (() => void) | undefined;
 /** Mounted bars, oldest first. */
 const bars: Array<() => void> = [];
+
+// A notice names an entry in one store; after a swap it names nothing.
+onStoreReset(() => show(undefined));
 
 function show(next: UndoNotice | undefined): void {
   current = next;

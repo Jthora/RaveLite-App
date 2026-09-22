@@ -13,6 +13,7 @@
  *   4. Enqueue needed rounds not yet enqueued, re-queue a waiting round
  *      whose contents changed, and cancel rounds no longer needed.
  */
+import {onStoreReset} from '../../storage';
 import type {ElementId} from '../../theme/elements';
 import {activityInRange, chimePoints} from '../activity/activity';
 import {averageShortfall} from '../activity/par';
@@ -130,6 +131,10 @@ function isWaterCall(plan: Plan, fire: FireSpec): boolean {
 }
 
 let balanceCache: {day: string; balance: Record<ElementId, number>} | undefined;
+// Worked out from one store's history; not the answer for another's.
+onStoreReset(() => {
+  balanceCache = undefined;
+});
 
 /**
  * Where today's partners lean, in points per element: what today's plan

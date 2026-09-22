@@ -20,6 +20,7 @@ import {addEntry, loadEntries} from '../../training/repository';
 import {loadProgram} from '../../program/repository';
 import {doneByTrack} from '../../program/progress';
 import {entriesForDay} from '../../journal/journal';
+import {setsToday} from '../../ambient/setScheduler';
 import React from 'react';
 import renderer, {act} from 'react-test-renderer';
 import {TodayPanel} from '../../../screens/heart/TodayPanel';
@@ -183,4 +184,24 @@ describe('the screens the camera visits', () => {
     expect(tree!.toJSON()).toBeTruthy();
     act(() => tree!.unmount());
   });
+});
+
+it("reads the demo's own history for today's rounds, not the real one", () => {
+  // Round partners lean on a balance worked out once a day. It used to
+  // survive the swap, so the demo's partners came from the real week,
+  // and after leaving, the real day kept the demo's.
+  jest.useFakeTimers();
+  jest.setSystemTime(NOW);
+  try {
+    aRealLife();
+    setsToday(NOW);
+    enterDemo(NOW);
+    const afterSwap = setsToday(NOW);
+    // A new day recomputes; coming back to today recomputes again, from
+    // the store that is in front now.
+    setsToday(NOW + 86_400_000);
+    expect(afterSwap).toEqual(setsToday(NOW));
+  } finally {
+    jest.useRealTimers();
+  }
 });

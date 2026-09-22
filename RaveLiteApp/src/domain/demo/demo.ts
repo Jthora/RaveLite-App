@@ -15,7 +15,6 @@
  */
 import {__swapStore} from '../../storage';
 import type {KeyValueStore} from '../../storage/types';
-import {__resetProfileCache} from '../profile/repository';
 import {seedDemo} from './seed';
 
 let on = false;
@@ -80,7 +79,6 @@ export function enterDemo(now: number = Date.now()): boolean {
   seedDemo(fake, {now});
   __swapStore(fake);
   on = true;
-  __resetProfileCache();
   announce();
   return true;
 }
@@ -92,7 +90,6 @@ export function exitDemo(): boolean {
   }
   __swapStore(undefined);
   on = false;
-  __resetProfileCache();
   announce();
   return true;
 }

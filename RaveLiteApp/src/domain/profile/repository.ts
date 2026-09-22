@@ -1,4 +1,4 @@
-import {store} from '../../storage';
+import {onStoreReset, store} from '../../storage';
 import {quarantine} from '../diagnostics/quarantine';
 import {KEYS} from '../../storage/keys';
 import {DAILY_PAR} from '../activity/par';
@@ -101,6 +101,10 @@ export function authorProfile(): Profile {
 const structuredCopy = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 
 let cached: Profile | undefined;
+// Demo mode, a wipe or a restore put a different profile underneath.
+onStoreReset(() => {
+  cached = undefined;
+});
 
 export function loadProfile(): Profile {
   if (cached) {

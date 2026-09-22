@@ -67,6 +67,26 @@ const persistentStore: KeyValueStore = {
  */
 let active: KeyValueStore = persistentStore;
 
+/**
+ * Caches built from what is stored. A module that keeps one registers
+ * here, and it is dropped whenever the store underneath changes wholesale:
+ * swapped for demo mode and back, cleared, or restored. Otherwise a cache from the
+ * real data answers for the demo, or the other way round, until the day
+ * changes.
+ */
+const resetListeners = new Set<() => void>();
+
+export function onStoreReset(listener: () => void): () => void {
+  resetListeners.add(listener);
+  return () => {
+    resetListeners.delete(listener);
+  };
+}
+
+function announceReset(): void {
+  resetListeners.forEach(listener => listener());
+}
+
 export const store: KeyValueStore = {
   getString: k => active.getString(k),
   getNumber: k => active.getNumber(k),
@@ -74,12 +94,16 @@ export const store: KeyValueStore = {
   set: (k, v) => active.set(k, v),
   delete: k => active.delete(k),
   keysWithPrefix: p => active.keysWithPrefix(p),
-  clearAll: () => active.clearAll(),
+  clearAll: () => {
+    active.clearAll();
+    announceReset();
+  },
 };
 
 /** Point every read and write somewhere else. Only `domain/demo` does this. */
 export function __swapStore(next: KeyValueStore | undefined): void {
   active = next ?? persistentStore;
+  announceReset();
 }
 
 export const __realStore = persistentStore;
@@ -116,6 +140,7 @@ export async function replaceStoredData(
       for (const [k, v] of entries) {
         memoryStore.set(k, v);
       }
+      announceReset();
       return result;
     }
     const back = await persistReplaceAll(memoryStore.entries());
