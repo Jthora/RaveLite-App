@@ -1,4 +1,8 @@
-import {attributeById, type AttributeId} from '../attributes/attributes';
+import {
+  attributeById,
+  type AttributeId,
+  type Modality,
+} from '../attributes/attributes';
 import {attributeSheet} from '../attributes/repository';
 import {attributesForDrill} from '../attributes/trains';
 import {EXERCISE_LIBRARY} from '../exercises/library';
@@ -214,10 +218,17 @@ function trackCard(id: TrackId): InfoCard | undefined {
   };
 }
 
+/** What the grid's three columns mean, in words (see `attributes.ts`). */
+const MODALITY_WORD: Record<Modality, string> = {
+  cardinal: 'starting',
+  fixed: 'holding',
+  mutable: 'changing',
+};
+
 function attributeCard(id: AttributeId): InfoCard {
   const attribute = attributeById(id);
   const standing = attributeSheet().standings.find(s => s.attribute.id === id);
-  const meta: string[] = [attribute.sign];
+  const meta: string[] = [];
   if (standing) {
     meta.push(
       standing.practice >= 85
@@ -243,9 +254,14 @@ function attributeCard(id: AttributeId): InfoCard {
       ? 'No test for this yet. Only practice raises it'
       : 'Passing a test can raise it past 85',
   );
+  // The astrology is the author's frame for the grid; it goes last, and
+  // the plain words for the three columns go first.
+  meta.push(`Sign: ${attribute.sign}`);
   return {
     title: attribute.name,
-    subtitle: `${ELEMENTS[attribute.element].name} · ${attribute.modality}`,
+    subtitle: `${ELEMENTS[attribute.element].name} · ${
+      MODALITY_WORD[attribute.modality]
+    }`,
     element: attribute.element,
     what: attribute.gist,
     how: [attribute.how],

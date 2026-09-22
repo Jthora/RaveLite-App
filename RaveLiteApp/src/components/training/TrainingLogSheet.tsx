@@ -369,11 +369,16 @@ export function TrainingLogSheet({
                       </Text>
                     </Pressable>
                   ) : null}
-                  <Pressable onPress={() => setShowManage(true)} hitSlop={8}>
-                    <Text style={[styles.sectionAction, {color: accent}]}>
-                      Manage
-                    </Text>
-                  </Pressable>
+                  {/* Opened for one test (from Goals, inside Daily Sets),
+                      Manage would be a fourth sheet deep. It lives on
+                      + Log instead. */}
+                  {defaultKindId ? null : (
+                    <Pressable onPress={() => setShowManage(true)} hitSlop={8}>
+                      <Text style={[styles.sectionAction, {color: accent}]}>
+                        Manage
+                      </Text>
+                    </Pressable>
+                  )}
                 </View>
                 <ScrollView
                   style={styles.exerciseScroll}

@@ -57,9 +57,10 @@ it('a track shows its ladder, where you are on it, and what rides along', () => 
 it('an attribute shows its gist, how it grows and its sign', () => {
   const card = infoFor({kind: 'attribute', id: 'toughness'})!;
   expect(card.title).toBe('Toughness');
-  expect(card.subtitle).toBe('Earth · fixed');
+  // Plain words first; the sign is last.
+  expect(card.subtitle).toBe('Earth · holding');
   expect(card.what).toBe('Holding load.');
-  expect(card.meta).toContain('Taurus');
+  expect(card.meta?.[card.meta.length - 1]).toBe('Sign: Taurus');
 });
 
 describe('a round', () => {
