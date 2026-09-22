@@ -269,7 +269,7 @@ accumulating anything.
 
 ---
 
-### Pass 6 — Performance and the low-end phone
+### Pass 6 — Performance and the low-end phone ◐ *(numbers taken 22 Sep 2026; the always-on case waits for the phone)*
 
 **Problem:** the target device is a Redmi A3. It has never been measured,
 only observed not to be obviously slow.

@@ -10,6 +10,14 @@ the app the author uses.
 Written 20 Sep 2026, after the app had been in daily personal use for a
 week and the operator asked to open it up.
 
+> **This plan is finished.** All of it shipped between 20 and 22 Sep
+> 2026. What came after it — seven audits of what could cause a stranger
+> grief, and six hardening passes over everything this wave added — is in
+> [audit.md](audit.md) and [hardening.md](hardening.md). What is left to
+> do, and who can do it, is in [next.md](next.md). Keep this one as the
+> reasoning: the numbers in it were counted on 20 Sep and have moved
+> since.
+
 ## Decisions already made
 
 | Decision | Made | Why |
