@@ -43,6 +43,12 @@ export interface Profile {
   injured?: Region;
   /** Set once setup has been answered, so it is never shown twice. */
   setUpAt?: number;
+  /**
+   * Set when setup first opens, alongside the gentle defaults it writes
+   * (`setup.beginSetup`). Anything setup leaves unanswered — Skip, Back,
+   * a killed app — falls back to those, not to the author's program.
+   */
+  startedSetupAt?: number;
   /** How much day there is to train in. See `program/density.ts`. */
   shape?: DayShapeId;
   /** Rounds, when `shape` is 'custom'. */
@@ -161,12 +167,16 @@ export function setPacks(packs: readonly PackId[]): void {
   saveProfile({...loadProfile(), packs: [...packs]});
 }
 
+/** Push-ups a day for somebody who set up without an archetype. */
+export const GENTLE_PUSHUP_GOAL = 100;
+
 /**
  * Push-ups a day to aim at.
  *
- * Falls back through the archetype to 200 — the number this app was
- * written around. An install that has never been asked keeps it, so
- * nothing moves for anyone who was already training toward it.
+ * Falls back through the archetype. Somebody who went through setup
+ * without one gets 100. An install from before setup keeps 200 — the
+ * number this app was written around — so nothing moves for anyone who
+ * was already training toward it.
  *
  * The archetype's number is a fallback, not an override: taking one later
  * does not undo a goal set by hand. Packs and the day shape *are* what an
@@ -180,7 +190,12 @@ export function loadPushupGoal(): number {
   const archetype = profile.archetype
     ? archetypeById(profile.archetype)
     : undefined;
-  return archetype?.pushupGoal ?? AUTHOR_PUSHUP_GOAL;
+  if (archetype) {
+    return archetype.pushupGoal;
+  }
+  return profile.startedSetupAt !== undefined
+    ? GENTLE_PUSHUP_GOAL
+    : AUTHOR_PUSHUP_GOAL;
 }
 
 export function setPushupGoal(reps: number): void {
@@ -309,8 +324,15 @@ export function hasAnyHistory(): boolean {
 }
 
 export function needsSetup(): boolean {
-  if (loadProfile().setUpAt !== undefined) {
+  const profile = loadProfile();
+  if (profile.setUpAt !== undefined) {
     return false;
+  }
+  if (profile.startedSetupAt !== undefined) {
+    // Setup opened and was never finished — the app was closed part way.
+    // Chimes may have fired since, so only something the person did
+    // counts as a reason to stay away.
+    return !hasAnswered();
   }
   if (store.getString(KEYS.profile) !== undefined) {
     return false;

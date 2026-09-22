@@ -33,6 +33,7 @@ import {startWeather} from './src/domain/conditions/weather';
 import {ElementShell} from './src/shell/ElementShell';
 import {SetupFlow} from './src/screens/setup/SetupFlow';
 import {__resetProfileCache, needsSetup} from './src/domain/profile/repository';
+import {beginSetup} from './src/domain/profile/setup';
 import {
   clearSetupRequest,
   subscribeSetupRequest,
@@ -109,6 +110,10 @@ function App(): React.JSX.Element {
         void guessUnitsOnce(fresh, getLocale, units =>
           setWeatherPrefs({units}),
         );
+        if (fresh) {
+          // Before anything reads the profile: Skip must land on these.
+          beginSetup();
+        }
         setSetup(fresh);
         setHydrated(true);
         // Reminders pipeline: now that persisted state is available,

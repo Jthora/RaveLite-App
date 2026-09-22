@@ -11,23 +11,33 @@
  * not a description of what the answers will do, it is what they have
  * already done — the preview and the thing are the same object.
  *
- * Skippable at any point. The defaults are a working program, and an app
- * that will not let you in until you have answered it is worse than one
- * that guesses.
+ * Skippable at any point. Opening it writes gentle defaults — the base
+ * program, fewer chimes, a beginner's numbers (`beginSetup`) — so Skip, a
+ * question left alone or a killed app never leaves somebody on the
+ * author's program. Android Back steps back a card; it does not skip.
  */
-import React, {useCallback, useMemo, useState} from 'react';
-import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {
+  BackHandler,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {Tap} from '../../components/Tap';
 import {previewDay, previewLine} from '../../domain/profile/preview';
 import {finishSetup} from '../../domain/profile/repository';
+import {beginSetup} from '../../domain/profile/setup';
 import {enqueueNow} from '../../domain/ambient/pulseRuntime';
 import {ArchetypePanel} from '../heart/ArchetypePanel';
 import {KitPanel} from '../heart/KitPanel';
 import {PacksPanel} from '../heart/PacksPanel';
 import {ShapePanel} from '../heart/ShapePanel';
 import {DisclaimerCard} from './DisclaimerCard';
+import {MyDayPanel} from './MyDayPanel';
 import {StartingPanel} from './StartingPanel';
 import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
@@ -70,6 +80,13 @@ const STEPS: readonly Step[] = [
     panel: KitPanel,
   },
   {
+    key: 'hours',
+    symbol: 'sun',
+    title: 'When does your day run?',
+    why: 'Chimes only sound inside these hours.',
+    panel: MyDayPanel,
+  },
+  {
     key: 'shape',
     symbol: 'desk',
     title: 'What is your day like?',
@@ -107,6 +124,21 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
     onDone();
   }, [onDone]);
 
+  // App.tsx has usually done this already; a wipe from Settings has not.
+  useEffect(() => {
+    beginSetup();
+    setVersion(v => v + 1);
+  }, []);
+
+  /** Back steps back. On the first card it leaves the app, as Android does. */
+  const back = useCallback(() => {
+    if (at > 0) {
+      setAt(n => n - 1);
+    } else {
+      BackHandler.exitApp();
+    }
+  }, [at]);
+
   const preview = useMemo(
     () => previewDay(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,7 +150,7 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
   const Panel = step.panel;
 
   return (
-    <Modal visible animationType="slide" onRequestClose={done}>
+    <Modal visible animationType="slide" onRequestClose={back}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <View

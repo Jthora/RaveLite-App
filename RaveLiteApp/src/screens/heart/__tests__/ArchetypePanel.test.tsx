@@ -5,6 +5,7 @@ import {beforeEach, expect, it} from '@jest/globals';
 import {ArchetypePanel} from '../ArchetypePanel';
 import {
   __resetProfileCache,
+  finishSetup,
   loadArchetype,
   loadPacks,
   loadShape,
@@ -28,6 +29,7 @@ const byTestId = (tree: renderer.ReactTestRenderer, id: string) =>
   tree.root.findAll((n: ReactTestInstance) => n.props.testID === id)[0];
 
 it('will not replace a program on one tap', () => {
+  finishSetup();
   const tree = renderPanel();
 
   act(() => {

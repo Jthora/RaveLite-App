@@ -28,21 +28,7 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
   }, [visible, value]);
 
   const accent = ELEMENTS.heart.accent;
-  const shift = (edge: 'start' | 'end', minutes: number) =>
-    setDraft(d => ({...d, [edge]: shiftHHMM(d[edge], minutes)}));
-  const toggleDay = (i: number) =>
-    setDraft(d => ({...d, daysMask: d.daysMask ^ (1 << i)}));
-  const length = dayLength(draft);
-  const valid = length >= MIN_DAY_MIN && draft.daysMask !== 0;
-  const note =
-    length < MIN_DAY_MIN
-      ? 'My day must be at least 4 hours.'
-      : draft.daysMask === 0
-      ? 'Pick at least one day.'
-      : draft.end < draft.start
-      ? `Ends the next day at ${draft.end}.`
-      : null;
-
+  const valid = myDayProblem(draft) === null;
   return (
     <Modal
       visible={visible}
@@ -56,42 +42,7 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
             Chimes sound inside My day, rounds spread across it, and the screen
             dims outside it. It can end after midnight.
           </Text>
-          <View style={styles.steppers}>
-            <Stepper
-              label="Starts"
-              value={draft.start}
-              onShift={m => shift('start', m)}
-            />
-            <Stepper
-              label="Ends"
-              value={draft.end}
-              onShift={m => shift('end', m)}
-            />
-          </View>
-          {note ? <Text style={styles.note}>{note}</Text> : null}
-          <View style={styles.days}>
-            {DAY_LETTERS.map((letter, i) => {
-              const on = (draft.daysMask & (1 << i)) !== 0;
-              return (
-                <Tap
-                  key={DAY_NAMES[i]}
-                  variant="plain"
-                  color={accent}
-                  onPress={() => toggleDay(i)}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{checked: on}}
-                  accessibilityLabel={DAY_NAMES[i]}
-                  style={[
-                    styles.day,
-                    on && {backgroundColor: accent, borderColor: accent},
-                  ]}>
-                  <Text style={[styles.dayText, on && styles.dayTextOn]}>
-                    {letter}
-                  </Text>
-                </Tap>
-              );
-            })}
-          </View>
+          <MyDayFields value={draft} onChange={setDraft} />
           <View style={styles.actions}>
             <Tap
               variant="ghost"
@@ -112,6 +63,76 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
         </View>
       </View>
     </Modal>
+  );
+}
+
+/** Why a My day can't be saved, or null when it can. */
+export function myDayProblem(value: ActiveHours): string | null {
+  if (dayLength(value) < MIN_DAY_MIN) {
+    return 'My day must be at least 4 hours.';
+  }
+  return value.daysMask === 0 ? 'Pick at least one day.' : null;
+}
+
+/**
+ * Start, end and days, with a line saying what is wrong or that the day
+ * ends after midnight. Shared by this sheet and the setup question.
+ */
+export function MyDayFields({
+  value,
+  onChange,
+}: {
+  value: ActiveHours;
+  onChange: (next: ActiveHours) => void;
+}) {
+  const accent = ELEMENTS.heart.accent;
+  const shift = (edge: 'start' | 'end', minutes: number) =>
+    onChange({...value, [edge]: shiftHHMM(value[edge], minutes)});
+  const toggleDay = (i: number) =>
+    onChange({...value, daysMask: value.daysMask ^ (1 << i)});
+  const note =
+    myDayProblem(value) ??
+    (value.end < value.start ? `Ends the next day at ${value.end}.` : null);
+
+  return (
+    <>
+      <View style={styles.steppers}>
+        <Stepper
+          label="Starts"
+          value={value.start}
+          onShift={m => shift('start', m)}
+        />
+        <Stepper
+          label="Ends"
+          value={value.end}
+          onShift={m => shift('end', m)}
+        />
+      </View>
+      {note ? <Text style={styles.note}>{note}</Text> : null}
+      <View style={styles.days}>
+        {DAY_LETTERS.map((letter, i) => {
+          const on = (value.daysMask & (1 << i)) !== 0;
+          return (
+            <Tap
+              key={DAY_NAMES[i]}
+              variant="plain"
+              color={accent}
+              onPress={() => toggleDay(i)}
+              accessibilityRole="checkbox"
+              accessibilityState={{checked: on}}
+              accessibilityLabel={DAY_NAMES[i]}
+              style={[
+                styles.day,
+                on && {backgroundColor: accent, borderColor: accent},
+              ]}>
+              <Text style={[styles.dayText, on && styles.dayTextOn]}>
+                {letter}
+              </Text>
+            </Tap>
+          );
+        })}
+      </View>
+    </>
   );
 }
 

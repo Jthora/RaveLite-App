@@ -51,9 +51,9 @@ export function DisclaimerCard() {
           </Text>
         </View>
         <Text style={styles.body}>
-          Five questions, then your day. You can skip any of them. You can
-          change every answer later in Settings. If you skip, the defaults give
-          you a full program.
+          Six questions, then your day. You can skip any of them. You can change
+          every answer later in Settings. If you skip, you get the base program
+          at a beginner's level.
         </Text>
         <Text style={styles.body}>
           Everything you log stays on this phone. There is no account. Nothing

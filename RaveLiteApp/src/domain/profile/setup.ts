@@ -13,10 +13,20 @@
  */
 import {TRACKS} from '../program/tracks';
 import {loadProgram, saveProgram, setTrackEnabled} from '../program/repository';
-import type {TrackId} from '../program/types';
+import type {DayShapeId, TrackId} from '../program/types';
 import {archetypeById, type ArchetypeId} from './archetypes';
-import {applyArchetypeToProfile, hasHistory, setStarting} from './repository';
+import {
+  applyArchetypeToProfile,
+  hasHistory,
+  loadProfile,
+  loadStarting,
+  saveProfile,
+  setStarting,
+} from './repository';
 import {seededMax, startingFactor, type StartingPoint} from './starting';
+
+/** Six chimes a day, where the author's desk day has nine. */
+export const GENTLE_SHAPE: DayShapeId = 'office';
 
 export function applyArchetype(id: ArchetypeId): void {
   const archetype = archetypeById(id);
@@ -64,4 +74,36 @@ export function chooseStarting(id: StartingPoint): boolean {
   }
   saveProgram({...program, tracks});
   return true;
+}
+
+/**
+ * What setup starts from, written the moment it opens.
+ *
+ * The base program only (no packs), a day with fewer chimes than the
+ * author's desk day, and a beginner's numbers. So Skip, Back, a killed
+ * app or a question left alone all leave somebody on a gentle start,
+ * not on the program this app was written for. Every one of these is an
+ * ordinary answer: the panels show it, and changing it is one tap.
+ *
+ * Runs once. An install that has been used, or that finished setup, is
+ * left alone.
+ */
+export function beginSetup(now: number = Date.now()): void {
+  const profile = loadProfile();
+  if (
+    profile.startedSetupAt !== undefined ||
+    profile.setUpAt !== undefined ||
+    hasHistory()
+  ) {
+    return;
+  }
+  saveProfile({
+    ...profile,
+    startedSetupAt: now,
+    packs: profile.packs ?? [],
+    shape: profile.shape ?? GENTLE_SHAPE,
+  });
+  if (loadStarting() === undefined) {
+    chooseStarting('new');
+  }
 }

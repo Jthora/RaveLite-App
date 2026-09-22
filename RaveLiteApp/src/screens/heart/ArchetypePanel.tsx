@@ -7,9 +7,11 @@
  * below it, and changing one afterwards is an ordinary edit, not a
  * departure from a preset.
  *
- * So picking is deliberately two taps. The first shows what would change
- * and what it costs; the second does it. Nobody should lose a tuned
- * program to a mis-tap on a list.
+ * Once set up, picking is two taps. The first shows what would change and
+ * what it costs; the second does it. Nobody should lose a tuned program to
+ * a mis-tap on a list. During setup there is nothing to lose yet, so one
+ * tap takes it — a first tap that only turned the card red, then Next,
+ * used to leave a stranger on the author's program.
  */
 import React, {useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
@@ -28,7 +30,11 @@ import {
 } from '../../domain/program/density';
 import {DAILY_PAR} from '../../domain/activity/par';
 import {PACKS, drillsOf} from '../../domain/profile/packs';
-import {loadArchetype} from '../../domain/profile/repository';
+import {
+  hasHistory,
+  loadArchetype,
+  loadProfile,
+} from '../../domain/profile/repository';
 import {applyArchetype} from '../../domain/profile/setup';
 import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
@@ -74,13 +80,18 @@ export const ARCHETYPE_SYMBOL: Record<ArchetypeId, SymbolName> = {
   'festival-six': 'festivalSix',
 };
 
+/** Whether a program has been set up or trained, and so could be lost. */
+function hasSomethingToLose(): boolean {
+  return loadProfile().setUpAt !== undefined || hasHistory();
+}
+
 export function ArchetypePanel() {
   const [chosen, setChosen] = useState<ArchetypeId | undefined>(loadArchetype);
   /** Tapped once, showing what it would do. */
   const [asking, setAsking] = useState<ArchetypeId | undefined>();
 
   const press = (id: ArchetypeId) => {
-    if (asking !== id) {
+    if (asking !== id && hasSomethingToLose()) {
       setAsking(id);
       return;
     }

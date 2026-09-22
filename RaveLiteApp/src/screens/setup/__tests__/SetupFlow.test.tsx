@@ -9,6 +9,8 @@ import {
   finishSetup,
   loadArchetype,
   loadPacks,
+  loadPushupGoal,
+  loadShape,
   needsSetup,
   setFacts,
 } from '../../../domain/profile/repository';
@@ -94,6 +96,10 @@ it('walks the questions, and every one is a panel Settings also uses', () => {
   expect(byTestId(tree, 'kit-mat')).toBeDefined();
 
   act(() => byTestId(tree, 'setup-next').props.onPress());
+  expect(textOf(tree)).toContain('When does your day run?');
+  expect(textOf(tree)).toContain('Starts');
+
+  act(() => byTestId(tree, 'setup-next').props.onPress());
   expect(byTestId(tree, 'shape-desk')).toBeDefined();
 
   act(() => byTestId(tree, 'setup-next').props.onPress());
@@ -106,7 +112,7 @@ it('walks the questions, and every one is a panel Settings also uses', () => {
 
 it('shows a real day at the end, and Start closes it for good', () => {
   const {tree, onDone} = renderFlow();
-  for (let i = 0; i < 6; i += 1) {
+  for (let i = 0; i < 7; i += 1) {
     act(() => byTestId(tree, 'setup-next').props.onPress());
   }
   expect(textOf(tree)).toContain("Here's your day");
@@ -121,7 +127,7 @@ it('shows a real day at the end, and Start closes it for good', () => {
 
 it('asks where you are starting, and seeds the maxes from the answer', () => {
   const {tree} = renderFlow();
-  for (let i = 0; i < 4; i += 1) {
+  for (let i = 0; i < 5; i += 1) {
     act(() => byTestId(tree, 'setup-next').props.onPress());
   }
   act(() => byTestId(tree, 'starting-new').props.onPress());
@@ -147,15 +153,60 @@ it('the preview is the program, not a promise about it', () => {
   act(() => tree.unmount());
 });
 
-it('can be skipped, and skipping still leaves a working program', () => {
+it('can be skipped, and skipping leaves a gentle start', () => {
   const {tree, onDone} = renderFlow();
   act(() => byTestId(tree, 'setup-skip').props.onPress());
 
   expect(onDone).toHaveBeenCalled();
   __resetProfileCache();
   expect(needsSetup()).toBe(false);
-  // Nothing was chosen, so nothing was narrowed.
+  // Nothing was chosen, so a stranger gets the base program at an easy
+  // start — not every pack, 200 push-ups and the author's desk day.
   expect(loadArchetype()).toBeUndefined();
-  expect(loadPacks().length).toBeGreaterThan(0);
+  expect(loadPacks()).toEqual([]);
+  expect(loadPushupGoal()).toBe(100);
+  expect(loadShape()).toBe('office');
+  expect(loadStarting()).toBe('new');
   act(() => tree.unmount());
+});
+
+it('steps back on Android Back instead of skipping', () => {
+  const {tree, onDone} = renderFlow();
+  act(() => byTestId(tree, 'setup-next').props.onPress());
+  act(() => byTestId(tree, 'setup-next').props.onPress());
+  expect(byTestId(tree, 'kit-mat')).toBeDefined();
+
+  const modal = tree.root.find(
+    (n: ReactTestInstance) => typeof n.props.onRequestClose === 'function',
+  );
+  act(() => modal.props.onRequestClose());
+  expect(textOf(tree)).toContain('What are you training for?');
+  expect(onDone).not.toHaveBeenCalled();
+  act(() => tree.unmount());
+});
+
+it('takes an archetype on the first tap during setup', () => {
+  const {tree} = renderFlow();
+  act(() => byTestId(tree, 'setup-next').props.onPress());
+  act(() => byTestId(tree, 'archetype-monk').props.onPress());
+  __resetProfileCache();
+  expect(loadArchetype()).toBe('monk');
+  act(() => tree.unmount());
+});
+
+it('comes back if the app was closed part way through', () => {
+  const {tree} = renderFlow();
+  act(() => byTestId(tree, 'setup-next').props.onPress());
+  act(() => byTestId(tree, 'setup-next').props.onPress());
+  act(() => byTestId(tree, 'kit-mat').props.onPress());
+  act(() => tree.unmount());
+  // A chime fired while it was closed; nobody answered it.
+  append({
+    kind: 'reminder.fired',
+    at: Date.now(),
+    pulseId: 'p1',
+    element: 'air',
+  } as never);
+  __resetProfileCache();
+  expect(needsSetup()).toBe(true);
 });
