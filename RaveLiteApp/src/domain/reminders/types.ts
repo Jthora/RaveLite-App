@@ -67,4 +67,9 @@ export interface ReminderPayload {
   /** Post on the element's quiet channel (vibration, no channel sound)
    *  because the cue already played in-app, or cues are set to Off. */
   silent?: boolean;
+  /** Clear the notification after this long: the chime's answer window,
+   *  so an unanswered one does not sit in the shade with live buttons. */
+  timeoutMs?: number;
+  /** Already given its +5: the notification offers Done and Skip only. */
+  snoozed?: boolean;
 }

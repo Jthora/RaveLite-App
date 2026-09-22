@@ -137,6 +137,7 @@ export function getActivePulseSummary(): ActivePulseSummary | undefined {
     cuesShort: safetyFirst(drill?.cues ?? []).slice(0, 4),
     prescription: active.prescription,
     note: active.note,
+    snoozed: active.snoozedFrom !== undefined,
   };
 }
 
@@ -189,6 +190,12 @@ function commit(
 ): void {
   for (const w of writes) {
     append(w);
+    if (w.kind === 'reminder.ignored') {
+      // Its answer window is over: take it out of the shade, so a stale
+      // notification's +5 cannot start a fresh chime hours later.
+      dismiss(w.pulseId);
+      continue;
+    }
     if (w.kind === 'reminder.suppressed') {
       const event: PulseSuppressedEvent = {
         pulseId: w.pulseId,
@@ -208,16 +215,19 @@ function commit(
       continue;
     }
     const element = w.element as ElementId;
-    const rx = state.pulses.find(p => p.id === w.pulseId)?.prescription;
+    const pulse = state.pulses.find(p => p.id === w.pulseId);
+    const rx = pulse?.prescription;
     // Fire-and-forget; failure must not abort the queue advance.
-    chime(
-      pulsePayload({
+    chime({
+      ...pulsePayload({
         pulseId: w.pulseId,
         element,
         exerciseId: w.exerciseId,
         prescription: rx,
       }),
-    ).catch(err => console.warn('[pulseRuntime] chime failed', err));
+      ...(pulse ? {timeoutMs: Math.max(0, pulse.expiresAt - w.at)} : {}),
+      ...(pulse?.snoozedFrom !== undefined ? {snoozed: true} : {}),
+    }).catch(err => console.warn('[pulseRuntime] chime failed', err));
     const event: PulseFiredEvent = {
       pulseId: w.pulseId,
       element,
@@ -403,6 +413,11 @@ export function snoozeActive(at: number = Date.now()): void {
     return;
   }
   const result = queueSnooze(state, active.id, at);
+  if (result.writes.length === 0) {
+    // Already snoozed once: nothing moved, so the chime stays where it is
+    // rather than vanishing from the shade.
+    return;
+  }
   state = result.state;
   commit(result.writes);
   dismiss(active.id);

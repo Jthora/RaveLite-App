@@ -344,11 +344,17 @@ export function buildPulseNotification(
       smallIcon: `ic_move_${moveForExercise(payload.exerciseId) ?? 'pulse'}`,
       pressAction: {id: 'default', launchActivity: 'default'},
       showTimestamp: true,
+      ...(payload.timeoutMs && payload.timeoutMs > 0
+        ? {timeoutAfter: payload.timeoutMs}
+        : {}),
       ...(payload.pulseId
         ? {
             actions: [
               {title: 'Done', pressAction: {id: 'seal'}},
-              {title: '+5 min', pressAction: {id: 'snooze'}},
+              // One +5 a chime: a second did nothing and lost the chime.
+              ...(payload.snoozed
+                ? []
+                : [{title: '+5 min', pressAction: {id: 'snooze'}}]),
               {title: 'Skip', pressAction: {id: 'skip'}},
             ],
           }

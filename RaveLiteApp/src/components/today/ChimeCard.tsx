@@ -264,15 +264,18 @@ function ActiveCard({
           style={styles.done}>
           <Text style={styles.doneText}>Done</Text>
         </Tap>
-        <Tap
-          variant="ghost"
-          color={el.color}
-          onPress={onSnooze}
-          accessibilityRole="button"
-          accessibilityLabel="Remind me in 5 minutes"
-          style={styles.secondary}>
-          <Text style={[styles.secondaryText, {color: el.color}]}>+5</Text>
-        </Tap>
+        {/* One +5 a chime. */}
+        {active.snoozed ? null : (
+          <Tap
+            variant="ghost"
+            color={el.color}
+            onPress={onSnooze}
+            accessibilityRole="button"
+            accessibilityLabel="Remind me in 5 minutes"
+            style={styles.secondary}>
+            <Text style={[styles.secondaryText, {color: el.color}]}>+5</Text>
+          </Tap>
+        )}
         <Tap
           variant="ghost"
           color={palette.textDim}

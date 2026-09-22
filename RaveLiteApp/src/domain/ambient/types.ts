@@ -102,4 +102,6 @@ export interface ActivePulseSummary {
   prescription?: SetPrescription;
   /** Why the chime changed with the weather, when it did. */
   note?: string;
+  /** Already given its one +5. */
+  snoozed?: boolean;
 }

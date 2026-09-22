@@ -21,7 +21,7 @@ import {
 } from '../reminders/notifeeScheduler';
 import type {ElementId} from '../../theme/elements';
 import {doneFields, prescriptionFromData, pulsePayload} from './pulsePayload';
-import {answerActivePulse} from './pulseRuntime';
+import {answerActivePulse, cancelQueued} from './pulseRuntime';
 import {reconcileSetsNow} from './setScheduler';
 
 /** +5 on a notification the runtime no longer holds. */
@@ -40,6 +40,9 @@ export async function handleNotificationAction(
   // detached snooze schedules a fresh one under the same id.
   await cancelPulseNotification(pulseId).catch(() => {});
   if (!handled) {
+    // The runtime may still hold it queued (a backup chime answered while
+    // the app was frozen): drop it, or the same chime rings again.
+    cancelQueued([pulseId]);
     if (action.actionId === 'snooze') {
       await snoozeDetached(action, now);
     } else {

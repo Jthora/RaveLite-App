@@ -2,6 +2,7 @@ import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import {syncAmbientService} from './ambientLifecycle';
 import {refreshAlivePause} from './aliveBridge';
+import {getActiveHours} from './activeHours';
 import {reconcileBackupsNow} from './backupScheduler';
 
 /**
@@ -25,16 +26,26 @@ export function pauseUntilFor(
       return now + 30 * 60_000;
     case 'p2h':
       return now + 2 * 60 * 60_000;
-    case 'tonight': {
-      // Until 06:00 the next morning, local time.
-      const d = new Date(now);
-      d.setDate(d.getDate() + 1);
-      d.setHours(6, 0, 0, 0);
-      return d.getTime();
-    }
+    case 'tonight':
+      return nextMorning(now, getActiveHours().start);
     default:
       return undefined;
   }
+}
+
+/**
+ * The next time My day starts after `now`. Tapped at 22:00, that is
+ * tomorrow morning; tapped at 00:30 it is this morning — it used to be
+ * the morning after, a 29-hour pause.
+ */
+export function nextMorning(now: number, start: string): number {
+  const [h, m] = start.split(':').map(Number);
+  const d = new Date(now);
+  d.setHours(h, m, 0, 0);
+  if (d.getTime() <= now) {
+    d.setDate(d.getDate() + 1);
+  }
+  return d.getTime();
 }
 
 export function setPause(
