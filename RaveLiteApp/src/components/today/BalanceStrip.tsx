@@ -14,6 +14,8 @@ interface Props {
   /** Per element, points for each of the last 7 days (today last). */
   week?: Record<ElementId, readonly number[]>;
   onElementPress?: (id: ElementId) => void;
+  /** Each tile's name under it: for somebody new, who has not learnt the marks. */
+  showNames?: boolean;
 }
 
 /**
@@ -29,6 +31,7 @@ export function BalanceStrip({
   par = dailyPar(),
   week,
   onElementPress,
+  showNames = false,
 }: Props) {
   return (
     <View style={styles.row}>
@@ -97,6 +100,13 @@ export function BalanceStrip({
                 ))}
               </View>
             ) : null}
+            {showNames ? (
+              <Text
+                style={[styles.name, lit && {color: el.color}]}
+                numberOfLines={1}>
+                {el.name}
+              </Text>
+            ) : null}
           </Tap>
         );
       })}
@@ -161,5 +171,11 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
+  },
+  name: {
+    fontSize: 11,
+    color: palette.textDim,
+    textAlign: 'center',
+    marginTop: 3,
   },
 });

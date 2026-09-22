@@ -413,6 +413,15 @@ export function needsSetup(): boolean {
   return !hasAnyHistory();
 }
 
+/** How long someone counts as new: the tiles are named, and so on. */
+export const NEW_FOR_MS = 14 * 86_400_000;
+
+/** Whether this person finished setup less than two weeks ago. */
+export function isNewcomer(now: number = Date.now()): boolean {
+  const at = loadProfile().setUpAt;
+  return at !== undefined && now - at < NEW_FOR_MS;
+}
+
 /** Mark setup answered, so it is never shown again. */
 export function finishSetup(now: number = Date.now()): void {
   saveProfile({...loadProfile(), setUpAt: now});

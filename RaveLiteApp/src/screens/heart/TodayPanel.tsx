@@ -29,6 +29,7 @@ import {
   clearInjury,
   clearMode,
   finishTutorial,
+  isNewcomer,
   loadInjured,
   loadMode,
   needsTutorial,
@@ -278,6 +279,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           points={model.points}
           week={model.week}
           onElementPress={onElementPress}
+          showNames={isNewcomer(model.now)}
         />
         <WaterCounter
           glasses={model.glasses}

@@ -129,8 +129,8 @@ it('teaches the three taps only on a first run, and only once', () => {
   const tree = renderToday();
   expect(byTestId(tree, 'coach-title').props.children).toBe('This is a chime');
 
-  // Four lessons, then it is gone for good.
-  for (let i = 0; i < 4; i += 1) {
+  // Five lessons, then it is gone for good.
+  for (let i = 0; i < 5; i += 1) {
     act(() => byTestId(tree, 'coach-next').props.onPress());
   }
   expect(byTestId(tree, 'coach-title')).toBeUndefined();
@@ -473,4 +473,17 @@ it('offers to set a place when there is none, and opens Weather', () => {
   act(() => line.props.onPress());
   expect(tree.root.findAllByType(WeatherSheet)[0].props.visible).toBe(true);
   act(() => tree.unmount());
+});
+
+it('names the element tiles for somebody new, and not for anyone else', () => {
+  const names = (tree: renderer.ReactTestRenderer) =>
+    JSON.stringify(tree.toJSON()).includes('"Water"');
+  const before = renderToday();
+  expect(names(before)).toBe(false);
+  act(() => before.unmount());
+
+  finishSetup(TEN_AM.getTime() - 60_000);
+  const fresh = renderToday();
+  expect(names(fresh)).toBe(true);
+  act(() => fresh.unmount());
 });

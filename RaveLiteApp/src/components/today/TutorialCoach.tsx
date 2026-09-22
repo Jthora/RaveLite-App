@@ -36,6 +36,11 @@ const LESSONS: readonly Lesson[] = [
     body: 'Done logs it. +5 min moves it 5 minutes later. Skip it skips this chime.',
   },
   {
+    title: 'Below the chime',
+    symbol: 'idea',
+    body: 'The five tiles are your elements: tap one to open it. + Log, Session, Practice and Settings are at the bottom of this page.',
+  },
+  {
     title: 'The ⓘ button',
     symbol: 'learn',
     body: 'Tap ⓘ on a drill, a track or an attribute to see what it is, how to do it and why it is here.',
