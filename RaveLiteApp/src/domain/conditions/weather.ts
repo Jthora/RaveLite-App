@@ -20,7 +20,13 @@ import type {Exercise} from '../exercises/types';
 import {plannedDrill} from '../program/morning';
 import type {CadenceSlot, Plan, Window} from '../reminders/types';
 import {localDayKey} from '../training/grading';
-import {DEFAULT_WEATHER_PREFS, adaptDrill, type WeatherPrefs} from './adapt';
+import {
+  DEFAULT_WEATHER_PREFS,
+  adaptDrill,
+  indoorRoom,
+  type WeatherPrefs,
+} from './adapt';
+import {loadFacts, loadProfile} from '../profile/repository';
 import {
   conditionsAt,
   heatLevel,
@@ -385,6 +391,7 @@ export function drillForPlanChime(
     conditions,
     getWeatherPrefs(),
     pulseId,
+    indoorRoom(loadFacts(ts), loadProfile().startedSetupAt === undefined),
   );
   return {drill, note, ...withDetail};
 }

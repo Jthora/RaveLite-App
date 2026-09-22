@@ -427,12 +427,12 @@ export function WeatherPanel() {
 
       <Text style={styles.footnote}>
         Thunder, ice and dangerous heat always move outdoor work inside, or swap
-        it for indoor drills that fit a low ceiling. Rain does too, unless you
-        choose to train in it. Drills that need running, hanging, jumping or
-        staff flow are never moved indoors. Hot days add hourly water reminders
-        and raise the Drink target. The bug level is estimated from warmth,
-        humidity, wind, recent rain and dawn or dusk. Your place is sent only to
-        Open-Meteo, rounded to about 10 km.
+        it for indoor drills that fit your indoor places. Rain does too, unless
+        you choose to train in it. Runs, carries and staff flow are never moved
+        indoors; jumps and kicks only where the ceiling is high enough. Hot days
+        add hourly water reminders and raise the Drink target. The bug level is
+        estimated from warmth, humidity, wind, recent rain and dawn or dusk.
+        Your place is sent only to Open-Meteo, rounded to about 10 km.
       </Text>
     </View>
   );

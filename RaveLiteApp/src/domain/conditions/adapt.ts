@@ -1,9 +1,12 @@
 /**
  * Bending a yard drill to the conditions — pure.
  *
- * Indoors is a basement with a low ceiling: most standing, mat and wall
- * work fits, but there's no room to run or walk laps, no hang point, no
- * height to jump or kick, and no space to dance or swing a staff.
+ * What fits indoors comes from the person's places (`indoorRoom`): runs,
+ * walks and carries never go inside, and neither does a staff; jumping
+ * and kicking can, unless every indoor place has a low ceiling; dance
+ * footwork can, unless every indoor place is also tight on room. An
+ * install from before places (the author's, whose indoors is a
+ * low-ceilinged basement) keeps the basement: no height and no room.
  *
  * Only drills that can happen in the yard adapt; porch, mat and desk work
  * stays as it is. In order:
@@ -24,7 +27,7 @@
  */
 import {EXERCISE_LIBRARY, isCurriculum} from '../exercises/library';
 import {moveForExercise, type MoveId} from '../exercises/moves';
-import {canDo} from '../profile/kit';
+import {canDo, placeKind, type Facts, type LimitId} from '../profile/kit';
 import {loadFacts} from '../profile/repository';
 import type {Exercise, Target, Venue} from '../exercises/types';
 import {seededPick} from '../reminders/scheduler';
@@ -70,16 +73,45 @@ export interface Adapted {
   swapped: boolean;
 }
 
-/** Moves that need what the basement lacks. */
-const NEEDS_OUTSIDE: ReadonlySet<MoveId> = new Set<MoveId>([
+/** Moves that need outdoors whatever the house is like. */
+const ALWAYS_OUTSIDE: ReadonlySet<MoveId> = new Set<MoveId>([
   'run',
   'walk',
-  'staff',
-  'footwork',
-  'jump',
-  'kick',
   'carry',
+  'staff',
 ]);
+/** Moves that need height. */
+const NEEDS_HEIGHT: ReadonlySet<MoveId> = new Set<MoveId>(['jump', 'kick']);
+/** Moves that need floor space. */
+const NEEDS_ROOM: ReadonlySet<MoveId> = new Set<MoveId>(['footwork']);
+
+/** What the indoor places allow. */
+export interface IndoorRoom {
+  lowCeiling: boolean;
+  tight: boolean;
+}
+
+/** The author's basement, and the assumption before places existed. */
+export const BASEMENT: IndoorRoom = {lowCeiling: true, tight: true};
+
+/**
+ * The best of this person's indoor places: height if any has no low
+ * ceiling, room if any is not tight. `legacy` keeps the basement for an
+ * install from before setup, whose places were split from a flat list and
+ * never asked about the ceiling.
+ */
+export function indoorRoom(facts: Facts, legacy: boolean): IndoorRoom {
+  const inside = (facts.places ?? []).filter(p => !placeKind(p.kind).outdoor);
+  if (legacy || inside.length === 0) {
+    return BASEMENT;
+  }
+  const has = (p: (typeof inside)[number], limit: LimitId) =>
+    (p.limits ?? []).includes(limit) || (facts.limits ?? []).includes(limit);
+  return {
+    lowCeiling: inside.every(p => has(p, 'lowCeiling')),
+    tight: inside.every(p => has(p, 'lowCeiling') || has(p, 'tight')),
+  };
+}
 /** Drills whose pictogram suggests otherwise but that fit a low ceiling. */
 const FITS_INSIDE: ReadonlySet<string> = new Set([
   'fire.fire-rounds',
@@ -101,19 +133,34 @@ const INDOOR_TAGS: Record<ElementId, readonly Target[]> = {
   heart: ['Presence'],
 };
 
-export function needsOutside(drill: Exercise): boolean {
+export function needsOutside(
+  drill: Exercise,
+  room: IndoorRoom = BASEMENT,
+): boolean {
   if (FITS_INSIDE.has(drill.id)) {
     return false;
   }
+  if (drill.targets.includes('PFT-Run')) {
+    return true;
+  }
   const move = moveForExercise(drill.id);
+  if (move === undefined) {
+    return false;
+  }
   return (
-    (move !== undefined && NEEDS_OUTSIDE.has(move)) ||
-    drill.targets.includes('PFT-Run')
+    ALWAYS_OUTSIDE.has(move) ||
+    (NEEDS_HEIGHT.has(move) && room.lowCeiling) ||
+    (NEEDS_ROOM.has(move) && room.tight)
   );
 }
 
-export function canGoInside(drill: Exercise): boolean {
-  return !needsOutside(drill) && drill.venues.some(v => INDOOR_VENUES.has(v));
+export function canGoInside(
+  drill: Exercise,
+  room: IndoorRoom = BASEMENT,
+): boolean {
+  return (
+    !needsOutside(drill, room) && drill.venues.some(v => INDOOR_VENUES.has(v))
+  );
 }
 
 export function isRun(drill: Exercise): boolean {
@@ -125,6 +172,7 @@ export function isRun(drill: Exercise): boolean {
 export function indoorAlternative(
   drill: Exercise,
   seed: string,
+  room: IndoorRoom = BASEMENT,
 ): Exercise | undefined {
   for (const tag of INDOOR_TAGS[drill.element]) {
     const options = EXERCISE_LIBRARY.filter(
@@ -136,7 +184,7 @@ export function indoorAlternative(
         !o.targets.includes('Fuel') &&
         !o.targets.includes('Test') &&
         !isCurriculum(o) &&
-        canGoInside(o) &&
+        canGoInside(o, room) &&
         canDo(o, loadFacts()),
     );
     // Prefer a stand-in of some substance for a long drill: swapping a
@@ -157,15 +205,16 @@ export function adaptDrill(
   c: Conditions,
   prefs: WeatherPrefs,
   seed: string,
+  room: IndoorRoom = BASEMENT,
 ): Adapted {
   if (!drill.venues.includes('yard')) {
     return {drill, swapped: false};
   }
   const temp = (value?: number) =>
     value === undefined ? '' : formatTemp(value, prefs.units);
-  const inside = canGoInside(drill);
+  const inside = canGoInside(drill, room);
   const swap = (why: string, tail: (alt: Exercise) => string): Adapted => {
-    const alt = indoorAlternative(drill, seed);
+    const alt = indoorAlternative(drill, seed, room);
     return alt
       ? {drill: alt, note: `${why} — ${tail(alt)}`, swapped: true}
       : {drill, note: `${why} — only if it's safe outside`, swapped: false};
