@@ -457,3 +457,17 @@ describe('the new kit', () => {
     expect(whyNot(drill('air.chin-tuck'), room)).toBeUndefined();
   });
 });
+
+it('keeps a quiet flat quiet indoors, and leaves the yard alone', () => {
+  const quiet = (kinds: Parameters<typeof newPlace>[0][]) => ({
+    kit: ['floor'] as KitItem[],
+    noise: 'quiet' as const,
+    corrections: [],
+    places: kinds.map(k => newPlace(k, [])),
+  });
+  expect(canDo(drill('water.toprock'), quiet(['room']))).toBe(false);
+  expect(whyNot(drill('water.toprock'), quiet(['room']))).toBe(
+    'Too loud for where you train',
+  );
+  expect(canDo(drill('water.toprock'), quiet(['room', 'yard']))).toBe(true);
+});

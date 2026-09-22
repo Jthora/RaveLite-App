@@ -916,9 +916,15 @@ interface Spot {
   kit: ReadonlySet<KitItem>;
   venues: ReadonlySet<Venue>;
   limits: readonly LimitId[];
+  /** Outdoors: "Quiet flat" is about the floor below, not the yard. */
+  outdoor: boolean;
 }
 
-function spotOf(items: Iterable<KitItem>, limits: readonly LimitId[]): Spot {
+function spotOf(
+  items: Iterable<KitItem>,
+  limits: readonly LimitId[],
+  outdoor = false,
+): Spot {
   const kit = new Set<KitItem>(['floor']);
   for (const item of items) {
     kit.add(item);
@@ -937,7 +943,7 @@ function spotOf(items: Iterable<KitItem>, limits: readonly LimitId[]): Spot {
       venues.add(venue);
     }
   }
-  return {kit, venues, limits};
+  return {kit, venues, limits, outdoor};
 }
 
 const SPOTS = new WeakMap<Facts, readonly Spot[]>();
@@ -960,6 +966,7 @@ function spotsOf(facts: Facts): readonly Spot[] {
       return spotOf(
         [...place.kit, ...facts.kit, ...(anchor ? [anchor] : [])],
         [...(place.limits ?? []), ...everywhere],
+        placeKind(place.kind).outdoor,
       );
     });
   }
@@ -1064,7 +1071,11 @@ export function whyNot(drill: Exercise, facts: Facts): string | undefined {
   if (injured && loadsRegion(drill, injured)) {
     return `Loads your ${injured}`;
   }
-  if (facts.noise === 'quiet' && isLoud(drill)) {
+  if (
+    facts.noise === 'quiet' &&
+    isLoud(drill) &&
+    !spots.some(spot => spot.outdoor && fits(drill, spot))
+  ) {
     return 'Too loud for where you train';
   }
   if (facts.packs && !inScope(drill.id, facts.packs)) {
@@ -1095,9 +1106,6 @@ export function canDo(
   facts: Facts,
   opts: {injured?: Region} = {},
 ): boolean {
-  if (facts.noise === 'quiet' && isLoud(drill)) {
-    return false;
-  }
   const injured = opts.injured ?? facts.injured;
   if (injured && loadsRegion(drill, injured)) {
     return false;
@@ -1105,7 +1113,13 @@ export function canDo(
   if (facts.packs && !inScope(drill.id, facts.packs)) {
     return false;
   }
-  return spotsOf(facts).some(spot => fits(drill, spot));
+  // "Quiet flat" quiets the indoor places; a loud drill can still happen
+  // in a yard or a park. A profile with no places — or a hotel room while
+  // travelling — is one indoor spot, so it stays quiet everywhere.
+  const quietHere = facts.noise === 'quiet' && isLoud(drill);
+  return spotsOf(facts).some(
+    spot => fits(drill, spot) && !(quietHere && !spot.outdoor),
+  );
 }
 
 /** Drills this kit can do right now. */

@@ -51,7 +51,8 @@ const NOISE: readonly {id: Noise; name: string; detail: string}[] = [
   {
     id: 'quiet',
     name: 'Quiet flat',
-    detail: 'No jumping, skipping or staff. Nothing the floor below can hear.',
+    detail:
+      'No jumping, skipping or staff indoors. Outdoor places are not affected.',
   },
   {id: 'normal', name: 'Normal', detail: 'Anything but the loudest drills.'},
   {
