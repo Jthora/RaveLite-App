@@ -644,7 +644,7 @@ const ANCHOR_POINT: readonly KitItem[] = [
   'hangLow',
   'hangHigh',
 ];
-const FLOW_TOYS: readonly KitItem[] = [
+export const FLOW_TOYS: readonly KitItem[] = [
   'poi',
   'hoop',
   'fans',

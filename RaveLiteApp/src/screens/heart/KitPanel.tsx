@@ -16,6 +16,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import {Tap} from '../../components/Tap';
 import {
   CARRIED_GROUPS,
+  FLOW_TOYS,
   KIT_LABELS,
   LIMITS,
   PLACE_GROUPS,
@@ -180,47 +181,54 @@ export function KitPanel() {
 
   const setNoise = (noise: Noise) => save({...facts, noise});
 
+  // A prop counts only with the Flow arts pack on. Without it every prop
+  // said "Adds nothing new", which read as a broken tile.
+  const flowOff = !loadPacks().includes('staff');
   const tile = (
     item: KitItem,
     has: boolean,
     unlocks: number,
     onPress: () => void,
-  ) => (
-    <Tap
-      key={item}
-      testID={`kit-${item}`}
-      variant="plain"
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{selected: has}}
-      accessibilityLabel={`${KIT_LABELS[item]}${
-        has ? ', you have this' : `, would unlock ${unlocks} drills`
-      }`}
-      style={[
-        styles.tile,
-        has && {
-          borderColor: hueOf(kitSymbol(item)),
-          backgroundColor: tint(hueOf(kitSymbol(item))),
-        },
-      ]}>
-      <View style={styles.tileInner}>
-        <Symbol name={kitSymbol(item)} size={18} />
-        <View style={styles.tileText}>
-          <Text
-            style={[styles.tileName, has && {color: hueOf(kitSymbol(item))}]}>
-            {KIT_LABELS[item]}
-          </Text>
-          <Text style={styles.tileNote}>
-            {has
-              ? 'Yours'
-              : unlocks > 0
-              ? `+${unlocks} drills`
-              : 'Adds nothing new'}
-          </Text>
+  ) => {
+    const packOff = flowOff && FLOW_TOYS.includes(item);
+    const note = packOff
+      ? 'Needs the Flow arts pack'
+      : has
+      ? 'Yours'
+      : unlocks > 0
+      ? `+${unlocks} drills`
+      : 'Adds nothing new';
+    return (
+      <Tap
+        key={item}
+        testID={`kit-${item}`}
+        variant="plain"
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityState={{selected: has}}
+        accessibilityLabel={`${KIT_LABELS[item]}, ${
+          has && !packOff ? 'you have this' : note
+        }`}
+        style={[
+          styles.tile,
+          has && {
+            borderColor: hueOf(kitSymbol(item)),
+            backgroundColor: tint(hueOf(kitSymbol(item))),
+          },
+        ]}>
+        <View style={styles.tileInner}>
+          <Symbol name={kitSymbol(item)} size={18} />
+          <View style={styles.tileText}>
+            <Text
+              style={[styles.tileName, has && {color: hueOf(kitSymbol(item))}]}>
+              {KIT_LABELS[item]}
+            </Text>
+            <Text style={styles.tileNote}>{note}</Text>
+          </View>
         </View>
-      </View>
-    </Tap>
-  );
+      </Tap>
+    );
+  };
 
   const placeBody = (place: TrainingPlace) => {
     const spec = placeKind(place.kind);

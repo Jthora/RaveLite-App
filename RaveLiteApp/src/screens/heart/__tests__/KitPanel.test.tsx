@@ -10,6 +10,7 @@ import {
   baseFacts,
   saveProfile,
   setMode,
+  setPacks,
 } from '../../../domain/profile/repository';
 import {store} from '../../../storage';
 
@@ -108,5 +109,15 @@ it('edits the real kit while away from home, not the hotel room', () => {
   const facts = baseFacts();
   expect(facts.places).toHaveLength(AUTHOR_FACTS.places!.length);
   expect(facts.kit).toEqual([...AUTHOR_FACTS.kit, 'band']);
+  act(() => tree.unmount());
+});
+
+it('says a prop needs the Flow arts pack, rather than that it adds nothing', () => {
+  setPacks([]);
+  const tree = renderPanel();
+  const poi = tree.root.findAll(
+    (n: ReactTestInstance) => n.props.testID === 'kit-poi',
+  )[0];
+  expect(poi.props.accessibilityLabel).toBe('Poi, Needs the Flow arts pack');
   act(() => tree.unmount());
 });

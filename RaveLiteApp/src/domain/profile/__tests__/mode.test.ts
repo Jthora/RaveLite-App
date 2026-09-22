@@ -12,7 +12,7 @@ import {
   startMode,
   trainsUnder,
 } from '../mode';
-import {AUTHOR_FACTS, canDo, usableDrills} from '../kit';
+import {AUTHOR_FACTS, canDo, usableDrills, type Facts} from '../kit';
 import {EXERCISE_LIBRARY} from '../../exercises/library';
 import {
   __resetProfileCache,
@@ -68,7 +68,9 @@ it('travelling puts you in a hotel room, whatever you own at home', () => {
   const away = startMode('travelling', NOW)!;
   const facts = factsUnder(AUTHOR_FACTS, away);
 
-  expect(facts.kit).toEqual(['floor', 'wall']);
+  // A floor and a wall, plus what you carry — the staff and ball come,
+  // the bricks stay home.
+  expect(facts.kit).toEqual(['floor', 'wall', 'staff', 'ball']);
   expect(facts.noise).toBe('quiet');
   // The author's porch and bricks are 300 miles away.
   expect(canDo(drill('fire.porch-pullup'), facts)).toBe(false);
@@ -178,4 +180,17 @@ it('says how long is left, in words worth reading', () => {
 
   const rest = startMode('rest', NOW)!;
   expect(modeLabel(rest, NOW)).toBe('Taking the day off · today');
+});
+
+it('packs the light things you carry when you travel, not the bricks', () => {
+  const home = {
+    kit: ['floor', 'poi', 'band', 'bricks'],
+    noise: 'normal',
+    corrections: [],
+  } as unknown as Facts;
+  const away = factsUnder(home, startMode('travelling', 0)!);
+  expect(away.kit).toEqual(
+    expect.arrayContaining(['floor', 'wall', 'poi', 'band']),
+  );
+  expect(away.kit).not.toContain('bricks');
 });

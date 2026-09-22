@@ -48,6 +48,7 @@ import {PlanPanel} from './PlanPanel';
 import {StayAlivePanel} from './StayAlivePanel';
 import {ThemePanel} from './ThemePanel';
 import {WeatherPanel} from './WeatherSheet';
+import {exitDemo, isDemo, subscribeDemo} from '../../domain/demo/demo';
 
 const WARN = '#FFD60A';
 
@@ -135,6 +136,9 @@ const GROUPS: readonly {
 
 export function SettingsSheet({visible, onClose, permission}: Props) {
   const [page, setPage] = useState<Page>('index');
+  // Demo mode is for screenshots, so Today does not say it is on. Here does.
+  const [demo, setDemo] = useState(isDemo);
+  useEffect(() => subscribeDemo(setDemo), []);
   const [confirmFresh, setConfirmFresh] = useState(false);
   // Armed, it erases everything on the next tap — so it never stays armed:
   // not for longer than a few seconds, and not across closing Settings.
@@ -234,6 +238,26 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}>
+          {demo ? (
+            <View testID="demo-banner" style={styles.banner}>
+              <Text style={styles.bannerTitle}>Demo mode is on</Text>
+              <Text style={styles.bannerBody}>
+                This is example data. Nothing you log now is kept. Your own data
+                is safe and comes back when you leave.
+              </Text>
+              <Tap
+                testID="demo-leave"
+                variant="ghost"
+                color={accent}
+                onPress={() => exitDemo()}
+                accessibilityRole="button"
+                style={styles.rowBtn}>
+                <Text style={[styles.rowBtnText, {color: accent}]}>
+                  Leave demo
+                </Text>
+              </Tap>
+            </View>
+          ) : null}
           {permission === 'denied' ? (
             <View style={styles.banner}>
               <Text style={styles.bannerTitle}>⚠ Notifications are off</Text>

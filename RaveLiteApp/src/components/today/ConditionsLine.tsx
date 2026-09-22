@@ -49,6 +49,13 @@ export function ConditionsLine({weather, onPress}: Props) {
     c.known && c.tempC !== undefined ? formatTemp(c.tempC, units) : undefined,
     c.known ? `rain ${c.rainChance ?? 0}%` : undefined,
     c.known || c.bugs === 'high' ? `bugs ${c.bugs}` : undefined,
+    // Without a forecast for this hour, rain, storm and heat checks are
+    // off too: say so, instead of the weather quietly going missing.
+    c.known
+      ? undefined
+      : weather.hadForecast
+      ? 'forecast out of date'
+      : 'no forecast yet',
   ].filter((part): part is string => part !== undefined);
   return (
     <Tap

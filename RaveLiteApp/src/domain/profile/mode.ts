@@ -15,7 +15,13 @@
  * off sits on top of it rather than switching the protection off. The
  * 'injured' mode below is how it is offered, and how older phones stored it.
  */
-import {DEFAULT_FACTS, type Facts, type KitItem, type Region} from './kit';
+import {
+  CARRIED,
+  DEFAULT_FACTS,
+  type Facts,
+  type KitItem,
+  type Region,
+} from './kit';
 
 export type ModeId = 'travelling' | 'injured' | 'festival' | 'rest';
 
@@ -55,11 +61,19 @@ export interface ModeSpec {
  */
 export const TRAVEL_KIT: readonly KitItem[] = ['floor', 'wall'];
 
+/** Carried things nobody packs for a trip. */
+const LEFT_AT_HOME: ReadonlySet<KitItem> = new Set<KitItem>([
+  'bricks',
+  'jugs',
+  'sandbag',
+]);
+
 export const MODES: readonly ModeSpec[] = [
   {
     id: 'travelling',
     name: 'away from home',
-    detail: 'One room with a floor and a wall. Quiet drills, nothing outdoors.',
+    detail:
+      'One room with a floor and a wall, plus what you carry. Quiet drills, nothing outdoors.',
     days: 7,
     density: 0.67,
     trains: true,
@@ -163,9 +177,14 @@ export function factsUnder(facts: Facts, mode: Mode | undefined): Facts {
     return facts;
   }
   // One room, not your places: a hotel has no yard, whatever home has.
+  // What you carry comes with you, except the heavy things: poi used to
+  // go missing on holiday.
+  const packed = facts.kit.filter(
+    item => CARRIED.has(item) && !LEFT_AT_HOME.has(item),
+  );
   return {
     ...facts,
-    kit: [...(mode.kit ?? TRAVEL_KIT)],
+    kit: [...new Set([...(mode.kit ?? TRAVEL_KIT), ...packed])],
     places: undefined,
     limits: undefined,
     noise: 'quiet',

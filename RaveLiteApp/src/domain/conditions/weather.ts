@@ -445,6 +445,8 @@ export interface WeatherLine {
   next?: {kind: 'sunrise' | 'sunset'; at: number};
   /** Right now; `known` is false without a forecast for this hour. */
   conditions: Conditions;
+  /** Whether a forecast was ever fetched, so an old one can be called old. */
+  hadForecast: boolean;
 }
 
 /** What Today's conditions line shows; undefined until a place is saved. */
@@ -467,7 +469,14 @@ export function weatherLine(now: number = Date.now()): WeatherLine | undefined {
         ? {kind: 'sunrise', at: tomorrow.sunrise}
         : undefined;
   }
-  return {place, units: getWeatherPrefs().units, sun, next, conditions};
+  return {
+    place,
+    units: getWeatherPrefs().units,
+    sun,
+    next,
+    conditions,
+    hadForecast: getForecast() !== undefined,
+  };
 }
 
 // ── Refresh loop ──────────────────────────────────────────────────────
