@@ -1,4 +1,5 @@
 import {store} from '../../storage';
+import {quarantine} from '../diagnostics/quarantine';
 import {KEYS} from '../../storage/keys';
 import {logError} from '../diagnostics/errorLog';
 import {BUILTIN_METRICS, builtinById} from './builtinMetrics';
@@ -232,10 +233,12 @@ export function loadEntries(): TrainingLogEntry[] {
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
+      quarantine(KEYS.trainingEntries, raw, 'not a list');
       return [];
     }
     return parsed as TrainingLogEntry[];
-  } catch {
+  } catch (e) {
+    quarantine(KEYS.trainingEntries, raw, e);
     return [];
   }
 }

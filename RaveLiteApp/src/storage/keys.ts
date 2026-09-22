@@ -64,6 +64,8 @@ export const KEYS = {
   profile: 'profile.state',
   /** 'metric' | 'imperial'; absent means never chosen. */
   units: 'settings.units',
+  /** When this phone last wrote an export, for "last export: 3 days ago". */
+  lastExportAt: 'data.lastExportAt',
   /** `{drillId: ChartId[]}` — the charts each curriculum move was cleared at. */
   practiceClears: 'practice.clears',
   /** `{disciplineId: {tier, chart}}` — where each path was left open. */

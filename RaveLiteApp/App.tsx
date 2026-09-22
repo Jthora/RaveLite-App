@@ -16,7 +16,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import {palette} from './src/theme';
 import {runMigrations} from './src/storage/migrations';
-import {ensureHydrated} from './src/storage/persistence';
+import {ensureHydrated, persistenceHealth} from './src/storage/persistence';
 import {
   bootstrapHeartVariant,
   subscribeHeartVariant,
@@ -38,6 +38,8 @@ import {
   subscribeSetupRequest,
 } from './src/domain/profile/setupRequest';
 import {store} from './src/storage';
+import {CURRENT_SCHEMA_VERSION, KEYS} from './src/storage/keys';
+import './src/domain/diagnostics/errorLog';
 import {resetPlanToDefault} from './src/domain/reminders/repository';
 import {capTextScaling} from './src/lib/textScaling';
 import {handleDemoLink} from './src/domain/demo/demo';
@@ -99,7 +101,9 @@ function App(): React.JSX.Element {
       // schema version.
       runMigrations();
       if (!cancelled) {
-        const fresh = needsSetup();
+        // A disk that could not be read looks exactly like a new install.
+        // Setup would then save over it; Today says what happened instead.
+        const fresh = needsSetup() && !persistenceHealth().readFailed;
         // Guess miles or kilometres from the phone rather than asking. An
         // install that has been running keeps what it was showing.
         void guessUnitsOnce(fresh, getLocale, units =>
@@ -140,6 +144,9 @@ function App(): React.JSX.Element {
       subscribeSetupRequest(reason => {
         if (reason === 'fresh') {
           store.clearAll();
+          // Written now, or the next launch runs every migration from v0
+          // over whatever setup is about to be answered with.
+          store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
           __resetProfileCache();
           // A read would seed the default quietly; this says so, so the
           // chime schedulers drop the old plan's chimes now.

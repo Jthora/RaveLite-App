@@ -1,4 +1,5 @@
 import {store} from '../../storage';
+import {quarantine} from '../diagnostics/quarantine';
 import {CURRENT_SCHEMA_VERSION, KEYS} from '../../storage/keys';
 import {Plan} from './types';
 import {DEFAULT_PLAN} from './defaultPlan';
@@ -18,8 +19,10 @@ export function loadPlan(): Plan {
   }
   try {
     return JSON.parse(raw) as Plan;
-  } catch {
-    // Corrupt — fall back to defaults rather than crash on launch.
+  } catch (e) {
+    // Corrupt — fall back to defaults rather than crash on launch, but
+    // keep the plan somebody built before the default replaces it.
+    quarantine(KEYS.planCurrent, raw, e);
     seedDefault();
     return DEFAULT_PLAN;
   }

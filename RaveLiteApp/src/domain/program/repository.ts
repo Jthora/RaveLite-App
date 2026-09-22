@@ -1,4 +1,5 @@
 import {store} from '../../storage';
+import {quarantine} from '../diagnostics/quarantine';
 import {KEYS} from '../../storage/keys';
 import {append, entriesForDay} from '../journal/journal';
 import {localDayKey} from '../training/grading';
@@ -61,7 +62,8 @@ export function loadProgram(now: Date = new Date()): ProgramState {
     const base = defaultProgram(now);
     // Spread over defaults so tracks added in later versions auto-fill.
     return {...base, ...parsed, tracks: {...base.tracks, ...parsed.tracks}};
-  } catch {
+  } catch (e) {
+    quarantine(KEYS.programState, raw, e);
     return defaultProgram(now);
   }
 }

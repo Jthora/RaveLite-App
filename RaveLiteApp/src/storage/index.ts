@@ -1,6 +1,14 @@
 import {KeyValueStore} from './types';
 import {memoryStore} from './memoryStore';
-import {persistKey, persistDelete, persistClear} from './persistence';
+import {
+  persistClear,
+  persistDelete,
+  persistKey,
+  persistReplaceAll,
+} from './persistence';
+
+/** While a restore is writing, other writes stay in memory only. */
+let frozen = false;
 
 /**
  * Active KeyValueStore for the app. Single import point.
@@ -27,16 +35,25 @@ const persistentStore: KeyValueStore = {
   getBoolean: k => memoryStore.getBoolean(k),
   set: (k, v) => {
     memoryStore.set(k, v);
-    persistKey(k, v);
+    if (!frozen) {
+      persistKey(k, v);
+    }
   },
   delete: k => {
     memoryStore.delete(k);
-    persistDelete(k);
+    if (!frozen) {
+      persistDelete(k);
+    }
   },
   keysWithPrefix: p => memoryStore.keysWithPrefix(p),
   clearAll: () => {
+    // The keys are taken before memory forgets them, so the disk removes
+    // exactly these, in order, ahead of anything written next.
+    const known = memoryStore.keysWithPrefix('');
     memoryStore.clearAll();
-    persistClear();
+    if (!frozen) {
+      persistClear(known);
+    }
   },
 };
 
@@ -66,3 +83,44 @@ export function __swapStore(next: KeyValueStore | undefined): void {
 }
 
 export const __realStore = persistentStore;
+
+export type ReplaceResult =
+  | {ok: true; written: number}
+  | {ok: false; why: string; rolledBack: boolean};
+
+/**
+ * Replace everything stored with `entries` — a restore — so that it is
+ * true on disk, not just in memory.
+ *
+ * Memory keeps the old data until the disk has been written and read
+ * back. If that fails, the old data is written back from memory, so a
+ * restore that did not finish leaves things as they were rather than
+ * half of each. Writes made meanwhile (a chime firing) stay in memory and
+ * are either replaced by the restore or saved by the rollback.
+ */
+export async function replaceStoredData(
+  entries: readonly (readonly [string, string | number | boolean])[],
+): Promise<ReplaceResult> {
+  if (active !== persistentStore) {
+    return {
+      ok: false,
+      why: 'demo mode is on, and nothing in it is saved',
+      rolledBack: false,
+    };
+  }
+  frozen = true;
+  try {
+    const result = await persistReplaceAll(entries);
+    if (result.ok) {
+      memoryStore.clearAll();
+      for (const [k, v] of entries) {
+        memoryStore.set(k, v);
+      }
+      return result;
+    }
+    const back = await persistReplaceAll(memoryStore.entries());
+    return {ok: false, why: result.why, rolledBack: back.ok};
+  } finally {
+    frozen = false;
+  }
+}

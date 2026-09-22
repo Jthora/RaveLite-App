@@ -119,6 +119,20 @@ const GROUPS: readonly {
 export function SettingsSheet({visible, onClose, permission}: Props) {
   const [page, setPage] = useState<Page>('index');
   const [confirmFresh, setConfirmFresh] = useState(false);
+  // Armed, it erases everything on the next tap — so it never stays armed:
+  // not for longer than a few seconds, and not across closing Settings.
+  useEffect(() => {
+    if (!confirmFresh) {
+      return;
+    }
+    const timer = setTimeout(() => setConfirmFresh(false), 6000);
+    return () => clearTimeout(timer);
+  }, [confirmFresh]);
+  useEffect(() => {
+    if (!visible) {
+      setConfirmFresh(false);
+    }
+  }, [visible]);
   const [plan, setPlan] = useState(loadPlan);
   const [planOpen, setPlanOpen] = useState(false);
   const [weatherOpen, setWeatherOpen] = useState(false);

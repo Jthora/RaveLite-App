@@ -21,6 +21,7 @@
  * - **Never carry training data.** Messages only, no journal entries, no
  *   places, no values.
  */
+import {onPersistenceError} from '../../storage/persistence';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 
@@ -122,3 +123,8 @@ export function errorSummary(
     ? `${day} in the last day, ${capped} kept.`
     : `${capped} kept, none in the last day.`;
 }
+
+// A write that did not reach the disk is exactly the kind of thing this
+// log exists for. Persistence cannot import the log (the log writes
+// through it), so the log registers itself.
+onPersistenceError((what, error) => logError(`storage.${what}`, error));

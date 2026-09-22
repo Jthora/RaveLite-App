@@ -243,6 +243,19 @@ it('can be asked to walk through the questions again', () => {
   act(() => tree.unmount());
 });
 
+it('disarms the erase if the second tap does not come', () => {
+  // Armed, it used to wait for days — one stray tap from wiping everything.
+  const tree = renderToday();
+  act(() => byTestId(tree, 'settings-open').props.onPress());
+  act(() => byTestId(tree, 'settings-fresh').props.onPress());
+  act(() => {
+    jest.advanceTimersByTime(7000);
+  });
+  act(() => byTestId(tree, 'settings-fresh').props.onPress());
+  expect(pendingSetup()).toBeUndefined();
+  act(() => tree.unmount());
+});
+
 it('will not erase everything on one tap', () => {
   const tree = renderToday();
   act(() => byTestId(tree, 'settings-open').props.onPress());

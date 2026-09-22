@@ -35,13 +35,35 @@ class MemoryStore implements KeyValueStore {
     const v = this.map.get(key);
     return typeof v === 'string' ? v : undefined;
   }
+  // Forgiving of how a value arrived. The first export format wrote every
+  // number and switch as text, and a restore of one put "75" back where 75
+  // had been — every volume and every ticked box then read as unset. A
+  // number stored as its own canonical text reads as that number; "true"
+  // and "false" read as switches. Nothing that is really text looks like
+  // either: day keys have dashes, blobs have braces.
   getNumber(key: string): number | undefined {
     const v = this.map.get(key);
-    return typeof v === 'number' ? v : undefined;
+    if (typeof v === 'number') {
+      return v;
+    }
+    if (typeof v === 'string' && v !== '' && String(Number(v)) === v) {
+      return Number(v);
+    }
+    return undefined;
   }
   getBoolean(key: string): boolean | undefined {
     const v = this.map.get(key);
-    return typeof v === 'boolean' ? v : undefined;
+    if (typeof v === 'boolean') {
+      return v;
+    }
+    return v === 'true' ? true : v === 'false' ? false : undefined;
+  }
+  has(key: string): boolean {
+    return this.map.has(key);
+  }
+  /** Everything held, as held — for a restore's rollback and the byte count. */
+  entries(): [string, string | number | boolean][] {
+    return [...this.map.entries()];
   }
   set(key: string, value: string | number | boolean): void {
     // Only a *new* key changes the ordering; overwriting a value does

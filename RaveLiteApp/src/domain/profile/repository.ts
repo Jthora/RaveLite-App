@@ -1,4 +1,5 @@
 import {store} from '../../storage';
+import {quarantine} from '../diagnostics/quarantine';
 import {KEYS} from '../../storage/keys';
 import {DAILY_PAR} from '../activity/par';
 import {densityFor, parFor, roundsFor} from '../program/density';
@@ -85,7 +86,8 @@ export function loadProfile(): Profile {
   try {
     const parsed = JSON.parse(raw) as Profile;
     cached = {...defaultProfile(), ...parsed};
-  } catch {
+  } catch (e) {
+    quarantine(KEYS.profile, raw, e);
     cached = defaultProfile();
   }
   return cached;

@@ -1,4 +1,4 @@
-import {store} from '../../storage';
+import {replaceStoredData, store} from '../../storage';
 import {CURRENT_SCHEMA_VERSION, KEYS} from '../../storage/keys';
 
 /**
@@ -12,17 +12,24 @@ import {CURRENT_SCHEMA_VERSION, KEYS} from '../../storage/keys';
  *
  * The format is deliberately dumb — every stored key, verbatim — so a
  * restore is exact and an export can be read with any text editor.
+ *
+ * Format 2 keeps each value's type. Format 1 wrote numbers and switches
+ * as text, which a restore then put back as text: every volume, every
+ * muted element and every ticked health check read as unset. Format 1
+ * files still restore — the store reads "75" as 75 and "true" as true.
  */
 
-export const BACKUP_FORMAT = 1;
+export const BACKUP_FORMAT = 2;
+
+type Value = string | number | boolean;
 
 export interface Backup {
   format: number;
   /** App schema the export came from; a restore refuses a newer one. */
   schema: number;
   exportedAt: number;
-  /** Every key in storage, as it was stored. */
-  entries: Record<string, string>;
+  /** Every key in storage, as it was stored, with its type. */
+  entries: Record<string, Value>;
 }
 
 /** Keys that are caches or device-specific, and are not worth carrying. */
@@ -31,21 +38,13 @@ const SKIP_PREFIXES = ['stats.cache.', 'ambient.session.'];
 const carried = (key: string) => !SKIP_PREFIXES.some(p => key.startsWith(p));
 
 export function buildBackup(now: number = Date.now()): Backup {
-  const entries: Record<string, string> = {};
+  const entries: Record<string, Value> = {};
   for (const key of store.keysWithPrefix('').filter(carried)) {
-    const value = store.getString(key);
+    // Text first, so text that happens to look like a number stays text.
+    const value =
+      store.getString(key) ?? store.getNumber(key) ?? store.getBoolean(key);
     if (value !== undefined) {
       entries[key] = value;
-      continue;
-    }
-    const n = store.getNumber(key);
-    if (n !== undefined) {
-      entries[key] = String(n);
-      continue;
-    }
-    const b = store.getBoolean(key);
-    if (b !== undefined) {
-      entries[key] = b ? 'true' : 'false';
     }
   }
   return {
@@ -67,7 +66,10 @@ export function backupFilename(now: number = Date.now()): string {
 
 export type RestoreResult =
   | {ok: true; entries: number; from: number}
-  | {ok: false; why: string};
+  | {ok: false; why: string; unchanged?: boolean};
+
+const isValue = (v: unknown): v is Value =>
+  typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
 
 /** What a backup holds, without writing anything. */
 export function readBackup(text: string): Backup | undefined {
@@ -90,8 +92,12 @@ export function readBackup(text: string): Backup | undefined {
  * Put a backup back. Everything currently stored is replaced: a restore
  * is a restore, not a merge, because merging two training logs would
  * invent days that never happened.
+ *
+ * It resolves only once the disk holds the backup and has been read back
+ * to prove it. If it cannot, what was there before is put back and the
+ * result says so — a restore never leaves half of each.
  */
-export function restoreBackup(text: string): RestoreResult {
+export async function restoreBackup(text: string): Promise<RestoreResult> {
   const backup = readBackup(text);
   if (!backup) {
     return {ok: false, why: 'That file is not a RaveLite export.'};
@@ -108,16 +114,27 @@ export function restoreBackup(text: string): RestoreResult {
       why: `That export is from schema v${backup.schema}; this app reads up to v${CURRENT_SCHEMA_VERSION}.`,
     };
   }
-  const entries = Object.entries(backup.entries);
+  const entries = Object.entries(backup.entries).filter(
+    (e): e is [string, Value] => isValue(e[1]),
+  );
   if (entries.length === 0) {
     return {ok: false, why: 'That export is empty.'};
   }
-  store.clearAll();
-  for (const [key, value] of entries) {
-    store.set(key, value);
-  }
   // An older export runs through the migrations on the next launch.
-  store.set(KEYS.schemaVersion, backup.schema);
+  const withSchema: [string, Value][] = [
+    ...entries.filter(([k]) => k !== KEYS.schemaVersion),
+    [KEYS.schemaVersion, backup.schema],
+  ];
+  const result = await replaceStoredData(withSchema);
+  if (!result.ok) {
+    return {
+      ok: false,
+      why: result.rolledBack
+        ? `Restore failed (${result.why}). Your data has not changed.`
+        : `Restore failed (${result.why}). Export your data before you try again.`,
+      unchanged: result.rolledBack,
+    };
+  }
   return {ok: true, entries: entries.length, from: backup.exportedAt};
 }
 

@@ -6,7 +6,7 @@
  * copy. Export writes the whole thing to a file you choose; Restore reads
  * one back over the top; Start over throws it away.
  */
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../../components/Tap';
@@ -25,6 +25,8 @@ import {
   shareExport,
 } from '../../native/raveLiteDevice';
 import {store} from '../../storage';
+import {KEYS} from '../../storage/keys';
+import {flushPersistence} from '../../storage/persistence';
 import {Symbol, hueOf} from '../../components/icons/Symbol';
 import {
   clearErrors,
@@ -38,6 +40,19 @@ import {palette, radius, spacing, type as t} from '../../theme';
 type Staged = {backup: Backup; text: string};
 
 const NO_PICKER = 'This phone has no file picker RaveLite can use.';
+const DISARM_MS = 6000;
+const DAY_MS = 86_400_000;
+
+/** "today", "3 days ago" — how old the newest copy is. */
+function sinceExport(at: number | undefined, now: number): string {
+  if (at === undefined) {
+    return 'Not exported yet.';
+  }
+  const days = Math.floor((now - at) / DAY_MS);
+  return `Last export: ${
+    days <= 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`
+  }.`;
+}
 
 function whenFrom(at: number): string {
   return Number.isFinite(at) && at > 0
@@ -50,10 +65,34 @@ export function DataPanel() {
   const [staged, setStaged] = useState<Staged | undefined>();
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [showing, setShowing] = useState(false);
+  const [lastExport, setLastExport] = useState(() =>
+    store.getNumber(KEYS.lastExportAt),
+  );
   const recent = showing ? readErrors().slice(-3).reverse() : [];
 
-  /** Restore and Start over both leave the running app holding old data. */
+  // An armed erase disarms itself. Left armed, it waited — days, across
+  // closing Settings — one stray tap from wiping everything.
+  useEffect(() => {
+    if (!confirmWipe) {
+      return;
+    }
+    const timer = setTimeout(() => setConfirmWipe(false), DISARM_MS);
+    return () => clearTimeout(timer);
+  }, [confirmWipe]);
+
+  const exported = () => {
+    const now = Date.now();
+    store.set(KEYS.lastExportAt, now);
+    setLastExport(now);
+  };
+
+  /**
+   * Restore and Start over both leave the running app holding old data.
+   * Every write lands before the restart: the process used to exit 400 ms
+   * after a burst of writes that had not reached the disk.
+   */
   const startAgain = async (fallback: string) => {
+    await flushPersistence();
     if (!(await restartApp())) {
       setNote(fallback);
     }
@@ -69,6 +108,7 @@ export function DataPanel() {
     const backup = buildBackup();
     const result = await saveExport(backupFilename(), JSON.stringify(backup));
     if (result.ok) {
+      exported();
       setNote(`Saved ${result.value} — ${backupSummary(backup)}.`);
     } else if (result.why === 'unsupported') {
       setNote(NO_PICKER);
@@ -81,7 +121,9 @@ export function DataPanel() {
     setNote(undefined);
     const backup = buildBackup();
     const sent = await shareExport(backupFilename(), JSON.stringify(backup));
-    if (!sent) {
+    if (sent) {
+      exported();
+    } else {
       setNote('This phone has nothing to share it with.');
     }
   };
@@ -110,8 +152,9 @@ export function DataPanel() {
     if (!staged) {
       return;
     }
-    const result = restoreBackup(staged.text);
     setStaged(undefined);
+    setNote('Restoring. Keep RaveLite open.');
+    const result = await restoreBackup(staged.text);
     if (!result.ok) {
       setNote(result.why);
       return;
@@ -138,6 +181,9 @@ export function DataPanel() {
         Everything you log lives on this phone only. Nothing is sent anywhere,
         and there is no account to recover — so the export file is the backup.
         Keep one somewhere the phone isn't.
+      </Text>
+      <Text testID="data-last-export" style={styles.caption}>
+        {sinceExport(lastExport, Date.now())}
       </Text>
 
       <View style={styles.row}>

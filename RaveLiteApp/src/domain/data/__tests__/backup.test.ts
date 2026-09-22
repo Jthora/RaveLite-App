@@ -42,7 +42,7 @@ it('carries everything worth keeping, and nothing worth rebuilding', () => {
   store.set(KEYS.statsCache('anything'), 'throwaway');
   const backup = buildBackup(NOW);
 
-  expect(backup.format).toBe(1);
+  expect(backup.format).toBe(2);
   expect(backup.schema).toBe(CURRENT_SCHEMA_VERSION);
   expect(Object.keys(backup.entries)).toEqual(
     expect.arrayContaining([KEYS.trainingEntries, KEYS.profile]),
@@ -53,7 +53,7 @@ it('carries everything worth keeping, and nothing worth rebuilding', () => {
   );
 });
 
-it('puts a life back exactly as it was', () => {
+it('puts a life back exactly as it was', async () => {
   aLifeLogged();
   const before = {
     activity: activityForDay(new Date(NOW)).length,
@@ -67,7 +67,7 @@ it('puts a life back exactly as it was', () => {
   __resetProfileCache();
   expect(store.getString(KEYS.trainingEntries)).toBeUndefined();
 
-  const result = restoreBackup(text);
+  const result = await restoreBackup(text);
   __resetProfileCache();
   expect(result).toMatchObject({ok: true, from: NOW});
   expect(store.getString(KEYS.trainingEntries)).toBe(before.entries);
@@ -75,24 +75,24 @@ it('puts a life back exactly as it was', () => {
   expect(activityForDay(new Date(NOW))).toHaveLength(before.activity);
 });
 
-it('refuses what it should refuse', () => {
-  expect(restoreBackup('not json at all')).toEqual({
+it('refuses what it should refuse', async () => {
+  expect(await restoreBackup('not json at all')).toEqual({
     ok: false,
     why: 'That file is not a RaveLite export.',
   });
-  expect(restoreBackup(JSON.stringify({format: 1, entries: {}}))).toMatchObject(
-    {ok: false},
-  );
+  expect(
+    await restoreBackup(JSON.stringify({format: 1, entries: {}})),
+  ).toMatchObject({ok: false});
   const fromTheFuture = JSON.stringify({
     format: 99,
     schema: 99,
     exportedAt: NOW,
     entries: {a: 'b'},
   });
-  expect(restoreBackup(fromTheFuture)).toMatchObject({ok: false});
+  expect(await restoreBackup(fromTheFuture)).toMatchObject({ok: false});
   // And a refusal leaves what was already there alone.
   setFacts(AUTHOR_FACTS);
-  restoreBackup('rubbish');
+  await restoreBackup('rubbish');
   __resetProfileCache();
   expect(loadFacts().kit).toEqual(AUTHOR_FACTS.kit);
 });
@@ -102,4 +102,34 @@ it('names the file by its date, and says what is in it', () => {
   aLifeLogged();
   const summary = backupSummary(readBackup(JSON.stringify(buildBackup(NOW)))!);
   expect(summary).toMatch(/^1 day, \d+ logged things?$/);
+});
+
+it('keeps numbers and switches as numbers and switches', async () => {
+  // Format 1 wrote them as text; a restore then read every volume, muted
+  // element and ticked health check as unset.
+  store.set(KEYS.ambientToneVolumeMaster, 40);
+  store.set('some.switch', true);
+  const text = JSON.stringify(buildBackup(NOW));
+  const parsed = readBackup(text)!;
+  expect(parsed.entries[KEYS.ambientToneVolumeMaster]).toBe(40);
+  expect(parsed.entries['some.switch']).toBe(true);
+
+  store.clearAll();
+  await restoreBackup(text);
+  expect(store.getNumber(KEYS.ambientToneVolumeMaster)).toBe(40);
+  expect(store.getBoolean('some.switch')).toBe(true);
+});
+
+it('still restores a format 1 file, text and all', async () => {
+  const old = JSON.stringify({
+    format: 1,
+    schema: 8,
+    exportedAt: NOW,
+    entries: {[KEYS.ambientToneVolumeMaster]: '40', 'some.switch': 'true'},
+  });
+  expect(await restoreBackup(old)).toMatchObject({ok: true});
+  expect(store.getNumber(KEYS.ambientToneVolumeMaster)).toBe(40);
+  expect(store.getBoolean('some.switch')).toBe(true);
+  // The old schema comes with it, so the migrations run on next launch.
+  expect(store.getNumber(KEYS.schemaVersion)).toBe(8);
 });

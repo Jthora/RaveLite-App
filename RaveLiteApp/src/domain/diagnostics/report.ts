@@ -9,6 +9,7 @@
  */
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
+import {persistenceHealth} from '../../storage/persistence';
 import {getFetchReport, getPlace} from '../conditions/weather';
 import {hasDeviceModule} from '../../native/raveLiteDevice';
 import {loadUnits} from '../settings/units';
@@ -50,8 +51,16 @@ export function diagnostics(now: number = Date.now()): Diagnostic[] {
   const errors: LoggedError[] = readErrors();
   const recent = errors.filter(e => now - e.at < 7 * 86_400_000).length;
   const fetch = getFetchReport();
-  const keys = store.keysWithPrefix('').length;
+  const all = store.keysWithPrefix('');
+  const keys = all.length;
   const journal = store.keysWithPrefix(KEYS.journalPrefix).length;
+  // Roughly what the disk holds: the database cap is in bytes, and a key
+  // count says nothing about how close it is.
+  const bytes = all.reduce((sum, k) => {
+    const v = store.getString(k) ?? store.getNumber(k) ?? store.getBoolean(k);
+    return sum + k.length + JSON.stringify(v ?? '').length;
+  }, 0);
+  const saving = persistenceHealth();
   const mode = loadMode(now);
 
   return [
@@ -65,7 +74,21 @@ export function diagnostics(now: number = Date.now()): Diagnostic[] {
     },
     {
       label: 'Storage',
-      value: `${keys} keys, ${journal} logged things`,
+      value: `${keys} keys, ${journal} logged things, ${Math.max(
+        1,
+        Math.round(bytes / 1024),
+      )} KB`,
+    },
+    {
+      label: 'Saving',
+      value: saving.readFailed
+        ? 'off: saved data could not be read at start-up'
+        : saving.failures === 0
+        ? 'OK'
+        : `${saving.failures} failed${
+            saving.lastError ? `: ${saving.lastError}` : ''
+          }`,
+      concern: saving.readFailed || saving.failures > 0,
     },
     {
       label: 'Schema',

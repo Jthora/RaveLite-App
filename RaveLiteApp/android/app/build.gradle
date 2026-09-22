@@ -77,6 +77,13 @@ android {
     namespace "com.raveliteapp"
     defaultConfig {
         applicationId "com.raveliteapp"
+        // A throwaway second install, beside the real one, for proving a
+        // restore on a real phone without touching real data:
+        //   ./gradlew assembleRelease -PcheckInstall
+        // installs as com.raveliteapp.check with its own storage.
+        if (project.hasProperty('checkInstall')) {
+            applicationIdSuffix ".check"
+        }
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
