@@ -102,7 +102,9 @@ export function ArchetypePanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>WHAT YOU'RE TRAINING FOR</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        WHAT YOU'RE TRAINING FOR
+      </Text>
       <Text style={styles.caption}>
         Picking one sets your packs, your day and your daily sets. You can
         change any of them later.
@@ -181,7 +183,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   row: {
@@ -222,6 +224,6 @@ const styles = StyleSheet.create({
   },
   means: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
 });

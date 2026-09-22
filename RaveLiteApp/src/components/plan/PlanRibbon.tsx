@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   legend: {
-    color: palette.textMuted,
+    color: palette.textFaint,
     fontSize: 10,
     letterSpacing: 1.2,
     textTransform: 'uppercase',

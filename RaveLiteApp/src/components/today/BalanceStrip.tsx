@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   countIdle: {
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
   // Tap wraps the cell in a view sized to its widest child: the dots row.
   bar: {

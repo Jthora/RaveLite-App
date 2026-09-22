@@ -79,7 +79,11 @@ export function ChimesPanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>▸ CHIMES</Text>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accent}]}>
+        ▸ CHIMES
+      </Text>
       <Text style={styles.body}>
         {respectDnd
           ? 'Chimes play at alarm volume. When the phone is on silent, vibrate or Do Not Disturb, they follow it.'
@@ -145,6 +149,7 @@ export function ChimesPanel() {
         color={accent}
         accessibilityRole="switch"
         accessibilityState={{checked: respectDnd}}
+        accessibilityLabel="Follow silent mode and Do Not Disturb"
         onPress={() => {
           setRespectDnd(!respectDnd);
           bump();

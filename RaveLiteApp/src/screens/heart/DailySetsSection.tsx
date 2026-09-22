@@ -170,7 +170,9 @@ export function DailySetsSection({
   return (
     <View>
       <View style={styles.header}>
-        <Text style={[styles.eyebrow, {color: accent}]}>
+        <Text
+          accessibilityRole="header"
+          style={[styles.eyebrow, {color: accent}]}>
           ▸ WEEK {week} ·{' '}
           {phase === 'deload' ? 'EASY WEEK + MAX TESTS' : 'BUILD'}
         </Text>
@@ -239,7 +241,9 @@ export function DailySetsSection({
 
       <WeekFocus days={focusDays} />
 
-      <Text style={styles.section}>Tracks</Text>
+      <Text accessibilityRole="header" style={styles.section}>
+        Tracks
+      </Text>
       {TRACKS.map(tr => {
         const state = program.tracks[tr.id];
         const el = ELEMENTS[tr.element];
@@ -256,7 +260,7 @@ export function DailySetsSection({
                   style={[
                     styles.trackName,
                     styles.trackNameText,
-                    {color: state.enabled ? el.color : palette.textMuted},
+                    {color: state.enabled ? el.color : palette.textFaint},
                   ]}>
                   {tr.name} ·{' '}
                   {currentRung(tr, state, loadFacts())?.label ?? '—'}
@@ -270,9 +274,13 @@ export function DailySetsSection({
               <Text style={styles.trackWhy}>{tr.why}</Text>
             </View>
             <Tap
+              testID={`track-toggle-${tr.id}`}
               variant={state.enabled ? 'solid' : 'ghost'}
               color={state.enabled ? el.color : palette.textDim}
               onPress={() => setTrackEnabled(tr.id, !state.enabled)}
+              accessibilityRole="switch"
+              accessibilityState={{checked: state.enabled}}
+              accessibilityLabel={`${tr.name} track`}
               style={styles.toggle}>
               <Text
                 style={[
@@ -490,7 +498,9 @@ function MaxTestSheet({
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.sheet, {borderColor: el.color}]}>
-          <Text style={[styles.sheetTitle, {color: el.color}]}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.sheetTitle, {color: el.color}]}>
             Max test · {rung.label}
           </Text>
           <Text style={styles.sheetStop}>{STOP_LINE}.</Text>
@@ -740,7 +750,7 @@ const styles = StyleSheet.create({
   },
   trackWhy: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     marginTop: 2,
   },
   toggle: {

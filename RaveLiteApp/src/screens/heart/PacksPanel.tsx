@@ -45,7 +45,9 @@ export function PacksPanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>WHAT YOU WANT TO LEARN</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        WHAT YOU WANT TO LEARN
+      </Text>
       <Text style={styles.caption}>
         {packs.length === 0
           ? 'None on. You still get the full base program: push, pull, squat, hinge, breath, posture, stillness and mobility.'
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   row: {
@@ -157,6 +159,6 @@ const styles = StyleSheet.create({
   },
   means: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
 });

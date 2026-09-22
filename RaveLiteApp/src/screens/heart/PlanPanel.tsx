@@ -143,7 +143,9 @@ export function PlanPanel({onPlanCommitted, scroll = true}: Props) {
         : {})}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.eyebrow, {color: accentDim}]}>
+        <Text
+          accessibilityRole="header"
+          style={[styles.eyebrow, {color: accentDim}]}>
           ▸ PLAN
           {draft.name && draft.name !== DEFAULT_PLAN.name
             ? ` · ${draft.name.toUpperCase()}`
@@ -195,7 +197,7 @@ export function PlanPanel({onPlanCommitted, scroll = true}: Props) {
           <Text
             style={[
               styles.utilBtnText,
-              {color: dirty ? palette.text : palette.textMuted},
+              {color: dirty ? palette.text : palette.textFaint},
             ]}>
             Revert
           </Text>

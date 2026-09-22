@@ -82,7 +82,9 @@ export function DrillCard({element, focus, version, onOpenLibrary}: Props) {
     <View style={[styles.card, {borderColor: element.accent}]}>
       <View style={styles.eyebrowRow}>
         <ElementGlyph element={element} size={13} color={element.accent} />
-        <Text style={[styles.eyebrow, {color: element.accent}]}>
+        <Text
+          accessibilityRole="header"
+          style={[styles.eyebrow, {color: element.accent}]}>
           TRY THIS NOW
         </Text>
       </View>

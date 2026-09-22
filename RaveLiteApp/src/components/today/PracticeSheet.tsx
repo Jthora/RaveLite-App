@@ -71,7 +71,9 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
       <backStack.Provider>
         <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
           <View style={styles.header}>
-            <Text style={[styles.title, {color: accent}]}>
+            <Text
+              accessibilityRole="header"
+              style={[styles.title, {color: accent}]}>
               {drilling ? 'Drill it' : 'Practice'}
             </Text>
             <Tap
@@ -135,7 +137,9 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
               }
               footer={
                 <View style={styles.drills}>
-                  <Text style={styles.sectionLabel}>HEART DRILLS</Text>
+                  <Text accessibilityRole="header" style={styles.sectionLabel}>
+                    HEART DRILLS
+                  </Text>
                   <CardGrid>
                     {exercisesFor('heart').map(ex => (
                       <ExerciseRow key={ex.id} exercise={ex} />

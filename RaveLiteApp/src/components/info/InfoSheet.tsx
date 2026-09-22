@@ -107,7 +107,9 @@ function Links({
 }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.eyebrow}>{title.toUpperCase()}</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        {title.toUpperCase()}
+      </Text>
       {links.map((link, i) => {
         const own = link.element ?? element;
         const body = (
@@ -207,7 +209,9 @@ export function InfoCardView({
         ) : null}
         {card.how && card.how.length > 0 ? (
           <View style={styles.section}>
-            <Text style={styles.eyebrow}>HOW</Text>
+            <Text accessibilityRole="header" style={styles.eyebrow}>
+              HOW
+            </Text>
             {card.how.map((step, i) => (
               <Text key={step} style={styles.step}>
                 {card.how!.length > 1 ? `${i + 1}. ` : ''}
@@ -339,7 +343,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     letterSpacing: 1.5,
   },
   step: {
@@ -381,7 +385,7 @@ const styles = StyleSheet.create({
   },
   meta: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
     marginTop: spacing.sm,
   },

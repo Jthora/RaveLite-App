@@ -37,7 +37,11 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
       onRequestClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.sheet, {borderColor: accent}]}>
-          <Text style={[styles.title, {color: accent}]}>My day</Text>
+          <Text
+            accessibilityRole="header"
+            style={[styles.title, {color: accent}]}>
+            My day
+          </Text>
           <Text style={styles.body}>
             Chimes sound inside My day, rounds spread across it, and the screen
             dims outside it. It can end after midnight.

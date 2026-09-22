@@ -265,10 +265,10 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   cellTextOut: {
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
   cellTextDisabled: {
-    color: palette.textMuted,
+    color: palette.textFaint,
     opacity: 0.4,
   },
   cellTextSel: {

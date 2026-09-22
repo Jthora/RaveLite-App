@@ -167,7 +167,9 @@ export function CharacterSheet({
         <View style={styles.levelRow}>
           <Text style={styles.big}>{level}</Text>
           <View style={styles.levelText}>
-            <Text style={styles.eyebrow}>LEVEL</Text>
+            <Text accessibilityRole="header" style={styles.eyebrow}>
+              LEVEL
+            </Text>
             <Text style={styles.caption}>
               {into} / {needs} XP
             </Text>
@@ -299,7 +301,7 @@ const styles = StyleSheet.create({
   modeName: {
     ...t.caption,
     flex: 1,
-    color: palette.textMuted,
+    color: palette.textFaint,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
@@ -322,7 +324,7 @@ const styles = StyleSheet.create({
   },
   rowPoints: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     fontVariant: ['tabular-nums'],
   },
   parBar: {
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
   cellNote: {
     ...t.caption,
     fontSize: 10,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
   bar: {
     height: 4,
@@ -399,7 +401,7 @@ const styles = StyleSheet.create({
   },
   note: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
     marginTop: spacing.sm,
   },

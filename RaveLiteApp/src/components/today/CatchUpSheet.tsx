@@ -65,7 +65,9 @@ export function CatchUpSheet({visible, rows, onLog, onClose}: Props) {
           accessibilityLabel="Close"
         />
         <View style={styles.sheet}>
-          <Text style={styles.eyebrow}>CATCH UP · {rows.length} MISSED</Text>
+          <Text accessibilityRole="header" style={styles.eyebrow}>
+            CATCH UP · {rows.length} MISSED
+          </Text>
           <Text style={styles.lead}>
             Tick what you did. Each is logged at the time it chimed.
           </Text>

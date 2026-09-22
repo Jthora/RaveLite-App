@@ -172,7 +172,9 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
               color={last ? accent : undefined}
             />
           </View>
-          <Text style={[styles.title, {color: accent}]}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.title, {color: accent}]}>
             {last ? "Here's your day" : step.title}
           </Text>
           <Tap
@@ -322,7 +324,7 @@ const styles = StyleSheet.create({
   },
   why: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 18,
     marginTop: spacing.sm,
   },

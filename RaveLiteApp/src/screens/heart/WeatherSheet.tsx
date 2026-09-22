@@ -87,7 +87,11 @@ export function WeatherSheet({visible, onClose}: Props) {
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>Weather</Text>
+          <Text
+            accessibilityRole="header"
+            style={[styles.title, {color: accent}]}>
+            Weather
+          </Text>
           <Tap
             variant="plain"
             onPress={onClose}
@@ -188,7 +192,9 @@ export function WeatherPanel() {
   return (
     <View style={styles.body}>
       <View style={styles.card}>
-        <Text style={styles.eyebrow}>YOUR PLACE</Text>
+        <Text accessibilityRole="header" style={styles.eyebrow}>
+          YOUR PLACE
+        </Text>
         <Text testID="weather-place" style={styles.cardTitle}>
           {place ? place.name : 'Not set'}
         </Text>
@@ -206,7 +212,7 @@ export function WeatherPanel() {
             onChangeText={setQuery}
             onSubmitEditing={onSearch}
             placeholder="Type a town"
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={palette.textFaint}
             returnKeyType="search"
             autoCorrect={false}
             style={styles.input}
@@ -261,7 +267,9 @@ export function WeatherPanel() {
 
       {place && sun ? (
         <View style={styles.card}>
-          <Text style={styles.eyebrow}>TODAY</Text>
+          <Text accessibilityRole="header" style={styles.eyebrow}>
+            TODAY
+          </Text>
           <View style={styles.facts}>
             <Fact
               label="First light"
@@ -335,7 +343,9 @@ export function WeatherPanel() {
       ) : null}
 
       <View style={styles.card}>
-        <Text style={styles.eyebrow}>HOW WEATHER CHANGES THE DAY</Text>
+        <Text accessibilityRole="header" style={styles.eyebrow}>
+          HOW WEATHER CHANGES THE DAY
+        </Text>
         <Toggle
           title="Buggy today"
           detail="Treat today as buggy, whatever the estimate says."
@@ -481,6 +491,8 @@ function Toggle({
       color={accent}
       accessibilityRole="switch"
       accessibilityState={{checked: on}}
+      accessibilityLabel={title}
+      accessibilityHint={detail}
       onPress={onPress}
       style={styles.toggle}>
       <View style={styles.toggleRow}>
@@ -664,7 +676,7 @@ const styles = StyleSheet.create({
   },
   footnote: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   rainRow: {

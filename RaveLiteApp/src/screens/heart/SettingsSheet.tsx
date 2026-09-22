@@ -214,7 +214,10 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
               </Text>
             </Tap>
           )}
-          <Text style={[styles.title, {color: accent}]} numberOfLines={1}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.title, {color: accent}]}
+            numberOfLines={1}>
             {page === 'index'
               ? 'Settings'
               : page === 'mode'
@@ -346,7 +349,9 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                 </Tap>
               ))}
 
-              <Text style={styles.eyebrow}>IF YOU ARE NOT SURE</Text>
+              <Text accessibilityRole="header" style={styles.eyebrow}>
+                IF YOU ARE NOT SURE
+              </Text>
               <Tap
                 testID="settings-revisit"
                 variant="plain"

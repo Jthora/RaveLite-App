@@ -1,5 +1,11 @@
-import React, {useMemo, useState} from 'react';
-import {Animated, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {
+  AccessibilityInfo,
+  Animated,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import {formatEta, formatHM} from '../ambient/format';
 import {ElementGlyph} from '../icons/ElementGlyph';
@@ -161,6 +167,13 @@ function ActiveCard({
 
   const done = () => onDone(moves ? {amounts} : rx ? {amount} : {});
 
+  // Said once, as the chime arrives, for anyone using TalkBack: the card
+  // changes without anything being tapped.
+  useEffect(() => {
+    AccessibilityInfo.announceForAccessibility(`Chime now: ${title}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <View style={[styles.card, {borderColor: el.deep}]}>
       <Animated.View
@@ -180,7 +193,10 @@ function ActiveCard({
           <Text style={[styles.eyebrow, {color: el.color}]}>
             NOW · {formatHM(active.fireAt)}
           </Text>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text
+            style={styles.title}
+            numberOfLines={2}
+            accessibilityLiveRegion="polite">
             {title}
           </Text>
         </View>

@@ -75,7 +75,9 @@ export function SkillList({
         }
         return (
           <View key={group.title} style={styles.group}>
-            <Text style={styles.groupTitle}>{group.title.toUpperCase()}</Text>
+            <Text accessibilityRole="header" style={styles.groupTitle}>
+              {group.title.toUpperCase()}
+            </Text>
             {group.ids.map(id => {
               const drill = skillDrill(id);
               if (!drill) {
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
   },
   groupTitle: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     letterSpacing: 1.5,
   },
   row: {

@@ -120,7 +120,9 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
       {/* Header */}
-      <Text style={[styles.eyebrow, {color: accentDim}]}>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accentDim}]}>
         ▸ {isNew ? 'NEW SLOT' : 'EDIT SLOT'}
       </Text>
       <Text style={styles.summary}>{summary}</Text>
@@ -308,7 +310,9 @@ function Section({label, right, children}: SectionProps) {
   return (
     <View style={styles.section}>
       <View style={styles.sectionHead}>
-        <Text style={styles.sectionLabel}>{label.toUpperCase()}</Text>
+        <Text accessibilityRole="header" style={styles.sectionLabel}>
+          {label.toUpperCase()}
+        </Text>
         {right}
       </View>
       {children}

@@ -28,6 +28,24 @@ interface Props {
   emptyText?: string;
 }
 
+/** How a row's state is said out loud; the marks alone are only seen. */
+const STATUS_WORD: Record<DayRowStatus, string> = {
+  done: 'Done',
+  active: 'Now',
+  upcoming: 'Coming up',
+  skipped: 'Skipped',
+  missed: 'Missed',
+  unsounded: 'Did not sound',
+};
+
+/** "09:30, Missed, Water Call, 1 glass". Upcoming rows used to be read as
+ *  "Keep or remove Water Call". */
+function spoken(row: DayRow): string {
+  return [formatHM(row.at), STATUS_WORD[row.status], row.label, row.detail]
+    .filter(Boolean)
+    .join(', ');
+}
+
 /**
  * The whole day in one list. Rows take their natural height inside the
  * page's scroll view. Skipped and missed rows are dimmed, never red.
@@ -69,7 +87,7 @@ export function DayList({
             <Text
               style={[
                 styles.mark,
-                {color: lit ? el.color : palette.textMuted},
+                {color: lit ? el.color : palette.textFaint},
               ]}>
               {MARK[row.status]}
             </Text>
@@ -110,18 +128,25 @@ export function DayList({
             color={el.color}
             onPress={() => onRowPress(row)}
             accessibilityRole="button"
-            accessibilityLabel={
-              late
-                ? `Log ${row.label}`
+            accessibilityLabel={spoken(row)}
+            accessibilityHint={
+              upcoming
+                ? 'Shows what it is'
+                : late
+                ? 'Log it if you did it'
                 : train
-                ? `Edit ${row.label}`
-                : `Keep or remove ${row.label}`
+                ? 'Edit this entry'
+                : 'Keep or remove it'
             }
             style={[styles.rowTap, quiet && styles.quiet]}>
             <View style={styles.rowInner}>{body}</View>
           </Tap>
         ) : (
-          <View key={row.id} style={[styles.row, quiet && styles.quiet]}>
+          <View
+            key={row.id}
+            accessible
+            accessibilityLabel={spoken(row)}
+            style={[styles.row, quiet && styles.quiet]}>
             {body}
           </View>
         );

@@ -7,9 +7,21 @@ import {clockHM, formatTemp} from '../../domain/conditions/format';
 import type {WeatherLine} from '../../domain/conditions/weather';
 import {palette, spacing, type as t} from '../../theme';
 
+/** A TalkBack shortcut to somewhere at the bottom of Today. */
+export interface QuickAction {
+  name: string;
+  label: string;
+  run: () => void;
+}
+
 interface Props {
   weather?: WeatherLine;
   onPress: () => void;
+  /**
+   * TalkBack actions on the first thing on Today, so Settings, Practice
+   * and logging are not reachable only after every row of the day.
+   */
+  quickActions?: readonly QuickAction[];
 }
 
 /**
@@ -17,10 +29,19 @@ interface Props {
  * the temperature, rain chance and bug estimate for this hour. Before a
  * place is set it asks for one. Tap for the Weather sheet.
  */
-export function ConditionsLine({weather, onPress}: Props) {
+export function ConditionsLine({weather, onPress, quickActions = []}: Props) {
+  const a11y = {
+    accessibilityActions: quickActions.map(a => ({
+      name: a.name,
+      label: a.label,
+    })),
+    onAccessibilityAction: (e: {nativeEvent: {actionName: string}}) =>
+      quickActions.find(a => a.name === e.nativeEvent.actionName)?.run(),
+  };
   if (!weather) {
     return (
       <Tap
+        {...a11y}
         testID="conditions-open"
         variant="plain"
         color={palette.textDim}
@@ -59,6 +80,7 @@ export function ConditionsLine({weather, onPress}: Props) {
   ].filter((part): part is string => part !== undefined);
   return (
     <Tap
+      {...a11y}
       testID="conditions-open"
       variant="plain"
       color={palette.textDim}

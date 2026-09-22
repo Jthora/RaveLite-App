@@ -28,10 +28,16 @@ const STATUS_GLYPH: Record<HealthStatus, string> = {
   unknown: '○',
 };
 
+const STATUS_WORD: Record<HealthStatus, string> = {
+  ok: 'Done',
+  warn: 'Needs doing',
+  unknown: "Can't check",
+};
+
 const STATUS_COLOR: Record<HealthStatus, string> = {
   ok: ELEMENTS.earth.color,
   warn: '#FFD60A',
-  unknown: palette.textMuted,
+  unknown: palette.textFaint,
 };
 
 export function StayAlivePanel() {
@@ -56,7 +62,11 @@ export function StayAlivePanel() {
   if (!inputs) {
     return (
       <View style={styles.panel}>
-        <Text style={[styles.eyebrow, {color: accent}]}>▸ STAY ALIVE</Text>
+        <Text
+          accessibilityRole="header"
+          style={[styles.eyebrow, {color: accent}]}>
+          ▸ STAY ALIVE
+        </Text>
         <Text style={styles.body}>Checking this phone…</Text>
       </View>
     );
@@ -66,7 +76,11 @@ export function StayAlivePanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>▸ STAY ALIVE</Text>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accent}]}>
+        ▸ STAY ALIVE
+      </Text>
       <Text style={styles.body}>
         {warnings === 0
           ? 'All set. Chimes should work all day.'
@@ -81,12 +95,23 @@ export function StayAlivePanel() {
           : false;
         return (
           <View key={check.id} style={styles.row}>
-            <Text style={[styles.glyph, {color: STATUS_COLOR[check.status]}]}>
+            <Text
+              style={[styles.glyph, {color: STATUS_COLOR[check.status]}]}
+              importantForAccessibility="no">
               {STATUS_GLYPH[check.status]}
             </Text>
             <View style={styles.copy}>
-              <Text style={styles.title}>{check.title}</Text>
-              <Text style={styles.detail}>{check.detail}</Text>
+              {/* The title names the goal ("Battery: no restrictions"),
+                  so said alone it sounded like success even when the
+                  check had failed. The state is said first. */}
+              <View
+                accessible
+                accessibilityLabel={`${STATUS_WORD[check.status]}: ${
+                  check.title
+                }. ${check.detail}`}>
+                <Text style={styles.title}>{check.title}</Text>
+                <Text style={styles.detail}>{check.detail}</Text>
+              </View>
               {check.fix || check.confirm ? (
                 <View style={styles.actions}>
                   {check.fix ? (
@@ -96,6 +121,8 @@ export function StayAlivePanel() {
                       onPress={() => {
                         openHealthFix(check.fix!).catch(() => {});
                       }}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Open settings for ${check.title}`}
                       style={styles.btn}>
                       <Text style={[styles.btnText, {color: accent}]}>
                         Open settings
@@ -108,6 +135,7 @@ export function StayAlivePanel() {
                       color={confirmed ? ELEMENTS.earth.color : palette.textDim}
                       accessibilityRole="checkbox"
                       accessibilityState={{checked: confirmed}}
+                      accessibilityLabel={`${check.title}: mark done`}
                       onPress={() => {
                         setConfirmed(check.confirm!, !confirmed);
                         setInputs({...inputs, confirmed: readConfirmations()});

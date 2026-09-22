@@ -176,7 +176,9 @@ export function DataPanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>YOUR DATA</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        YOUR DATA
+      </Text>
       <Text style={styles.caption}>
         Your data is only on this phone. There is no account to recover it from.
         Export it and keep a copy somewhere else.
@@ -409,7 +411,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   row: {
@@ -490,11 +492,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: spacing.sm,
   },
-  readoutLabel: {...t.caption, color: palette.textMuted, width: 120},
+  readoutLabel: {...t.caption, color: palette.textFaint, width: 120},
   readoutValue: {...t.caption, color: palette.textDim, flex: 1},
   note: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
 });

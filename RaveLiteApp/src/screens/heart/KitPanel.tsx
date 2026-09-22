@@ -251,7 +251,9 @@ export function KitPanel() {
         {groups.map(group => (
           <View key={group.title || 'offered'} style={styles.group}>
             {group.title ? (
-              <Text style={styles.groupTitle}>{group.title.toUpperCase()}</Text>
+              <Text accessibilityRole="header" style={styles.groupTitle}>
+                {group.title.toUpperCase()}
+              </Text>
             ) : null}
             <View style={styles.tiles}>
               {group.items.map(item =>
@@ -280,7 +282,9 @@ export function KitPanel() {
 
         {spec.hangs || hangOf(place) !== 'none' ? (
           <>
-            <Text style={styles.groupTitle}>SOMETHING TO HANG FROM HERE?</Text>
+            <Text accessibilityRole="header" style={styles.groupTitle}>
+              SOMETHING TO HANG FROM HERE?
+            </Text>
             <Text style={styles.caption}>
               Feet touch: rows and bent-knee hangs. Hang clear: pull-ups and leg
               raises.
@@ -308,7 +312,9 @@ export function KitPanel() {
           </>
         ) : null}
 
-        <Text style={styles.groupTitle}>LIMITS AT THIS PLACE</Text>
+        <Text accessibilityRole="header" style={styles.groupTitle}>
+          LIMITS AT THIS PLACE
+        </Text>
         <View style={styles.tiles}>
           {LIMITS.map(limit => {
             const on = place.limits.includes(limit.id);
@@ -374,7 +380,9 @@ export function KitPanel() {
 
   return (
     <View testID="kit-panel" style={styles.root}>
-      <Text style={styles.eyebrow}>WHERE YOU TRAIN</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        WHERE YOU TRAIN
+      </Text>
       <Text style={styles.caption}>
         {usable} drills fit your places. A drill counts if one place allows it.
         What you carry counts in every place.
@@ -478,7 +486,9 @@ export function KitPanel() {
 
       {adding ? (
         <View style={styles.kinds}>
-          <Text style={styles.groupTitle}>WHAT KIND OF PLACE?</Text>
+          <Text accessibilityRole="header" style={styles.groupTitle}>
+            WHAT KIND OF PLACE?
+          </Text>
           <View style={styles.tiles}>
             {PLACE_KINDS.map(kind => (
               <Tap
@@ -522,13 +532,17 @@ export function KitPanel() {
         </Tap>
       )}
 
-      <Text style={styles.eyebrow}>WHAT YOU CARRY</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        WHAT YOU CARRY
+      </Text>
       <Text style={styles.caption}>
         Things you can take anywhere. Each one counts in every place above.
       </Text>
       {CARRIED_GROUPS.map(group => (
         <View key={group.title} style={styles.group}>
-          <Text style={styles.groupTitle}>{group.title.toUpperCase()}</Text>
+          <Text accessibilityRole="header" style={styles.groupTitle}>
+            {group.title.toUpperCase()}
+          </Text>
           <View style={styles.tiles}>
             {group.items.map(item => {
               const has = facts.kit.includes(item);
@@ -543,7 +557,9 @@ export function KitPanel() {
         </View>
       ))}
 
-      <Text style={styles.eyebrow}>HOW LOUD YOU CAN BE</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        HOW LOUD YOU CAN BE
+      </Text>
       <View style={styles.pills}>
         {NOISE.map(option => {
           const on = facts.noise === option.id;
@@ -584,7 +600,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   inset: {
@@ -637,14 +653,14 @@ const styles = StyleSheet.create({
   },
   countUnit: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
   group: {
     gap: spacing.sm,
   },
   groupTitle: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     letterSpacing: 1.5,
     marginTop: spacing.xs,
   },
@@ -678,7 +694,7 @@ const styles = StyleSheet.create({
   },
   tileNote: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
   kinds: {
     gap: spacing.sm,

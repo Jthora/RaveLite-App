@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   clock: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     fontVariant: ['tabular-nums'],
   },
   row: {

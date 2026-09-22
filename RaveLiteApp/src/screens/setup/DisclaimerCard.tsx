@@ -46,7 +46,9 @@ export function DisclaimerCard() {
       <View style={[styles.card, {borderColor: palette.border}]}>
         <View style={styles.head}>
           <Symbol name="idea" size={18} />
-          <Text style={[styles.title, {color: hueOf('idea')}]}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.title, {color: hueOf('idea')}]}>
             How this goes
           </Text>
         </View>

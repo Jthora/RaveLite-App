@@ -14,7 +14,16 @@ export const palette = {
   text: '#F5F7FA',
   /** Secondary text. */
   textDim: '#8A93A6',
-  /** Muted/disabled. */
+  /**
+   * De-emphasised text that still has to be read: captions, hints, idle
+   * counts. 4.7:1 on `bg`. Use this, not `textMuted`, for any words.
+   */
+  textFaint: '#737B8C',
+  /**
+   * Marks, dots and borders that are decoration or plainly disabled. At
+   * 2.5:1 it is too faint for words (it was once used for them, and the
+   * captions it carried were nearly unreadable on a mounted phone).
+   */
   textMuted: '#4A5161',
   /** Universal danger (independent of fire). */
   danger: '#FF453A',

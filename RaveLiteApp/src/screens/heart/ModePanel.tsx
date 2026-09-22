@@ -78,7 +78,11 @@ export function ModePanel({showTitle = true}: {showTitle?: boolean} = {}) {
 
   return (
     <View style={styles.root}>
-      {showTitle ? <Text style={styles.eyebrow}>TODAY I'M…</Text> : null}
+      {showTitle ? (
+        <Text accessibilityRole="header" style={styles.eyebrow}>
+          TODAY I'M…
+        </Text>
+      ) : null}
       {injured ? (
         <ActiveCard
           testID="injury-active"
@@ -244,7 +248,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   row: {
@@ -293,7 +297,7 @@ const styles = StyleSheet.create({
   },
   means: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
   rowBtn: {
     minWidth: 72,

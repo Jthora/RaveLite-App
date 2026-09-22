@@ -34,7 +34,9 @@ export function LoggedSheet({row, onRemove, onClose}: Props) {
           accessibilityLabel="Close"
         />
         <View style={styles.sheet}>
-          <Text style={styles.eyebrow}>LOGGED · {formatHM(row.at)}</Text>
+          <Text accessibilityRole="header" style={styles.eyebrow}>
+            LOGGED · {formatHM(row.at)}
+          </Text>
           <View style={styles.head}>
             {row.move ? (
               <View style={[styles.tile, {backgroundColor: `${el.color}29`}]}>

@@ -282,7 +282,9 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
-          <Text style={styles.eyebrow}>PUSH-UPS TODAY</Text>
+          <Text accessibilityRole="header" style={styles.eyebrow}>
+            PUSH-UPS TODAY
+          </Text>
           <Text style={styles.big}>
             {pushups.total}
             <Text style={styles.bigGoal}>
@@ -317,7 +319,9 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
         </View>
 
         <View testID="active-card" style={styles.card}>
-          <Text style={styles.eyebrow}>ACTIVE TODAY</Text>
+          <Text accessibilityRole="header" style={styles.eyebrow}>
+            ACTIVE TODAY
+          </Text>
           <Text style={styles.big}>
             {active.today}
             <Text style={styles.bigGoal}> / {view.activeGoal.goal} min</Text>
@@ -337,6 +341,10 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
             />
           </View>
           <Text style={styles.caption}>
+            {/* The bar turns red under the minimum; say it too. */}
+            {active.today < view.activeGoal.floor
+              ? `Under today's minimum of ${view.activeGoal.floor} so far. `
+              : ''}
             The goal is {view.activeGoal.goal} minutes a day. On a busy day, the
             minimum is {view.activeGoal.floor}. Sessions, runs, drills and sets
             count. Water, breathing and stillness don't. Last 7 days:{' '}
@@ -345,7 +353,9 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
         </View>
 
         <View testID="run-card" style={styles.card}>
-          <Text style={styles.eyebrow}>RUNNING</Text>
+          <Text accessibilityRole="header" style={styles.eyebrow}>
+            RUNNING
+          </Text>
           <Text style={styles.big}>
             {view.graded || run.fitness.from
               ? formatDuration(run.fitness.threeMile)
@@ -398,7 +408,9 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
 
         {groups.map((group, index) => (
           <View key={group} testID={`goals-${group}`} style={styles.section}>
-            <Text style={[styles.sectionTitle, {color: groupColor(group)}]}>
+            <Text
+              accessibilityRole="header"
+              style={[styles.sectionTitle, {color: groupColor(group)}]}>
               {groupTitle(group)}
             </Text>
             {group === 'tests' ? (
@@ -694,7 +706,9 @@ function TargetEditor({
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.editor, {borderColor: accent}]}>
-          <Text style={[styles.editorTitle, {color: accent}]}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.editorTitle, {color: accent}]}>
             {event.name} target
           </Text>
           <Text style={styles.caption}>{caption}</Text>
@@ -788,7 +802,11 @@ function HeightEditor({
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.editor, {borderColor: accent}]}>
-          <Text style={[styles.editorTitle, {color: accent}]}>Your height</Text>
+          <Text
+            accessibilityRole="header"
+            style={[styles.editorTitle, {color: accent}]}>
+            Your height
+          </Text>
           <Text style={styles.caption}>
             {units === 'imperial'
               ? 'In inches, for waist-to-height: 5 ft 10 in is 70.'
@@ -886,7 +904,7 @@ const styles = StyleSheet.create({
   },
   note: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   projection: {

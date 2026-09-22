@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   letter: {
     ...t.caption,
     fontSize: 10,
-    color: palette.textMuted,
+    color: palette.textFaint,
     marginTop: 2,
   },
   letterOn: {

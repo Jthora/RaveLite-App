@@ -297,7 +297,7 @@ export function TrainingLogSheet({
           <>
             {/* Compact header with inline save/cancel */}
             <View style={styles.header}>
-              <Text style={styles.title}>
+              <Text accessibilityRole="header" style={styles.title}>
                 {editing ? 'Edit Entry' : 'New Training Log'}
               </Text>
               {isLandscape && livePace ? (
@@ -351,7 +351,9 @@ export function TrainingLogSheet({
                   isCompactLand && styles.leftColCompact,
                 ]}>
                 <View style={styles.colHeader}>
-                  <Text style={styles.sectionTitle}>Exercises</Text>
+                  <Text accessibilityRole="header" style={styles.sectionTitle}>
+                    Exercises
+                  </Text>
                   {/* What's being logged, even when the list is scrolled away from it. */}
                   {selectedKind ? (
                     <Pressable
@@ -397,7 +399,11 @@ export function TrainingLogSheet({
                 {(() => {
                   const whenSection = (
                     <View style={styles.section}>
-                      <Text style={styles.sectionTitle}>When</Text>
+                      <Text
+                        accessibilityRole="header"
+                        style={styles.sectionTitle}>
+                        When
+                      </Text>
                       <View style={styles.dateRow}>
                         {[0, 1, 2, 3].map(i => {
                           const day = startOfDay(Date.now()) - i * MS_PER_DAY;
@@ -469,7 +475,9 @@ export function TrainingLogSheet({
                                 : styles.valueColPort,
                               isCompactLand && styles.valueColCompact,
                             ]}>
-                            <Text style={styles.sectionTitle}>
+                            <Text
+                              accessibilityRole="header"
+                              style={styles.sectionTitle}>
                               {inputLabel(selectedKind)}
                             </Text>
                             <ValueInput
@@ -493,12 +501,16 @@ export function TrainingLogSheet({
                           }>
                           {/* Landscape: When sits above Notes in this column. */}
                           {isLandscape && whenSection}
-                          <Text style={styles.sectionTitle}>Notes</Text>
+                          <Text
+                            accessibilityRole="header"
+                            style={styles.sectionTitle}>
+                            Notes
+                          </Text>
                           <TextInput
                             value={notes}
                             onChangeText={setNotes}
                             placeholder="How it felt, route, weather…"
-                            placeholderTextColor={palette.textMuted}
+                            placeholderTextColor={palette.textFaint}
                             style={[
                               styles.notesInput,
                               isLandscape && styles.notesInputLand,
@@ -753,7 +765,9 @@ function ManageMetricsSheet({
       transparent={false}>
       <View style={styles.root}>
         <View style={styles.header}>
-          <Text style={styles.title}>Manage Exercises</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            Manage Exercises
+          </Text>
           <View style={styles.headerActions}>
             <Pressable onPress={onClose} style={[styles.btn, styles.btnGhost]}>
               <Text style={styles.btnText}>Done</Text>
@@ -825,7 +839,9 @@ function ArchivedList({onChange}: {onChange: () => void}) {
   }
   return (
     <View style={{marginTop: spacing.xl}}>
-      <Text style={[styles.sectionTitle, {marginBottom: spacing.sm}]}>
+      <Text
+        accessibilityRole="header"
+        style={[styles.sectionTitle, {marginBottom: spacing.sm}]}>
         Archived
       </Text>
       {archived.map(a => (
@@ -892,7 +908,9 @@ function AddCustomMetricSheet({
       transparent={false}>
       <View style={styles.root}>
         <View style={styles.header}>
-          <Text style={styles.title}>New Exercise</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            New Exercise
+          </Text>
           <View style={styles.headerActions}>
             <Pressable onPress={onClose} style={[styles.btn, styles.btnGhost]}>
               <Text style={styles.btnText}>Cancel</Text>
@@ -911,15 +929,19 @@ function AddCustomMetricSheet({
           </View>
         </View>
         <ScrollView contentContainerStyle={{padding: spacing.lg}}>
-          <Text style={styles.sectionTitle}>Name</Text>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
+            Name
+          </Text>
           <TextInput
             value={label}
             onChangeText={setLabel}
             placeholder="e.g. Squats, Brick Press, Shadow Box Round"
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={palette.textFaint}
             style={styles.notesInput}
           />
-          <Text style={[styles.sectionTitle, {marginTop: spacing.lg}]}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.sectionTitle, {marginTop: spacing.lg}]}>
             Category
           </Text>
           <View style={styles.dateRow}>
@@ -945,7 +967,9 @@ function AddCustomMetricSheet({
               </Pressable>
             ))}
           </View>
-          <Text style={[styles.sectionTitle, {marginTop: spacing.lg}]}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.sectionTitle, {marginTop: spacing.lg}]}>
             Input type
           </Text>
           <View style={styles.dateRow}>
@@ -1214,7 +1238,7 @@ const styles = StyleSheet.create({
   // Exercise list
   catHeader: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     marginTop: spacing.xs,
     marginBottom: spacing.xs,
     paddingHorizontal: spacing.xs,

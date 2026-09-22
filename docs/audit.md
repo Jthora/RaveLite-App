@@ -282,6 +282,16 @@ Contrast (`textMuted` for borders only), TalkBack labels, roles and
 headings, a live region on the chime card, non-colour cues, reduce-motion
 in the circuit, README paths.
 
+*Phase 4 done 22 Sep 2026.* Words moved off `textMuted` (2.5:1) onto a
+new `textFaint` (4.7:1), with a test that keeps them off it; day rows,
+track switches and Stay alive rows say their state to TalkBack; 82
+section and sheet titles are headings; a chime announces itself when it
+arrives; the first line of Today carries TalkBack actions for Settings,
+Practice, logging, a session and Daily Sets; cleared charts are said
+aloud and the active-minutes bar says in words when it is under the
+minimum; the circuit holds still under Remove animations or the Still
+setting; the README's menu paths match the app.
+
 ## Protect these in every fix
 
 - **Misses are quiet**: dimmed, never red; "did it but didn't tap Done?"

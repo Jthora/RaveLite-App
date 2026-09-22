@@ -60,7 +60,9 @@ export class Guard extends React.Component<Props, State> {
     }
     return (
       <View testID={`guard-${this.props.name}`} style={styles.root}>
-        <Text style={styles.title}>{this.props.name} stopped</Text>
+        <Text accessibilityRole="header" style={styles.title}>
+          {this.props.name} stopped
+        </Text>
         <Text style={styles.body}>
           This screen could not load. The rest of the app works, and your logged
           data is safe.
@@ -100,7 +102,7 @@ const styles = StyleSheet.create({
   body: {...t.caption, color: palette.textDim, lineHeight: 18},
   what: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     fontVariant: ['tabular-nums'],
   },
   btn: {

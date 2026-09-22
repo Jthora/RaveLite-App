@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   reason: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     flex: 1,
   },
   count: {

@@ -235,6 +235,29 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         <ConditionsLine
           weather={model.weather}
           onPress={() => setWeatherOpen(true)}
+          quickActions={[
+            {
+              name: 'settings',
+              label: 'Open Settings',
+              run: () => setSettingsOpen(true),
+            },
+            {
+              name: 'practice',
+              label: 'Open Practice',
+              run: () => setPracticeOpen(true),
+            },
+            {name: 'log', label: 'Log a session', run: () => setLogOpen(true)},
+            {
+              name: 'session',
+              label: 'Time a session',
+              run: () => setSessionOpen(true),
+            },
+            {
+              name: 'sets',
+              label: 'Open Daily Sets',
+              run: () => setSetsOpen(true),
+            },
+          ]}
         />
         {/* These render nothing at all unless they are wanted. */}
         <StorageWarning />
@@ -294,7 +317,10 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         />
 
         <View style={styles.sectionRow}>
-          <Text testID="today-header" style={styles.section}>
+          <Text
+            testID="today-header"
+            accessibilityRole="header"
+            style={styles.section}>
             {(model.streak > 0
               ? `Today · ${model.streak}-day streak`
               : 'Today') +

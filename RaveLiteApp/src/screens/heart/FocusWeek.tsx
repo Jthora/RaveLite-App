@@ -68,7 +68,9 @@ export function TodayFocus({
   const body = (
     <>
       <View style={styles.eyebrowRow}>
-        <Text style={styles.eyebrow}>Today's focus</Text>
+        <Text accessibilityRole="header" style={styles.eyebrow}>
+          Today's focus
+        </Text>
         {onOpen ? <Text style={styles.more}>Character ›</Text> : null}
       </View>
       <Attributes ids={focus.focus} style={styles.focusLine} />
@@ -128,7 +130,9 @@ export function WeekFocus({
 }) {
   return (
     <View testID="week-focus">
-      <Text style={styles.section}>This week</Text>
+      <Text accessibilityRole="header" style={styles.section}>
+        This week
+      </Text>
       {days.map(({date, focus, run, title}, i) => (
         <View
           key={date.toDateString()}

@@ -47,7 +47,9 @@ export function StartingPanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>WHERE YOU'RE STARTING</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        WHERE YOU'RE STARTING
+      </Text>
       <Text style={styles.caption}>
         This only sets your first numbers. After that, the app adjusts to what
         you do. A wrong pick costs about a week.
@@ -114,7 +116,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   row: {

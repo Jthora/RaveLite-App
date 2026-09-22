@@ -78,7 +78,7 @@ export function LateLogSheet({row, prescription: rx, onDone, onClose}: Props) {
               ) : (
                 <>
                   <View style={styles.topRow}>
-                    <Text style={styles.eyebrow}>
+                    <Text accessibilityRole="header" style={styles.eyebrow}>
                       {row.status === 'skipped' ? 'SKIPPED' : 'MISSED'} ·{' '}
                       {formatHM(row.at)}
                     </Text>

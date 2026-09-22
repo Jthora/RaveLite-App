@@ -58,7 +58,11 @@ export function ThemePanel(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.eyebrow, {color: accent}]}>▸ THEME</Text>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accent}]}>
+        ▸ THEME
+      </Text>
       <View style={styles.row}>
         {HEART_VARIANT_ORDER.map(id => {
           const v = HEART_VARIANTS[id];

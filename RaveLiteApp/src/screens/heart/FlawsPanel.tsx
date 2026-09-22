@@ -59,7 +59,9 @@ export function FlawsPanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>WHAT YOU'RE FIXING</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        WHAT YOU'RE FIXING
+      </Text>
       <Text style={styles.caption}>
         Three common effects of sitting at a desk. Mark the ones you have. The
         program then gives you more work to fix them.
@@ -173,7 +175,7 @@ export function FlawsPanel() {
 const styles = StyleSheet.create({
   root: {gap: spacing.sm, marginTop: spacing.lg},
   eyebrow: {...t.caption, color: palette.textDim, letterSpacing: 1.5},
-  caption: {...t.caption, color: palette.textMuted, lineHeight: 17},
+  caption: {...t.caption, color: palette.textFaint, lineHeight: 17},
   row: {
     borderRadius: radius.md,
     borderWidth: 1,
@@ -198,7 +200,7 @@ const styles = StyleSheet.create({
   },
   rowText: {flex: 1, paddingVertical: spacing.md, gap: 3},
   rowName: {...t.subtitle, color: palette.text},
-  rowProper: {...t.caption, color: palette.textMuted, fontStyle: 'italic'},
+  rowProper: {...t.caption, color: palette.textFaint, fontStyle: 'italic'},
   rowDetail: {...t.caption, color: palette.textDim, lineHeight: 17},
   tell: {...t.caption, lineHeight: 17},
   bar: {

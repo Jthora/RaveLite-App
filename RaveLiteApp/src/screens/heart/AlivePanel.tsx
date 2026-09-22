@@ -48,7 +48,11 @@ export function AlivePanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={[styles.eyebrow, {color: accent}]}>▸ ALIVE</Text>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accent}]}>
+        ▸ ALIVE
+      </Text>
       <Text style={styles.body}>
         How much the screen pulses while RaveLite is open.
       </Text>
@@ -77,7 +81,7 @@ export function AlivePanel() {
               <Text
                 style={[
                   styles.radio,
-                  {color: selected ? accent : palette.textMuted},
+                  {color: selected ? accent : palette.textFaint},
                 ]}>
                 {selected ? '◉' : '○'}
               </Text>

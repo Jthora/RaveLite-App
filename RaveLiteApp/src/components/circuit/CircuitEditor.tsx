@@ -112,7 +112,9 @@ export function CircuitEditor({
       style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
-      <Text style={[styles.eyebrow, {color: accentDim}]}>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accentDim}]}>
         ▸ {isNew ? 'NEW CIRCUIT' : 'EDIT CIRCUIT'}
       </Text>
 
@@ -122,7 +124,7 @@ export function CircuitEditor({
           value={draft.name}
           onChangeText={setName}
           placeholder="Circuit name"
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor={palette.textFaint}
           style={[styles.input, {borderColor: palette.border}]}
         />
       </Section>
@@ -206,7 +208,9 @@ function Section({label, right, children}: SectionProps) {
   return (
     <View style={styles.section}>
       <View style={styles.sectionHead}>
-        <Text style={styles.sectionLabel}>{label.toUpperCase()}</Text>
+        <Text accessibilityRole="header" style={styles.sectionLabel}>
+          {label.toUpperCase()}
+        </Text>
         {right}
       </View>
       {children}
@@ -228,7 +232,7 @@ function LegRow({index, leg, onPress}: LegRowProps) {
       color={c}
       onPress={onPress}
       style={[styles.legRow, {borderColor: palette.border}]}>
-      <Text style={[styles.legIndex, {color: palette.textMuted}]}>
+      <Text style={[styles.legIndex, {color: palette.textFaint}]}>
         {String(index + 1).padStart(2, '0')}
       </Text>
       <View style={[styles.legDot, {backgroundColor: c}]} />

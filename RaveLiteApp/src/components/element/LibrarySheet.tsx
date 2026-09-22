@@ -97,7 +97,7 @@ export function LibrarySheet({
               </CardGrid>
               {others.length > 0 ? (
                 <>
-                  <Text style={styles.eyebrow}>
+                  <Text accessibilityRole="header" style={styles.eyebrow}>
                     NOT AVAILABLE WHERE YOU TRAIN
                   </Text>
                   <CardGrid>

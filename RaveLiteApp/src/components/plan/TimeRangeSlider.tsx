@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   scaleLabel: {
-    color: palette.textMuted,
+    color: palette.textFaint,
     fontSize: 10,
     fontVariant: ['tabular-nums'],
   },

@@ -50,7 +50,9 @@ export function ShapePanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>WHAT YOUR DAY IS LIKE</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        WHAT YOUR DAY IS LIKE
+      </Text>
       <Text style={styles.caption}>
         Pick how many times a day you can stop and move. Chimes, sets and point
         goals all scale to fit. A short day still counts in full.
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
   row: {
@@ -164,6 +166,6 @@ const styles = StyleSheet.create({
   },
   means: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
 });

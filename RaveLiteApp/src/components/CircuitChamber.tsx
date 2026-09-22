@@ -15,6 +15,7 @@ import {usePulse} from '../hooks/usePulse';
 import {buildCircuit, CircuitLeg} from '../domain/circuit/circuit';
 import {recordCompletion} from '../domain/journal/recordCompletion';
 import {pulseHaptic} from '../lib/elementHaptics';
+import {useCalmMotion} from '../hooks/useCalmMotion';
 
 interface Props {
   visible: boolean;
@@ -79,7 +80,11 @@ export const CircuitChamber: React.FC<Props> = ({
 
   const leg = circuit[legIdx];
   const element = ELEMENTS[leg.element];
-  const pulse = usePulse(ELEMENT_BPM[leg.element]);
+  const calm = useCalmMotion();
+  const pulse = usePulse(ELEMENT_BPM[leg.element], !calm);
+  // Read in the leg effect without restarting the leg when it changes.
+  const calmRef = useRef(calm);
+  calmRef.current = calm;
 
   // Cross-leg flash so the body feels the transition. Triggered on
   // legIdx change.
@@ -104,6 +109,11 @@ export const CircuitChamber: React.FC<Props> = ({
     setRemaining(circuit[legIdx].durationSec);
     // Tactile threshold: each new leg announces itself in the body.
     pulseHaptic(circuit[legIdx].element, 'enter');
+    if (calmRef.current) {
+      // No flash when motion is held still; the haptic still marks it.
+      flash.setValue(0);
+      return;
+    }
     flash.setValue(1);
     Animated.timing(flash, {
       toValue: 0,

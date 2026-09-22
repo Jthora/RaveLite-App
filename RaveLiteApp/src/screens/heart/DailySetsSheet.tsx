@@ -71,7 +71,9 @@ export function DailySetsSheet({visible, onClose}: Props) {
         ) : (
           <>
             <View style={styles.header}>
-              <Text style={[styles.title, {color: accent}]}>
+              <Text
+                accessibilityRole="header"
+                style={[styles.title, {color: accent}]}>
                 {TITLES[showing]}
               </Text>
               <View style={styles.actions}>

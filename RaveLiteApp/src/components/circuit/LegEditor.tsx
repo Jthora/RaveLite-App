@@ -72,7 +72,9 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
       style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
-      <Text style={[styles.eyebrow, {color: accentDim}]}>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accentDim}]}>
         ▸ {isNew ? 'NEW LEG' : 'EDIT LEG'}
       </Text>
       <Text style={styles.summary}>{summary}</Text>
@@ -218,7 +220,9 @@ interface SectionProps {
 function Section({label, children}: SectionProps) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionLabel}>{label.toUpperCase()}</Text>
+      <Text accessibilityRole="header" style={styles.sectionLabel}>
+        {label.toUpperCase()}
+      </Text>
       {children}
     </View>
   );

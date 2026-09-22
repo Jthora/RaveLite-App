@@ -119,7 +119,9 @@ export function WindowEditor({
       style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}>
-      <Text style={[styles.eyebrow, {color: accentDim}]}>
+      <Text
+        accessibilityRole="header"
+        style={[styles.eyebrow, {color: accentDim}]}>
         ▸ {isNew ? 'NEW WINDOW' : 'EDIT WINDOW'}
       </Text>
 
@@ -129,7 +131,7 @@ export function WindowEditor({
           value={draft.label}
           onChangeText={setLabel}
           placeholder="Window name"
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor={palette.textFaint}
           style={[styles.input, {borderColor: palette.border}]}
         />
       </Section>
@@ -272,7 +274,9 @@ function Section({label, right, children}: SectionProps) {
   return (
     <View style={styles.section}>
       <View style={styles.sectionHead}>
-        <Text style={styles.sectionLabel}>{label.toUpperCase()}</Text>
+        <Text accessibilityRole="header" style={styles.sectionLabel}>
+          {label.toUpperCase()}
+        </Text>
         {right}
       </View>
       {children}

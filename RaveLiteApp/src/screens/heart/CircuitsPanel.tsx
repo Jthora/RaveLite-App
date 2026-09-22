@@ -134,7 +134,11 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
       showsVerticalScrollIndicator={false}>
       {header}
       <View style={styles.header}>
-        <Text style={[styles.eyebrow, {color: accentDim}]}>▸ CIRCUITS</Text>
+        <Text
+          accessibilityRole="header"
+          style={[styles.eyebrow, {color: accentDim}]}>
+          ▸ CIRCUITS
+        </Text>
         <Text style={styles.subtitle}>
           The Five Elements circuit, plus circuits you make.
         </Text>
@@ -158,7 +162,9 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
 
       {/* Saved custom circuits */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>SAVED CIRCUITS</Text>
+        <Text accessibilityRole="header" style={styles.sectionLabel}>
+          SAVED CIRCUITS
+        </Text>
         {list.map(c => (
           <CircuitListRow
             key={c.id}

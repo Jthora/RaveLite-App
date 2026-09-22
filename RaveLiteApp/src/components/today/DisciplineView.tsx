@@ -102,7 +102,11 @@ export function DisciplineView({
       <View style={styles.titleRow}>
         <Symbol name={disciplineSymbol(discipline)} size={26} />
         <View style={styles.titleText}>
-          <Text style={[styles.title, {color: accent}]}>{discipline.name}</Text>
+          <Text
+            accessibilityRole="header"
+            style={[styles.title, {color: accent}]}>
+            {discipline.name}
+          </Text>
           <Text style={styles.caption}>
             {moves.length} moves · {clearedHere} of {shown.length} here cleared
             at {chart.name}
@@ -110,7 +114,9 @@ export function DisciplineView({
         </View>
       </View>
 
-      <Text style={styles.eyebrow}>TIER</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        TIER
+      </Text>
       <View style={styles.pills}>
         {TIERS.map(tier => {
           const on = level.tier === tier.id;
@@ -138,7 +144,9 @@ export function DisciplineView({
         })}
       </View>
 
-      <Text style={styles.eyebrow}>CHART</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        CHART
+      </Text>
       <View style={styles.pills}>
         {CHARTS.map(c => {
           const on = level.chart === c.id;
@@ -179,7 +187,13 @@ export function DisciplineView({
             variant="plain"
             onPress={() => onPick(move, level.chart, dose)}
             accessibilityRole="button"
-            accessibilityLabel={`${move.name}, ${chart.name}: ${dose}`}
+            accessibilityLabel={`${move.name}, ${chart.name}: ${dose}. ${
+              cleared.length > 0
+                ? `Cleared at ${CHARTS.filter(c => cleared.includes(c.id))
+                    .map(c => c.name)
+                    .join(', ')}`
+                : 'Not cleared yet'
+            }${why ? `. ${why}` : ''}`}
             style={styles.row}>
             <View style={styles.rowInner}>
               <View style={[styles.tile, {backgroundColor: `${el.color}29`}]}>
@@ -196,7 +210,10 @@ export function DisciplineView({
                 <Text style={styles.caption}>{dose}</Text>
                 {why ? <Text style={styles.why}>{why}</Text> : null}
               </View>
-              <View style={styles.dots}>
+              {/* Filled once cleared, hollow before: shape as well as colour. */}
+              <View
+                style={styles.dots}
+                importantForAccessibility="no-hide-descendants">
                 {CHARTS.map(c => (
                   <View
                     key={c.id}
@@ -252,7 +269,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     letterSpacing: 1.5,
     marginTop: spacing.sm,
   },
@@ -273,7 +290,7 @@ const styles = StyleSheet.create({
   },
   pillCount: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
   pillOn: {
     color: palette.bg,

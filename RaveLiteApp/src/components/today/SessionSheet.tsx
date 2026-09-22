@@ -60,7 +60,11 @@ export function SessionSheet({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
-          <Text style={[styles.title, {color: accent}]}>Session</Text>
+          <Text
+            accessibilityRole="header"
+            style={[styles.title, {color: accent}]}>
+            Session
+          </Text>
           <Tap
             variant="plain"
             onPress={onClose}
@@ -71,7 +75,9 @@ export function SessionSheet({
         </View>
         {session ? (
           <View style={styles.body}>
-            <Text style={styles.eyebrow}>{labelOf(session.kindId)}</Text>
+            <Text accessibilityRole="header" style={styles.eyebrow}>
+              {labelOf(session.kindId)}
+            </Text>
             <Text testID="session-clock" style={styles.clock}>
               {formatDuration(sessionSeconds(session, now))}
             </Text>
@@ -103,7 +109,9 @@ export function SessionSheet({
           </View>
         ) : (
           <View style={styles.body}>
-            <Text style={styles.eyebrow}>What are you doing?</Text>
+            <Text accessibilityRole="header" style={styles.eyebrow}>
+              What are you doing?
+            </Text>
             <View style={styles.kinds}>
               {SESSION_KIND_IDS.map(id => {
                 const on = id === kindId;

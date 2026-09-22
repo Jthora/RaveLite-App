@@ -24,11 +24,19 @@ import {sineStops} from '../lib/aliveMath';
  */
 const BREATH_SHAPE = sineStops(16);
 
-export function usePulse(bpm = 60): Animated.AnimatedInterpolation<number> {
+export function usePulse(
+  bpm = 60,
+  /** False holds it still: reduce motion, or the Still setting. */
+  moving = true,
+): Animated.AnimatedInterpolation<number> {
   // useRef so the value survives re-renders without restarting the loop.
   const phase = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (!moving) {
+      phase.setValue(0);
+      return;
+    }
     const loop = Animated.loop(
       Animated.timing(phase, {
         toValue: 1,
@@ -39,7 +47,7 @@ export function usePulse(bpm = 60): Animated.AnimatedInterpolation<number> {
     );
     loop.start();
     return () => loop.stop();
-  }, [bpm, phase]);
+  }, [bpm, phase, moving]);
 
   return useMemo(() => phase.interpolate(BREATH_SHAPE), [phase]);
 }

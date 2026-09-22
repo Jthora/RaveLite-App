@@ -34,9 +34,9 @@ Android. No account, no server, no analytics, no ads. One person's app,
 opened up: **beta, no support promised.**
 
 Because there is no account, there is nothing to recover from: your
-training lives on your phone and nowhere else. Settings → Your data
-writes the whole thing to a file you choose, and reads one back. During
-the beta, take one.
+training lives on your phone and nowhere else. Settings › The app ›
+Your data writes the whole thing to a file you choose, and reads one
+back. During the beta, take one.
 
 ## Not only for the dance floor
 
@@ -170,10 +170,11 @@ yarn install
 yarn android          # a connected Android device or an emulator
 ```
 
-Android 13+ will ask for notification permission on the first visit to
-the home screen. On MIUI/HyperOS phones you must also turn **Autostart**
-on by hand, or chimes stop when the app is backgrounded; Settings → Stay
+Android 13+ asks for notification permission once setup is finished. On
+MIUI/HyperOS phones you must also turn **Autostart** on by hand, or
+chimes stop when the app is backgrounded; Settings › The day › Stay
 alive lists everything this phone needs, with a button for each.
+(Settings is at the bottom of Today.)
 
 ## Chimes, notifications and Daily Sets
 
@@ -190,9 +191,9 @@ What works today:
 - **Rolling schedule** — the JS pulse runtime fires the Plan's element
   cadence (`planScheduler`) and the Daily Sets program (`setScheduler`),
   one pulse at a time; the rest queue.
-- **Daily Sets** (Heart → Sets) — each movement track prescribes sets at
-  about half your tested max, spread across the day. Sets climb weekly,
-  every 4th week is a deload + max-test week, and a harder variation
+- **Daily Sets** (the meters on Today; tap them) — each movement track
+  prescribes sets at about half your tested max, spread across the day.
+  Sets climb weekly, every 4th week is an easy week with max tests, and a harder variation
   unlocks once a set size graduates. Push is always balanced by rows and
   pull-ups.
 - **Answer from anywhere** — every pulse notification has Done / +5 min /
@@ -208,14 +209,14 @@ What works today:
   a quiet channel; if the cue can't play, it uses the sounding channel
   instead. By default chimes follow the phone: on silent, vibrate or Do
   Not Disturb they post on the sounding channel and the phone decides.
-  Heart › Settings › Chimes: volumes, per-element test, and a "Follow
+  Settings › The day › Chimes: volumes, per-element test, and a "Follow
   silent mode and Do Not Disturb" switch. Turn it off and chimes cut
   through both.
 - **Backup chimes** — the OS also holds an exact-alarm notification ~90 s
   after every upcoming chime. The live app cancels it when the chime comes
   due, so you hear one chime; if the app has been killed, the backup
   still arrives with the same buttons.
-- **Stay alive checklist** — Heart › Settings lists what keeps chimes
+- **Stay alive checklist** — Settings › The day lists what keeps chimes
   firing on this phone (notifications, exact alarms, battery, HyperOS
   Autostart, alarm volume, locked in recents, charger) with a button to
   fix each.
@@ -237,7 +238,7 @@ motion — a tap wakes it for two minutes.
 
 The UI breathes: a faint element-colored glow on one shared, native-driven
 clock (`src/lib/aliveClock.ts`), a small swell on touch, and a soft color
-wash when a chime fires. Heart › Settings › Alive picks Whisper (default),
+wash when a chime fires. Settings › The app › Alive picks Whisper (default),
 Glow or Still; night, a pause, or Android's "Remove animations" make it
 rest. The clock's `aliveDriver` is the plug-in point for the beat
 recognizer.

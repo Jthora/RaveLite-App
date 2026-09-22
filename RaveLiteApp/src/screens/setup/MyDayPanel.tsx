@@ -26,7 +26,9 @@ export function MyDayPanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>MY DAY</Text>
+      <Text accessibilityRole="header" style={styles.eyebrow}>
+        MY DAY
+      </Text>
       <Text style={styles.caption}>
         Set the start to when you get up. It can end after midnight.
       </Text>
@@ -47,7 +49,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     ...t.caption,
-    color: palette.textMuted,
+    color: palette.textFaint,
     lineHeight: 17,
   },
 });
