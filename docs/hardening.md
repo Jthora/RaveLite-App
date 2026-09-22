@@ -155,7 +155,7 @@ packs written to break the validator — so CI runs them.
 
 ---
 
-### Pass 4 — Edges of a real life
+### Pass 4 — Edges of a real life ✅ *(22 Sep 2026, bar the device half)*
 
 **Problem:** the app was tested on one phone belonging to somebody with
 eleven weeks of data.
@@ -175,6 +175,24 @@ eleven weeks of data.
 
 *Done when:* each has a test, and the ones that cannot be tested have a
 device script.
+
+**What it found.** Nothing broken, which is worth saying plainly: the
+edges hold.
+
+- **Day zero** is covered by the prescription invariants: every archetype
+  on a fresh store builds a day it can do.
+- **Day one thousand**: five years, about 27,000 logged things. Opening a
+  day costs a day, not a life — and the ratios are pinned as a test.
+- **The long gap**: back after three days, a month or four hundred, the
+  program comes back with sets inside every track's cap, a day that can
+  be done, and a streak of zero rather than a year of failure.
+- **No permissions** and **the phone fights back** were already covered:
+  notifications denied, exact alarms revoked, a probe that cannot run,
+  and a write the phone refused each have tests.
+
+Still device-only: battery optimisation and OEM autostart behaviour, and
+what a real overnight does — the Stay alive page answers that one every
+morning.
 
 ---
 
@@ -266,6 +284,29 @@ only observed not to be obviously slow.
 
 *Done when:* there are numbers in a doc, and a regression test on the
 worst one.
+
+**The numbers** (22 Sep 2026, five years of data — 27,376 stored keys —
+on the laptop under Node, not on the phone; the Redmi is several times
+slower, so read these as ratios rather than as milliseconds):
+
+| What | Cost |
+|---|---|
+| Building today's activity (`activityForDay`) | under 0.1 ms |
+| Today's rounds (`setsToday`) | 1 ms |
+| The day list | under 0.1 ms |
+| "Has this person ever logged anything?" | 1 ms |
+| The streak, on an unbroken five-year run | 9 ms |
+| A whole export (`buildBackup`) | 7 ms |
+| A full scan of five years, for comparison | 49 ms |
+
+The streak is the worst of them, because an unbroken run has no gap to
+stop at — the one person it is slow for is the one who trained every day
+for five years. It is pinned against the full scan in `aLongLife.test.ts`
+along with the day list and the day's rounds.
+
+Still open here: the always-on case — memory after twelve hours beside a
+monitor, the wake lock, and the battery — which only the phone can
+answer.
 
 ---
 
