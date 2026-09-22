@@ -20,6 +20,9 @@
          killed. RaveLite is sideloaded, where USE_EXACT_ALARM is granted at
          install. If it ever ships on Google Play this needs policy review. -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Start the chime runtime again after a reboot or an update, without
+         waiting for somebody to open the app. See boot/BootReceiver.kt. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
       android:name=".MainApplication"
@@ -61,6 +64,18 @@
         android:name="android.support.FILE_PROVIDER_PATHS"
         android:resource="@xml/file_paths" />
     </provider>
+
+      <receiver
+        android:name=".boot.BootReceiver"
+        android:exported="true">
+        <intent-filter>
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+        </intent-filter>
+      </receiver>
+      <service
+        android:name=".boot.BootTaskService"
+        android:exported="false" />
 
       <!-- API 34+ requires a foregroundServiceType on the FGS. We
            override Notifee's bundled <service> declaration to add it. -->

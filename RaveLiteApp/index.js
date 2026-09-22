@@ -10,6 +10,7 @@ import {ensureHydrated} from './src/storage/persistence';
 import {runMigrations} from './src/storage/migrations';
 import {toNotificationAction} from './src/domain/reminders/notifeeScheduler';
 import {handleNotificationAction} from './src/domain/ambient/notificationActions';
+import {bootTask} from './src/boot/bootTask';
 
 // Notification buttons (Done / +5 / Skip) pressed while RaveLite is in the
 // background. Notifee requires this at module scope, before rendering.
@@ -28,3 +29,10 @@ notifee.onBackgroundEvent(async event => {
 });
 
 AppRegistry.registerComponent(appName, () => App);
+
+// After a reboot or an update, start the chimes again without waiting for
+// somebody to open the app. See android/…/boot/BootReceiver.kt.
+AppRegistry.registerHeadlessTask(
+  'RaveLiteBoot',
+  () => () => bootTask().then(() => undefined),
+);
