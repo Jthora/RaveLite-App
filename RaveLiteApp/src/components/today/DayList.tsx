@@ -16,6 +16,7 @@ const MARK: Record<DayRowStatus, string> = {
   upcoming: '○',
   skipped: '–',
   missed: '·',
+  unsounded: '·',
 };
 
 interface Props {
@@ -43,9 +44,15 @@ export function DayList({
     <View>
       {rows.map(row => {
         const el = ELEMENTS[row.element];
-        const quiet = row.status === 'skipped' || row.status === 'missed';
+        const quiet =
+          row.status === 'skipped' ||
+          row.status === 'missed' ||
+          row.status === 'unsounded';
         const lit = row.status === 'done' || row.status === 'active';
-        const late = row.status === 'missed' || row.status === 'skipped';
+        const late =
+          row.status === 'missed' ||
+          row.status === 'skipped' ||
+          row.status === 'unsounded';
         const train = row.ref?.store === 'train';
         // Logged completions open to keep or remove; max tests don't.
         const removable =

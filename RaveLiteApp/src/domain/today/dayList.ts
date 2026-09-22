@@ -2,7 +2,7 @@ import type {ElementId} from '../../theme/elements';
 import type {InfoLink} from '../info/info';
 import type {MoveId} from '../exercises/moves';
 import type {ActivityItem, ActivitySource} from '../activity/activity';
-import type {JournalEntry} from '../journal/types';
+import type {JournalEntry, SuppressionReason} from '../journal/types';
 
 /**
  * Today's list — pure. One list for the whole day from every source:
@@ -15,7 +15,9 @@ import type {JournalEntry} from '../journal/types';
  * water as the detail; a drill with a ride-along (a water call's eye break)
  * reads as the drill. A chime that was answered shows only as that done
  * row. Missed chimes stay in the list, dimmed by the view, and are never
- * counted or used as a headline.
+ * counted or used as a headline. A chime that never sounded — paused, or
+ * outside My day — is not missed: it is its own quiet row and stays out of
+ * Catch up.
  */
 
 export type DayRowStatus =
@@ -23,7 +25,9 @@ export type DayRowStatus =
   | 'active'
   | 'upcoming'
   | 'skipped'
-  | 'missed';
+  | 'missed'
+  /** It never sounded: paused, outside My day, battery saver. Not missed. */
+  | 'unsounded';
 
 export interface DayRow {
   id: string;
@@ -69,12 +73,25 @@ export interface DayListInput {
   active?: ScheduledChime;
   /** Current fire time of queued chimes (a +5 moves a chime later). */
   queuedAt?: ReadonlyMap<string, number>;
+  /**
+   * When the day started for this person — setup, on its day. A chime
+   * from before it is left out: it was never theirs to miss.
+   */
+  from?: number;
 }
+
+/** Why a chime did not sound, as the row says it. */
+const UNSOUNDED: Record<SuppressionReason, string> = {
+  'manual-pause': 'Paused, did not sound',
+  'outside-active-hours': 'Outside My day, did not sound',
+  'battery-saver': 'Battery saver, did not sound',
+};
 
 const STATUS_ORDER: Record<DayRowStatus, number> = {
   done: 0,
   skipped: 1,
   missed: 2,
+  unsounded: 2,
   active: 3,
   upcoming: 4,
 };
@@ -115,7 +132,7 @@ function doneRow(items: ActivityItem[]): DayRow {
 }
 
 export function buildDayList(input: DayListInput): DayRow[] {
-  const {now, activity, journal, scheduled, active, queuedAt} = input;
+  const {now, activity, journal, scheduled, active, queuedAt, from} = input;
   const rows: DayRow[] = [];
 
   const records = new Map<string, ActivityItem[]>();
@@ -133,6 +150,11 @@ export function buildDayList(input: DayListInput): DayRow[] {
   const skipped = new Set(
     journal.flatMap(e => (e.kind === 'reminder.skipped' ? [e.pulseId] : [])),
   );
+  const unsounded = new Map(
+    journal.flatMap(e =>
+      e.kind === 'reminder.suppressed' ? [[e.pulseId, e.reason] as const] : [],
+    ),
+  );
   const chimes = [...scheduled];
   if (active && !chimes.some(c => c.id === active.id)) {
     chimes.push(active);
@@ -142,6 +164,10 @@ export function buildDayList(input: DayListInput): DayRow[] {
       continue;
     }
     const at = queuedAt?.get(chime.id) ?? chime.ts;
+    if (from !== undefined && at < from && chime.id !== active?.id) {
+      continue;
+    }
+    const why = unsounded.get(chime.id);
     const status: DayRowStatus =
       chime.id === active?.id
         ? 'active'
@@ -149,6 +175,8 @@ export function buildDayList(input: DayListInput): DayRow[] {
         ? 'skipped'
         : queuedAt?.has(chime.id) || at > now
         ? 'upcoming'
+        : why
+        ? 'unsounded'
         : 'missed';
     rows.push({
       id: chime.id,
@@ -156,7 +184,10 @@ export function buildDayList(input: DayListInput): DayRow[] {
       element: chime.element,
       status,
       label: chime.label,
-      detail: chime.detail,
+      detail:
+        status === 'unsounded' && why
+          ? [UNSOUNDED[why], chime.detail].filter(Boolean).join(' · ')
+          : chime.detail,
       move: chime.move,
       exerciseId: chime.exerciseId,
       parts: chime.parts,

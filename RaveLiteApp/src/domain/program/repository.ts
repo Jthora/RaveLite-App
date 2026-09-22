@@ -333,6 +333,12 @@ export function reviewProgram(now: number = Date.now()): ProgramState {
   const history = loadDayHistory();
   const excused = loadExcused();
   const rest = restDaySet();
+  // The day of setup started whenever setup finished: a part day, never
+  // a verdict.
+  const setUpAt = loadProfile().setUpAt;
+  if (setUpAt !== undefined) {
+    rest.add(localDayKey(setUpAt));
+  }
   const done = window.map(day => doneByTrack(entriesForDay(day)));
   const deload =
     phaseForWeek(programWeek(program.startDay, yesterday)) === 'deload';

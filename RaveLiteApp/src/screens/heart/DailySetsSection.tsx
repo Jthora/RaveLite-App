@@ -66,6 +66,7 @@ import {blockPieces, runFor, blockTitle} from '../../domain/program/morning';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {STOP_LINE} from '../../domain/exercises/safety';
+import {owedToday} from '../../domain/program/setsSummary';
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const REFRESH_MS = 30_000;
@@ -133,8 +134,11 @@ export function DailySetsSection({
     facts,
   } = view;
   const accent = ELEMENTS.heart.accent;
-  const setsTotal = today.prescriptions.reduce((s, p) => s + p.sets, 0);
-  const setsDone = today.prescriptions.reduce(
+  // What is still owed: a skipped round or one that never sounded is let
+  // go, so the day can still be finished.
+  const owed = today.prescriptions.map(p => owedToday(p, today.released));
+  const setsTotal = owed.reduce((s, p) => s + p.sets, 0);
+  const setsDone = owed.reduce(
     (s, p) => s + Math.min(p.sets, done[p.trackId]?.sets ?? 0),
     0,
   );
@@ -188,7 +192,7 @@ export function DailySetsSection({
       {today.prescriptions.length === 0 ? (
         <Text style={styles.emptyText}>Rest day. No sets scheduled.</Text>
       ) : (
-        today.prescriptions.map(p => {
+        owed.map(p => {
           const track = trackById(p.trackId);
           const state = program.tracks[p.trackId];
           const d = done[p.trackId] ?? {amount: 0, sets: 0};

@@ -50,7 +50,7 @@ export function isRestDay(day: string): boolean {
 }
 
 /** Every rest day on record, for readers that walk many days at once. */
-export function restDaySet(): ReadonlySet<string> {
+export function restDaySet(): Set<string> {
   return new Set(Object.keys(load()));
 }
 

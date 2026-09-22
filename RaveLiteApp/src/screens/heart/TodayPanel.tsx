@@ -148,7 +148,11 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         info.show(cardForRow(row));
         return;
       }
-      if (row.status === 'missed' || row.status === 'skipped') {
+      if (
+        row.status === 'missed' ||
+        row.status === 'skipped' ||
+        row.status === 'unsounded'
+      ) {
         setLate(row);
         return;
       }

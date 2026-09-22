@@ -39,10 +39,31 @@ const byElement = (prescriptions: readonly DayPrescription[]) =>
       ELEMENT_ORDER.indexOf(a.element) - ELEMENT_ORDER.indexOf(b.element),
   );
 
+/**
+ * A prescription with the sets let go today taken off (a round skipped,
+ * or one that never sounded), so an interrupted day can still be finished.
+ */
+export function owedToday(
+  p: DayPrescription,
+  released: Partial<Record<TrackId, number>> = {},
+): DayPrescription {
+  const gone = released[p.trackId] ?? 0;
+  if (gone <= 0) {
+    return p;
+  }
+  const size = Math.max(1, p.setSize);
+  return {
+    ...p,
+    sets: Math.ceil(Math.max(0, p.setSize * p.sets - gone) / size),
+  };
+}
+
 export function summarizeSets(
-  prescriptions: readonly DayPrescription[],
+  asked: readonly DayPrescription[],
   done: ReturnType<typeof doneByTrack>,
+  released: Partial<Record<TrackId, number>> = {},
 ): SetsSummary {
+  const prescriptions = asked.map(p => owedToday(p, released));
   return {
     done: prescriptions.reduce(
       (sum, p) => sum + Math.min(p.sets, done[p.trackId]?.sets ?? 0),

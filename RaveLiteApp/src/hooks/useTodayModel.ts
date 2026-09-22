@@ -39,7 +39,7 @@ import {
   queuedPulses,
   subscribe as subscribeRuntime,
 } from '../domain/ambient/pulseRuntime';
-import {setsToday} from '../domain/ambient/setScheduler';
+import {setUpToday, setsToday} from '../domain/ambient/setScheduler';
 import type {ActiveHours, ActivePulseSummary} from '../domain/ambient/types';
 import {partsOf} from '../domain/info/info';
 import {moveForExercise, moveForTrack} from '../domain/exercises/moves';
@@ -212,6 +212,7 @@ export function buildTodayModel(
     scheduled,
     active,
     queuedAt: new Map(queuedPulses().map(p => [p.id, p.fireAt])),
+    from: setUpToday(now),
   });
 
   const done = doneByTrack(journal);
@@ -234,7 +235,7 @@ export function buildTodayModel(
     }),
     waterReason: heatReason(now, activity),
     weather: weatherLine(now),
-    sets: summarizeSets(sets.prescriptions, done),
+    sets: summarizeSets(sets.prescriptions, done, sets.released),
     focus: focusFor(date),
     activeMinutes: activeMinutes(activity),
   };

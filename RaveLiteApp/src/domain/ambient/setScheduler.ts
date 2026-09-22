@@ -41,7 +41,12 @@ import {
 } from '../program/repository';
 import {plannedDrill} from '../program/morning';
 import {programWeek} from '../program/progression';
-import {dailyPar, dayRounds, noteRestDays} from '../profile/repository';
+import {
+  dailyPar,
+  dayRounds,
+  loadProfile,
+  noteRestDays,
+} from '../profile/repository';
 import {groupIntoRounds, movesOf} from '../program/rounds';
 import {placeRounds, selectUpcomingRounds} from '../program/schedule';
 import {
@@ -49,6 +54,7 @@ import {
   type DayPrescription,
   type SetFire,
   type SetPrescription,
+  type TrackId,
 } from '../program/types';
 import {dayFocus} from '../program/week';
 import {localDayKey} from '../training/grading';
@@ -85,6 +91,33 @@ export interface SetsToday {
   redundant: string[];
   /** Plan water calls folded into a round; the plan scheduler skips them. */
   absorbedPlanIds: string[];
+  /**
+   * Amounts let go today, per track: rounds skipped, rounds that never
+   * sounded, and rounds from before setup. They are not owed any more, so
+   * they neither roll into later rounds nor stay in the day's total.
+   */
+  released: Partial<Record<TrackId, number>>;
+}
+
+/** When setup was finished, if that was today: the day starts there. */
+export function setUpToday(now: number): number | undefined {
+  const at = loadProfile().setUpAt;
+  return at !== undefined && localDayKey(at) === localDayKey(now)
+    ? at
+    : undefined;
+}
+
+/** What a set of rounds asked, per track. */
+function amountsOf(
+  rounds: readonly SetFire[],
+): Partial<Record<TrackId, number>> {
+  const out: Partial<Record<TrackId, number>> = {};
+  for (const round of rounds) {
+    for (const move of movesOf(round.prescription)) {
+      out[move.trackId] = (out[move.trackId] ?? 0) + move.amount;
+    }
+  }
+  return out;
 }
 
 function isWaterCall(plan: Plan, fire: FireSpec): boolean {
@@ -164,7 +197,7 @@ export function setsToday(now: number = Date.now()): SetsToday {
     midnight.getTime(),
     midnight.getTime() + 86_399_999,
   );
-  const fires = placeRounds({
+  const placed = placeRounds({
     date,
     dayStart: myDay.start,
     dayEnd: myDay.end,
@@ -176,12 +209,44 @@ export function setsToday(now: number = Date.now()): SetsToday {
     }),
     blockedTs: planFires.map(f => f.ts),
   });
+  // On the day of setup, rounds from before it never existed for this
+  // person: they are dropped, and the rest are numbered from one, so the
+  // first chime is "Round 1 of 4", not "Round 6 of 9" after a list of
+  // chimes they missed before the app was theirs.
+  const from = setUpToday(now);
+  const before = from === undefined ? [] : placed.filter(f => f.ts < from);
+  const kept = from === undefined ? placed : placed.filter(f => f.ts >= from);
+  const fires =
+    before.length === 0
+      ? kept
+      : kept.map((f, i) => ({
+          ...f,
+          prescription: {
+            ...f.prescription,
+            roundIndex: i + 1,
+            rounds: kept.length,
+          },
+        }));
   const entries = entriesForDay(date);
   const firedIds = firedSetIds(entries);
+  // Skip means "not today": those sets are let go, not rolled into later
+  // rounds. So are rounds that never sounded — paused, outside My day.
+  const letGo = new Set(
+    entries.flatMap(e =>
+      e.kind === 'reminder.skipped' || e.kind === 'reminder.suppressed'
+        ? [e.pulseId]
+        : [],
+    ),
+  );
+  const released = amountsOf([
+    ...before,
+    ...fires.filter(f => letGo.has(f.id)),
+  ]);
   const {keep, drop} = selectUpcomingRounds({
     fires,
     prescriptions,
     doneByTrack: doneByTrack(entries),
+    released,
     firedIds,
     now,
     graceMs: SET_GRACE_MS,
@@ -216,6 +281,7 @@ export function setsToday(now: number = Date.now()): SetsToday {
     upcoming: keep.map(addWater),
     redundant: drop,
     absorbedPlanIds,
+    released,
   };
 }
 

@@ -169,6 +169,8 @@ export interface SelectInput {
   prescriptions: DayPrescription[];
   /** Amount done today per track (reps or seconds). */
   doneByTrack: Partial<Record<TrackId, {amount: number}>>;
+  /** Amount let go today per track: skipped, or never sounded. */
+  released?: Partial<Record<TrackId, number>>;
   /** Set pulse ids that have already fired today. */
   firedIds: ReadonlySet<string>;
   now: number;
@@ -192,7 +194,8 @@ export interface SelectResult {
  * still to come, at most one per round for each track and never past a
  * full round, spread across the rest of the day. What doesn't fit is let
  * go rather than crammed into one big set; the daily review (`adapt.ts`)
- * reads the shortfall.
+ * reads the shortfall. Sets `released` — a round skipped, or one that
+ * never sounded — are not owed, so they do not roll forward.
  */
 export function selectUpcomingRounds(input: SelectInput): SelectResult {
   const {fires, prescriptions, doneByTrack, firedIds, now, graceMs} = input;
@@ -201,9 +204,10 @@ export function selectUpcomingRounds(input: SelectInput): SelectResult {
   for (const p of prescriptions) {
     const size = Math.max(1, p.setSize);
     const done = doneByTrack[p.trackId]?.amount ?? 0;
+    const gone = input.released?.[p.trackId] ?? 0;
     owed.set(
       p.trackId,
-      Math.ceil(Math.max(0, p.setSize * p.sets - done) / size),
+      Math.ceil(Math.max(0, p.setSize * p.sets - done - gone) / size),
     );
     doneSets.set(p.trackId, Math.min(p.sets, Math.floor(done / size)));
   }

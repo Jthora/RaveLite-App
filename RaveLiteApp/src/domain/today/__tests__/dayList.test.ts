@@ -218,3 +218,42 @@ it('shows an answered water call as its drill, with the eye break beside it', ()
     }),
   ]);
 });
+
+describe('chimes that never sounded', () => {
+  it('are their own quiet row, not missed', () => {
+    const journal = [
+      {
+        id: 'j1',
+        kind: 'reminder.suppressed',
+        at: NOON - 60 * MIN,
+        pulseId: 'p1',
+        reason: 'manual-pause',
+      },
+    ] as JournalEntry[];
+    const rows = buildDayList({
+      ...base,
+      journal,
+      scheduled: [
+        chime('p1', NOON - 60 * MIN, 'Water Call'),
+        chime('p2', NOON - 30 * MIN),
+      ],
+    });
+    expect(rows.map(r => [r.id, r.status])).toEqual([
+      ['p1', 'unsounded'],
+      ['p2', 'missed'],
+    ]);
+    expect(rows[0].detail).toBe('Paused, did not sound');
+  });
+
+  it('leave out what came before setup', () => {
+    const rows = buildDayList({
+      ...base,
+      from: NOON - 10 * MIN,
+      scheduled: [
+        chime('early', NOON - 60 * MIN),
+        chime('later', NOON + 30 * MIN),
+      ],
+    });
+    expect(rows.map(r => r.id)).toEqual(['later']);
+  });
+});
