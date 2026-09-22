@@ -6,7 +6,7 @@ import {DEFAULT_PLAN} from '../../reminders/defaultPlan';
 import {expandPlanToFires, planPulseId} from '../../reminders/expandPlan';
 import {pickDrillForSlotSeeded} from '../../reminders/scheduler';
 import {addEntry} from '../../training/repository';
-import {blockPieces, blockTitle, plannedDrill} from '../morning';
+import {WARM_UP_NOTE, blockPieces, blockTitle, plannedDrill} from '../morning';
 import {defaultProgram, focusFor} from '../repository';
 import {AUTHOR_FACTS, DEFAULT_FACTS, type KitItem} from '../../profile/kit';
 import {SATURDAY_TESTS} from '../week';
@@ -81,7 +81,28 @@ it('other slots still pick from the library, and the weather keeps the piece', (
       first.fire.ts,
       morning,
     ),
-  ).toEqual({drill: first.drill, detail: 'Kicks and flips · 1 of 3'});
+  ).toEqual({
+    drill: first.drill,
+    detail: 'Kicks and flips · 1 of 3',
+    note: WARM_UP_NOTE,
+  });
+});
+
+it('asks for a warm-up before a sharp first piece, and only then', () => {
+  const noteAt = (date: Date, i: number) => {
+    const chime = chimesOn(date)[i];
+    return drillForPlanChime(
+      morning.slots[0],
+      planPulseId(chime.fire),
+      chime.fire.ts,
+      morning,
+    ).note;
+  };
+  // Monday opens on kicks at 05:45; the 06:10 piece comes after them.
+  expect(noteAt(MONDAY, 0)).toBe(WARM_UP_NOTE);
+  expect(noteAt(MONDAY, 1)).toBeUndefined();
+  // Thursday opens on body isolations, a warm-up in itself.
+  expect(noteAt(new Date(2026, 8, 17), 0)).toBeUndefined();
 });
 
 it('on a run day the run plan takes the piece, and the chime says the run', () => {

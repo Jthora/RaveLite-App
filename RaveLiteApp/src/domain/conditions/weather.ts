@@ -17,7 +17,7 @@ import {
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import type {Exercise} from '../exercises/types';
-import {plannedDrill} from '../program/morning';
+import {WARM_UP_NOTE, needsWarmUp, plannedDrill} from '../program/morning';
 import type {CadenceSlot, Plan, Window} from '../reminders/types';
 import {localDayKey} from '../training/grading';
 import {
@@ -380,11 +380,19 @@ export function drillForPlanChime(
   if (!slot) {
     return {};
   }
-  const {drill: planned, detail} = plannedDrill(slot, window, pulseId, ts);
+  const {
+    drill: planned,
+    detail,
+    first,
+  } = plannedDrill(slot, window, pulseId, ts);
   const withDetail = detail ? {detail} : {};
+  // The morning's first piece, if it is sharp, asks for a warm-up.
+  const warm = (d: Exercise | undefined) =>
+    first && d && needsWarmUp(d) ? WARM_UP_NOTE : undefined;
   const conditions = planned ? conditionsFor(ts) : undefined;
   if (!planned || !conditions) {
-    return {drill: planned, ...withDetail};
+    const note = warm(planned);
+    return {drill: planned, ...(note ? {note} : {}), ...withDetail};
   }
   const {drill, note} = adaptDrill(
     planned,
@@ -393,7 +401,11 @@ export function drillForPlanChime(
     pulseId,
     indoorRoom(loadFacts(ts), loadProfile().startedSetupAt === undefined),
   );
-  return {drill, note, ...withDetail};
+  const warmUp = warm(drill);
+  // A cold morning's note already says to warm up.
+  const both =
+    note && warmUp && !/warm up/i.test(note) ? `${note}. ${warmUp}` : undefined;
+  return {drill, note: both ?? note ?? warmUp, ...withDetail};
 }
 
 /** The plan with hot-day water calls for today and tomorrow. */

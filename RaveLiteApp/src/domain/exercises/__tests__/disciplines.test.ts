@@ -97,4 +97,18 @@ describe('charts', () => {
       'Challenge',
     ]);
   });
+
+  it('never runs an aerial trick as a timed round', () => {
+    const tornado = BY_ID.get('fire.tricking-tornado-kick')!;
+    for (const chart of CHARTS) {
+      const dose = chartDose(tornado, chart.id, 'danceCombat');
+      expect(dose).not.toMatch(/\b(min|round|track)\b/);
+    }
+    expect(chartDose(tornado, 'challenge', 'danceCombat')).toMatch(
+      /full rest between/,
+    );
+    // Other dance combat moves keep the family's round.
+    const ginga = BY_ID.get('water.capoeira-ginga')!;
+    expect(chartDose(ginga, 'challenge', 'danceCombat')).toMatch(/3 min round/);
+  });
 });

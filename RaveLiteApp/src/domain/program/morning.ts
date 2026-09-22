@@ -1,6 +1,7 @@
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {MorningBlock} from './week';
 import type {Exercise} from '../exercises/types';
+import {moveForExercise, type MoveId} from '../exercises/moves';
 import {pickDrillForSlotSeeded} from '../reminders/scheduler';
 import type {CadenceSlot, Window} from '../reminders/types';
 import {canDo} from '../profile/kit';
@@ -23,6 +24,36 @@ export interface PlannedDrill {
   drill?: Exercise;
   /** For a block piece: "Kicks and jumps · 1 of 3", or the run: "6 × 400 m in 1:59 · 1 of 3". */
   detail?: string;
+  /** The block's first piece, soon after waking. */
+  first?: boolean;
+}
+
+/**
+ * Pieces too sharp for cold legs: jumps, kicks, sprints and strikes. A
+ * morning block's first chime comes soon after waking, so when its piece
+ * is one of these the chime asks for a warm-up first — unless the drill
+ * already carries its own warm-up cue.
+ */
+const SHARP_MOVES: ReadonlySet<MoveId> = new Set<MoveId>(['jump', 'kick']);
+const SHARP_IDS: ReadonlySet<string> = new Set([
+  'fire.backyard-strides',
+  'fire.cft-sprint',
+  'fire.jab-cross',
+  'fire.hook-uppercut',
+  'fire.elbow-strikes',
+]);
+
+export const WARM_UP_NOTE =
+  'Warm up for 5 min first: march, leg swings, arm circles';
+
+export function needsWarmUp(drill: Exercise): boolean {
+  if (drill.cues?.some(cue => /^warm up/i.test(cue))) {
+    return false;
+  }
+  const move = moveForExercise(drill.id);
+  return (
+    SHARP_IDS.has(drill.id) || (move !== undefined && SHARP_MOVES.has(move))
+  );
 }
 
 export interface BlockPiece {
@@ -182,6 +213,7 @@ export function plannedDrill(
       return {
         drill,
         detail: `${piece.run ? piece.run.short : title} · ${which}`,
+        first: i === 0,
       };
     }
   }

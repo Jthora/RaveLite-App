@@ -63,6 +63,22 @@ const RULES: Readonly<
   },
 };
 
+/**
+ * Aerial tricks: every rep is a take-off and a landing. No chart turns
+ * them into a timed round; harder charts ask for cleaner or linked reps,
+ * always with full rest between.
+ */
+const AERIAL: Readonly<Record<Exclude<ChartId, 'standard'>, string>> = {
+  beginner: '5 each side in slow motion, without leaving the ground',
+  light: '5 × 1 at half height, full rest between',
+  heavy: 'weak side first',
+  challenge:
+    '5 × 2 linked out of a kick you already know, full rest between. Stop at the first messy landing',
+};
+
+export const isAerial = (exercise: Exercise): boolean =>
+  exercise.id.startsWith('fire.tricking-');
+
 /** What a move asks for at a chart. */
 export function chartDose(
   exercise: Exercise,
@@ -72,7 +88,7 @@ export function chartDose(
   if (chart === 'standard') {
     return exercise.dose;
   }
-  const rule = RULES[family][chart];
+  const rule = (isAerial(exercise) ? AERIAL : RULES[family])[chart];
   // Heavy builds on the move's own dose; the others replace it.
   return chart === 'heavy' ? `${exercise.dose}, ${rule}` : capital(rule);
 }
