@@ -144,7 +144,7 @@ device script.
 
 ---
 
-### Pass 5 — The seams this wave created
+### Pass 5 — The seams this wave created ✅ *(22 Sep 2026)*
 
 > **Promoted ahead of 3 and 4 (21 Sep 2026).** Both bugs found since this
 > plan was written were seams of exactly this kind — a helper whose cost
@@ -180,6 +180,40 @@ Specific, named, because they are new and nothing has stressed them.
 
 *Done when:* each seam has a test that fails when the seam is broken —
 verified by breaking it, as with the element-property guard.
+
+**What it found** (c7c2185, 2df0cac, 04823f1, and this pass's tests):
+
+- **Caches outlived the store.** Round partners lean on a balance worked
+  out once a day from the week's history, and that cache survived demo
+  mode's store swap: the demo's partners came from the real week, and
+  after leaving, the real day kept the demo's. The Undo notice could name
+  an entry in the other store. Storage now announces a wholesale change —
+  demo swap, clear, restore — and every cache built from it registers to
+  drop itself. The profile cache uses that hook instead of demo mode
+  resetting it by hand.
+- **Sheets over sheets.** Settings opened My day over itself; Daily Sets
+  opened the max test, a target and a height over itself; Goals opened the
+  Train log, which opened Manage, which opened New Exercise — four deep.
+  On the phone a Modal over a Modal loses Back once touched. A dialog
+  inside a sheet is now drawn in that sheet's own window (`SheetLayer`)
+  and takes Back through its `BackStack`; My day is a page under The day.
+  The guards count visible Modals along each path.
+- **A mode took up to a minute to matter.** The schedulers watched the
+  program, the plan and My day, but not the profile — where modes,
+  injuries, packs and places live. A round queued at home could still ask
+  for the pull-up bar after "away from home", and "taking the day off"
+  still chimed. Both schedulers watch the profile now.
+- **Festival Six inherited a festival that had already happened.** Taking
+  it a second time kept the first date, and a date in the past is no block
+  at all, so the program never started.
+- **The combinations hold.** Every (mode × injury × room × packs) builds a
+  day whose rounds are all doable, with no track twice in a round, empty
+  only when the mode says so. A month of changing day shapes leaves the
+  ladder exactly where a month of steady days does.
+
+Not found: handlers that can do nothing (the early returns left are all
+behind a disabled control or a message), and archetype switching
+accumulating anything.
 
 ---
 
