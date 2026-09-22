@@ -44,7 +44,10 @@ export interface Archetype {
    * appears in every archetype rather than silently in none.
    */
   tracksOff?: readonly TrackId[];
-  /** Weeks, for the two that have a finish line. */
+  /**
+   * Weeks, for the two that are a block: the Comeback's ramp-in, and
+   * Festival Six's default weeks to the event. See `blocks.ts`.
+   */
   blockWeeks?: number;
   /**
    * Push-ups a day to aim at. 200 is one person's number and a wall for
@@ -119,7 +122,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     packs: [],
     shape: 'shift',
     tracksOff: ['kicks', 'flow'],
-    blockWeeks: 12,
+    blockWeeks: 4,
     pushupGoal: 50,
   },
   {

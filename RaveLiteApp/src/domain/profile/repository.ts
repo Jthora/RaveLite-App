@@ -27,6 +27,12 @@ import {
   type ModeId,
 } from './mode';
 import {markRest} from './restDays';
+import {
+  blockFactor,
+  blockPhase,
+  defaultEventDate,
+  type BlockPhase,
+} from './blocks';
 import {myDayRunsOn} from '../ambient/activeHours';
 
 /**
@@ -68,6 +74,12 @@ export interface Profile {
   packs?: PackId[];
   /** Where this program started. Changing anything else does not clear it. */
   archetype?: ArchetypeId;
+  /** When the archetype was taken: day one of a Comeback's ramp-in. */
+  archetypeAt?: number;
+  /** Festival Six's event, as a local day key. See `blocks.ts`. */
+  eventDate?: string;
+  /** Which of an event's modes were already started, by event date. */
+  eventStages?: Record<string, ('festival' | 'rest')[]>;
   /** Where the body was starting from, used once to seed the maxes. */
   starting?: StartingPoint;
   /** Push-ups a day, when it has been set by hand. */
@@ -305,18 +317,76 @@ export function loadArchetype(): ArchetypeId | undefined {
  * reach both here and into the program (this file must not import the
  * program: the program already imports this one).
  */
-export function applyArchetypeToProfile(id: ArchetypeId): void {
+export function applyArchetypeToProfile(
+  id: ArchetypeId,
+  now: number = Date.now(),
+): void {
   const archetype = archetypeById(id);
   if (!archetype) {
     return;
   }
+  const profile = loadProfile();
   saveProfile({
-    ...loadProfile(),
+    ...profile,
     archetype: id,
+    archetypeAt: now,
     packs: [...archetype.packs],
     shape: archetype.shape,
     customRounds: undefined,
+    // Festival Six needs a date; six weeks out until it is set.
+    eventDate:
+      id === 'festival-six'
+        ? profile.eventDate ?? defaultEventDate(now)
+        : profile.eventDate,
   });
+}
+
+/** Where today sits in a Comeback or Festival Six block, if anywhere. */
+export function loadBlockPhase(
+  now: number = Date.now(),
+): BlockPhase | undefined {
+  return blockPhase(loadProfile(), now);
+}
+
+/** Set (or clear) Festival Six's event date. */
+export function setEventDate(day: string | undefined): void {
+  saveProfile({...loadProfile(), eventDate: day});
+}
+
+/**
+ * Start the event's own modes when their day comes: festival mode on the
+ * event date (unless another mode is already on), then a rest day after
+ * it. Each is started once per event, so ending one early sticks.
+ */
+export function advanceBlock(now: number = Date.now()): void {
+  const profile = loadProfile();
+  const phase = blockPhase(profile, now);
+  const event = profile.eventDate;
+  if (!phase || !event) {
+    return;
+  }
+  const done = profile.eventStages?.[event] ?? [];
+  const stage =
+    phase.kind === 'event'
+      ? 'festival'
+      : phase.kind === 'recovery'
+      ? 'rest'
+      : undefined;
+  if (!stage || done.includes(stage)) {
+    return;
+  }
+  const record = () =>
+    saveProfile({
+      ...loadProfile(),
+      eventStages: {...profile.eventStages, [event]: [...done, stage]},
+    });
+  if (stage === 'festival' && loadMode(now) === undefined) {
+    const [y, m, d] = event.split('-').map(Number);
+    setMode('festival', {}, new Date(y, m - 1, d).getTime());
+  } else if (stage === 'rest' && loadMode(now)?.id !== 'rest') {
+    setMode('rest', {}, now);
+  }
+  record();
 }
 
 /** What the room is really like, with no mode over the top. */
@@ -363,9 +433,12 @@ export function setShape(shape: DayShapeId, customRounds?: number): void {
 /** This person's share of a full day, 0–1. */
 export function dayDensity(now: number = Date.now()): number {
   const profile = loadProfile();
-  return densityUnder(
-    densityFor(profile.shape ?? 'desk', profile.customRounds),
-    loadMode(now),
+  // A Comeback's ramp-in and a festival taper ask for less, on top.
+  return (
+    densityUnder(
+      densityFor(profile.shape ?? 'desk', profile.customRounds),
+      loadMode(now),
+    ) * blockFactor(blockPhase(profile, now))
   );
 }
 

@@ -60,6 +60,11 @@ function preview(id: ArchetypeId): string {
     }`,
     `+${drills} drills`,
     `goal ${parFor(densityFor(archetype.shape), DAILY_PAR)} points`,
+    archetype.id === 'comeback'
+      ? `${archetype.blockWeeks}-week ramp-in`
+      : archetype.id === 'festival-six'
+      ? `${archetype.blockWeeks} weeks to your festival`
+      : '',
   ]
     .filter(Boolean)
     .join(' · ');

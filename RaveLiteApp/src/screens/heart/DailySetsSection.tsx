@@ -59,7 +59,8 @@ import type {
 } from '../../domain/program/types';
 import {formatDuration} from '../../domain/training/grading';
 import type {InfoRef} from '../../domain/info/info';
-import {loadFacts} from '../../domain/profile/repository';
+import {loadBlockPhase, loadFacts} from '../../domain/profile/repository';
+import {blockLine, testsHeldBack} from '../../domain/profile/blocks';
 import {TodayFocus, WeekFocus} from './FocusWeek';
 import {blockPieces, runFor, blockTitle} from '../../domain/program/morning';
 
@@ -117,6 +118,7 @@ export function DailySetsSection({
       }),
       pieces: blockPieces(date, now),
       facts: loadFacts(now),
+      block: loadBlockPhase(now),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
@@ -132,7 +134,10 @@ export function DailySetsSection({
     focusDays,
     pieces,
     facts,
+    block,
   } = view;
+  // No max tests while ramping back in or tapering for a festival.
+  const heldBack = testsHeldBack(block);
   const accent = ELEMENTS.heart.accent;
   // What is still owed: a skipped round or one that never sounded is let
   // go, so the day can still be finished.
@@ -184,6 +189,11 @@ export function DailySetsSection({
             Last week: {Math.round(lastWeek * 100)}% of sets done
           </Text>
         ) : null}
+        {blockLine(block) ? (
+          <Text testID="sets-block" style={styles.lastWeek}>
+            {blockLine(block)}
+          </Text>
+        ) : null}
       </View>
 
       <TodayFocus
@@ -210,7 +220,7 @@ export function DailySetsSection({
               doneAmount={d.amount}
               doneSets={d.sets}
               nextAt={next?.ts}
-              testDue={isTestDue(program, state, date)}
+              testDue={!heldBack && isTestDue(program, state, date)}
               untested={state.testedAt === undefined}
               testMax={state.testMax}
               canLevelUp={readyToLevelUp(track, state, facts)}

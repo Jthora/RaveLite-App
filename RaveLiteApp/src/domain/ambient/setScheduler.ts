@@ -42,6 +42,7 @@ import {
 import {plannedDrill} from '../program/morning';
 import {programWeek} from '../program/progression';
 import {
+  advanceBlock,
   dailyPar,
   dayRounds,
   loadProfile,
@@ -319,6 +320,8 @@ export function reconcileSetsNow(now: number = Date.now()): void {
     enqueuedDay = day;
     enqueuedIds = new Set();
   }
+  // A festival block starts its own modes on the event date and after.
+  advanceBlock(now);
   // Rest is written down while it is happening, so tomorrow's review
   // reads it as rest (`profile/restDays.ts`).
   noteRestDays(now);

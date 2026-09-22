@@ -43,6 +43,7 @@ import {FlawsPanel} from './FlawsPanel';
 import {KitPanel} from './KitPanel';
 import {MODE_SYMBOL, ModePanel} from './ModePanel';
 import {PacksPanel} from './PacksPanel';
+import {BlockPanel} from './BlockPanel';
 import {ShapePanel} from './ShapePanel';
 import {PlanPanel} from './PlanPanel';
 import {StayAlivePanel} from './StayAlivePanel';
@@ -443,6 +444,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
 
           {page === 'program' ? (
             <>
+              <BlockPanel />
               <ArchetypePanel />
               <PacksPanel />
             </>
