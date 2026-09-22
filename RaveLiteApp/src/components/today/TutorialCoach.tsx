@@ -28,22 +28,22 @@ const LESSONS: readonly Lesson[] = [
   {
     title: 'This is a chime',
     symbol: 'time',
-    body: 'A real one, not a demo. Do it now if you like — it only takes a few seconds, and it counts.',
+    body: 'This is a real chime. It takes a few seconds, and it counts if you do it now.',
   },
   {
-    title: 'Three taps, and that is all',
+    title: 'Three buttons',
     symbol: 'body',
-    body: "Done logs it. +5 min pushes it back when you're mid-something. Skip it says not today, with no guilt attached.",
+    body: 'Done logs it. +5 min moves it 5 minutes later. Skip it skips this chime.',
   },
   {
-    title: 'Anything can explain itself',
+    title: 'The ⓘ button',
     symbol: 'learn',
     body: 'Tap ⓘ on a drill, a track or an attribute to see what it is, how to do it and why it is here.',
   },
   {
     title: "That's it",
     symbol: 'star',
-    body: 'The rest is more of that. The app follows what you actually do — miss a week and it eases off, keep up and it climbs.',
+    body: 'The app adjusts to what you do. Miss a week and it gets easier. Keep up and it gets harder.',
   },
 ];
 

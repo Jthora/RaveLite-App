@@ -59,10 +59,10 @@ export function FlawsPanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>WHAT YOU'RE UNDOING</Text>
+      <Text style={styles.eyebrow}>WHAT YOU'RE FIXING</Text>
       <Text style={styles.caption}>
-        Three things a desk does to a body. Claiming one tilts the program
-        toward undoing it — which it has been doing quietly all along.
+        Three common effects of sitting at a desk. Mark the ones you have. The
+        program then gives you more work to fix them.
       </Text>
       {FLAWS.map(flaw => {
         const on = mine.includes(flaw.id);
@@ -82,7 +82,7 @@ export function FlawsPanel() {
               accessibilityLabel={`${flaw.name}, ${flaw.proper}. ${
                 on
                   ? `${progress.done} of ${progress.needed} sessions`
-                  : 'not claimed'
+                  : 'not marked'
               }. ${flaw.what}`}
               style={[
                 styles.row,
@@ -116,7 +116,7 @@ export function FlawsPanel() {
                         testID={`flaw-progress-${flaw.id}`}
                         style={styles.rowDetail}>
                         {progress.ready
-                          ? `${progress.done} sessions in ${flaw.withinDays} days — enough to check.`
+                          ? `${progress.done} sessions in ${flaw.withinDays} days. Time to check.`
                           : `${progress.done} of ${progress.needed} sessions in the last ${flaw.withinDays} days.`}
                       </Text>
                     </>
@@ -132,8 +132,8 @@ export function FlawsPanel() {
               <View style={[styles.confirm, {borderColor: el.color}]}>
                 <Text style={styles.rowDetail}>
                   {progress.ready
-                    ? 'The work is done. The app cannot see your posture, so this part is yours: check the tell above, and clear it if it has gone.'
-                    : 'You can clear it whenever it has gone — the count is a guide, not a gate.'}
+                    ? 'You have done the work. The app cannot see your posture. Do the check below, and clear it if the problem has gone.'
+                    : 'You can clear it any time the problem has gone. The count is only a guide.'}
                 </Text>
                 <Text style={[styles.tell, {color: hueOf('idea')}]}>
                   {flaw.tell}

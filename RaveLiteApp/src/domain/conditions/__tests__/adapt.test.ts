@@ -167,7 +167,7 @@ describe('training in the rain, by choice', () => {
     const out = adaptDrill(run, wet, runs, seed);
     expect(out.drill.id).toBe(run.id);
     expect(out.note).toBe(
-      'Rain 80% — out in it: shorter stride, something bright',
+      'Rain 80% — take shorter strides, wear something bright',
     );
     expect(adaptDrill(staff, wet, runs, seed).drill.id).not.toBe(staff.id);
   });
@@ -177,7 +177,7 @@ describe('training in the rain, by choice', () => {
     expect(adaptDrill(run, wet, train, seed).drill.id).toBe(run.id);
     const flow = adaptDrill(staff, wet, train, seed);
     expect(flow.drill.id).toBe(staff.id);
-    expect(flow.note).toContain('out in it');
+    expect(flow.note).toContain('watch your footing');
   });
 
   it('thunder sends everybody in, whatever they chose', () => {

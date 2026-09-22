@@ -72,6 +72,6 @@ it('counts the days so far rather than saying nothing', () => {
   trained(1);
   const tree = renderSheet();
   const text = JSON.stringify(tree.toJSON());
-  expect(text).toContain('2 days in.');
+  expect(text).toContain('2 days trained so far.');
   act(() => tree.unmount());
 });

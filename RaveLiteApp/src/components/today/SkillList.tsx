@@ -56,8 +56,8 @@ export function SkillList({
   return (
     <View style={styles.root}>
       <Text style={styles.intro}>
-        Drill one and count it. The count is the record; the minutes are what
-        the attributes hear about.
+        Pick a skill and count it. The count is your record. The minutes earn
+        attribute points.
       </Text>
       {skillGroupsFor(loadFacts()).map(group => {
         const path = group.discipline

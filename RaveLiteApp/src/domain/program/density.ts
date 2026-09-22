@@ -38,19 +38,19 @@ export const DAY_SHAPES: readonly DayShape[] = [
   {
     id: 'office',
     name: 'In an office',
-    detail: 'People around. Fewer, quieter breaks — and none in a meeting.',
+    detail: 'People around. Fewer, quieter breaks, and none in meetings.',
     rounds: 6,
   },
   {
     id: 'shift',
     name: 'On your feet',
-    detail: 'A shift, a ward, a site. Already moving; training fits the edges.',
+    detail: 'A shift, a ward, a site. You move a lot. Training fits around it.',
     rounds: 4,
   },
   {
     id: 'weekend',
     name: 'Only some days',
-    detail: 'The week is not yours. Train properly when it is.',
+    detail: 'No time on most days. Train fully on the days you have.',
     rounds: 2,
   },
 ];

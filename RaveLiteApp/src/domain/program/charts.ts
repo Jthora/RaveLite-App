@@ -44,21 +44,21 @@ const RULES: Readonly<
   Record<ChartFamily, Readonly<Record<Exclude<ChartId, 'standard'>, string>>>
 > = {
   flow: {
-    beginner: '1 min each side, half tempo — reset after every drop',
+    beginner: '1 min each side at half tempo. Reset after every drop',
     light: '2 min, both directions, at an easy tempo',
     heavy: 'weak side first, then link it into a move you already know',
-    challenge: 'one full track at tempo — both sides, linked, no drops',
+    challenge: 'one full track at tempo, both sides linked, with no drops',
   },
   dance: {
-    beginner: 'count it out slowly with no music — 8 clean reps',
+    beginner: '8 clean reps, counted out slowly with no music',
     light: '2 min to a slow track, about 100 BPM',
-    heavy: 'travelling, at house tempo or faster (125 BPM and up)',
-    challenge: 'a whole track at 140 BPM or double time, freestyled in',
+    heavy: 'travelling, at 125 BPM or faster',
+    challenge: 'a whole track at 140 BPM or double time, in freestyle',
   },
   danceCombat: {
-    beginner: 'slow motion, no music — 5 clean reps each side',
+    beginner: '5 clean reps each side, in slow motion with no music',
     light: '2 × 1 min to a slow beat',
-    heavy: 'weak side leading; full power only while it stays clean',
+    heavy: 'weak side leading. Use full power only while form stays clean',
     challenge: 'a 3 min round at tempo, freestyling everything in this tier',
   },
 };

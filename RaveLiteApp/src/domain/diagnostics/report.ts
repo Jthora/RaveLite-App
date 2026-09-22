@@ -74,7 +74,7 @@ export function diagnostics(now: number = Date.now()): Diagnostic[] {
     },
     {
       label: 'Storage',
-      value: `${keys} keys, ${journal} logged things, ${Math.max(
+      value: `${keys} keys, ${journal} journal entries, ${Math.max(
         1,
         Math.round(bytes / 1024),
       )} KB`,
@@ -124,7 +124,7 @@ export function diagnostics(now: number = Date.now()): Diagnostic[] {
     {
       label: 'Device features',
       value: hasDeviceModule()
-        ? 'cues, location and sharing available'
+        ? 'chimes, location and sharing available'
         : 'not available on this build',
       concern: !hasDeviceModule(),
     },

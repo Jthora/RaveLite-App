@@ -66,7 +66,7 @@ function fetchLine(
   fetchedAt: number | undefined,
 ): string {
   if (!report && fetchedAt === undefined) {
-    return 'No forecast yet — it fetches on its own.';
+    return 'No forecast yet. It downloads automatically.';
   }
   if (report && !report.ok) {
     const had = fetchedAt
@@ -135,7 +135,7 @@ export function WeatherSheet({visible, onClose}: Props) {
             ? 'Location not allowed. Type a town instead.'
             : out.reason === 'off'
             ? 'Location is switched off on the phone. Turn it on in Settings, or type a town.'
-            : "Couldn't get a fix. Try again outside, or type a town.",
+            : "Couldn't find your location. Try again outside, or type a town.",
         );
       }
     } finally {
@@ -181,7 +181,7 @@ export function WeatherSheet({visible, onClose}: Props) {
                 ? `${place.region ? `${place.region} · ` : ''}${
                     place.source === 'detected' ? 'Detected' : 'Typed'
                   } · rounded to about 10 km`
-                : 'Sunrise, rain, heat and bugs all need a rough place.'}
+                : 'Set a rough place to see sunrise, rain, heat and bugs.'}
             </Text>
             <View style={styles.searchRow}>
               <TextInput
@@ -232,7 +232,7 @@ export function WeatherSheet({visible, onClose}: Props) {
               accessibilityRole="button"
               style={styles.button}>
               <Text style={styles.buttonText}>
-                {busy === 'detect' ? 'Finding you…' : 'Use my location'}
+                {busy === 'detect' ? 'Finding location…' : 'Use my location'}
               </Text>
             </Tap>
             {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -322,7 +322,7 @@ export function WeatherSheet({visible, onClose}: Props) {
           ) : null}
 
           <View style={styles.card}>
-            <Text style={styles.eyebrow}>HOW THE DAY BENDS</Text>
+            <Text style={styles.eyebrow}>HOW WEATHER CHANGES THE DAY</Text>
             <Toggle
               title="Buggy today"
               detail="Treat today as buggy, whatever the estimate says."
@@ -331,8 +331,8 @@ export function WeatherSheet({visible, onClose}: Props) {
               accent={accent}
             />
             <Toggle
-              title="Move yard work inside when buggy"
-              detail="Stretches and balance go inside; runs and staff flow stay out, with repellent."
+              title="Move outdoor work inside when buggy"
+              detail="Stretches and balance move inside. Runs and staff flow stay out: use repellent."
               on={prefs.bugsMoveInside}
               onPress={() =>
                 setWeatherPrefs({bugsMoveInside: !prefs.bugsMoveInside})
@@ -343,8 +343,8 @@ export function WeatherSheet({visible, onClose}: Props) {
               title="Central air"
               detail={
                 prefs.airConditioned
-                  ? 'On — a hot day only adds water for the time you spend outside.'
-                  : 'Off — a hot day adds water whatever you do, since the house is hot too.'
+                  ? 'On: hot days add water only for time spent outside.'
+                  : 'Off: hot days add water all day. The house is hot too.'
               }
               on={prefs.airConditioned}
               onPress={() =>
@@ -384,8 +384,8 @@ export function WeatherSheet({visible, onClose}: Props) {
               title="Run in the dark"
               detail={
                 prefs.runInDark
-                  ? 'On — dark runs stay, with a headlamp and reflective gear reminder.'
-                  : 'Off — before first light, the run becomes indoor Fire work.'
+                  ? 'On: dark runs stay, with a headlamp and reflective gear reminder.'
+                  : 'Off: runs before first light become indoor Fire work.'
               }
               on={prefs.runInDark}
               onPress={() => setWeatherPrefs({runInDark: !prefs.runInDark})}
@@ -403,13 +403,13 @@ export function WeatherSheet({visible, onClose}: Props) {
           </View>
 
           <Text style={styles.footnote}>
-            Thunder, ice and dangerous heat always move yard work inside or swap
-            it for indoor drills that fit a low ceiling; rain does too, unless
-            you train in it. Nothing that needs running, hanging, jumping or
-            staff flow is sent indoors. Hot days add hourly water calls and
-            raise the Drink target. The bug level is an estimate from warmth,
-            humidity, wind, recent rain and dawn or dusk. Your place is only
-            sent to Open-Meteo, rounded to about 10 km.
+            Thunder, ice and dangerous heat always move outdoor work inside, or
+            swap it for indoor drills that fit a low ceiling. Rain does too,
+            unless you choose to train in it. Drills that need running, hanging,
+            jumping or staff flow are never moved indoors. Hot days add hourly
+            water reminders and raise the Drink target. The bug level is
+            estimated from warmth, humidity, wind, recent rain and dawn or dusk.
+            Your place is sent only to Open-Meteo, rounded to about 10 km.
           </Text>
         </ScrollView>
       </SafeAreaView>
@@ -425,18 +425,17 @@ const RAIN_CHOICES: readonly {
   {
     id: 'inside',
     name: 'Inside',
-    detail: 'Rain moves yard work inside, or swaps it for indoor work.',
+    detail: 'Rain moves outdoor work inside, or swaps it for indoor work.',
   },
   {
     id: 'runs',
     name: 'Run in it',
-    detail: 'Runs stay out in the rain; everything else moves inside.',
+    detail: 'Runs stay outside in the rain. Everything else moves inside.',
   },
   {
     id: 'train',
     name: 'Train in it',
-    detail:
-      'Rain changes nothing — the harder session, on purpose. Thunder still sends you in.',
+    detail: 'Rain changes nothing. Thunder still moves you inside.',
   },
 ];
 

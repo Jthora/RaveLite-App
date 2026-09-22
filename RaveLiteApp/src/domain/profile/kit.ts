@@ -103,7 +103,7 @@ export const LIMITS: readonly {
   {
     id: 'lowCeiling',
     label: 'A low ceiling',
-    note: 'Nothing jumped, spun or pressed overhead.',
+    note: 'No jumps, spins or overhead presses.',
   },
   {
     id: 'below',
@@ -113,17 +113,17 @@ export const LIMITS: readonly {
   {
     id: 'watched',
     label: 'People around',
-    note: 'Nothing on the floor, nothing odd-looking.',
+    note: 'No floor work, nothing that looks odd.',
   },
   {
     id: 'tight',
     label: 'Not much room',
-    note: "Less than arm's length. No staff, no broad movement.",
+    note: "Less than arm's length of space. No staff, no wide moves.",
   },
   {
     id: 'barefoot',
     label: 'No shoes',
-    note: 'A hard floor. No sprinting, bounding or kerb work.',
+    note: 'Bare feet on a hard floor. No sprinting, bounding or kerb work.',
   },
 ];
 
@@ -287,13 +287,13 @@ export const KIT_NOTES: Readonly<Partial<Record<KitItem, string>>> = {
     'Your feet reach the ground. Rows, bent-knee hangs, assisted pull-ups.',
   hangHigh: 'You hang clear of the floor. Full hangs, leg raises, pull-ups.',
   table: 'Anything waist height and solid enough to lean on.',
-  kerb: 'A step down at the roadside — calf and ankle work.',
+  kerb: 'A step down at the roadside. For calf and ankle work.',
   beam: 'Anything narrow and solid to walk along. A 2×4 on the floor counts.',
   frame: 'Monkey bars and parallel bars.',
   mirror: 'Full-length, or big enough to see yourself move in.',
   jugs: 'Full ones, with handles. About 4 kg (9 lb) each.',
   bricks: 'Or books in a backpack — anything heavy you can carry.',
-  gloves: 'LED gloves — gloving needs no room at all, even at a desk.',
+  gloves: 'LED gloves. Gloving needs no room, so you can do it at a desk.',
   staff: 'Any staff you spin: a bo, a contact staff, a light-up staff.',
 };
 
@@ -358,7 +358,7 @@ export const PLACE_KINDS: readonly PlaceKindSpec[] = [
   {
     id: 'basement',
     name: 'A basement',
-    detail: 'Room to move, but not upward.',
+    detail: 'Room to move, but a low ceiling.',
     outdoor: false,
     starts: ['wall', 'mat'],
     offers: [
@@ -468,7 +468,7 @@ export const PLACE_KINDS: readonly PlaceKindSpec[] = [
   {
     id: 'streets',
     name: 'The streets',
-    detail: 'Out the door: pavement, kerbs, a hill, a loop of the block.',
+    detail: 'Near your door: pavement, kerbs, a hill, a loop around the block.',
     outdoor: true,
     anchor: 'streets',
     starts: ['kerb'],
@@ -479,7 +479,7 @@ export const PLACE_KINDS: readonly PlaceKindSpec[] = [
   {
     id: 'beach',
     name: 'A beach',
-    detail: 'Sand, and plenty of it.',
+    detail: 'Lots of sand.',
     outdoor: true,
     starts: ['sand'],
     offers: ['sand', 'grass', 'bench', 'rail', 'beam', 'hill'],

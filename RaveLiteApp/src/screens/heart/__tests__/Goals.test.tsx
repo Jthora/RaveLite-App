@@ -87,7 +87,7 @@ it('dates a goal from two tests a week or more apart, and says how soon push-ups
   expect(json).toContain('On pace for the B+ around');
   // At the assumed push-up max of 10, sets top out at 84 a day.
   expect(json).toContain('top out at 84 a day');
-  expect(json).toContain('a tested max of 29 reaches 200');
+  expect(json).toContain('A tested max of 29 reaches 200');
   act(() => tree.unmount());
 });
 

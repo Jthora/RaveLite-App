@@ -116,11 +116,11 @@ function rampLine(ramp: PushupRamp, goal: number): string {
     case 'reached':
       return `Today's sets already reach ${goal} a day.`;
     case 'on-pace':
-      return `Keeping up every week, the sets reach ${goal} a day around ${futureDate(
+      return `If you keep up every week, your sets reach ${goal} a day around ${futureDate(
         ramp.at,
       )} (${ramp.weeks} weeks).`;
     case 'capped':
-      return `At today's push-up max the sets top out at ${ramp.most} a day; a tested max of ${ramp.needMax} reaches ${goal}.`;
+      return `With your current push-up max, sets top out at ${ramp.most} a day. A tested max of ${ramp.needMax} reaches ${goal}.`;
   }
 }
 
@@ -170,9 +170,9 @@ function projectionLine(row: GoalRow): string | undefined {
     case 'on-pace':
       return `On pace for ${goal} around ${futureDate(row.projection.at)}.`;
     case 'close':
-      return `The trend is at ${goal}: test again to make it count.`;
+      return `Your trend has reached ${goal}. Test again to confirm it.`;
     case 'not-yet':
-      return `Not on pace for ${goal} yet: keep testing every week or two.`;
+      return `Not on pace for ${goal} yet. Test every week or two.`;
     case 'need-more':
       return row.result
         ? 'Test again in a week or more to see a date.'
@@ -301,7 +301,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
           </Text>
           <Text style={styles.caption}>
             {pushups.planned > 0
-              ? `Today's sets add up to ${pushups.planned}. They grow as you keep up with them and your tested max rises, toward ${goal} a day.`
+              ? `Today's sets add up to ${pushups.planned}. They grow toward ${goal} a day as you keep up and your tested max rises.`
               : `The long-term goal is ${goal} a day.`}
           </Text>
           <Text testID="pushups-ramp" style={styles.projection}>
@@ -330,10 +330,10 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
             />
           </View>
           <Text style={styles.caption}>
-            Two and a half hours is the ideal; {ACTIVE_FLOOR_MINUTES} minutes
-            keeps a busy day on track. Sessions, runs, drills and sets count;
-            water, breathing and stillness don't. Last 7 days: {active.week} min
-            a day.
+            The ideal is two and a half hours. On a busy day, the minimum is{' '}
+            {ACTIVE_FLOOR_MINUTES} minutes. Sessions, runs, drills and sets
+            count. Water, breathing and stillness don't. Last 7 days:{' '}
+            {active.week} min a day.
           </Text>
         </View>
 
@@ -349,8 +349,8 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
                   run.fitness.from.at,
                 )}${
                   run.fitness.stale
-                    ? ', over four months ago: a run soon updates it.'
-                    : ', carried to 3 miles.'
+                    ? ', over four months ago. Log a run to update it.'
+                    : ', converted to 3 miles.'
                 }`
               : 'Assumed until you log a run of a mile or more.'}
           </Text>

@@ -778,9 +778,9 @@ function ManageMetricsSheet({
             </View>
           ))}
           <Text style={styles.helpText}>
-            Built-in exercises are hidden, not removed — old log entries that
-            reference them stay readable. Custom exercises with no entries are
-            deleted; otherwise they're archived.
+            Hiding a built-in exercise keeps its old log entries. Custom
+            exercises with no entries are deleted. Custom exercises with entries
+            are archived.
           </Text>
           <ArchivedList onChange={onChange} />
         </ScrollView>

@@ -168,7 +168,7 @@ export function adaptDrill(
     const alt = indoorAlternative(drill, seed);
     return alt
       ? {drill: alt, note: `${why} — ${tail(alt)}`, swapped: true}
-      : {drill, note: `${why} — only if it's safe out`, swapped: false};
+      : {drill, note: `${why} — only if it's safe outside`, swapped: false};
   };
 
   const rainText =
@@ -210,8 +210,8 @@ export function adaptDrill(
     return {
       drill,
       note: isRun(drill)
-        ? `${rainText} — out in it: shorter stride, something bright`
-        : `${rainText} — out in it: watch your footing and your grip`,
+        ? `${rainText} — take shorter strides, wear something bright`
+        : `${rainText} — watch your footing and your grip`,
       swapped: false,
     };
   }

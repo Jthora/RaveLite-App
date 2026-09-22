@@ -111,7 +111,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'integer',
     builtIn: true,
     element: 'fire',
-    notes: 'From a dead hang on the deck edge. Clean reps only.',
+    notes: 'Start each rep from a dead hang. Clean reps only.',
   },
   {
     id: 'builtin.burpees-2min',
@@ -121,7 +121,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'integer',
     builtIn: true,
     element: 'fire',
-    notes: 'Step-back burpees count. Smooth reps over sloppy speed.',
+    notes: 'Step-back burpees count. Do smooth reps, not fast sloppy ones.',
   },
   {
     id: 'builtin.cft-mtc',
@@ -167,7 +167,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     builtIn: true,
     element: 'air',
     notes:
-      'Seated and relaxed: breathe normally, inhale, then hold while it stays calm. Never in water or while driving.',
+      'Sit and relax. Breathe normally, inhale, then hold while it stays calm. Never do this in water or while driving.',
   },
   {
     id: 'builtin.exhale-hold',
@@ -177,7 +177,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'air',
-    notes: 'Seated: a full exhale, then hold. CO2 tolerance read.',
+    notes: 'Sit, breathe out fully, then hold. Measures CO2 tolerance.',
   },
   {
     id: 'builtin.box-breath-2min',
@@ -222,7 +222,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     builtIn: true,
     element: 'earth',
     notes:
-      'Back-safe core: legs straight, lift to vertical, then push hips up. Lower back stays glued to floor.',
+      'Safe for your back. Keep legs straight, lift them to vertical, then push your hips up. Keep your lower back on the floor.',
   },
   {
     id: 'builtin.side-ups-amrap',
@@ -269,8 +269,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'earth',
-    notes:
-      'Passive hang from the deck edge, shoulders relaxed. Test the hang point first.',
+    notes: 'Passive hang, shoulders relaxed. Test the hang point first.',
   },
   {
     id: 'builtin.wall-sit',
@@ -289,7 +288,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'decimal',
     builtIn: true,
     element: 'earth',
-    notes: 'One or two bricks per hand. Meters walked before set-down.',
+    notes: 'One or two bricks per hand. Log the meters walked before you stop.',
   },
   {
     id: 'builtin.weighted-carry-time',
@@ -320,7 +319,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'heart',
-    notes: 'Sit still, eyes soft on one point; stop at the first fidget.',
+    notes: 'Sit still with a soft gaze on one point. Stop at the first fidget.',
   },
 
   // ─── WATER — flow, fascia, joint glide ───────────────────────────
@@ -342,7 +341,8 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'water',
-    notes: 'Single deep mobility position; time to involuntary tension.',
+    notes:
+      'Hold one deep mobility position. Stop when muscles tense on their own.',
   },
   {
     id: 'builtin.deep-squat-hold',
@@ -383,7 +383,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'water',
-    notes: 'Flow and combat on the beat; the long ones build stamina too.',
+    notes: 'Flow and combat on the beat. Long sessions also build stamina.',
   },
   {
     id: 'builtin.bike-ride',
@@ -393,8 +393,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'fire',
-    notes:
-      'The 6-mile grocery loop runs about 40 minutes, the loaded pack home included.',
+    notes: 'Time the whole ride, including any ride home with a loaded pack.',
   },
   {
     id: 'builtin.ruck',
@@ -405,7 +404,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     builtIn: true,
     element: 'earth',
     notes:
-      'Note the load. MARSOC marks: 45 lb plus about 10, at 15 minutes a mile.',
+      'Note the load. MARSOC standard: 45 lb plus about 10, at 15 min a mile.',
   },
   {
     id: 'builtin.walk-session',
@@ -425,7 +424,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'water',
-    notes: 'Played on your other device; RaveLite keeps the time.',
+    notes: 'Play the video on another device. RaveLite keeps the time.',
   },
   {
     id: 'builtin.tai-chi-video',
@@ -435,7 +434,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'heart',
-    notes: 'Played on your other device; RaveLite keeps the time.',
+    notes: 'Play the video on another device. RaveLite keeps the time.',
   },
   {
     id: 'builtin.quiet-cardio-video',
@@ -445,7 +444,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'fire',
-    notes: 'Low-ceiling, no-jump cardio played on your other device.',
+    notes: 'No-jump cardio for low ceilings. Play the video on another device.',
   },
 
   // ─── BODY — measurements ─────────────────────────────────────────────
@@ -458,7 +457,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     builtIn: true,
     element: 'earth',
     notes:
-      'Around the navel, relaxed, after a normal breath out. Goals turns it into waist-to-height.',
+      'Measure around the navel, relaxed, after a normal breath out. Goals shows it as waist-to-height.',
   },
 ];
 

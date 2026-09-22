@@ -69,7 +69,7 @@ export function StayAlivePanel() {
       <Text style={[styles.eyebrow, {color: accent}]}>▸ STAY ALIVE</Text>
       <Text style={styles.body}>
         {warnings === 0
-          ? 'All set — chimes should keep firing all day.'
+          ? 'All set. Chimes should work all day.'
           : `${warnings} thing${
               warnings === 1 ? '' : 's'
             } could stop chimes on this phone.`}

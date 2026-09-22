@@ -71,8 +71,8 @@ export function summarizeHealth(input: HealthInputs): {
     status: notifications === null ? 'unknown' : notifications ? 'ok' : 'warn',
     detail:
       notifications === false
-        ? "Chimes can't show or buzz until notifications are allowed."
-        : 'Chimes show, buzz and carry Done / +5 / Skip.',
+        ? "Chimes can't show or vibrate until you allow notifications."
+        : 'Chimes show, vibrate and have Done / +5 / Skip buttons.',
     fix: notifications === false ? 'notification-settings' : undefined,
   });
 
@@ -83,8 +83,8 @@ export function summarizeHealth(input: HealthInputs): {
     status: alarms === null ? 'unknown' : alarms === 'disabled' ? 'warn' : 'ok',
     detail:
       alarms === 'disabled'
-        ? "Backup chimes can't be scheduled if RaveLite gets killed."
-        : 'Backup chimes can fire on time even if RaveLite gets killed.',
+        ? "Without this, backup chimes can't fire if Android closes RaveLite."
+        : 'Backup chimes can fire on time even if Android closes RaveLite.',
     fix: alarms === 'disabled' ? 'alarm-permission' : undefined,
   });
 
@@ -105,7 +105,7 @@ export function summarizeHealth(input: HealthInputs): {
       title: 'Autostart on',
       status: input.confirmed.autostart ? 'ok' : 'warn',
       detail:
-        'HyperOS only lets RaveLite restart and keep its alarms with Autostart on. Turn it on, then mark it done.',
+        'On HyperOS, RaveLite needs Autostart to restart and keep its alarms. Turn it on, then tap Mark done.',
       fix: 'power-manager',
       confirm: 'autostart',
     });
@@ -122,7 +122,7 @@ export function summarizeHealth(input: HealthInputs): {
         ? 'ok'
         : 'warn',
     detail: !input.cuePlayerAvailable
-      ? 'Needs the rebuilt app to check. Chimes play at alarm volume.'
+      ? "This build can't check it. Chimes play at alarm volume."
       : volume === null
       ? "Couldn't read alarm volume."
       : volume.current > 0
@@ -135,7 +135,7 @@ export function summarizeHealth(input: HealthInputs): {
     title: 'Locked in recent apps',
     status: input.confirmed.lockedInRecents ? 'ok' : 'warn',
     detail:
-      'Open recent apps, long-press RaveLite and lock it, so clearing recents never kills it.',
+      'Open recent apps, long-press RaveLite and lock it. Then clearing recent apps won’t close it.',
     confirm: 'lockedInRecents',
   });
 

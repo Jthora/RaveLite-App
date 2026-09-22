@@ -200,8 +200,8 @@ export function CharacterSheet({
         </View>
         <Text style={styles.caption}>
           {harmony
-            ? 'Every element at par today — a Harmony day.'
-            : 'All five at par in a day is Harmony. Everything you finish feeds the attributes it trains.'}
+            ? 'Every element reached par today. This is a Harmony day.'
+            : 'Reach par in all five elements in one day for Harmony. Everything you finish adds XP to the attributes it trains.'}
         </Text>
         {bonus > 0 ? (
           <Text style={styles.note}>
@@ -221,16 +221,15 @@ export function CharacterSheet({
 
       {locked ? (
         <View testID="sheet-locked" style={styles.locked}>
-          <Text style={styles.lockedTitle}>Your sheet is still filling in</Text>
+          <Text style={styles.lockedTitle}>Your sheet is not open yet</Text>
           <Text style={styles.lockedBody}>
-            Fifteen attributes, grown by what you actually do — so on day one
-            they are fifteen zeroes, which tells you nothing. It opens at level
-            2, or after a week of training.
+            Your 15 attributes grow from what you do, so they all start at zero.
+            The sheet opens at level 2, or after 7 days of training.
           </Text>
           <Text style={styles.lockedBody}>
             {days === 0
-              ? 'Nothing logged yet. Answer one chime.'
-              : `${days} ${days === 1 ? 'day' : 'days'} in.`}
+              ? 'Nothing logged yet. Answer a chime to start.'
+              : `${days} ${days === 1 ? 'day' : 'days'} trained so far.`}
           </Text>
         </View>
       ) : (
@@ -247,9 +246,9 @@ export function CharacterSheet({
       )}
 
       <Text style={styles.note}>
-        Cardinal starts, fixed holds, mutable changes — so a column is one kind
-        of training: the first move, the hold, the change. Practice carries an
-        attribute to {PRACTICE_CAP}; past that a passed test sets the number.
+        Each column is one kind of training. Cardinal: starting a move. Fixed:
+        holding. Mutable: changing. Practice raises an attribute to{' '}
+        {PRACTICE_CAP}. Above that, a passed test sets the level.
       </Text>
     </ScrollView>
   );

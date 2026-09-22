@@ -142,7 +142,7 @@ export function CircuitEditor({
         ))}
         {draft.legs.length === 0 && (
           <Text style={styles.emptyText}>
-            No legs. Tap + add leg to start sequencing.
+            No legs yet. Tap + add leg to add one.
           </Text>
         )}
       </Section>
@@ -155,7 +155,7 @@ export function CircuitEditor({
           disabled={!canEngage}
           onPress={() => onEngage(draft)}
           style={styles.engageBtn}>
-          <Text style={styles.engageText}>Engage circuit ⟶</Text>
+          <Text style={styles.engageText}>Start circuit ⟶</Text>
         </Tap>
       </View>
 

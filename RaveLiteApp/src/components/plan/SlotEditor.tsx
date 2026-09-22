@@ -258,7 +258,7 @@ export function SlotEditor({slot, isNew, onSave, onDelete, onCancel}: Props) {
         )}
         {tagsExpanded && (
           <Text style={styles.helper}>
-            Slot only fires when the chosen exercise carries every selected tag.
+            This slot only chimes for exercises that have every selected tag.
           </Text>
         )}
       </Section>

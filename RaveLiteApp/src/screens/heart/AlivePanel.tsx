@@ -23,18 +23,17 @@ const OPTIONS: Array<{value: AliveIntensity; label: string; detail: string}> = [
     value: 'whisper',
     label: 'Whisper',
     detail:
-      'A faint glow breathing behind every screen, and a tiny swell when you touch.',
+      'A faint glow pulses behind every screen. It swells when you touch.',
   },
   {
     value: 'glow',
     label: 'Glow',
-    detail:
-      'The same breath, a little brighter. More rave, more pull on the eye.',
+    detail: 'The same pulse, a little brighter and easier to notice.',
   },
   {
     value: 'still',
     label: 'Still',
-    detail: 'No idle breathing. Touches and chimes still move.',
+    detail: 'No pulse while idle. Touches and chimes still animate.',
   },
 ];
 
@@ -51,12 +50,12 @@ export function AlivePanel() {
     <View style={styles.panel}>
       <Text style={[styles.eyebrow, {color: accent}]}>▸ ALIVE</Text>
       <Text style={styles.body}>
-        How much RaveLite breathes while it sits beside you.
+        How much the screen pulses while RaveLite is open.
       </Text>
       {mode === 'off' ? (
         <Text style={styles.meta}>
-          Resting right now — night, a pause, or Android's "Remove animations"
-          is on. Chimes still show a soft fade.
+          Motion is off now: it is night, chimes are paused, or Android's
+          "Remove animations" is on. Chimes still show a soft fade.
         </Text>
       ) : null}
 

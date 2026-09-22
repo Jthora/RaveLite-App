@@ -13,12 +13,12 @@ describe('a drill', () => {
   it('says what it is, how to do it, how much, and where it belongs', () => {
     const card = infoFor({kind: 'drill', id: 'air.chin-tuck'})!;
     expect(card.title).toBe('Chin Tuck');
-    expect(card.what).toContain('deep neck flexors');
-    expect(card.how?.[0]).toContain('string pulling the crown');
+    expect(card.what).toContain('deep neck muscles');
+    expect(card.how?.[0]).toContain('top of your head');
     expect(card.dose).toBe('3 × 10 (5 sec hold)');
     expect(card.meta).toEqual(
       expect.arrayContaining([
-        'at the desk · standing anywhere',
+        'sitting · standing anywhere',
         'About 60 sec',
         'Trains Breath and Awareness',
       ]),
@@ -31,7 +31,7 @@ describe('a drill', () => {
 
   it('knows a partner drill rides along with its track', () => {
     const card = infoFor({kind: 'drill', id: 'air.doorway-pec-stretch'})!;
-    expect(card.related?.[0].detail).toBe('Rides along after its sets');
+    expect(card.related?.[0].detail).toBe('Partner drill, done after its sets');
   });
 
   it('has nothing to say about a drill that does not exist', () => {
@@ -42,7 +42,7 @@ describe('a drill', () => {
 it('a track shows its ladder, where you are on it, and what rides along', () => {
   const card = infoFor({kind: 'track', id: 'push'})!;
   expect(card.subtitle).toBe('Fire · a Daily Sets track');
-  expect(card.what).toContain('200 a day');
+  expect(card.what).toContain('your daily goal');
   expect(card.dose).toContain('Now: Push-ups');
   expect(card.parts?.map(p => p.label)).toEqual([
     'Incline push-ups',
@@ -51,7 +51,7 @@ it('a track shows its ladder, where you are on it, and what rides along', () => 
   // A new program starts on the second rung, so the first is behind it.
   expect(card.parts?.[0].detail).toBe('Climbed');
   expect(card.parts?.[1].detail).toContain('Where you are');
-  expect(card.related?.[0].detail).toBe('Rides along · 30 sec');
+  expect(card.related?.[0].detail).toBe('Done after its sets · 30 sec');
 });
 
 it('an attribute shows its gist, how it grows and its sign', () => {
@@ -59,7 +59,7 @@ it('an attribute shows its gist, how it grows and its sign', () => {
   expect(card.title).toBe('Toughness');
   expect(card.subtitle).toBe('Earth · fixed');
   expect(card.what).toBe('Holding load.');
-  expect(card.meta).toContain('Taurus · the bull');
+  expect(card.meta).toContain('Taurus');
 });
 
 describe('a round', () => {

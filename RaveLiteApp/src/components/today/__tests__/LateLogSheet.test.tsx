@@ -75,7 +75,7 @@ it('says what was missed, and names every move', () => {
   // Both move labels, each beside its own −/+.
   expect(json).toContain('Push-ups');
   expect(json).toContain('Chin tucks');
-  expect(json).toContain('Did it but didn');
+  expect(json).toContain('If you did it, tap Done');
 
   // The invariant behind that bug: a Tap wraps its children in one column
   // view, so a direct child that relies on flex gets no size and vanishes.
@@ -128,6 +128,6 @@ it('opens what it asked for, whole and move by move', () => {
   expect(JSON.stringify(tree!.toJSON())).toContain('Round 6 of 9');
   press('info-close');
   press('move-info-Chin tucks');
-  expect(JSON.stringify(tree!.toJSON())).toContain('deep neck flexors');
+  expect(JSON.stringify(tree!.toJSON())).toContain('deep neck muscles');
   act(() => tree!.unmount());
 });

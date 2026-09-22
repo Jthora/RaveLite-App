@@ -50,9 +50,9 @@ const NOISE: readonly {id: Noise; name: string; detail: string}[] = [
   {
     id: 'quiet',
     name: 'Quiet flat',
-    detail: 'No jumping, skipping or staff — nothing the floor below hears.',
+    detail: 'No jumping, skipping or staff. Nothing the floor below can hear.',
   },
-  {id: 'normal', name: 'Normal', detail: 'Anything but the loudest work.'},
+  {id: 'normal', name: 'Normal', detail: 'Anything but the loudest drills.'},
   {
     id: 'free',
     name: 'Free',
@@ -300,7 +300,7 @@ export function KitPanel() {
           </>
         ) : null}
 
-        <Text style={styles.groupTitle}>WHAT IT WON'T ALLOW</Text>
+        <Text style={styles.groupTitle}>LIMITS AT THIS PLACE</Text>
         <View style={styles.tiles}>
           {LIMITS.map(limit => {
             const on = place.limits.includes(limit.id);
@@ -368,8 +368,8 @@ export function KitPanel() {
     <View testID="kit-panel" style={styles.root}>
       <Text style={styles.eyebrow}>WHERE YOU TRAIN</Text>
       <Text style={styles.caption}>
-        {usable} drills fit your places. A drill needs only one place that
-        allows it, and what you carry goes to all of them.
+        {usable} drills fit your places. A drill counts if one place allows it.
+        What you carry counts in every place.
       </Text>
       {best && best.count >= 3 ? (
         <Tap
@@ -381,7 +381,7 @@ export function KitPanel() {
           <View style={styles.tileInner}>
             <Symbol name="idea" size={18} />
             <Text style={styles.bestText}>
-              Most would come from{' '}
+              To unlock the most, add{' '}
               {KIT_LABELS[best.item].replace(/^A /, 'a ').toLowerCase()}
               {best.placeId
                 ? ` at ${placeName(
@@ -443,9 +443,9 @@ export function KitPanel() {
                       holds.length > 0
                         ? holds.join(', ')
                         : 'somewhere to stand',
-                      ...limits.map(
-                        l => `no ${l === 'low ceiling' ? 'height' : l}`,
-                      ),
+                      // The limit as it is: "neighbours below", not
+                      // "no neighbours below", which said the opposite.
+                      ...limits,
                     ].join(' · ')}
                   </Text>
                 </View>

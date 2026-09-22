@@ -159,7 +159,7 @@ export function DataPanel() {
       setNote(result.why);
       return;
     }
-    setNote('Restored. Starting over from that day…');
+    setNote('Restored. Restarting RaveLite…');
     await startAgain('Restored. Close RaveLite and open it again.');
   };
 
@@ -170,7 +170,7 @@ export function DataPanel() {
     }
     setConfirmWipe(false);
     store.clearAll();
-    setNote('Everything erased. Starting fresh…');
+    setNote('Everything erased. Restarting RaveLite…');
     await startAgain('Everything erased. Close RaveLite and open it again.');
   };
 
@@ -178,9 +178,8 @@ export function DataPanel() {
     <View style={styles.root}>
       <Text style={styles.eyebrow}>YOUR DATA</Text>
       <Text style={styles.caption}>
-        Everything you log lives on this phone only. Nothing is sent anywhere,
-        and there is no account to recover — so the export file is the backup.
-        Keep one somewhere the phone isn't.
+        Your data is only on this phone. There is no account to recover it from.
+        Export it and keep a copy somewhere else.
       </Text>
       <Text testID="data-last-export" style={styles.caption}>
         {sinceExport(lastExport, Date.now())}
@@ -195,7 +194,7 @@ export function DataPanel() {
             Export
           </Text>
           <Text style={styles.rowValue}>
-            Write it all to a file you pick: journal, streak, levels, tests,
+            Save everything to a file: journal, streak, levels, tests and
             settings.
           </Text>
         </View>
@@ -220,8 +219,7 @@ export function DataPanel() {
             Report a problem
           </Text>
           <Text style={styles.rowValue}>
-            Send this file to whoever is looking at it. It is everything the app
-            knows, which is usually enough to find the bug.
+            Send a file of all your app data to the person fixing the problem.
           </Text>
         </View>
         <Tap
@@ -245,7 +243,8 @@ export function DataPanel() {
             Restore
           </Text>
           <Text style={styles.rowValue}>
-            Read an export back. It replaces what is here — it does not merge.
+            Load an export file. It replaces your current data. It does not
+            merge.
           </Text>
         </View>
         <Tap
@@ -263,9 +262,9 @@ export function DataPanel() {
       {staged ? (
         <View style={styles.confirm}>
           <Text style={styles.confirmBody}>
-            That file holds {backupSummary(staged.backup)}, exported{' '}
-            {whenFrom(staged.backup.exportedAt)}. Everything currently in
-            RaveLite is replaced by it.
+            This file has {backupSummary(staged.backup)}, exported{' '}
+            {whenFrom(staged.backup.exportedAt)}. It will replace all your data
+            in RaveLite.
           </Text>
           {/*
             Backing out comes first. The two pills wrap on a narrow screen,
@@ -333,7 +332,7 @@ export function DataPanel() {
         onPress={() => setShowing(s => !s)}
         accessibilityRole="button"
         accessibilityState={{expanded: showing}}
-        accessibilityLabel="What state this install is in"
+        accessibilityLabel="App status and recent problems"
         style={styles.row}>
         <View style={styles.rowInner}>
           <View
@@ -342,7 +341,7 @@ export function DataPanel() {
           </View>
           <View style={styles.rowText}>
             <Text style={[styles.rowTitle, {color: hueOf('measure')}]}>
-              What state this is in
+              App status
             </Text>
             <Text style={styles.rowValue}>{errorSummary()}</Text>
           </View>
@@ -382,7 +381,7 @@ export function DataPanel() {
                 }}
                 accessibilityRole="button"
                 style={styles.rowBtn}>
-                <Text style={styles.rowBtnText}>Forget them</Text>
+                <Text style={styles.rowBtnText}>Clear them</Text>
               </Tap>
             </>
           ) : null}

@@ -102,8 +102,7 @@ export function ModePanel({showTitle = true}: {showTitle?: boolean} = {}) {
     <View style={styles.root}>
       {showTitle ? <Text style={styles.eyebrow}>TODAY I'M…</Text> : null}
       <Text style={styles.caption}>
-        Nothing here sticks. Each one says when it ends as you pick it, so the
-        app bends round a week instead of you working round the app.
+        Each mode shows when it ends before you pick it.
       </Text>
       {MODES.map(spec => (
         <View key={spec.id}>

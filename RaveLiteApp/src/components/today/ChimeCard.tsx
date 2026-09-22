@@ -367,7 +367,7 @@ export function cardForRow(row: DayRow): InfoCard {
         ? row.detail.split(' · ')[0]
         : row.label,
       element: row.element,
-      what: 'A few small sets back to back, then something from another element to balance them.',
+      what: 'A few small sets back to back, then a drill from another element to balance them.',
       subtitle: 'Daily Sets',
       parts: row.parts,
     });

@@ -62,15 +62,15 @@ export class Guard extends React.Component<Props, State> {
       <View testID={`guard-${this.props.name}`} style={styles.root}>
         <Text style={styles.title}>{this.props.name} stopped</Text>
         <Text style={styles.body}>
-          Something in here could not be drawn. The rest of the app is fine, and
-          nothing you have logged is affected.
+          This screen could not load. The rest of the app works, and your logged
+          data is safe.
         </Text>
         <Text style={styles.what} numberOfLines={3}>
           {failed.what}
         </Text>
         <Text style={styles.body}>
-          It has been written down. Settings → Your data → Report a problem
-          sends it with everything needed to find it.
+          The error was saved. To send it, go to Settings → Your data → Report a
+          problem.
         </Text>
         <Tap
           testID={`guard-retry-${this.props.name}`}

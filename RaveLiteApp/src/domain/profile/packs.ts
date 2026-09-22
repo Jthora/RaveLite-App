@@ -73,7 +73,7 @@ export const PACKS: readonly Pack[] = [
   {
     id: 'dance',
     name: 'Dance',
-    detail: 'Steps, waves and grooves. The floor is the point.',
+    detail: 'Steps, waves and grooves.',
     groups: [
       {title: 'Dance', ids: pathOf('dance'), discipline: 'dance'},
       {title: 'On film', ids: ['heart.film-and-watch']},
@@ -83,7 +83,7 @@ export const PACKS: readonly Pack[] = [
     id: 'dance-combat',
     name: 'Dance combat',
     detail:
-      'Fighting as dance, to music: capoeira, combos on the beat, tricking, the staff.',
+      'Fighting as dance, to music: capoeira, beat combos, tricking and staff.',
     groups: [
       {
         title: 'Dance combat',
@@ -96,7 +96,7 @@ export const PACKS: readonly Pack[] = [
   {
     id: 'martial',
     name: 'Martial basics',
-    detail: 'Strikes, blocks and kicks. Fundamentals, drilled properly.',
+    detail: 'Basic strikes, blocks and kicks, drilled with good form.',
     tracks: ['kicks'],
     groups: [
       {
@@ -138,7 +138,7 @@ export const PACKS: readonly Pack[] = [
     id: 'staff',
     name: 'Flow arts',
     detail:
-      'Staff, poi, hoop and the rest: spins, weaves and flow. No fighting.',
+      'Staff, poi, hoop and other props. Spins, weaves and flow. No fighting.',
     // One group per prop, each the prop's whole path; Practice shows only
     // the props you have.
     groups: [
@@ -160,7 +160,7 @@ export const PACKS: readonly Pack[] = [
   {
     id: 'yoga-taichi',
     name: 'Yoga and tai chi',
-    detail: 'Shapes held, and shapes moved through slowly.',
+    detail: 'Poses you hold, and slow flowing movement.',
     tracks: ['flow'],
     groups: [
       {
@@ -184,7 +184,7 @@ export const PACKS: readonly Pack[] = [
   {
     id: 'jumps',
     name: 'Jumps',
-    detail: 'Leaving the ground and landing well. Loud, and hard on floors.',
+    detail: 'Jumping and landing safely. Loud, and hard on floors.',
     groups: [
       {
         title: 'Jumps',
@@ -202,7 +202,7 @@ export const PACKS: readonly Pack[] = [
   {
     id: 'runs',
     name: 'Running',
-    detail: 'Easy miles, intervals and hills, out of the door.',
+    detail: 'Easy runs, intervals and hills, outside.',
     groups: [],
     extras: [
       'fire.zone2-run',
@@ -221,7 +221,7 @@ export const PACKS: readonly Pack[] = [
   {
     id: 'military-tests',
     name: 'Military tests',
-    detail: 'USAF, USSF and USMC standards, scored on the real tables.',
+    detail: 'USAF, USSF and USMC fitness tests, scored on the official tables.',
     groups: [],
     extras: [
       'earth.plank-test',

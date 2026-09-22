@@ -28,7 +28,7 @@ export const STARTING_POINTS: readonly StartingSpec[] = [
   {
     id: 'new',
     name: 'new to this',
-    detail: "Start low. It climbs as soon as you're finishing the sets.",
+    detail: 'Start low. It goes up once you finish the sets.',
     factor: 0.5,
   },
   {
@@ -40,7 +40,7 @@ export const STARTING_POINTS: readonly StartingSpec[] = [
   {
     id: 'training',
     name: 'training already',
-    detail: 'Start higher, and take a max test when you want it exact.',
+    detail: 'Start higher. Take a max test to get exact numbers.',
     factor: 1.5,
   },
 ];

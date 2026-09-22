@@ -76,12 +76,12 @@ export interface InfoCard {
 const EXERCISES = new Map(EXERCISE_LIBRARY.map(e => [e.id, e]));
 
 const VENUES: Record<Venue, string> = {
-  desk: 'at the desk',
+  desk: 'sitting',
   standing: 'standing anywhere',
   yard: 'in the yard',
   mat: 'on the mat',
   wall: 'at a wall or doorframe',
-  porch: 'on the porch edge',
+  porch: 'at a hang point',
   house: 'in the house',
   neighborhood: 'out in the neighborhood',
 };
@@ -155,7 +155,7 @@ function drillCard(exercise: Exercise): InfoCard {
             element: home.track.element,
             move: moveForTrack(home.track.id),
             detail: home.partner
-              ? 'Rides along after its sets'
+              ? 'Partner drill, done after its sets'
               : 'One of its variations',
           },
         ]
@@ -203,11 +203,11 @@ function trackCard(id: TrackId): InfoCard | undefined {
           ? 'Climbed'
           : `Unlocks at ${track.ladder[i - 1]?.graduateAt ?? step.graduateAt}`,
     })),
-    relatedTitle: 'Rides along',
+    relatedTitle: 'Partner drills',
     related: track.partners.map(p => ({
       ref: {kind: 'drill' as const, id: p.exerciseId},
       label: EXERCISES.get(p.exerciseId)?.name ?? p.exerciseId,
-      detail: `Rides along · ${p.seconds} sec`,
+      detail: `Done after its sets · ${p.seconds} sec`,
       element: EXERCISES.get(p.exerciseId)?.element,
       move: moveForExercise(p.exerciseId),
     })),
@@ -221,7 +221,7 @@ function attributeCard(id: AttributeId): InfoCard {
   if (standing) {
     meta.push(
       standing.practice >= 85
-        ? `Level ${standing.level} · practice has taken it as far as it goes`
+        ? `Level ${standing.level} · practice cannot raise it further`
         : `Level ${standing.level} · practice ${standing.practice}, ${
             standing.xp
           } of ${standing.toNext} XP to ${standing.practice + 1}`,
@@ -234,14 +234,14 @@ function attributeCard(id: AttributeId): InfoCard {
     }
     if (standing.idleDays !== undefined && standing.idleDays > 14) {
       meta.push(
-        `Left alone ${standing.idleDays} days — sliding a level a week`,
+        `Not trained for ${standing.idleDays} days. It drops a level a week`,
       );
     }
   }
   meta.push(
     attribute.events.length === 0
-      ? 'No test for this one yet, so practice is all there is'
-      : 'A passed test can carry it past 85',
+      ? 'No test for this yet. Only practice raises it'
+      : 'Passing a test can raise it past 85',
   );
   return {
     title: attribute.name,
@@ -402,7 +402,7 @@ export function partsOf(
   if (prescription.water) {
     parts.push({
       label: 'A glass of water',
-      detail: 'Rides along with this one',
+      detail: 'Drink it with this round',
     });
   }
   return parts;
@@ -437,8 +437,8 @@ export function roundCard(
     subtitle: 'Daily Sets',
     element,
     what: several
-      ? 'A few small sets back to back, then something from another element to balance them.'
-      : 'One small set, well short of failure — the day is made of many.',
+      ? 'A few small sets back to back, then a drill from another element to balance them.'
+      : 'One small set, well short of failure. You do many across the day.',
     parts,
     partsTitle: 'In this round',
   };

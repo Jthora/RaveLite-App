@@ -29,19 +29,18 @@ export function DisclaimerCard() {
           </Text>
         </View>
         <Text style={styles.body}>
-          RaveLite is not a medical device and gives no medical advice. It is
-          one person's training app, and the program is chosen by rules in a
-          phone — not by anyone who has met you.
+          RaveLite is not a medical device. It gives no medical advice. The app
+          chooses your program by rules. No person who knows you is involved.
         </Text>
         <Text style={styles.body}>
-          <Text style={styles.strong}>Stop if it hurts.</Text> Sharp pain, a
-          joint that complains, dizziness, chest pain, or anything that feels
-          wrong: stop, and do not push through it because a chime asked.
+          <Text style={styles.strong}>Stop if it hurts.</Text> Stop if you feel
+          sharp pain, joint pain, dizziness, chest pain, or anything that feels
+          wrong. Do not push through it.
         </Text>
         <Text style={styles.body}>
-          Talk to a doctor before starting if you are pregnant, recovering from
-          injury or surgery, have a heart or blood-pressure condition, or have
-          been still for a long time.
+          Talk to a doctor before you start if you are pregnant, are recovering
+          from injury or surgery, have a heart or blood-pressure condition, or
+          have not been active for a long time.
         </Text>
       </View>
       <View style={[styles.card, {borderColor: palette.border}]}>
@@ -52,12 +51,13 @@ export function DisclaimerCard() {
           </Text>
         </View>
         <Text style={styles.body}>
-          Four questions, then a day. You can skip any of it — the answers are
-          all in Settings afterwards, and the defaults are a working program.
+          Five questions, then your day. You can skip any of them. You can
+          change every answer later in Settings. If you skip, the defaults give
+          you a full program.
         </Text>
         <Text style={styles.body}>
-          Everything you log stays on this phone. There is no account, and
-          nothing is sent anywhere.
+          Everything you log stays on this phone. There is no account. Nothing
+          is sent anywhere.
         </Text>
       </View>
     </View>

@@ -93,19 +93,19 @@ const GROUPS: readonly {
   {
     id: 'you',
     title: 'You',
-    holds: 'What you train with, how loud you can be, what a desk did to you',
+    holds: 'Where you train, your kit, noise limits and posture problems',
     symbol: 'you',
   },
   {
     id: 'day',
     title: 'The day',
-    holds: 'My day, chimes, how much day you have, weather, the plan',
+    holds: 'My day, chimes, how often you can move, weather, the plan',
     symbol: 'time',
   },
   {
     id: 'program',
     title: 'The program',
-    holds: "What you're training for, and what you're here to learn",
+    holds: 'Your training goal and the skills you want to learn',
     symbol: 'program',
   },
   {
@@ -216,8 +216,9 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
             <View style={styles.banner}>
               <Text style={styles.bannerTitle}>⚠ Notifications are off</Text>
               <Text style={styles.bannerBody}>
-                Android has muted RaveLite. Open Settings → Apps → RaveLite →
-                Notifications, or chimes arrive silently.
+                Android has turned off RaveLite notifications, so chimes are
+                silent. Turn them on in Settings → Apps → RaveLite →
+                Notifications.
               </Text>
             </View>
           ) : null}
@@ -323,8 +324,8 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                       Walk me through it
                     </Text>
                     <Text style={styles.rowValue}>
-                      The questions setup asked, filled in with your answers.
-                      Change anything or skip straight out.
+                      Go through the setup questions again, with your answers
+                      filled in. Change any of them, or leave.
                     </Text>
                   </View>
                   <Text style={styles.chevron}>›</Text>
@@ -509,7 +510,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                   <View style={styles.rowText}>
                     <Text style={styles.rowTitle}>Previous plan</Text>
                     <Text style={styles.rowValue}>
-                      Replaced by the leaner default on{' '}
+                      Replaced by the smaller default plan on{' '}
                       {new Date(replacedAt).toLocaleDateString()}.
                     </Text>
                   </View>

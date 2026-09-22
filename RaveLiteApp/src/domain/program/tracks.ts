@@ -48,7 +48,7 @@ export const TRACKS: Track[] = [
     baseSets: 4,
     maxSets: 12,
     enabledByDefault: true,
-    why: 'The fitness-test push-up, every day, building toward 200 a day. Always paired with rows and pull-ups.',
+    why: 'Standard push-ups every day, building toward your daily goal. Always paired with rows and pull-ups.',
     partners: [
       {exerciseId: 'air.doorway-pec-stretch', seconds: 30},
       {exerciseId: 'air.physiological-sigh', seconds: 30},
@@ -83,7 +83,7 @@ export const TRACKS: Track[] = [
     baseSets: 2,
     maxSets: 6,
     enabledByDefault: true,
-    why: 'Harder push-ups on top of the standard ones: more strength for the same count. Every rep counts toward the 200.',
+    why: 'Harder push-ups, on top of the standard ones. More strength for the same count. Every rep counts toward your daily goal.',
     partners: [
       {exerciseId: 'air.doorway-pec-stretch', seconds: 30},
       {exerciseId: 'water.side-line-stretch', seconds: 30},
@@ -123,7 +123,7 @@ export const TRACKS: Track[] = [
     baseSets: 4,
     maxSets: 10,
     enabledByDefault: true,
-    why: 'A pull for every push, every day push-ups run: the desk-side fix for rounded shoulders.',
+    why: 'One pull for every push, every day. Rows help fix rounded shoulders from sitting.',
     partners: [
       {exerciseId: 'air.chin-tuck', seconds: 30},
       {exerciseId: 'heart.pulse-check', seconds: 30},
@@ -172,7 +172,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 8,
     enabledByDefault: true,
-    why: "The Marine test's pull-ups, every day from the porch edge: back, arms and grip.",
+    why: 'Pull-ups every day from a hang point. Trains back, arms and grip.',
     partners: [
       {exerciseId: 'air.standing-belly-release', seconds: 30},
       {exerciseId: 'water.side-line-stretch', seconds: 30},
@@ -209,7 +209,7 @@ export const TRACKS: Track[] = [
     baseSets: 4,
     maxSets: 8,
     enabledByDefault: true,
-    why: 'Legs for all-night stepping; later rungs build one-leg control for kicks.',
+    why: 'Leg strength for dancing all night. Harder versions build one-leg control for kicks.',
     partners: [
       {exerciseId: 'water.deep-squat-hold', seconds: 30},
       {exerciseId: 'water.hamstring-floss', seconds: 30},
@@ -263,7 +263,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 8,
     enabledByDefault: true,
-    why: 'Lower abs that pull the pelvis out of tilt and lift the legs for flips.',
+    why: 'Trains the lower abs. They help level a tilted pelvis and lift your legs for flips.',
     partners: [
       {exerciseId: 'water.hamstring-floss', seconds: 30},
       {exerciseId: 'air.physiological-sigh', seconds: 30},
@@ -291,7 +291,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: "The Air Force test's sit-ups. Capped on purpose: the gut goes with food and movement.",
+    why: 'Sit-ups, with sets capped on purpose. Belly fat goes with food and movement.',
     partners: [
       {exerciseId: 'air.standing-belly-release', seconds: 30},
       {exerciseId: 'air.physiological-sigh', seconds: 30},
@@ -321,7 +321,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: 'Obliques and the side line — the twist behind staff spins and kicks.',
+    why: 'Trains the obliques and sides. They power the twist in staff spins and kicks.',
     partners: [{exerciseId: 'water.side-line-stretch', seconds: 30}],
   },
   {
@@ -340,7 +340,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: "The Marine test's plank, every day, toward 3:45. A rigid trunk also settles the pelvic tilt.",
+    why: 'Forearm plank every day, building toward 3:45. A strong trunk also helps level a tilted pelvis.',
     partners: [{exerciseId: 'heart.rave-vision', seconds: 30}],
   },
   {
@@ -380,7 +380,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 8,
     enabledByDefault: true,
-    why: 'Grip, shoulder health and a decompressed spine after desk hours.',
+    why: 'Builds grip and shoulder health. Hanging also decompresses your spine after sitting.',
     partners: [
       {exerciseId: 'air.physiological-sigh', seconds: 30},
       {exerciseId: 'heart.pulse-check', seconds: 30},
@@ -403,7 +403,7 @@ export const TRACKS: Track[] = [
     baseSets: 4,
     maxSets: 8,
     enabledByDefault: true,
-    why: 'Undoes the desk a few reps at a time: forward head and rounded shoulders.',
+    why: 'Fixes forward head and rounded shoulders from sitting, a few reps at a time.',
     partners: [
       {exerciseId: 'water.side-line-stretch', seconds: 30},
       {exerciseId: 'heart.pulse-check', seconds: 30},
@@ -434,7 +434,7 @@ export const TRACKS: Track[] = [
     baseSets: 4,
     maxSets: 8,
     enabledByDefault: true,
-    why: 'Calm, low breathing between focus blocks; the tested max is how long the pattern stays easy.',
+    why: 'Calm, low breathing between focus blocks. Your max is how long the pattern stays easy.',
     partners: [
       {exerciseId: 'water.hamstring-floss', seconds: 30},
       {exerciseId: 'earth.posterior-pelvic-tilt', seconds: 30},
@@ -469,7 +469,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: 'Range and fascia for kicks and flow, a little at a time instead of one long stretch.',
+    why: 'Builds range and fascia for kicks and flow. Short sets instead of one long stretch.',
     partners: [
       {exerciseId: 'air.physiological-sigh', seconds: 30},
       {exerciseId: 'earth.single-leg-balance', seconds: 30},
@@ -496,7 +496,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: 'Focus trained like a muscle: attention held still for half a minute between the other sets.',
+    why: 'Trains focus. Hold your attention still for half a minute between other sets.',
     partners: [
       {exerciseId: 'air.physiological-sigh', seconds: 30},
       {exerciseId: 'water.side-line-stretch', seconds: 30},
@@ -532,7 +532,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: 'For the tilted pelvis and desk back: glutes pull the pelvis level, then a hip-flexor or upper-back stretch.',
+    why: 'For a tilted pelvis and a stiff back from sitting. Glute work levels the pelvis. Then stretch the hip flexors or upper back.',
     partners: [
       {exerciseId: 'water.hip-flexor-stretch', seconds: 60},
       {exerciseId: 'air.thread-the-needle', seconds: 60},
@@ -563,7 +563,7 @@ export const TRACKS: Track[] = [
     baseSets: 2,
     maxSets: 5,
     enabledByDefault: true,
-    why: 'Hip range for high kicks, a little every day, with leg swings or a horse stance after.',
+    why: 'Hip range for high kicks, a little every day. Leg swings or a horse stance follow.',
     partners: [
       {exerciseId: 'air.leg-swings', seconds: 60},
       {exerciseId: 'earth.horse-stance', seconds: 45},
@@ -600,7 +600,7 @@ export const TRACKS: Track[] = [
     baseSets: 2,
     maxSets: 5,
     enabledByDefault: true,
-    why: 'Slow weight shifts and turning waist: balance, dexterity and calm, in a set that needs no shower.',
+    why: 'Slow weight shifts and waist turns. Builds balance, dexterity and calm. You won’t need a shower after.',
     partners: [
       {exerciseId: 'air.coherence-breath', seconds: 60},
       {exerciseId: 'heart.mirror-presence', seconds: 30},

@@ -56,7 +56,7 @@ export const MODES: readonly ModeSpec[] = [
   {
     id: 'travelling',
     name: 'away from home',
-    detail: 'A room, a floor and a wall. Quiet hours, nothing outdoors.',
+    detail: 'One room with a floor and a wall. Quiet drills, nothing outdoors.',
     days: 7,
     density: 0.67,
     trains: true,
@@ -65,7 +65,7 @@ export const MODES: readonly ModeSpec[] = [
   {
     id: 'injured',
     name: 'hurt somewhere',
-    detail: 'Nothing that loads it. The ramp waits until you clear it.',
+    detail: 'Skips drills that load it. Progress pauses until you clear it.',
     density: 1,
     trains: true,
     pausesRamp: true,
@@ -73,7 +73,7 @@ export const MODES: readonly ModeSpec[] = [
   {
     id: 'festival',
     name: 'at a festival',
-    detail: 'Water, feet and sleep. The dancing is the training.',
+    detail: 'Water, feet and sleep. Your dancing counts as training.',
     days: 3,
     density: 0.33,
     trains: true,
@@ -82,7 +82,7 @@ export const MODES: readonly ModeSpec[] = [
   {
     id: 'rest',
     name: 'taking the day off',
-    detail: 'Water and the evening review. Your streak survives it.',
+    detail: 'Only water and the evening review. Your streak is kept.',
     days: 1,
     density: 0,
     trains: false,

@@ -39,8 +39,8 @@ export function MissingSheet({
             </Text>
           </View>
           <Text style={styles.body}>
-            This was logged in the Train log, and that entry is no longer there.
-            Nothing else is affected — the row will go when the day is next
+            This was logged in the Train log, and that entry is gone. Nothing
+            else is affected. The row goes away the next time the day is
             rebuilt.
           </Text>
           <Tap

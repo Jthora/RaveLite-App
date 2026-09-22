@@ -137,8 +137,8 @@ export function SessionSheet({
               <Text style={styles.primaryText}>Start</Text>
             </Tap>
             <Text style={styles.caption}>
-              Videos play on your other device; RaveLite keeps the time. Under{' '}
-              {MIN_SESSION_SECONDS / 60} minute isn't logged.
+              Play videos on another device. RaveLite keeps the time. Sessions
+              under {MIN_SESSION_SECONDS / 60} minute are not logged.
             </Text>
           </View>
         )}

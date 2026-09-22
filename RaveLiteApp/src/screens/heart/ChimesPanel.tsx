@@ -65,7 +65,7 @@ export function ChimesPanel() {
       } else if (volume <= 0) {
         setTestNote(`${ELEMENTS[element].name} is set to Off.`);
       } else {
-        setTestNote('Cue player not ready — try again in a moment.');
+        setTestNote('Chime player not ready. Try again in a moment.');
       }
       refreshAlarm();
     },
@@ -80,14 +80,14 @@ export function ChimesPanel() {
     <View style={styles.panel}>
       <Text style={[styles.eyebrow, {color: accent}]}>▸ CHIMES</Text>
       <Text style={styles.body}>
-        Cues play on the alarm channel, so they sound through silent mode and Do
-        Not Disturb during active hours. Alarm volume is the ceiling.
+        Chimes play on the alarm channel. They sound in silent mode and Do Not
+        Disturb during active hours. Alarm volume sets the maximum.
       </Text>
 
       {!hasDeviceModule() ? (
         <Text style={styles.warn}>
-          The cue player isn't in this build — chimes use notification sounds
-          until the app is rebuilt.
+          This build has no chime player. Chimes use notification sounds until
+          the app is rebuilt.
         </Text>
       ) : alarm && alarm.current === 0 ? (
         <Text style={styles.warn}>
@@ -153,8 +153,8 @@ export function ChimesPanel() {
             <Text style={styles.label}>Respect Do Not Disturb</Text>
             <Text style={styles.meta}>
               {respectDnd
-                ? 'On — DND mutes chimes; vibration and the notification still arrive.'
-                : 'Off — chimes cut through DND.'}
+                ? 'On: DND mutes chimes but not vibration or the notification.'
+                : 'Off: chimes sound during Do Not Disturb.'}
             </Text>
           </View>
           <Text

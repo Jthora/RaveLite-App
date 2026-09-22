@@ -45,11 +45,11 @@ export function PacksPanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>WHAT YOU'RE HERE TO LEARN</Text>
+      <Text style={styles.eyebrow}>WHAT YOU WANT TO LEARN</Text>
       <Text style={styles.caption}>
         {packs.length === 0
-          ? 'None on. You still get the whole base program — push, pull, squat, hinge, breath, posture, stillness, mobility.'
-          : 'On top of the base program, which you get either way.'}
+          ? 'None on. You still get the full base program: push, pull, squat, hinge, breath, posture, stillness and mobility.'
+          : 'These add to the base program. You get the base program either way.'}
       </Text>
       {PACKS.map(pack => {
         const on = packs.includes(pack.id);

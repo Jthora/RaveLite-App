@@ -198,7 +198,7 @@ export function WindowEditor({
           <View style={{flex: 1}}>
             <Text style={styles.checkLabel}>Exclusive window</Text>
             <Text style={styles.checkHelp}>
-              Suppresses any other window's pulses while this one is active.
+              While this window is active, other windows send no chimes.
             </Text>
           </View>
         </Tap>

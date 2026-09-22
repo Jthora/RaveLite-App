@@ -48,11 +48,10 @@ export function ShapePanel() {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.eyebrow}>HOW MUCH DAY YOU HAVE</Text>
+      <Text style={styles.eyebrow}>WHAT YOUR DAY IS LIKE</Text>
       <Text style={styles.caption}>
-        Not how hard you want it — how many times a day you can stop and move.
-        Everything is sized from this, so a short day is a full day's training,
-        not a failed one.
+        Pick how many times a day you can stop and move. Chimes, sets and par
+        all scale to fit. A short day still counts in full.
       </Text>
       {DAY_SHAPES.map(option => {
         const on = shape === option.id;

@@ -131,7 +131,7 @@ export const FOCUS_WHEEL: readonly WheelDay[] = [
     focus: ['power', 'mobility', 'presence'],
     block: {
       title: 'Kicks and flips',
-      standInTitle: 'Power and flight',
+      standInTitle: 'Power and jumps',
       pieces: [
         'fire.roundhouse-kick',
         'fire.kick-flip-foundations',

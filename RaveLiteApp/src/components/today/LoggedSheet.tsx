@@ -53,8 +53,8 @@ export function LoggedSheet({row, onRemove, onClose}: Props) {
             </View>
           </View>
           <Text style={styles.note}>
-            Didn't happen, or logged by mistake? Remove it — it stops counting
-            everywhere.
+            If this didn't happen or was logged by mistake, remove it. It will
+            stop counting everywhere.
           </Text>
           <View style={styles.actions}>
             <Tap

@@ -93,8 +93,8 @@ export function ArchetypePanel() {
     <View style={styles.root}>
       <Text style={styles.eyebrow}>WHAT YOU'RE TRAINING FOR</Text>
       <Text style={styles.caption}>
-        A starting point, not a setting. Taking one fills in the packs, the day
-        and the tracks below — all of which you can then change.
+        Picking one sets your packs, your day and your tracks. You can change
+        any of them later.
       </Text>
       {ARCHETYPES.map(archetype => {
         const on = chosen === archetype.id;
@@ -110,7 +110,7 @@ export function ArchetypePanel() {
             accessibilityLabel={`${archetype.name}, for someone who ${
               archetype.forWhom
             }. ${preview(archetype.id)}.${
-              open ? ' Tap again to take it.' : ''
+              open ? ' Tap again to choose it.' : ''
             }`}
             style={[
               styles.row,
@@ -146,7 +146,7 @@ export function ArchetypePanel() {
                 </Text>
                 <Text style={[styles.means, open && {color: palette.danger}]}>
                   {open
-                    ? `Tap again to take it — ${preview(archetype.id)}`
+                    ? `Tap again to choose it · ${preview(archetype.id)}`
                     : `${archetype.leadsWith} · ${preview(archetype.id)}`}
                 </Text>
               </View>

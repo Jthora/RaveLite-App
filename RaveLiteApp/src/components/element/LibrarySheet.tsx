@@ -85,7 +85,7 @@ export function LibrarySheet({
           </Text>
           {shown.length === 0 ? (
             <Text style={styles.empty}>
-              No drills match these focus areas. Drop a pill or two.
+              No drills match these focus areas. Turn one or two off.
             </Text>
           ) : (
             <>
@@ -96,7 +96,9 @@ export function LibrarySheet({
               </CardGrid>
               {others.length > 0 ? (
                 <>
-                  <Text style={styles.eyebrow}>NOT WHERE YOU TRAIN, YET</Text>
+                  <Text style={styles.eyebrow}>
+                    NOT AVAILABLE WHERE YOU TRAIN
+                  </Text>
                   <CardGrid>
                     {others.map(ex => (
                       <ExerciseRow

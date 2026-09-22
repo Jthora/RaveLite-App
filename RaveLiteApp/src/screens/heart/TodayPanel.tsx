@@ -164,7 +164,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
       info.show({
         title: row.label,
         element: row.element,
-        what: 'This was logged in the Train log, and that entry is no longer there. Nothing else is affected.',
+        what: 'This was in the Train log, but that entry has been deleted. Nothing else is affected.',
       });
     },
     [info],

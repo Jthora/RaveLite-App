@@ -172,7 +172,7 @@ export function DailySetsSection({
       />
 
       {today.prescriptions.length === 0 ? (
-        <Text style={styles.emptyText}>Rest day — no sets scheduled.</Text>
+        <Text style={styles.emptyText}>Rest day. No sets scheduled.</Text>
       ) : (
         today.prescriptions.map(p => {
           const track = trackById(p.trackId);
@@ -373,10 +373,10 @@ function TrackCard({
       ) : null}
       {untested ? (
         <Text style={styles.cardNote}>
-          Not tested yet — assuming a max of {formatMax(track, testMax)}.
+          Not tested yet. Using a max of {formatMax(track, testMax)} for now.
         </Text>
       ) : testDue ? (
-        <Text style={styles.cardNote}>Test week: log a fresh max.</Text>
+        <Text style={styles.cardNote}>Test week: test and log a new max.</Text>
       ) : null}
       <View style={styles.cardActions}>
         <Tap
@@ -455,7 +455,7 @@ function MaxTestSheet({
           <Text style={styles.sheetBody}>
             {seconds
               ? 'Warm up, then hold until your form breaks. Log the time.'
-              : 'Warm up, then one all-out set of clean reps. Log the count.'}{' '}
+              : 'Warm up, then do one set of as many clean reps as you can. Log the count.'}{' '}
             Sets become about half of this.
           </Text>
           <NumberPad
@@ -502,26 +502,26 @@ export function reviewLine(review: TrackReview): string {
   const sets = `${review.sets} ${review.sets === 1 ? 'set' : 'sets'} a day`;
   switch (review.change) {
     case 'new':
-      return `Starting at ${sets}. After a week at ${upAt} or more, a set more.`;
+      return `Starting at ${sets}. Do ${upAt} or more for a week to add a set.`;
     case 'up':
       return `Up to ${sets}: ${pct} of last week's sets done.`;
     case 'down':
-      return `Eased to ${sets}: ${pct} of last week's sets done. ${upAt} for a week brings a set back.`;
+      return `Down to ${sets}: ${pct} of last week's sets done. Do ${upAt} for a week to add one back.`;
     case 'top':
-      return `At the most, ${sets}. A new max test makes each set bigger.`;
+      return `At the maximum: ${sets}. A new max test makes each set bigger.`;
     case 'rebuild':
-      return `Back from a break at ${sets}: a set more after every three good days.`;
+      return `Back from a break at ${sets}. One more set every 3 good days.`;
     case 'deload':
-      return 'Deload week: lighter on purpose. The climb picks up after it.';
+      return 'Deload week: lighter sets on purpose. They go back up after it.';
     case 'paused':
-      return `Held at ${sets} while a mode is on. These days don't count either way.`;
+      return `Held at ${sets} while a mode is on. These days don't count.`;
     case 'hold':
       if (review.ratio === undefined) {
-        return `Holding at ${sets} until there are a few days to go on.`;
+        return `Holding at ${sets} until there are a few days of results.`;
       }
       return review.ratio >= UP_AT
-        ? `Holding at ${sets}: ${pct} last week. A set more comes a week after the last step.`
-        : `Holding at ${sets}: ${pct} of last week's sets done. ${upAt} adds a set.`;
+        ? `Holding at ${sets}: ${pct} last week. A set is added a week after the last increase.`
+        : `Holding at ${sets}: ${pct} of last week's sets done. Do ${upAt} to add a set.`;
   }
 }
 

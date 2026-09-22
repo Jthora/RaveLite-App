@@ -37,9 +37,9 @@ const BY_ID = new Map(EXERCISE_LIBRARY.map(e => [e.id, e]));
 
 /** What each chart does, in a line, for the family's own rules. */
 const CHART_LINE: Readonly<Record<ChartId, string>> = {
-  beginner: 'Half tempo, short, and a reset after every slip.',
+  beginner: 'Half tempo and short. Reset after every slip.',
   light: 'Easy tempo, both sides, a little longer.',
-  standard: 'Each move’s own dose — the one written for it.',
+  standard: 'The dose written for each move.',
   heavy: 'The Standard dose, weak side first, linked to another move.',
   challenge: 'A whole track at tempo. Linked, both sides, clean.',
 };

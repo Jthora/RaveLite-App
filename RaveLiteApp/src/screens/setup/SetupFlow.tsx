@@ -52,42 +52,42 @@ const STEPS: readonly Step[] = [
     key: 'disclaimer',
     symbol: 'warning',
     title: 'Before you start',
-    why: 'Thirty seconds, and then it is all training.',
+    why: 'This takes about 30 seconds.',
     panel: DisclaimerCard,
   },
   {
     key: 'archetype',
     symbol: 'operator',
     title: 'What are you training for?',
-    why: 'Pick the closest one. It fills in everything after this, and you can change any of it.',
+    why: 'Pick the closest one. It sets the answers that follow. You can change any of them.',
     panel: ArchetypePanel,
   },
   {
     key: 'kit',
     symbol: 'carry',
-    title: 'What have you got?',
-    why: 'The program only ever asks for things this list says you have.',
+    title: 'What do you have?',
+    why: 'The program only asks for things you mark here.',
     panel: KitPanel,
   },
   {
     key: 'shape',
     symbol: 'desk',
-    title: 'How much day have you got?',
-    why: 'Not how hard you want it. How many times a day you can stop and move.',
+    title: 'What is your day like?',
+    why: 'This sets how many times a day the app asks you to move.',
     panel: ShapePanel,
   },
   {
     key: 'starting',
     symbol: 'new',
     title: 'Where are you starting?',
-    why: 'Only used to pick the first numbers. The app follows what you actually do from there.',
+    why: 'This sets your first numbers. After that, the app adjusts to what you do.',
     panel: StartingPanel,
   },
   {
     key: 'packs',
     symbol: 'learn',
     title: 'Anything you want to learn?',
-    why: 'On top of the base program, which you get either way.',
+    why: 'These add to the base program. You get the base program either way.',
     panel: PacksPanel,
   },
 ];
@@ -175,14 +175,13 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
                 {preview.lessons > 0
                   ? `${preview.lessons} ${
                       preview.lessons === 1 ? 'section' : 'sections'
-                    } of curriculum to work through`
+                    } of lessons to work through`
                   : 'the base program to work through'}
-                . Each element aims for {preview.par} points a day; all five at
-                par is a Harmony day.
+                . Each element has a goal of {preview.par} points a day. Reach
+                it in all five for a Harmony day.
               </Text>
               <Text style={styles.why}>
-                That's it. The rest is more of that — answer the chimes, and the
-                app follows what you actually do.
+                Answer the chimes. The app adjusts to what you do.
               </Text>
             </View>
           ) : (

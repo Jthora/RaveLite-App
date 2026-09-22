@@ -118,3 +118,21 @@ and neither is your contribution.
 Drills, grouped the way they are taught, are added as **packs** — pure
 data, no app code. See [docs/packs.md](docs/packs.md) for the format, the
 rules that get a pack rejected, and a working example to copy.
+
+## Writing app text
+
+Testers found the app's text too heavy and too clever. Everything a person
+reads — screens, setup, notifications, drill purposes and cues, errors —
+follows these rules:
+
+- Say what it is, what it does, or what to do. Nothing else.
+- No irony, jokes, wordplay, metaphors, asides, rhetorical questions or
+  speculation.
+- One idea per sentence. UI sentences around 15 words or fewer; a drill
+  `purpose` is one short sentence.
+- Keep every fact, number and safety instruction, and keep safety lines
+  explicit.
+- Neutral nouns for everyone ("hang point", "sitting"), and nothing about
+  weight or body shape — say what a drill trains.
+
+Code comments can explain design at length. Strings people read cannot.

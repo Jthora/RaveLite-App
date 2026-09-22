@@ -127,7 +127,7 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
       <View style={styles.header}>
         <Text style={[styles.eyebrow, {color: accentDim}]}>▸ CIRCUITS</Text>
         <Text style={styles.subtitle}>
-          The signature pentagram, plus your own sequences.
+          The built-in Pentagram, plus circuits you make.
         </Text>
       </View>
 
@@ -143,7 +143,7 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
           color={accent}
           onPress={() => onEngageLegs(buildCircuit())}
           style={styles.engageBtn}>
-          <Text style={styles.engageText}>Engage ⟶</Text>
+          <Text style={styles.engageText}>Start ⟶</Text>
         </Tap>
       </View>
 
@@ -159,7 +159,7 @@ export function CircuitsPanel({onEngageLegs, header, footer}: Props) {
         ))}
         {list.length === 0 && (
           <Text style={styles.emptyText}>
-            No saved circuits yet. Tap + New circuit to compose one.
+            No saved circuits yet. Tap + New circuit to make one.
           </Text>
         )}
       </View>

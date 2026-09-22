@@ -49,8 +49,8 @@ export function StartingPanel() {
     <View style={styles.root}>
       <Text style={styles.eyebrow}>WHERE YOU'RE STARTING</Text>
       <Text style={styles.caption}>
-        Only used to pick the first numbers. Get it wrong and it costs about a
-        week — the app follows what you actually do from there.
+        This only sets your first numbers. After that, the app adjusts to what
+        you do. A wrong pick costs about a week.
       </Text>
       {STARTING_POINTS.map(option => {
         const on = chosen === option.id;
@@ -94,7 +94,7 @@ export function StartingPanel() {
       })}
       {settled ? (
         <Text testID="starting-settled" style={styles.caption}>
-          You have already trained against these numbers, so they are yours now.
+          You have already logged training, so your numbers now come from that.
           Take a max test to set one exactly.
         </Text>
       ) : null}

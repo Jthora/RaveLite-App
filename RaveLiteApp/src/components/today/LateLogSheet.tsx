@@ -168,8 +168,7 @@ export function LateLogSheet({row, prescription: rx, onDone, onClose}: Props) {
                   ) : null}
 
                   <Text style={styles.note}>
-                    Did it but didn't tap Done? This logs it at{' '}
-                    {formatHM(row.at)}.
+                    If you did it, tap Done to log it at {formatHM(row.at)}.
                   </Text>
                   <View style={styles.actions}>
                     <Tap

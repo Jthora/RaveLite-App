@@ -300,10 +300,9 @@ const FinaleView: React.FC<{onClose: () => void}> = ({onClose}) => {
         ]}>
         ✦
       </Animated.Text>
-      <Text style={styles.finaleTitle}>Five elements aligned.</Text>
+      <Text style={styles.finaleTitle}>All five elements done.</Text>
       <Text style={styles.finaleBody}>
-        Penta-lock acquired. Circuit complete — all five legs logged. Re-engage
-        whenever the system needs a full sweep.
+        All five legs are logged. Run the circuit again any time.
       </Text>
       <Pressable
         onPress={onClose}
