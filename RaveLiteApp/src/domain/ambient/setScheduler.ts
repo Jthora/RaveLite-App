@@ -48,6 +48,7 @@ import {
   dayRounds,
   loadProfile,
   noteRestDays,
+  subscribeProfile,
 } from '../profile/repository';
 import {groupIntoRounds, movesOf} from '../program/rounds';
 import {placeRounds, selectUpcomingRounds} from '../program/schedule';
@@ -362,7 +363,23 @@ export function reconcileSetsNow(now: number = Date.now()): void {
 }
 
 /** Program, plan or My day changed: round times may have moved. */
+// A reconcile writes (rest days, the review, a block's own mode), and
+// those writes come back here as changes. One relay at a time.
+let relaying = false;
+
 function relay(): void {
+  if (relaying) {
+    return;
+  }
+  relaying = true;
+  try {
+    relayNow();
+  } finally {
+    relaying = false;
+  }
+}
+
+function relayNow(): void {
   const queued = queuedPulseIds(SETS_WINDOW_ID);
   cancelQueued(queued);
   for (const id of queued) {
@@ -387,6 +404,10 @@ export function startSetScheduler(): void {
     subscribeProgram(relay),
     subscribePlan(relay),
     subscribeActiveHours(relay),
+    // A mode, an injury, a pack or a room changes what today's rounds can
+    // ask for: a chime queued at home must not ask for the pull-up bar
+    // once they say they are away from home.
+    subscribeProfile(relay),
     // A set logged anywhere (drill tap, "+ set", a chime) trims the rounds
     // it made redundant. Deferred so a runtime seal that is still writing
     // its entry finishes before the queue changes under it.

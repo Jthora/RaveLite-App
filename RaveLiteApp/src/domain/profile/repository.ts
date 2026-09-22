@@ -31,6 +31,7 @@ import {
   blockFactor,
   blockPhase,
   defaultEventDate,
+  eventAhead,
   type BlockPhase,
 } from './blocks';
 import {myDayRunsOn} from '../ambient/activeHours';
@@ -338,10 +339,11 @@ export function applyArchetypeToProfile(
     packs: [...archetype.packs],
     shape: archetype.shape,
     customRounds: undefined,
-    // Festival Six needs a date; six weeks out until it is set.
+    // Festival Six needs a date; six weeks out until it is set. A date
+    // that has already passed is last festival's, not this one's.
     eventDate:
       id === 'festival-six'
-        ? profile.eventDate ?? defaultEventDate(now)
+        ? eventAhead(profile.eventDate, now) ?? defaultEventDate(now)
         : profile.eventDate,
   });
 }

@@ -97,6 +97,21 @@ export function testsHeldBack(phase: BlockPhase | undefined): boolean {
   return phase?.kind === 'ramp-in' || phase?.kind === 'taper';
 }
 
+/**
+ * A stored event date that has not been and gone — still ahead, or still
+ * running, counting the event days and the recovery day after them.
+ * Taking Festival Six again for the next festival must not inherit the
+ * last one's date, which would be no block at all.
+ */
+export function eventAhead(
+  day: string | undefined,
+  now: number,
+): string | undefined {
+  return day !== undefined && daysFrom(localDayKey(now), day) >= -EVENT_DAYS
+    ? day
+    : undefined;
+}
+
 /** The default event date: six weeks from when Festival Six is taken. */
 export function defaultEventDate(now: number): string {
   return localDayKey(now + DEFAULT_WEEKS_TO_EVENT * 7 * DAY_MS);

@@ -40,6 +40,7 @@ import {
   type FireSpec,
 } from '../reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../reminders/repository';
+import {subscribeProfile} from '../profile/repository';
 import type {Plan} from '../reminders/types';
 import {
   cancelQueued,
@@ -164,6 +165,7 @@ function parsePlanIdTs(id: string): number | null {
 let enqueuedIds = new Set<string>();
 let timer: ReturnType<typeof setInterval> | null = null;
 let planUnsub: (() => void) | null = null;
+let profileUnsub: (() => void) | null = null;
 let weatherUnsub: (() => void) | null = null;
 
 /**
@@ -251,6 +253,9 @@ export function startPlanScheduler(): void {
   reconcileNow();
   timer = setInterval(() => reconcileNow(), DEFAULT_RECONCILE_MS);
   planUnsub = subscribePlan(() => reconcileNow());
+  // A mode or an injury changes which drill a chime can ask for, and a
+  // queued chime is re-picked when its drill changes.
+  profileUnsub = subscribeProfile(() => reconcileNow());
   weatherUnsub = subscribeWeather(() => reconcileNow());
 }
 
@@ -263,6 +268,10 @@ export function stopPlanScheduler(): void {
   if (planUnsub !== null) {
     planUnsub();
     planUnsub = null;
+  }
+  if (profileUnsub !== null) {
+    profileUnsub();
+    profileUnsub = null;
   }
   if (weatherUnsub !== null) {
     weatherUnsub();
