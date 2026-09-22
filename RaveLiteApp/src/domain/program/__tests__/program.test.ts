@@ -1,4 +1,5 @@
 import {store} from '../../../storage';
+import {authorProfile, saveProfile} from '../../profile/repository';
 import {EXERCISE_LIBRARY} from '../../exercises/library';
 import type {JournalEntry} from '../../journal/types';
 import {
@@ -220,6 +221,8 @@ describe('program repository', () => {
   });
 
   it('records tests, toggles tracks and levels up', () => {
+    // Levelling up needs a room that can do the next rung: the author's.
+    saveProfile(authorProfile());
     loadProgram(MONDAY);
     recordMaxTest('push', 30, 123);
     expect(loadProgram().tracks.push).toMatchObject({

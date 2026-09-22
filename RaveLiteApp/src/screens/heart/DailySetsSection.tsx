@@ -35,12 +35,14 @@ import {movesOf} from '../../domain/program/rounds';
 import {
   currentRung,
   isTestDue,
+  neighbourStep,
   phaseForWeek,
   programWeek,
   readyToLevelUp,
 } from '../../domain/program/progression';
 import {
   focusFor,
+  levelDownTrack,
   levelUpTrack,
   loadProgram,
   recordMaxTest,
@@ -113,12 +115,23 @@ export function DailySetsSection({
         };
       }),
       pieces: blockPieces(date, now),
+      facts: loadFacts(now),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
 
-  const {program, today, done, week, phase, date, myDay, focusDays, pieces} =
-    view;
+  const {
+    program,
+    today,
+    done,
+    week,
+    phase,
+    date,
+    myDay,
+    focusDays,
+    pieces,
+    facts,
+  } = view;
   const accent = ELEMENTS.heart.accent;
   const setsTotal = today.prescriptions.reduce((s, p) => s + p.sets, 0);
   const setsDone = today.prescriptions.reduce(
@@ -193,8 +206,11 @@ export function DailySetsSection({
               testDue={isTestDue(program, state, date)}
               untested={state.testedAt === undefined}
               testMax={state.testMax}
-              canLevelUp={readyToLevelUp(track, state)}
-              nextRungLabel={track.ladder[state.rung + 1]?.label}
+              canLevelUp={readyToLevelUp(track, state, facts)}
+              nextRungLabel={neighbourStep(track, state, 1, facts)?.rung.label}
+              easierRungLabel={
+                neighbourStep(track, state, -1, facts)?.rung.label
+              }
               review={state.lastReview}
               onInfo={
                 onInfo
@@ -204,6 +220,7 @@ export function DailySetsSection({
               onLogSet={() => logSet(p)}
               onTest={() => setTesting(p.trackId)}
               onLevelUp={() => levelUpTrack(p.trackId)}
+              onStepDown={() => levelDownTrack(p.trackId)}
             />
           );
         })
@@ -289,11 +306,14 @@ interface TrackCardProps {
   testMax: number;
   canLevelUp: boolean;
   nextRungLabel?: string;
+  /** The easier step this room can do, if there is one. */
+  easierRungLabel?: string;
   /** Why today asks for these sets. */
   review?: TrackReview;
   onLogSet: () => void;
   onTest: () => void;
   onLevelUp: () => void;
+  onStepDown: () => void;
   /** "What is this?" for the track. */
   onInfo?: () => void;
 }
@@ -309,10 +329,12 @@ function TrackCard({
   testMax,
   canLevelUp,
   nextRungLabel,
+  easierRungLabel,
   review,
   onLogSet,
   onTest,
   onLevelUp,
+  onStepDown,
   onInfo,
 }: TrackCardProps) {
   const el = ELEMENTS[track.element];
@@ -414,6 +436,19 @@ function TrackCard({
           </Tap>
         ) : null}
       </View>
+      {easierRungLabel ? (
+        <Tap
+          testID={`track-down-${track.id}`}
+          variant="plain"
+          onPress={onStepDown}
+          accessibilityRole="button"
+          accessibilityLabel={`Too hard? Step down to ${easierRungLabel}`}
+          style={styles.stepDown}>
+          <Text style={styles.stepDownText} numberOfLines={1}>
+            Too hard? Step down → {easierRungLabel}
+          </Text>
+        </Tap>
+      ) : null}
     </View>
   );
 }
@@ -640,6 +675,15 @@ const styles = StyleSheet.create({
     minWidth: 88,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
+  },
+  stepDown: {
+    minHeight: 44,
+    justifyContent: 'center',
+    marginTop: spacing.xs,
+  },
+  stepDownText: {
+    ...t.caption,
+    color: palette.textDim,
   },
   cardBtnWide: {
     flexGrow: 1,

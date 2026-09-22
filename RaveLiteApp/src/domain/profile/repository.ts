@@ -412,6 +412,11 @@ export function needsTutorial(): boolean {
  * is wrong here, because firing the tutorial's own chime writes a
  * `reminder.fired` entry: the lesson would switch itself off by starting.
  */
+/** Whether the person has logged or answered anything themselves. */
+export function hasAnsweredAnything(): boolean {
+  return hasAnswered();
+}
+
 function hasAnswered(): boolean {
   const entries = store.getString(KEYS.trainingEntries);
   if (entries !== undefined && entries !== '[]') {

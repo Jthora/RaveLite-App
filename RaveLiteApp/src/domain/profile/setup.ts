@@ -12,11 +12,17 @@
  * visible in Settings afterwards, and changing one is an ordinary edit.
  */
 import {TRACKS} from '../program/tracks';
-import {loadProgram, saveProgram, setTrackEnabled} from '../program/repository';
+import {
+  loadProgram,
+  saveProgram,
+  setTrackEnabled,
+  startsAtTheBottom,
+} from '../program/repository';
 import type {DayShapeId, TrackId} from '../program/types';
 import {archetypeById, type ArchetypeId} from './archetypes';
 import {
   applyArchetypeToProfile,
+  hasAnsweredAnything,
   hasHistory,
   loadProfile,
   loadStarting,
@@ -41,6 +47,24 @@ export function applyArchetype(id: ArchetypeId): void {
   for (const track of TRACKS) {
     setTrackEnabled(track.id, !off.has(track.id));
   }
+  // The Comeback starts every ladder at the bottom; the rest don't.
+  if (!hasAnsweredAnything()) {
+    seedRungs();
+  }
+}
+
+/** Put every ladder where this person starts: the bottom, or its default. */
+function seedRungs(): void {
+  const bottom = startsAtTheBottom();
+  const program = loadProgram();
+  const tracks = {...program.tracks};
+  for (const track of TRACKS) {
+    const state = tracks[track.id];
+    if (state) {
+      tracks[track.id] = {...state, rung: bottom ? 0 : track.defaultRung};
+    }
+  }
+  saveProgram({...program, tracks});
 }
 
 /**
@@ -53,13 +77,19 @@ export function applyArchetype(id: ArchetypeId): void {
  * numbers are rewritten whenever they are still nobody's.
  *
  * Refused once anything has been logged: by then those numbers have been
- * trained against and a max test is the honest way to change them.
+ * trained against and a max test is the honest way to change them. Only
+ * what the person did counts — the tutorial's own chime used to lock this
+ * the moment setup finished.
+ *
+ * The rungs move with it: somebody new starts every ladder on its first
+ * step, not on the author's full push-ups and porch pull-ups.
  */
 export function chooseStarting(id: StartingPoint): boolean {
-  if (hasHistory()) {
+  if (hasAnsweredAnything()) {
     return false;
   }
   setStarting(id);
+  seedRungs();
   const factor = startingFactor(id);
   const program = loadProgram();
   const tracks = {...program.tracks};

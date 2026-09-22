@@ -96,6 +96,46 @@ function clampRung(track: Track, rung: number): number {
   return Math.max(0, Math.min(track.ladder.length - 1, rung));
 }
 
+/** Ladder step `i` as this room can do it: itself, its stand-in, or not. */
+function doableAt(track: Track, i: number, facts?: Facts): Rung | undefined {
+  const rung = track.ladder[i];
+  if (!rung || !facts) {
+    return rung;
+  }
+  const drill = exerciseById(rung.exerciseId);
+  if (drill && canDo(drill, facts)) {
+    return rung;
+  }
+  const stand = rung.instead
+    ? exerciseById(rung.instead.exerciseId)
+    : undefined;
+  if (stand && canDo(stand, facts)) {
+    return {...rung, exerciseId: stand.id, label: rung.instead!.label};
+  }
+  return undefined;
+}
+
+export interface Step {
+  /** Where on the ladder it is. */
+  index: number;
+  rung: Rung;
+}
+
+/** Today's rung and where it sits, after stand-ins and fallbacks. */
+export function currentStep(
+  track: Track,
+  state: TrackState,
+  facts?: Facts,
+): Step | undefined {
+  for (let i = clampRung(track, state.rung); i >= 0; i--) {
+    const rung = doableAt(track, i, facts);
+    if (rung) {
+      return {index: i, rung};
+    }
+  }
+  return undefined;
+}
+
 /**
  * The rung to train today. With the author's kit this is simply the rung
  * the state points at. With less kit it is the same step's stand-in — a
@@ -108,21 +148,33 @@ export function currentRung(
   state: TrackState,
   facts?: Facts,
 ): Rung | undefined {
-  const at = clampRung(track, state.rung);
-  if (!facts) {
-    return track.ladder[at];
+  return currentStep(track, state, facts)?.rung;
+}
+
+/**
+ * The nearest step above (`+1`) or below (`-1`) today's that this room can
+ * do and that is a different drill. A step whose only answer here is the
+ * drill already being trained is no step at all: taking it used to halve
+ * the numbers and change nothing else.
+ */
+export function neighbourStep(
+  track: Track,
+  state: TrackState,
+  direction: 1 | -1,
+  facts?: Facts,
+): Step | undefined {
+  const here = currentStep(track, state, facts);
+  if (!here) {
+    return undefined;
   }
-  for (let i = at; i >= 0; i--) {
-    const rung = track.ladder[i];
-    const drill = exerciseById(rung.exerciseId);
-    if (drill && canDo(drill, facts)) {
-      return rung;
-    }
-    const stand = rung.instead
-      ? exerciseById(rung.instead.exerciseId)
-      : undefined;
-    if (stand && canDo(stand, facts)) {
-      return {...rung, exerciseId: stand.id, label: rung.instead!.label};
+  for (
+    let i = here.index + direction;
+    i >= 0 && i < track.ladder.length;
+    i += direction
+  ) {
+    const rung = doableAt(track, i, facts);
+    if (rung && rung.exerciseId !== here.rung.exerciseId) {
+      return {index: i, rung};
     }
   }
   return undefined;
@@ -170,12 +222,20 @@ export function prescribeDay(
   };
 }
 
-/** True once the set size has reached the current rung's graduation mark. */
-export function readyToLevelUp(track: Track, state: TrackState): boolean {
-  const i = clampRung(track, state.rung);
+/**
+ * True once the set size has reached today's rung's graduation mark and
+ * there is a harder step this room can do.
+ */
+export function readyToLevelUp(
+  track: Track,
+  state: TrackState,
+  facts?: Facts,
+): boolean {
+  const here = currentStep(track, state, facts);
   return (
-    i < track.ladder.length - 1 &&
-    setSizeFor(track, state) >= track.ladder[i].graduateAt
+    here !== undefined &&
+    neighbourStep(track, state, 1, facts) !== undefined &&
+    setSizeFor(track, state) >= track.ladder[here.index].graduateAt
   );
 }
 
@@ -192,16 +252,42 @@ export function applyTest(
  * Step up to the next rung. A harder variation roughly halves what you
  * can do, so the max is estimated at 50% until the operator tests it.
  */
-export function levelUp(track: Track, state: TrackState): TrackState {
-  const i = clampRung(track, state.rung);
-  if (i >= track.ladder.length - 1) {
+export function levelUp(
+  track: Track,
+  state: TrackState,
+  facts?: Facts,
+): TrackState {
+  const next = neighbourStep(track, state, 1, facts);
+  if (!next) {
     return state;
   }
   const floor = track.unit === 'seconds' ? 20 : 2;
   return {
     ...state,
-    rung: i + 1,
+    rung: next.index,
     testMax: Math.max(floor, Math.round(state.testMax * 0.5)),
+    testedAt: undefined,
+  };
+}
+
+/**
+ * Step back down to an easier rung. The easier variation roughly doubles
+ * what you can do, so the max is estimated at twice until it is tested —
+ * the same guess as levelling up, the other way.
+ */
+export function levelDown(
+  track: Track,
+  state: TrackState,
+  facts?: Facts,
+): TrackState {
+  const prev = neighbourStep(track, state, -1, facts);
+  if (!prev) {
+    return state;
+  }
+  return {
+    ...state,
+    rung: prev.index,
+    testMax: Math.max(1, Math.round(state.testMax * 2)),
     testedAt: undefined,
   };
 }

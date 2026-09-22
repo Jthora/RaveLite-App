@@ -7,6 +7,7 @@ import {TRACKS, trackById} from './tracks';
 import {WINDOW_DAYS, reviewTrack, type DayWork} from './adapt';
 import {
   applyTest,
+  levelDown,
   levelUp,
   phaseForWeek,
   prescribeDay,
@@ -17,6 +18,7 @@ import {doneByTrack} from './progress';
 import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
 import {
   dayDensity,
+  loadArchetype,
   loadFacts,
   loadPacks,
   loadProfile,
@@ -38,10 +40,11 @@ export function defaultProgram(now: Date = new Date()): ProgramState {
   // this the ramp and the max tests own these numbers; a week of training
   // says far more than the question ever could.
   const factor = startingFactor(loadStarting());
+  const bottom = startsAtTheBottom();
   for (const t of TRACKS) {
     tracks[t.id] = {
       enabled: t.enabledByDefault,
-      rung: t.defaultRung,
+      rung: bottom ? 0 : t.defaultRung,
       testMax: seededMax(t.defaultMax, factor),
     };
   }
@@ -50,6 +53,15 @@ export function defaultProgram(now: Date = new Date()): ProgramState {
     startDay: localDayKey(now.getTime()),
     tracks,
   };
+}
+
+/**
+ * Whether every ladder starts on its first step: for somebody new to
+ * this, or coming back. The author's rungs — full push-ups, porch
+ * pull-ups — are a wall for a beginner, whatever the numbers say.
+ */
+export function startsAtTheBottom(): boolean {
+  return loadStarting() === 'new' || loadArchetype() === 'comeback';
 }
 
 export function loadProgram(now: Date = new Date()): ProgramState {
@@ -129,7 +141,12 @@ export function recordMaxTest(
 }
 
 export function levelUpTrack(id: TrackId): ProgramState {
-  return updateTrack(id, s => levelUp(trackById(id), s));
+  return updateTrack(id, s => levelUp(trackById(id), s, loadFacts()));
+}
+
+/** One rung easier, for when today's is too hard. */
+export function levelDownTrack(id: TrackId): ProgramState {
+  return updateTrack(id, s => levelDown(trackById(id), s, loadFacts()));
 }
 
 /** Every enabled track's work for `date`, in catalog order. */
