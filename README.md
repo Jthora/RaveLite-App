@@ -198,8 +198,9 @@ What works today:
 - **Answer from anywhere** — every pulse notification has Done / +5 min /
   Skip buttons that work with the app open or in the background. The
   Always-On card has a −/+ stepper to log the reps actually done.
-- **Background service** — during active hours a foreground service keeps
-  chimes alive whichever screen is open, or with the app in the background.
+- **Background service** — a foreground service keeps chimes alive
+  whichever screen is open, or with the app in the background. It runs
+  around the clock, so the app is already awake when My day starts.
 - Permission (Android 13+ `POST_NOTIFICATIONS`) is requested in context
   on first Heart-screen visit, not at cold start.
 - **Cues at alarm volume** — a small native module (`RaveLiteDevice`)

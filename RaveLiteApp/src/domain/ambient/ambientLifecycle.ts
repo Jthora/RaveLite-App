@@ -3,13 +3,16 @@
  * (active hours) is saved.
  *
  *  - Foreground service: keeps the JS runtime (and so every chime) alive
- *    while RaveLite is in the background or the screen is off. Running
- *    whenever paging is allowed (inside active hours and not manually
- *    paused), stopped otherwise.
+ *    while RaveLite is in the background or the screen is off. It runs
+ *    around the clock. It used to stop outside My day, which let Android
+ *    close the app overnight — and nothing started it again, so the
+ *    morning's chimes came only as OS backups (seen on the author's phone,
+ *    22 Sep 2026). Chimes still stay silent outside My day and during a
+ *    pause; that is the paging rule's job, not the service's.
  *  - Screen policy: day inside active hours, dimmed night outside them
  *    (see `screenPolicy`).
  */
-import {pagingAllowedAt, subscribeActiveHours} from './activeHours';
+import {subscribeActiveHours} from './activeHours';
 import {
   startAmbientForegroundService,
   stopAmbientForegroundService,
@@ -22,9 +25,9 @@ let timer: ReturnType<typeof setInterval> | null = null;
 let unsubscribe: (() => void) | null = null;
 let running: boolean | null = null;
 
-/** Start or stop the service to match the paging rule right now. */
-export function syncAmbientService(now: Date = new Date()): void {
-  const allowed = pagingAllowedAt(now) === null;
+/** Make sure the service is running (retried each minute if it failed). */
+export function syncAmbientService(): void {
+  const allowed = true;
   if (allowed === running) {
     return;
   }
