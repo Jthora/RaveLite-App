@@ -6,8 +6,13 @@ import {setHeightInches} from '../../../domain/standards/standards';
 import {addEntry} from '../../../domain/training/repository';
 import {ELEMENTS} from '../../../theme/elements';
 import {Goals} from '../Goals';
+import {beginSetup} from '../../../domain/profile/setup';
+import {__resetProfileCache} from '../../../domain/profile/repository';
 
-beforeEach(() => store.clearAll());
+beforeEach(() => {
+  store.clearAll();
+  __resetProfileCache();
+});
 
 function render() {
   let tree: renderer.ReactTestRenderer | undefined;
@@ -106,4 +111,19 @@ it('asks for a height, then shows waist-to-height from the waist logged', () => 
   expect(json).toContain('USAF full points');
   expect(json).toContain('Height 70 in · change');
   act(() => again.unmount());
+});
+
+it('grades nobody without the military tests pack, and assumes no run', () => {
+  beginSetup();
+  addEntry({at: Date.now(), kindId: 'builtin.squats-amrap', value: 40});
+  const tree = render();
+  const json = JSON.stringify(tree.toJSON());
+  for (const grade of ['A+', 'B+', 'D−', ' · B ', ' · C ', ' · F ']) {
+    expect(json).not.toContain(grade);
+  }
+  expect(json).not.toContain('Assumed until');
+  expect(json).toContain('No runs yet.');
+  // A stranger's day is not the author's two and a half hours.
+  expect(json).toContain('" / ","30"," min"');
+  act(() => tree.unmount());
 });

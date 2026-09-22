@@ -29,6 +29,8 @@ export function buildHeadline(
   entries: TrainingLogEntry[],
   metrics: MetricKind[],
   now: number = Date.now(),
+  /** Letter grades: with the military tests pack only. */
+  graded: boolean = true,
 ): Headline | undefined {
   // The best run grade in the window across all distance-bearing kinds.
   const cutoff = now - WINDOW_MS;
@@ -63,10 +65,11 @@ export function buildHeadline(
     }
   }
   if (bestGrade && bestKind && bestEntryRef) {
+    const time = mmss(bestGrade.equivalent3MiSeconds);
     return {
-      kicker: 'BEST 3 MI EQUIV (30 D)',
-      label: 'Best 3-mi equiv',
-      main: `${bestGrade.grade} · ${mmss(bestGrade.equivalent3MiSeconds)}`,
+      kicker: 'BEST RUN AS A 3-MILE TIME (30 DAYS)',
+      label: 'Best run as a 3-mile time',
+      main: graded ? `${bestGrade.grade} · ${time}` : time,
       detail: `from ${bestKind.label} · ${formatEntryValue(
         bestEntryRef,
         bestKind,
@@ -105,12 +108,13 @@ export function buildHeadline(
   };
 }
 
-/** One line for an element page, e.g. "Best 3-mi equiv (30 d) · B+ · 20:41". */
+/** One line for an element page: "Best run as a 3-mile time, 30 days · 20:41". */
 export function bestResultLine(
   entries: TrainingLogEntry[],
   metrics: MetricKind[],
   now: number = Date.now(),
+  graded: boolean = true,
 ): string | undefined {
-  const headline = buildHeadline(entries, metrics, now);
-  return headline ? `${headline.label} (30 d) · ${headline.main}` : undefined;
+  const headline = buildHeadline(entries, metrics, now, graded);
+  return headline ? `${headline.label}, 30 days · ${headline.main}` : undefined;
 }

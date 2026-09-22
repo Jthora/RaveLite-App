@@ -22,11 +22,7 @@ import {Tap} from '../../components/Tap';
 import type {InfoRef} from '../../domain/info/info';
 import {NumberPad} from '../../components/training/NumberPad';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
-import {
-  ACTIVE_FLOOR_MINUTES,
-  ACTIVE_GOAL_MINUTES,
-  activeMinutes,
-} from '../../domain/activity/active';
+import {activeMinutes} from '../../domain/activity/active';
 import {
   activityForDay,
   activityInRange,
@@ -37,7 +33,12 @@ import {setsToday} from '../../domain/ambient/setScheduler';
 import {lastWeekDone} from '../../domain/program/adapt';
 import {pushupDay} from '../../domain/program/pushups';
 import {heightToInches, loadUnits} from '../../domain/settings/units';
-import {loadPacks, loadPushupGoal} from '../../domain/profile/repository';
+import {
+  activeGoal,
+  loadPacks,
+  loadPushupGoal,
+  showsGrades,
+} from '../../domain/profile/repository';
 import {pushupRamp, type PushupRamp} from '../../domain/program/ramp';
 import {runFor} from '../../domain/program/morning';
 import {
@@ -162,8 +163,8 @@ interface GoalRow {
 }
 
 /** Where a goal's tests are heading, in a sentence; nothing before a first test. */
-function projectionLine(row: GoalRow): string | undefined {
-  const goal = row.own ? 'your target' : 'the B+';
+function projectionLine(row: GoalRow, graded: boolean): string | undefined {
+  const goal = row.own ? 'your target' : graded ? 'the B+' : 'your goal';
   switch (row.projection.kind) {
     case 'reached':
       return `Reached ${goal}.`;
@@ -199,6 +200,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
     const sex = getPrimarySex();
     const program = loadProgram(new Date(now));
     const done = lastWeekDone(Object.values(program.tracks));
+    const graded = showsGrades();
     const height = getHeightInches();
     const rows: GoalRow[] = STANDARD_EVENTS.map(event => {
       const target = targetFor(event);
@@ -213,7 +215,10 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
         target,
         own: hasOwnTarget(event),
         result,
-        grades: result ? formatGrades(gradesFor(event, sex, result.value)) : '',
+        grades:
+          result && graded
+            ? formatGrades(gradesFor(event, sex, result.value))
+            : '',
         progress: result ? progressToward(event, result.value, target) : 0,
         projection: projectGoal(
           event,
@@ -227,6 +232,8 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
     const today = activityForDay(date);
     return {
       sex,
+      graded,
+      activeGoal: activeGoal(),
       pushups: pushupDay(today, setsToday(now).prescriptions),
       rows,
       height,
@@ -313,7 +320,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
           <Text style={styles.eyebrow}>ACTIVE TODAY</Text>
           <Text style={styles.big}>
             {active.today}
-            <Text style={styles.bigGoal}> / {ACTIVE_GOAL_MINUTES} min</Text>
+            <Text style={styles.bigGoal}> / {view.activeGoal.goal} min</Text>
           </Text>
           <View style={styles.bar}>
             <View
@@ -321,17 +328,17 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
                 styles.fill,
                 {
                   width: `${
-                    Math.min(1, active.today / ACTIVE_GOAL_MINUTES) * 100
+                    Math.min(1, active.today / view.activeGoal.goal) * 100
                   }%`,
                   backgroundColor:
-                    active.today >= ACTIVE_FLOOR_MINUTES ? accent : fire,
+                    active.today >= view.activeGoal.floor ? accent : fire,
                 },
               ]}
             />
           </View>
           <Text style={styles.caption}>
-            The ideal is two and a half hours. On a busy day, the minimum is{' '}
-            {ACTIVE_FLOOR_MINUTES} minutes. Sessions, runs, drills and sets
+            The goal is {view.activeGoal.goal} minutes a day. On a busy day, the
+            minimum is {view.activeGoal.floor}. Sessions, runs, drills and sets
             count. Water, breathing and stillness don't. Last 7 days:{' '}
             {active.week} min a day.
           </Text>
@@ -340,11 +347,15 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
         <View testID="run-card" style={styles.card}>
           <Text style={styles.eyebrow}>RUNNING</Text>
           <Text style={styles.big}>
-            {formatDuration(run.fitness.threeMile)}
+            {view.graded || run.fitness.from
+              ? formatDuration(run.fitness.threeMile)
+              : '—'}
             <Text style={styles.bigGoal}> 3-mile estimate</Text>
           </Text>
           <Text style={styles.caption}>
-            {run.fitness.from
+            {!view.graded && !run.fitness.from
+              ? 'No runs yet. Log a run of a mile or more to see your pace.'
+              : run.fitness.from
               ? `From ${run.fitness.from.label} on ${shortDate(
                   run.fitness.from.at,
                 )}${
@@ -354,15 +365,22 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
                 }`
               : 'Assumed until you log a run of a mile or more.'}
           </Text>
-          <Text style={styles.projection}>
-            Next: {formatDuration(run.checkpoint.seconds)}
-            {run.checkpoint.label === 'the next checkpoint'
-              ? ', a minute at a time toward B+ (20:54)'
-              : ` for ${run.checkpoint.label}`}
-            . Easy {formatPerMile(run.paces.easy)}, tempo{' '}
-            {formatPerMile(run.paces.tempo)}, 400 m in{' '}
-            {formatDuration(splitTime(run.paces.goal, 400))}.
-          </Text>
+          {view.graded ? (
+            <Text style={styles.projection}>
+              Next: {formatDuration(run.checkpoint.seconds)}
+              {run.checkpoint.label === 'the next checkpoint'
+                ? ', a minute at a time toward B+ (20:54)'
+                : ` for ${run.checkpoint.label}`}
+              . Easy {formatPerMile(run.paces.easy)}, tempo{' '}
+              {formatPerMile(run.paces.tempo)}, 400 m in{' '}
+              {formatDuration(splitTime(run.paces.goal, 400))}.
+            </Text>
+          ) : run.fitness.from ? (
+            <Text style={styles.projection}>
+              Easy runs at {formatPerMile(run.paces.easy)}, tempo at{' '}
+              {formatPerMile(run.paces.tempo)}.
+            </Text>
+          ) : null}
           {run.week.length > 0 ? (
             <Text style={styles.caption}>
               This week:{' '}
@@ -410,7 +428,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
                 </View>
                 <Text style={styles.note}>{STANDARDS_NOTE}</Text>
               </>
-            ) : index === 1 ? (
+            ) : view.graded && index === (groups[0] === 'tests' ? 1 : 0) ? (
               <Text style={styles.note}>{MARKS_NOTE}</Text>
             ) : null}
             {view.rows
@@ -420,6 +438,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
                   key={row.event.id}
                   row={row}
                   sex={view.sex}
+                  graded={view.graded}
                   onEdit={() => setEditing(row.event)}
                   onInfo={
                     onInfo
@@ -442,6 +461,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
       <TargetEditor
         event={editing}
         sex={view.sex}
+        graded={view.graded}
         onClose={() => setEditing(undefined)}
         onSave={value => {
           if (editing) {
@@ -476,6 +496,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
 function GoalCard({
   row,
   sex,
+  graded,
   onEdit,
   onLog,
   onInfo,
@@ -484,6 +505,8 @@ function GoalCard({
 }: {
   row: GoalRow;
   sex: Sex;
+  /** Letter grades and marks, with the military tests pack only. */
+  graded: boolean;
   onEdit: () => void;
   /** Unset for a goal the app measures itself. */
   onLog?: () => void;
@@ -494,7 +517,7 @@ function GoalCard({
   onHeight?: () => void;
 }) {
   const {event, target, own, result, grades, progress} = row;
-  const projection = measured(event) ? undefined : projectionLine(row);
+  const projection = measured(event) ? undefined : projectionLine(row, graded);
   const accent = ELEMENTS.heart.accent;
   const isMeasured = measured(event);
   const resultLine = result
@@ -552,6 +575,8 @@ function GoalCard({
             <Text style={styles.caption}>
               {own
                 ? 'your target'
+                : !graded
+                ? 'goal'
                 : event.targetCaption ??
                   (event.scales ? 'B+ goal' : topScores(event, sex))}
             </Text>
@@ -591,12 +616,12 @@ function GoalCard({
         ) : null}
       </View>
       {projection ? <Text style={styles.projection}>{projection}</Text> : null}
-      {(event.scales ?? []).map((scale, i) => (
+      {(graded ? event.scales ?? [] : []).map((scale, i) => (
         <Text key={scale.test ?? i} style={styles.caption}>
           {scaleLine(event, scale, sex)}
         </Text>
       ))}
-      {own && !event.scales && !event.targetCaption ? (
+      {graded && own && !event.scales && !event.targetCaption ? (
         <Text style={styles.caption}>Top score {topScores(event, sex)}</Text>
       ) : null}
       {event.note ? <Text style={styles.caption}>{event.note}</Text> : null}
@@ -621,11 +646,13 @@ function GoalCard({
 function TargetEditor({
   event,
   sex,
+  graded,
   onClose,
   onSave,
 }: {
   event?: StandardEvent;
   sex: Sex;
+  graded: boolean;
   onClose: () => void;
   /** `undefined` goes back to the default target. */
   onSave: (value: number | undefined) => void;
@@ -647,18 +674,22 @@ function TargetEditor({
   const accent = ELEMENTS.heart.accent;
   const goal = goalFor(event, sex);
   const onTests = event.scales?.some(scale => scale.test) ?? false;
-  const caption =
-    goal === undefined
-      ? `Top score for ages 35–40: ${topScores(event, sex)}`
-      : onTests
-      ? `A B+ on every test: ${formatValue(
-          event,
-          goal,
-        )}. Top score: ${topScores(event, sex)}`
-      : `B+ mark: ${formatValue(event, goal)}. A+: ${formatValue(
-          event,
-          event.top[sex],
-        )}`;
+  const caption = !graded
+    ? `The goal starts at ${formatValue(
+        event,
+        goal ?? event.top[sex],
+      )}. Set your own.`
+    : goal === undefined
+    ? `Top score for ages 35–40: ${topScores(event, sex)}`
+    : onTests
+    ? `A B+ on every test: ${formatValue(event, goal)}. Top score: ${topScores(
+        event,
+        sex,
+      )}`
+    : `B+ mark: ${formatValue(event, goal)}. A+: ${formatValue(
+        event,
+        event.top[sex],
+      )}`;
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.scrim}>
@@ -697,7 +728,7 @@ function TargetEditor({
                 accessibilityRole="button"
                 style={styles.editorBtn}>
                 <Text style={styles.pillText}>
-                  {event.scales ? 'B+ goal' : 'Top score'}
+                  {!graded ? 'Default' : event.scales ? 'B+ goal' : 'Top score'}
                 </Text>
               </Tap>
             ) : null}

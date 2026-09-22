@@ -15,7 +15,7 @@ it('leads with the best run as a 3-mile grade', () => {
   ];
   const metrics = loadMetrics();
   expect(bestResultLine(entries, metrics, NOW)).toMatch(
-    /^Best 3-mi equiv \(30 d\) · \S+ · \d+:\d\d$/,
+    /^Best run as a 3-mile time, 30 days · \S+ · \d+:\d\d$/,
   );
   expect(buildHeadline(entries, metrics, NOW)?.detail).toBe(
     'from 2-Mile Run · 17:20',
@@ -30,7 +30,7 @@ it('falls back to the best of the most-logged kind', () => {
     {id: 'b', at: NOW - 3 * DAY, kindId: plank.id, value: 120},
   ];
   expect(bestResultLine(entries, metrics, NOW)).toBe(
-    'Best Plank — max hold (30 d) · 2:00',
+    'Best Plank — max hold, 30 days · 2:00',
   );
 });
 

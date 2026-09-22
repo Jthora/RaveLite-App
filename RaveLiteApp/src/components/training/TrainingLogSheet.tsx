@@ -53,6 +53,7 @@ import {gradeForRun, formatPace} from '../../domain/training/grading';
 import {NumberPad} from './NumberPad';
 import {CalendarPicker} from './CalendarPicker';
 import {METERS_PER_MILE, MS_PER_DAY} from '../../lib/constants';
+import {showsGrades} from '../../domain/profile/repository';
 
 const MI_PER_M = 1 / METERS_PER_MILE;
 
@@ -248,9 +249,10 @@ export function TrainingLogSheet({
     return undefined;
   }, [selectedKind, distanceCenti]);
 
+  // Letter grades come from the military tests' tables: only with that pack.
   const liveGrade = useMemo(
     () =>
-      runDistance && valueSec > 0
+      runDistance && valueSec > 0 && showsGrades()
         ? gradeForRun(runDistance, valueSec)
         : undefined,
     [runDistance, valueSec],
@@ -289,11 +291,13 @@ export function TrainingLogSheet({
               <Text style={styles.title}>
                 {editing ? 'Edit Entry' : 'New Training Log'}
               </Text>
-              {isLandscape && liveGrade && livePace ? (
+              {isLandscape && livePace ? (
                 <View style={styles.headerGrade}>
-                  <Text style={[styles.headerGradeText, {color: accent}]}>
-                    {liveGrade.grade}
-                  </Text>
+                  {liveGrade ? (
+                    <Text style={[styles.headerGradeText, {color: accent}]}>
+                      {liveGrade.grade}
+                    </Text>
+                  ) : null}
                   <Text style={styles.headerPaceText}>{livePace}</Text>
                 </View>
               ) : null}
@@ -487,16 +491,18 @@ export function TrainingLogSheet({
                             ]}
                             multiline
                           />
-                          {!isLandscape && liveGrade && livePace ? (
+                          {!isLandscape && livePace ? (
                             <View style={styles.portraitGradeRow}>
                               <View style={styles.headerGrade}>
-                                <Text
-                                  style={[
-                                    styles.headerGradeText,
-                                    {color: accent},
-                                  ]}>
-                                  {liveGrade.grade}
-                                </Text>
+                                {liveGrade ? (
+                                  <Text
+                                    style={[
+                                      styles.headerGradeText,
+                                      {color: accent},
+                                    ]}>
+                                    {liveGrade.grade}
+                                  </Text>
+                                ) : null}
                                 <Text style={styles.headerPaceText}>
                                   {livePace}
                                 </Text>

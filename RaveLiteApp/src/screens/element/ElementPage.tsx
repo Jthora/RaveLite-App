@@ -34,7 +34,7 @@ import {
 import {streakDays, windowStart} from '../../domain/activity/stats';
 import type {Target} from '../../domain/exercises/types';
 import {entriesForDay} from '../../domain/journal/journal';
-import {dailyPar} from '../../domain/profile/repository';
+import {dailyPar, showsGrades} from '../../domain/profile/repository';
 import {
   getElementPrefs,
   setElementPrefs,
@@ -114,6 +114,7 @@ export function ElementPage({element, onBack}: Props) {
         loadEntriesForElement(element.id),
         loadMetricsForElement(element.id),
         now.getTime(),
+        showsGrades(),
       ),
     };
     // `version` is the rebuild trigger; the reads go to storage directly.

@@ -413,6 +413,26 @@ export function needsSetup(): boolean {
   return !hasAnyHistory();
 }
 
+/**
+ * Whether results get letter grades. They come from the military tests'
+ * tables, so only somebody carrying that pack sees A to F; for everyone
+ * else a result is measured against their own goal, never failed.
+ */
+export function showsGrades(): boolean {
+  return loadPacks().includes('military-tests');
+}
+
+/**
+ * Active minutes to aim for, and the least that still counts on a busy
+ * day. The author's two and a half hours stays with installs from before
+ * setup; anyone set up since starts at half an hour.
+ */
+export function activeGoal(): {goal: number; floor: number} {
+  return loadProfile().startedSetupAt === undefined
+    ? {goal: 150, floor: 45}
+    : {goal: 30, floor: 10};
+}
+
 /** How long someone counts as new: the tiles are named, and so on. */
 export const NEW_FOR_MS = 14 * 86_400_000;
 

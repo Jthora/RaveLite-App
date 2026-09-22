@@ -4,7 +4,7 @@ import {EXERCISE_LIBRARY} from '../exercises/library';
 import type {ActivityItem} from './activity';
 
 /**
- * Active minutes — how much of the day went to moving, toward 2.5 hours.
+ * Active minutes — how much of the day went to moving.
  *
  * Sessions and runs from the Train log count in full; drills, sets and
  * partners count their time. Water, eye breaks, breathing, stillness and
@@ -12,10 +12,7 @@ import type {ActivityItem} from './activity';
  * session still counts: it's a session.)
  */
 
-/** The ideal day: two and a half hours. */
-export const ACTIVE_GOAL_MINUTES = 150;
-/** Enough, on a busy day, to keep losing weight and staying fit. */
-export const ACTIVE_FLOOR_MINUTES = 45;
+// The goal itself is per person: `profile/repository.activeGoal`.
 
 const STILL_MOVES: ReadonlySet<MoveId> = new Set<MoveId>([
   'breath',
