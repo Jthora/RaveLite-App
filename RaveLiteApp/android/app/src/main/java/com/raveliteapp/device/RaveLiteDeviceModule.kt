@@ -40,8 +40,9 @@ import java.util.concurrent.atomic.AtomicReference
  *    sound even when the ringer is silent, notification volume is 0, or Do
  *    Not Disturb lets alarms through. Other audio (e.g. TikTok) ducks for
  *    the length of the cue.
- *  - Alarm volume and the current DND interruption filter, for the Chimes
- *    settings and the "Respect Do Not Disturb" toggle.
+ *  - Alarm volume, the ringer mode and the current DND interruption
+ *    filter, for the Chimes settings and the "Follow silent mode and Do
+ *    Not Disturb" switch.
  *  - Window backlight override for night mode: the screen stays on
  *    (FLAG_KEEP_SCREEN_ON) but barely lit outside active hours.
  *  - A rough location, once, for sunrise and the forecast.
@@ -162,6 +163,12 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     val notifications =
         reactContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     promise.resolve(notifications.currentInterruptionFilter)
+  }
+
+  /** Resolves AudioManager.RINGER_MODE_* (0 silent, 1 vibrate, 2 normal). */
+  @ReactMethod
+  fun getRingerMode(promise: Promise) {
+    promise.resolve(audioManager.ringerMode)
   }
 
   /**

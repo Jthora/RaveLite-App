@@ -23,6 +23,8 @@ interface RaveLiteDeviceNative {
   playCue(element: string, volume: number): Promise<boolean>;
   getAlarmVolume(): Promise<{current: number; max: number}>;
   getInterruptionFilter(): Promise<number>;
+  /** Missing on APKs built before chimes could follow silent mode. */
+  getRingerMode?(): Promise<number>;
   setWindowBrightness(level: number): Promise<boolean>;
   /** Missing on APKs built before location support. */
   getCoarseLocation?(): Promise<CoarseLocation | null>;
@@ -43,6 +45,9 @@ const native: RaveLiteDeviceNative | undefined =
 
 /** Android `INTERRUPTION_FILTER_ALL` — Do Not Disturb is off. */
 export const INTERRUPTION_FILTER_ALL = 1;
+
+/** Android `RINGER_MODE_NORMAL` — the phone is not on silent or vibrate. */
+export const RINGER_MODE_NORMAL = 2;
 
 export function hasDeviceModule(): boolean {
   return native != null;
@@ -98,6 +103,18 @@ export async function getInterruptionFilter(): Promise<number | null> {
   }
   try {
     return await native.getInterruptionFilter();
+  } catch {
+    return null;
+  }
+}
+
+/** The ringer mode (0 silent, 1 vibrate, 2 normal), or null when unknown. */
+export async function getRingerMode(): Promise<number | null> {
+  if (!native?.getRingerMode) {
+    return null;
+  }
+  try {
+    return await native.getRingerMode();
   } catch {
     return null;
   }

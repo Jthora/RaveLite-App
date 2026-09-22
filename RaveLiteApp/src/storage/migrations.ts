@@ -10,6 +10,7 @@ import {DEFAULT_ACTIVE_HOURS, type ActiveHours} from '../domain/ambient/types';
 import {DEFAULT_PLAN} from '../domain/reminders/defaultPlan';
 import {plansEqual} from '../domain/reminders/planMutations';
 import type {Plan} from '../domain/reminders/types';
+import {hasRespectDndChoice, setRespectDnd} from '../domain/ambient/cueVolume';
 
 /**
  * Storage schema migration runner.
@@ -66,6 +67,9 @@ export function runMigrations(now: number = Date.now()): void {
   // shape is safe.
   if (from < 10) {
     intoPlaces();
+  }
+  if (from < 11) {
+    keepTheChimeRoute();
   }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
@@ -566,5 +570,21 @@ function intoPlaces(): void {
   } catch {
     // A profile that will not parse is already handled by loadProfile,
     // which falls back to defaults on the next read.
+  }
+}
+
+/**
+ * v11 — chimes follow silent mode and Do Not Disturb by default.
+ *
+ * They used to take the alarm stream unless someone turned "Respect Do
+ * Not Disturb" on. A phone already in use keeps that: it is written down
+ * as a choice, so only a new install gets the new default.
+ */
+function keepTheChimeRoute(): void {
+  if (hasRespectDndChoice()) {
+    return;
+  }
+  if (store.getString(KEYS.profile) || hasAnyHistory()) {
+    setRespectDnd(false);
   }
 }

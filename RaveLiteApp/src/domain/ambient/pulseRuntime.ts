@@ -38,7 +38,11 @@ import {
 import {pagingAllowedAt} from './activeHours';
 import {doneFields, pulsePayload} from './pulsePayload';
 import {chooseCueRoute, cueSettingsFor} from './cueVolume';
-import {getInterruptionFilter, playCue} from '../../native/raveLiteDevice';
+import {
+  getInterruptionFilter,
+  getRingerMode,
+  playCue,
+} from '../../native/raveLiteDevice';
 import type {ReminderPayload} from '../reminders/types';
 import type {SetPrescription, TrackId} from '../program/types';
 import type {ActivePulseSummary, Pulse, PulseOutcome} from './types';
@@ -129,18 +133,23 @@ function dismiss(pulseId: string): void {
 }
 
 /**
- * Make a fired pulse heard. By default the element cue plays in-app on the
- * alarm stream (cutting through silent mode and DND) and the notification
- * posts on the quiet channel. If the cue can't play, the notification uses
- * the sounding channel instead, so a chime is never silent by accident.
- * See `cueVolume.chooseCueRoute` for the Off / Respect-DND routes.
+ * Make a fired pulse heard. The element cue plays in-app on the alarm
+ * stream and the notification posts on the quiet channel — unless the
+ * phone is on silent, vibrate or DND and chimes follow it, when the
+ * notification takes the sounding channel and the OS decides. If the cue
+ * can't play, the sounding channel is used too, so a chime is never
+ * silent by accident. See `cueVolume.chooseCueRoute`.
  */
 async function chime(payload: ReminderPayload): Promise<void> {
   const {volume, respectDnd} = cueSettingsFor(payload.element);
+  const [interruptionFilter, ringerMode] = respectDnd
+    ? await Promise.all([getInterruptionFilter(), getRingerMode()])
+    : [null, null];
   const route = chooseCueRoute({
     volume,
     respectDnd,
-    interruptionFilter: respectDnd ? await getInterruptionFilter() : null,
+    interruptionFilter,
+    ringerMode,
   });
   let silent = route === 'silent';
   if (route === 'alarm') {

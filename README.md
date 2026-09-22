@@ -202,12 +202,14 @@ What works today:
   chimes alive whichever screen is open, or with the app in the background.
 - Permission (Android 13+ `POST_NOTIFICATIONS`) is requested in context
   on first Heart-screen visit, not at cold start.
-- **Cues that always sound** — a small native module (`RaveLiteDevice`)
-  plays the cue on the alarm audio stream, so chimes cut through silent
-  mode and Do Not Disturb during active hours. The notification then posts
-  on a quiet channel; if the cue can't play, it uses the sounding channel
-  instead. Heart › Settings › Chimes: volumes, per-element test, and a
-  "Respect Do Not Disturb" toggle.
+- **Cues at alarm volume** — a small native module (`RaveLiteDevice`)
+  plays the cue on the alarm audio stream. The notification then posts on
+  a quiet channel; if the cue can't play, it uses the sounding channel
+  instead. By default chimes follow the phone: on silent, vibrate or Do
+  Not Disturb they post on the sounding channel and the phone decides.
+  Heart › Settings › Chimes: volumes, per-element test, and a "Follow
+  silent mode and Do Not Disturb" switch. Turn it off and chimes cut
+  through both.
 - **Backup chimes** — the OS also holds an exact-alarm notification ~90 s
   after every upcoming chime. The live app cancels it when the chime comes
   due, so you hear one chime; if the app has been killed, the backup

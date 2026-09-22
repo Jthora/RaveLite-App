@@ -6,7 +6,8 @@
  *   - a test button per element (plays the cue directly; no journal write)
  *   - alarm-volume check — cues play on the alarm stream, so alarm volume
  *     is the ceiling, and 0 means silent
- *   - "Respect Do Not Disturb" toggle (off by default: chimes cut through)
+ *   - "Follow silent mode and Do Not Disturb" switch (on by default; off
+ *     and chimes cut through both — see `cueVolume.ts`)
  */
 import React, {useCallback, useEffect, useState} from 'react';
 import {AppState, StyleSheet, Text, View} from 'react-native';
@@ -80,8 +81,9 @@ export function ChimesPanel() {
     <View style={styles.panel}>
       <Text style={[styles.eyebrow, {color: accent}]}>▸ CHIMES</Text>
       <Text style={styles.body}>
-        Chimes play on the alarm channel. They sound in silent mode and Do Not
-        Disturb during active hours. Alarm volume sets the maximum.
+        {respectDnd
+          ? 'Chimes play at alarm volume. When the phone is on silent, vibrate or Do Not Disturb, they follow it.'
+          : 'Chimes play at alarm volume, even in silent mode and Do Not Disturb.'}
       </Text>
 
       {!hasDeviceModule() ? (
@@ -150,11 +152,13 @@ export function ChimesPanel() {
         style={styles.toggleTap}>
         <View style={styles.toggleRow}>
           <View style={styles.toggleCopy}>
-            <Text style={styles.label}>Respect Do Not Disturb</Text>
+            <Text style={styles.label}>
+              Follow silent mode and Do Not Disturb
+            </Text>
             <Text style={styles.meta}>
               {respectDnd
-                ? 'On: DND mutes chimes but not vibration or the notification.'
-                : 'Off: chimes sound during Do Not Disturb.'}
+                ? 'On: silent mode and Do Not Disturb mute chimes. You still get the notification.'
+                : 'Off: chimes always sound.'}
             </Text>
           </View>
           <Text

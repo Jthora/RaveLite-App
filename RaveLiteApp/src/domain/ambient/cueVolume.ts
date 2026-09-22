@@ -1,7 +1,10 @@
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import {ELEMENT_ORDER, type ElementId} from '../../theme/elements';
-import {INTERRUPTION_FILTER_ALL} from '../../native/raveLiteDevice';
+import {
+  INTERRUPTION_FILTER_ALL,
+  RINGER_MODE_NORMAL,
+} from '../../native/raveLiteDevice';
 
 /**
  * Cue volume + routing.
@@ -14,9 +17,16 @@ import {INTERRUPTION_FILTER_ALL} from '../../native/raveLiteDevice';
  *   - 'alarm'   — play the cue in-app on the alarm stream (cuts through
  *                 silent / DND), then post the notification on the quiet
  *                 channel. If playback fails, post on the sounding channel.
- *   - 'channel' — "Respect Do Not Disturb" is on and DND is active: post on
- *                 the sounding channel and let the OS decide (it mutes).
+ *   - 'channel' — "Follow silent mode and Do Not Disturb" is on and the
+ *                 phone is on silent, on vibrate, or in DND: post on the
+ *                 sounding channel and let the OS decide (it mutes).
  *   - 'silent'  — the cue is set to Off: quiet channel, vibration only.
+ *
+ * Following the phone is the default. A stranger's first chime must not
+ * ring out in a meeting or at 2 a.m. because the app took the alarm
+ * stream. Installs that already had history when this arrived were
+ * written `false` by migration v11, so a phone that relied on chimes
+ * cutting through keeps doing so.
  */
 
 /** 75 so the default lands on one of the panel's volume pills. */
@@ -42,18 +52,21 @@ export function chooseCueRoute(input: {
   respectDnd: boolean;
   /** Current interruption filter, or null when unknown. */
   interruptionFilter: number | null;
+  /** Current ringer mode, or null when unknown. */
+  ringerMode?: number | null;
 }): CueRoute {
   if (input.volume <= 0) {
     return 'silent';
   }
-  if (
-    input.respectDnd &&
-    input.interruptionFilter !== null &&
-    input.interruptionFilter !== INTERRUPTION_FILTER_ALL
-  ) {
-    return 'channel';
+  if (!input.respectDnd) {
+    return 'alarm';
   }
-  return 'alarm';
+  const dnd =
+    input.interruptionFilter != null &&
+    input.interruptionFilter !== INTERRUPTION_FILTER_ALL;
+  const hushed =
+    input.ringerMode != null && input.ringerMode !== RINGER_MODE_NORMAL;
+  return dnd || hushed ? 'channel' : 'alarm';
 }
 
 // ── Storage accessors ────────────────────────────────────────────────
@@ -82,8 +95,14 @@ export function setElementVolume(element: ElementId, percent: number): void {
   store.set(KEYS.ambientToneVolumeForElement(element), clampPercent(percent));
 }
 
+/** Whether chimes follow silent mode and DND. On unless someone said no. */
 export function getRespectDnd(): boolean {
-  return store.getBoolean(RESPECT_DND_KEY) === true;
+  return store.getBoolean(RESPECT_DND_KEY) !== false;
+}
+
+/** Whether anyone has chosen, so migration v11 can keep an old default. */
+export function hasRespectDndChoice(): boolean {
+  return store.getBoolean(RESPECT_DND_KEY) !== undefined;
 }
 
 export function setRespectDnd(on: boolean): void {

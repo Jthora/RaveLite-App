@@ -18,14 +18,17 @@ import * as runtime from '../pulseRuntime';
 
 jest.mock('../../../native/raveLiteDevice', () => ({
   INTERRUPTION_FILTER_ALL: 1,
+  RINGER_MODE_NORMAL: 2,
   hasDeviceModule: jest.fn(() => true),
   playCue: jest.fn(),
   getInterruptionFilter: jest.fn(),
+  getRingerMode: jest.fn(),
   getAlarmVolume: jest.fn(),
 }));
 
 const playCue = device.playCue as jest.Mock;
 const getInterruptionFilter = device.getInterruptionFilter as jest.Mock;
+const getRingerMode = device.getRingerMode as jest.Mock;
 const display = notifee.displayNotification as jest.Mock;
 
 // Monday 14 Sep 2026, 10:00 local — inside default active hours.
@@ -39,6 +42,7 @@ beforeEach(() => {
   runtime.__test.reset();
   playCue.mockReset();
   getInterruptionFilter.mockReset();
+  getRingerMode.mockReset();
   display.mockClear();
 });
 
@@ -51,11 +55,11 @@ describe('cue volume', () => {
   });
 
   it('defaults to 75 % master at full element level, and persists changes', () => {
-    expect(cueSettingsFor('fire')).toEqual({volume: 0.75, respectDnd: false});
+    expect(cueSettingsFor('fire')).toEqual({volume: 0.75, respectDnd: true});
     setMasterVolume(50);
     setElementVolume('fire', 0);
-    setRespectDnd(true);
-    expect(cueSettingsFor('fire')).toEqual({volume: 0, respectDnd: true});
+    setRespectDnd(false);
+    expect(cueSettingsFor('fire')).toEqual({volume: 0, respectDnd: false});
     expect(cueSettingsFor('air').volume).toBeCloseTo(0.5);
   });
 });
@@ -67,6 +71,22 @@ describe('cue routing', () => {
     [{volume: 0.5, respectDnd: true, interruptionFilter: 1}, 'alarm'],
     [{volume: 0.5, respectDnd: true, interruptionFilter: 2}, 'channel'],
     [{volume: 0.5, respectDnd: true, interruptionFilter: null}, 'alarm'],
+    [
+      {volume: 0.5, respectDnd: true, interruptionFilter: 1, ringerMode: 2},
+      'alarm',
+    ],
+    [
+      {volume: 0.5, respectDnd: true, interruptionFilter: 1, ringerMode: 0},
+      'channel',
+    ],
+    [
+      {volume: 0.5, respectDnd: true, interruptionFilter: 1, ringerMode: 1},
+      'channel',
+    ],
+    [
+      {volume: 0.5, respectDnd: false, interruptionFilter: 1, ringerMode: 0},
+      'alarm',
+    ],
   ])('%j → %s', (input, route) => {
     expect(chooseCueRoute(input)).toBe(route);
   });
@@ -138,6 +158,23 @@ describe('a firing pulse', () => {
     await fire();
     expect(playCue).not.toHaveBeenCalled();
     expect(postedChannel()).toBe('elem.fire.v3');
+  });
+
+  it('follows silent mode on a new install', async () => {
+    getInterruptionFilter.mockResolvedValue(1);
+    getRingerMode.mockResolvedValue(0);
+    await fire();
+    expect(playCue).not.toHaveBeenCalled();
+    expect(postedChannel()).toBe('elem.fire.v3');
+  });
+
+  it('cuts through silent mode once someone turns following off', async () => {
+    setRespectDnd(false);
+    playCue.mockResolvedValue(true);
+    getRingerMode.mockResolvedValue(0);
+    await fire();
+    expect(playCue).toHaveBeenCalled();
+    expect(getRingerMode).not.toHaveBeenCalled();
   });
 
   it('announces the fire to listeners with its prescription', () => {

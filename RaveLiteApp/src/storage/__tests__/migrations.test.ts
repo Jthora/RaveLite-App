@@ -16,6 +16,7 @@ import {
   needsSetup,
 } from '../../domain/profile/repository';
 import {AUTHOR_FACTS, usableDrills} from '../../domain/profile/kit';
+import {getRespectDnd, setRespectDnd} from '../../domain/ambient/cueVolume';
 
 const NOW = 1_700_000_000_000;
 
@@ -303,6 +304,28 @@ describe('v10', () => {
     store.set(KEYS.profile, JSON.stringify(placed));
     runMigrations(NOW);
     expect(json(KEYS.profile)).toEqual(placed);
+  });
+});
+
+describe('v11', () => {
+  it('keeps a phone in use on the alarm route', () => {
+    store.set(KEYS.schemaVersion, 10);
+    store.set(KEYS.profile, JSON.stringify({version: 1, facts: AUTHOR_FACTS}));
+    runMigrations(NOW);
+    expect(getRespectDnd()).toBe(false);
+  });
+
+  it('lets a new install follow the phone', () => {
+    runMigrations(NOW);
+    expect(getRespectDnd()).toBe(true);
+  });
+
+  it('keeps a choice somebody made', () => {
+    store.set(KEYS.schemaVersion, 10);
+    store.set(KEYS.profile, JSON.stringify({version: 1, facts: AUTHOR_FACTS}));
+    setRespectDnd(true);
+    runMigrations(NOW);
+    expect(getRespectDnd()).toBe(true);
   });
 });
 

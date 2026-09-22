@@ -102,5 +102,7 @@ export const KEYS = {
  *   9 — one hang point becomes two (low, high).
  *  10 — kit becomes places: the flat kit list is split into a room, a
  *       yard, a porch, the streets…, with its limits on the room.
+ *  11 — chimes follow silent mode and DND by default; a phone already in
+ *       use is written down as having chosen the alarm route.
  */
-export const CURRENT_SCHEMA_VERSION = 10;
+export const CURRENT_SCHEMA_VERSION = 11;
