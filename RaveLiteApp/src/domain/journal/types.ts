@@ -43,7 +43,9 @@ export type EntryKind =
 export type SuppressionReason =
   | 'outside-active-hours'
   | 'battery-saver'
-  | 'manual-pause';
+  | 'manual-pause'
+  /** Due while the app was closed or frozen; too late to ring now. */
+  | 'app-closed';
 
 interface BaseEntry {
   id: string; // ULID-ish: timestamp + random

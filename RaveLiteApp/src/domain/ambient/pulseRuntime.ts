@@ -36,6 +36,7 @@ import {
   type QueueState,
 } from './pulseQueue';
 import {pagingAllowedAt} from './activeHours';
+import {beat} from './heartbeat';
 import {doneFields, pulsePayload} from './pulsePayload';
 import {chooseCueRoute, cueSettingsFor} from './cueVolume';
 import {safetyFirst} from '../exercises/safety';
@@ -339,13 +340,14 @@ function disarmDueBackups(now: number): void {
 export function tickNow(now: number = Date.now()): void {
   disarmDueBackups(now);
   const result = queueTick(state, now, t => pagingAllowedAt(new Date(t)));
-  if (result.writes.length === 0 && result.state === state) {
-    return;
+  if (result.writes.length > 0 || result.state !== state) {
+    const before = state.pulses;
+    state = result.state;
+    commit(result.writes, before);
+    notify();
   }
-  const before = state.pulses;
-  state = result.state;
-  commit(result.writes, before);
-  notify();
+  // After the tick, so a gap's listeners see what the tick wrote.
+  beat(now);
 }
 
 /**

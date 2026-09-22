@@ -78,6 +78,8 @@ export interface DayListInput {
    * from before it is left out: it was never theirs to miss.
    */
   from?: number;
+  /** When the app was not running (`ambient/heartbeat.ts`). */
+  closed?: readonly {from: number; to: number}[];
 }
 
 /** Why a chime did not sound, as the row says it. */
@@ -85,6 +87,7 @@ const UNSOUNDED: Record<SuppressionReason, string> = {
   'manual-pause': 'Paused, did not sound',
   'outside-active-hours': 'Outside My day, did not sound',
   'battery-saver': 'Battery saver, did not sound',
+  'app-closed': 'RaveLite was closed, did not sound',
 };
 
 const STATUS_ORDER: Record<DayRowStatus, number> = {
@@ -132,7 +135,8 @@ function doneRow(items: ActivityItem[]): DayRow {
 }
 
 export function buildDayList(input: DayListInput): DayRow[] {
-  const {now, activity, journal, scheduled, active, queuedAt, from} = input;
+  const {now, activity, journal, scheduled, active, queuedAt, from, closed} =
+    input;
   const rows: DayRow[] = [];
 
   const records = new Map<string, ActivityItem[]>();
@@ -155,6 +159,10 @@ export function buildDayList(input: DayListInput): DayRow[] {
       e.kind === 'reminder.suppressed' ? [[e.pulseId, e.reason] as const] : [],
     ),
   );
+  // A chime the journal saw sound is not one the app was closed for.
+  const sounded = new Set(
+    journal.flatMap(e => (e.kind === 'reminder.fired' ? [e.pulseId] : [])),
+  );
   const chimes = [...scheduled];
   if (active && !chimes.some(c => c.id === active.id)) {
     chimes.push(active);
@@ -167,7 +175,11 @@ export function buildDayList(input: DayListInput): DayRow[] {
     if (from !== undefined && at < from && chime.id !== active?.id) {
       continue;
     }
-    const why = unsounded.get(chime.id);
+    const why =
+      unsounded.get(chime.id) ??
+      (!sounded.has(chime.id) && closed?.some(g => at > g.from && at < g.to)
+        ? 'app-closed'
+        : undefined);
     const status: DayRowStatus =
       chime.id === active?.id
         ? 'active'

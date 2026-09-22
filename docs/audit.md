@@ -243,6 +243,17 @@ leave Catch up; install day starts at install; Skip releases its sets;
 fix the second +5, "Till morning" after midnight, and stale notifications;
 a heartbeat that tells the truth when chimes didn't sound.
 
+*Done 21 Sep 2026* (6731650, 03fba31, 81276ed, 6557e4f and the heartbeat
+commit). Rest days are written down as they happen (`profile/restDays.ts`)
+and left out of the ramp, the streak and attribute decay; a day's
+recorded asks are taken at their word; My day's days are honoured;
+chimes that never sounded (paused, outside My day, app closed) are their
+own row and out of Catch up; Skip lets its sets go; the setup day starts
+at setup. Still open: a boot receiver, so chimes come back after a
+reboot without opening the app (native, needs a reboot test on the
+phone), and the Comeback and Festival Six block programs, which are
+described but not built.
+
 **Phase 3 — say it plainly, and un-personalise.**
 No letter grades outside the military pack; take the author's numbers out
 of copy (derive from the person's goal); human names for flaw codes and

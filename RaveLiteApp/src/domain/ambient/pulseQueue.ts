@@ -60,6 +60,9 @@ export interface PulseSpec {
  */
 export type PagingPolicy = (now: number) => SuppressionReason | null;
 
+/** A queued pulse this far past its time is not rung. */
+export const STALE_AFTER_MS = 30 * 60_000;
+
 /** Default policy — always allow. Useful for unit tests. */
 export const ALWAYS_PAGE: PagingPolicy = () => null;
 
@@ -165,7 +168,11 @@ export function tick(
     .sort((a, b) => a.fireAt - b.fireAt);
 
   for (const p of queuedReady) {
-    const reason = policy(now);
+    // Long overdue: the app was closed or frozen when it was due. Ringing
+    // it now — one stale chime after another on resume — is worse than
+    // saying it never sounded.
+    const reason: SuppressionReason | null =
+      now - p.fireAt > STALE_AFTER_MS ? 'app-closed' : policy(now);
     if (reason !== null) {
       p.state = 'suppressed';
       p.suppression = {at: now, reason};

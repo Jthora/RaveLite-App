@@ -24,8 +24,10 @@ export const KEYS = {
   activeHours: 'ambient.activeHours',
   /** Epoch ms; pulses suppress while now < value. Cleared when reached. */
   manualPauseUntil: 'ambient.manualPauseUntil',
-  /** Epoch ms of last AOS foreground tick (for absence detection). */
+  /** Epoch ms of the runtime's last heartbeat (see `ambient/heartbeat.ts`). */
   ambientLastSeenAt: 'ambient.session.lastSeenAt',
+  /** `{from, to}[]` JSON — recent stretches when the runtime was not running. */
+  ambientGaps: 'ambient.session.gaps',
   /** Epoch ms — first-launch onboarding completion stamp. */
   ambientOnboardingCompletedAt: 'ambient.onboarding.completedAt',
   /** 0–100 master volume. */

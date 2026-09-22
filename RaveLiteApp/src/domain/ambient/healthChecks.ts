@@ -3,6 +3,8 @@ import notifee from '@notifee/react-native';
 import {store} from '../../storage';
 import {KEYS} from '../../storage/keys';
 import {getAlarmVolume, hasDeviceModule} from '../../native/raveLiteDevice';
+import {getActiveHours, withinActiveHours} from './activeHours';
+import {gapsBetween} from './heartbeat';
 
 /**
  * Stay-alive health checks — what keeps chimes firing on this phone.
@@ -37,6 +39,8 @@ export interface HealthInputs {
   alarmVolume: {current: number; max: number} | null;
   cuePlayerAvailable: boolean;
   confirmed: Record<ConfirmId, boolean>;
+  /** The latest time in the last day the app was not running during My day. */
+  lastGap?: {from: number; to: number};
 }
 
 export interface HealthCheck {
@@ -111,6 +115,25 @@ export function summarizeHealth(input: HealthInputs): {
     });
   }
 
+  // The one check that reads what happened rather than a setting: every
+  // other row could say "all set" while Android was closing the app.
+  const gap = input.lastGap;
+  checks.push({
+    id: 'kept-running',
+    title: 'Chimes kept running',
+    status: gap ? 'warn' : 'ok',
+    detail: gap
+      ? `Android closed RaveLite from ${hm(gap.from)} to ${hm(
+          gap.to,
+        )}. Chimes did not sound then.`
+      : 'RaveLite ran through My day for the last 24 hours.',
+    fix: gap
+      ? input.powerManagerAvailable
+        ? 'power-manager'
+        : 'battery-optimization'
+      : undefined,
+  });
+
   const volume = input.alarmVolume;
   checks.push({
     id: 'alarm-volume',
@@ -162,6 +185,33 @@ export function summarizeHealth(input: HealthInputs): {
   };
 }
 
+const hm = (at: number): string => {
+  const d = new Date(at);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(
+    d.getMinutes(),
+  ).padStart(2, '0')}`;
+};
+
+const DAY_MS = 86_400_000;
+const STEP_MS = 5 * 60_000;
+
+/** The latest gap in the last day that cost chimes: one inside My day. */
+export function lastGapInMyDay(
+  now: number = Date.now(),
+): {from: number; to: number} | undefined {
+  const hours = getActiveHours();
+  return gapsBetween(now - DAY_MS, now)
+    .filter(g => {
+      for (let t = g.from; t <= g.to; t += STEP_MS) {
+        if (withinActiveHours(new Date(t), hours)) {
+          return true;
+        }
+      }
+      return false;
+    })
+    .pop();
+}
+
 // ── OS probes ────────────────────────────────────────────────────────
 
 function mapAlarmSetting(
@@ -196,6 +246,7 @@ export async function gatherHealthInputs(): Promise<HealthInputs> {
     alarmVolume,
     cuePlayerAvailable: hasDeviceModule(),
     confirmed: readConfirmations(),
+    lastGap: lastGapInMyDay(),
   };
 }
 

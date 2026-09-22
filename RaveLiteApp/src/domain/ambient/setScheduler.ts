@@ -63,6 +63,7 @@ import {
   subscribeActiveHours,
   withinActiveHours,
 } from './activeHours';
+import {gapsBetween, inGap, onGap, type Gap} from './heartbeat';
 import {
   cancelQueued,
   enqueue,
@@ -238,6 +239,13 @@ export function setsToday(now: number = Date.now()): SetsToday {
         : [],
     ),
   );
+  // Rounds due while the app was not running never sounded either.
+  const gaps = gapsBetween(midnight.getTime(), now);
+  for (const f of fires) {
+    if (!firedIds.has(f.id) && inGap(f.ts, gaps)) {
+      letGo.add(f.id);
+    }
+  }
   const released = amountsOf([
     ...before,
     ...fires.filter(f => letGo.has(f.id)),
@@ -366,6 +374,7 @@ export function startSetScheduler(): void {
   timer = setInterval(() => reconcileSetsNow(), SET_RECONCILE_MS);
   unsubs = [
     onPulseSuppressed(excuseSuppressedRound),
+    onGap(excuseRoundsInGap),
     subscribeProgram(relay),
     subscribePlan(relay),
     subscribeActiveHours(relay),
@@ -378,6 +387,37 @@ export function startSetScheduler(): void {
       }
     }),
   ];
+}
+
+/**
+ * A gap in the heartbeat: the rounds due inside it never sounded, and
+ * nothing was written for them, so excuse them from their day here. A
+ * round the journal knows about — fired, suppressed, answered — is left
+ * to what the journal says.
+ */
+export function excuseRoundsInGap(gap: Gap): void {
+  for (const day of new Set([localDayKey(gap.from), localDayKey(gap.to)])) {
+    const noon = new Date(`${day}T12:00:00`).getTime();
+    const known = new Set(
+      entriesForDay(new Date(noon)).flatMap(e =>
+        'pulseId' in e && e.pulseId ? [e.pulseId] : [],
+      ),
+    );
+    const unheard = setsToday(noon).fires.filter(
+      f => !known.has(f.id) && inGap(f.ts, [gap]),
+    );
+    if (unheard.length > 0) {
+      excuseSets(
+        day,
+        unheard.flatMap(f =>
+          movesOf(f.prescription).map(m => ({
+            trackId: m.trackId,
+            amount: m.amount,
+          })),
+        ),
+      );
+    }
+  }
 }
 
 /** `sets:2026-09-21:round:3` → `2026-09-21`. */

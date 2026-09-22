@@ -32,11 +32,14 @@ export function syncAmbientService(now: Date = new Date()): void {
   const change = allowed
     ? startAmbientForegroundService()
     : stopAmbientForegroundService();
-  change.catch(err =>
+  change.catch(err => {
     // A failed start (e.g. notifications revoked) must not crash the app;
-    // chimes still work while RaveLite is in the foreground.
-    console.warn('[ambientLifecycle] service change failed', err),
-  );
+    // chimes still work while RaveLite is in the foreground. Forget what
+    // was asked, so the next minute's check tries again instead of
+    // believing the service is running.
+    running = null;
+    console.warn('[ambientLifecycle] service change failed', err);
+  });
 }
 
 function tick(): void {
