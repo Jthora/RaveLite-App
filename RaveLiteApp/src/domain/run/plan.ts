@@ -287,7 +287,7 @@ export function runDay({
           short: `goal ${formatDuration(goal3)}`,
           detail: `Goal ${formatDuration(goal3)}: ${formatPerMile(
             goal3 / 3,
-          )}, the first mile no faster. The 3.2-mile loop counts at the same pace.${steady}`,
+          )}, the first mile no faster. A loop a little over 3 miles counts at the same pace.${steady}`,
         };
       }
       if (deload) {

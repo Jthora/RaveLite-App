@@ -108,7 +108,7 @@ export const TRACKS: Track[] = [
       {exerciseId: 'fire.table-row', label: 'Table rows', graduateAt: 12},
       {
         exerciseId: 'fire.inverted-row',
-        label: 'Inverted rows (porch edge)',
+        label: 'Inverted rows (low bar)',
         graduateAt: 15,
         instead: {
           exerciseId: 'fire.feet-up-towel-row',
@@ -152,7 +152,7 @@ export const TRACKS: Track[] = [
       },
       {
         exerciseId: 'fire.porch-pullup',
-        label: 'Porch pull-ups',
+        label: 'Pull-ups',
         graduateAt: 10,
         instead: {
           exerciseId: 'fire.feet-up-towel-row',
@@ -291,7 +291,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: 'Sit-ups, with sets capped on purpose. Belly fat goes with food and movement.',
+    why: 'Sit-ups, with sets capped on purpose.',
     partners: [
       {exerciseId: 'air.standing-belly-release', seconds: 30},
       {exerciseId: 'air.physiological-sigh', seconds: 30},
@@ -340,7 +340,7 @@ export const TRACKS: Track[] = [
     baseSets: 3,
     maxSets: 6,
     enabledByDefault: true,
-    why: 'Forearm plank every day, building toward 3:45. A strong trunk also helps level a tilted pelvis.',
+    why: 'Forearm plank every day, building a longer hold. A strong trunk also helps level a tilted pelvis.',
     partners: [{exerciseId: 'heart.rave-vision', seconds: 30}],
   },
   {

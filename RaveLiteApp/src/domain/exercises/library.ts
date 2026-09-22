@@ -586,7 +586,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
   {
     id: 'earth.porch-dead-hang',
     element: 'earth',
-    name: 'Porch Dead Hang',
+    name: 'Dead Hang',
     purpose: 'Builds grip, keeps shoulders healthy and stretches the spine.',
     dose: '3 × 20–40 sec',
     cues: [
@@ -1348,7 +1348,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
   {
     id: 'fire.porch-pullup',
     element: 'fire',
-    name: 'Porch Pull-Ups',
+    name: 'Pull-Ups',
     purpose: 'Builds back and arm strength by pulling your body up.',
     dose: '4 × max clean reps (leave 1–2 in the tank)',
     cues: [

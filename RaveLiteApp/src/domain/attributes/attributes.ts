@@ -153,7 +153,7 @@ export const ATTRIBUTES: readonly Attribute[] = [
     modality: 'cardinal',
     sign: 'Capricorn',
     gist: 'Moving load.',
-    how: 'Push, pull and squat ladders; rows and porch pull-ups.',
+    how: 'Push, pull and squat ladders; rows and pull-ups.',
     events: ['pushups-2min', 'pullups', 'squats'],
   },
   {

@@ -105,7 +105,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
   },
   {
     id: 'builtin.pullups-amrap',
-    label: 'Porch pull-ups — max set',
+    label: 'Pull-ups — max set',
     category: 'reps',
     unit: 'reps',
     inputMode: 'integer',
@@ -263,7 +263,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
   },
   {
     id: 'builtin.deadhang',
-    label: 'Porch dead hang — max',
+    label: 'Dead hang — max',
     category: 'hold',
     unit: 'seconds',
     inputMode: 'mmss',
@@ -393,7 +393,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'fire',
-    notes: 'Time the whole ride, including any ride home with a loaded pack.',
+    notes: 'Time the whole ride.',
   },
   {
     id: 'builtin.ruck',
@@ -403,8 +403,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     inputMode: 'mmss',
     builtIn: true,
     element: 'earth',
-    notes:
-      'Note the load. MARSOC standard: 45 lb plus about 10, at 15 min a mile.',
+    notes: 'Note the load you carry.',
   },
   {
     id: 'builtin.walk-session',

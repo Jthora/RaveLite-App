@@ -57,7 +57,7 @@ export const MEASURES: Record<string, string> = {
   'builtin.side-plank':
     'Side plank on the weaker side, hips stacked and lifted.',
   'builtin.deadhang':
-    'Dead hang from the porch edge, shoulders active, until the grip goes.',
+    'Dead hang from your hang point, shoulders active, until the grip goes.',
   'builtin.wall-sit':
     'Back flat to the wall, thighs parallel to the floor, until the legs give.',
   'builtin.farmer-carry':
@@ -120,7 +120,7 @@ export const EVENT_WHAT: Record<string, string> = {
     'The share of the day sets you actually answered, across the week.',
   squats: 'One set of squats to failure, below parallel.',
   'wall-sit': 'A wall sit held to the second the legs give.',
-  'dead-hang': 'A dead hang from the porch edge until the grip goes.',
+  'dead-hang': 'A dead hang from your hang point until the grip goes.',
   'side-plank': 'A side plank on the weaker side, held for time.',
   balance: 'Single-leg balance with the eyes closed, on the weaker leg.',
   'deep-squat-hold': 'The bottom of a squat, held with the heels down.',
