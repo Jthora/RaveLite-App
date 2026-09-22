@@ -155,3 +155,38 @@ it('a Goals event opens what the test asks for', () => {
   expect(json).toContain('LOG IT WITH');
   act(() => tree!.unmount());
 });
+
+it('draws its dialogs in its own window, and Back closes the dialog first', () => {
+  // A Modal over this sheet lost Back on the phone once touched, and took
+  // the sheet's Back with it.
+  const onClose = jest.fn();
+  let tree: renderer.ReactTestRenderer | undefined;
+  act(() => {
+    tree = renderer.create(<DailySetsSheet visible onClose={onClose} />);
+  });
+  const press = (id: string) =>
+    act(() => {
+      tree!.root
+        .findAll(
+          node =>
+            node.props.testID === id &&
+            typeof node.props.onPress === 'function',
+        )[0]
+        .props.onPress();
+    });
+  const modals = () =>
+    tree!.root.findAllByType(Modal).filter(m => m.props.visible !== false);
+  const back = () => modals()[0].props.onRequestClose();
+  const saveShown = () =>
+    tree!.root.findAll(node => node.props.testID === 'height-save').length > 0;
+  press('goals-open');
+  press('height-open');
+  expect(saveShown()).toBe(true);
+  expect(modals()).toHaveLength(1);
+  act(() => back());
+  expect(saveShown()).toBe(false);
+  // Still on Goals, still open.
+  expect(tree!.root.findAllByType(Goals)).toHaveLength(1);
+  expect(onClose).not.toHaveBeenCalled();
+  act(() => tree!.unmount());
+});

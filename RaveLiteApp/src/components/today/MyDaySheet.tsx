@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Modal, StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../Tap';
@@ -20,15 +20,7 @@ interface Props {
 
 /** Edit My day: when it starts and ends, and which days it runs. */
 export function MyDaySheet({visible, value, onClose, onSave}: Props) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => {
-    if (visible) {
-      setDraft(value);
-    }
-  }, [visible, value]);
-
   const accent = ELEMENTS.heart.accent;
-  const valid = myDayProblem(draft) === null;
   return (
     <Modal
       visible={visible}
@@ -42,31 +34,58 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
             style={[styles.title, {color: accent}]}>
             My day
           </Text>
-          <Text style={styles.body}>
-            Chimes sound inside My day, rounds spread across it, and the screen
-            dims outside it. It can end after midnight.
-          </Text>
-          <MyDayFields value={draft} onChange={setDraft} />
-          <View style={styles.actions}>
-            <Tap
-              variant="ghost"
-              color={palette.textDim}
-              onPress={onClose}
-              style={styles.btn}>
-              <Text style={styles.btnText}>Cancel</Text>
-            </Tap>
-            <Tap
-              variant="solid"
-              color={accent}
-              disabled={!valid}
-              onPress={() => onSave(draft)}
-              style={styles.btn}>
-              <Text style={styles.btnSolidText}>Save</Text>
-            </Tap>
-          </View>
+          {visible ? (
+            <MyDayEditor value={value} onCancel={onClose} onSave={onSave} />
+          ) : null}
         </View>
       </View>
     </Modal>
+  );
+}
+
+/**
+ * The editor without a sheet around it, for a page inside another sheet
+ * (Settings): a sheet over a sheet loses Back on Android.
+ */
+export function MyDayEditor({
+  value,
+  onCancel,
+  onSave,
+}: {
+  value: ActiveHours;
+  onCancel: () => void;
+  onSave: (next: ActiveHours) => void;
+}) {
+  const [draft, setDraft] = useState(value);
+  const accent = ELEMENTS.heart.accent;
+  const valid = myDayProblem(draft) === null;
+  return (
+    <>
+      <Text style={styles.body}>
+        Chimes sound inside My day, rounds spread across it, and the screen dims
+        outside it. It can end after midnight.
+      </Text>
+      <MyDayFields value={draft} onChange={setDraft} />
+      <View style={styles.actions}>
+        <Tap
+          testID="myday-cancel"
+          variant="ghost"
+          color={palette.textDim}
+          onPress={onCancel}
+          style={styles.btn}>
+          <Text style={styles.btnText}>Cancel</Text>
+        </Tap>
+        <Tap
+          testID="myday-save"
+          variant="solid"
+          color={accent}
+          disabled={!valid}
+          onPress={() => onSave(draft)}
+          style={styles.btn}>
+          <Text style={styles.btnSolidText}>Save</Text>
+        </Tap>
+      </View>
+    </>
   );
 }
 

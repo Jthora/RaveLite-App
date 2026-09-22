@@ -14,6 +14,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {InfoCardView, useInfoStack} from '../../components/info/InfoSheet';
 import {Tap} from '../../components/Tap';
 import {UndoBar} from '../../components/UndoBar';
+import {useBackStack} from '../../components/BackStack';
+import {SheetLayerHost} from '../../components/SheetLayer';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
 import {CharacterSheet} from './CharacterSheet';
@@ -40,6 +42,8 @@ export function DailySetsSheet({visible, onClose}: Props) {
   const accent = ELEMENTS.heart.accent;
   const goals = showing === 'goals';
   const away = showing !== 'sets';
+  // Dialogs inside (a max test, a target, a height) take Back first.
+  const backStack = useBackStack();
 
   // Every opening starts on Daily Sets, with no card open.
   useEffect(() => {
@@ -59,77 +63,84 @@ export function DailySetsSheet({visible, onClose}: Props) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={back}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={() => backStack.back() || back()}>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-        {info.card ? (
-          <InfoCardView
-            card={info.card}
-            canGoBack={info.depth > 1}
-            onOpen={info.open}
-            onBack={info.back}
-            onClose={info.close}
-          />
-        ) : (
-          <>
-            <View style={styles.header}>
-              <Text
-                accessibilityRole="header"
-                style={[styles.title, {color: accent}]}>
-                {TITLES[showing]}
-              </Text>
-              <View style={styles.actions}>
-                {away ? (
-                  <Tap
-                    testID="sets-back"
-                    variant="plain"
-                    onPress={() => setShowing('sets')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Back to Daily Sets"
-                    style={styles.close}>
-                    <Text style={[styles.closeText, {color: accent}]}>
-                      Daily Sets
-                    </Text>
-                  </Tap>
-                ) : (
-                  <Tap
-                    testID="goals-open"
-                    variant="plain"
-                    onPress={() => setShowing('goals')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Goals: push-ups today, the fitness tests and a goal for each element"
-                    style={styles.close}>
-                    <Text style={[styles.closeText, {color: accent}]}>
-                      Goals
-                    </Text>
-                  </Tap>
-                )}
-                <Tap
-                  variant="plain"
-                  onPress={onClose}
-                  accessibilityRole="button"
-                  style={styles.close}>
-                  <Text style={styles.closeText}>Close</Text>
-                </Tap>
-              </View>
-            </View>
-            {goals ? (
-              <Goals onInfo={info.open} />
-            ) : showing === 'attributes' ? (
-              <Guard name="Character sheet">
-                <CharacterSheet onInfo={info.open} />
-              </Guard>
+        <backStack.Provider>
+          <SheetLayerHost>
+            {info.card ? (
+              <InfoCardView
+                card={info.card}
+                canGoBack={info.depth > 1}
+                onOpen={info.open}
+                onBack={info.back}
+                onClose={info.close}
+              />
             ) : (
-              <ScrollView
-                contentContainerStyle={styles.content}
-                showsVerticalScrollIndicator={false}>
-                <DailySetsSection
-                  onOpenAttributes={() => setShowing('attributes')}
-                  onInfo={info.open}
-                />
-              </ScrollView>
+              <>
+                <View style={styles.header}>
+                  <Text
+                    accessibilityRole="header"
+                    style={[styles.title, {color: accent}]}>
+                    {TITLES[showing]}
+                  </Text>
+                  <View style={styles.actions}>
+                    {away ? (
+                      <Tap
+                        testID="sets-back"
+                        variant="plain"
+                        onPress={() => setShowing('sets')}
+                        accessibilityRole="button"
+                        accessibilityLabel="Back to Daily Sets"
+                        style={styles.close}>
+                        <Text style={[styles.closeText, {color: accent}]}>
+                          Daily Sets
+                        </Text>
+                      </Tap>
+                    ) : (
+                      <Tap
+                        testID="goals-open"
+                        variant="plain"
+                        onPress={() => setShowing('goals')}
+                        accessibilityRole="button"
+                        accessibilityLabel="Goals: push-ups today, the fitness tests and a goal for each element"
+                        style={styles.close}>
+                        <Text style={[styles.closeText, {color: accent}]}>
+                          Goals
+                        </Text>
+                      </Tap>
+                    )}
+                    <Tap
+                      variant="plain"
+                      onPress={onClose}
+                      accessibilityRole="button"
+                      style={styles.close}>
+                      <Text style={styles.closeText}>Close</Text>
+                    </Tap>
+                  </View>
+                </View>
+                {goals ? (
+                  <Goals onInfo={info.open} />
+                ) : showing === 'attributes' ? (
+                  <Guard name="Character sheet">
+                    <CharacterSheet onInfo={info.open} />
+                  </Guard>
+                ) : (
+                  <ScrollView
+                    contentContainerStyle={styles.content}
+                    showsVerticalScrollIndicator={false}>
+                    <DailySetsSection
+                      onOpenAttributes={() => setShowing('attributes')}
+                      onInfo={info.open}
+                    />
+                  </ScrollView>
+                )}
+              </>
             )}
-          </>
-        )}
+          </SheetLayerHost>
+        </backStack.Provider>
         <UndoBar />
       </SafeAreaView>
     </Modal>

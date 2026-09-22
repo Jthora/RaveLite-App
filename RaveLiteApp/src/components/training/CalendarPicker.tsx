@@ -3,12 +3,13 @@
  *
  * Used by TrainingLogSheet for dates older than the quick chips. Caller
  * passes the currently selected epoch and an `onPick` callback; the
- * picker renders a Modal with month-paging arrows, year jump, and a
+ * picker renders a dialog with month-paging arrows, year jump, and a
  * 7×6 grid. Selecting a day fires `onPick` with the start-of-day epoch
  * for that local date.
  */
 import React, {useState} from 'react';
-import {Modal, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {SheetLayer} from '../SheetLayer';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {ELEMENTS} from '../../theme/elements';
 import {useElementAccent} from '../../theme/elementContext';
@@ -71,101 +72,101 @@ export const CalendarPicker = React.memo(function CalendarPicker({
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}>
-      <Pressable style={styles.scrim} onPress={onClose}>
-        <Pressable style={styles.card} onPress={() => {}}>
-          <View style={styles.header}>
-            <Pressable
-              onPress={() => step(-12)}
-              style={styles.navBtn}
-              hitSlop={12}>
-              <Text style={styles.navText}>‹‹</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => step(-1)}
-              style={styles.navBtn}
-              hitSlop={12}>
-              <Text style={styles.navText}>‹</Text>
-            </Pressable>
-            <Text style={styles.monthLabel}>{monthLabel}</Text>
-            <Pressable
-              onPress={() => step(1)}
-              style={styles.navBtn}
-              hitSlop={12}>
-              <Text style={styles.navText}>›</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => step(12)}
-              style={styles.navBtn}
-              hitSlop={12}>
-              <Text style={styles.navText}>››</Text>
-            </Pressable>
-          </View>
+    // In a sheet that hosts dialogs (the Train log) it is drawn in that
+    // sheet's window; elsewhere, a Modal as before.
+    visible ? (
+      <SheetLayer onClose={onClose}>
+        <Pressable style={styles.scrim} onPress={onClose}>
+          <Pressable style={styles.card} onPress={() => {}}>
+            <View style={styles.header}>
+              <Pressable
+                onPress={() => step(-12)}
+                style={styles.navBtn}
+                hitSlop={12}>
+                <Text style={styles.navText}>‹‹</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => step(-1)}
+                style={styles.navBtn}
+                hitSlop={12}>
+                <Text style={styles.navText}>‹</Text>
+              </Pressable>
+              <Text style={styles.monthLabel}>{monthLabel}</Text>
+              <Pressable
+                onPress={() => step(1)}
+                style={styles.navBtn}
+                hitSlop={12}>
+                <Text style={styles.navText}>›</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => step(12)}
+                style={styles.navBtn}
+                hitSlop={12}>
+                <Text style={styles.navText}>››</Text>
+              </Pressable>
+            </View>
 
-          <View style={styles.weekRow}>
-            {WEEKDAYS.map((w, i) => (
-              <Text key={i} style={styles.weekLabel}>
-                {w}
-              </Text>
-            ))}
-          </View>
+            <View style={styles.weekRow}>
+              {WEEKDAYS.map((w, i) => (
+                <Text key={i} style={styles.weekLabel}>
+                  {w}
+                </Text>
+              ))}
+            </View>
 
-          <View style={styles.grid}>
-            {days.map((d, i) => {
-              const inMonth = d.getMonth() === month;
-              const dayEpoch = startOfDay(d.getTime());
-              const isSel = dayEpoch === selectedDay;
-              const isToday = dayEpoch === today;
-              const isFuture = dayEpoch > today;
-              return (
-                <Pressable
-                  key={i}
-                  disabled={isFuture}
-                  onPress={() => {
-                    onPick(dayEpoch);
-                    onClose();
-                  }}
-                  style={[
-                    styles.cell,
-                    isSel && styles.cellSel,
-                    isSel && {backgroundColor: accent},
-                    isToday && !isSel && styles.cellToday,
-                    isToday && !isSel && {borderColor: accent},
-                  ]}>
-                  <Text
+            <View style={styles.grid}>
+              {days.map((d, i) => {
+                const inMonth = d.getMonth() === month;
+                const dayEpoch = startOfDay(d.getTime());
+                const isSel = dayEpoch === selectedDay;
+                const isToday = dayEpoch === today;
+                const isFuture = dayEpoch > today;
+                return (
+                  <Pressable
+                    key={i}
+                    disabled={isFuture}
+                    onPress={() => {
+                      onPick(dayEpoch);
+                      onClose();
+                    }}
                     style={[
-                      styles.cellText,
-                      !inMonth && styles.cellTextOut,
-                      isFuture && styles.cellTextDisabled,
-                      isSel && styles.cellTextSel,
+                      styles.cell,
+                      isSel && styles.cellSel,
+                      isSel && {backgroundColor: accent},
+                      isToday && !isSel && styles.cellToday,
+                      isToday && !isSel && {borderColor: accent},
                     ]}>
-                    {d.getDate()}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+                    <Text
+                      style={[
+                        styles.cellText,
+                        !inMonth && styles.cellTextOut,
+                        isFuture && styles.cellTextDisabled,
+                        isSel && styles.cellTextSel,
+                      ]}>
+                      {d.getDate()}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <View style={styles.footer}>
-            <Pressable
-              onPress={() => {
-                onPick(today);
-                onClose();
-              }}
-              style={styles.footerBtn}>
-              <Text style={styles.footerBtnText}>Today</Text>
-            </Pressable>
-            <Pressable onPress={onClose} style={styles.footerBtn}>
-              <Text style={styles.footerBtnText}>Cancel</Text>
-            </Pressable>
-          </View>
+            <View style={styles.footer}>
+              <Pressable
+                onPress={() => {
+                  onPick(today);
+                  onClose();
+                }}
+                style={styles.footerBtn}>
+                <Text style={styles.footerBtnText}>Today</Text>
+              </Pressable>
+              <Pressable onPress={onClose} style={styles.footerBtn}>
+                <Text style={styles.footerBtnText}>Cancel</Text>
+              </Pressable>
+            </View>
+          </Pressable>
         </Pressable>
-      </Pressable>
-    </Modal>
+      </SheetLayer>
+    ) : null
   );
 });
 

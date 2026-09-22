@@ -16,8 +16,9 @@
  * sets could reach 200 a day keeping up every week (`program/ramp.ts`).
  */
 import React, {useEffect, useMemo, useState} from 'react';
-import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 
+import {SheetLayer} from '../../components/SheetLayer';
 import {Tap} from '../../components/Tap';
 import type {InfoRef} from '../../domain/info/info';
 import {NumberPad} from '../../components/training/NumberPad';
@@ -686,7 +687,7 @@ function TargetEditor({
         event.top[sex],
       )}`;
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+    <SheetLayer onClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.editor, {borderColor: accent}]}>
           <Text
@@ -749,7 +750,7 @@ function TargetEditor({
           </View>
         </View>
       </View>
-    </Modal>
+    </SheetLayer>
   );
 }
 
@@ -782,7 +783,7 @@ function HeightEditor({
   // 36 in / 91 cm — below that it is a typo, not a person.
   const valid = heightToInches(value, units) >= 36;
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+    <SheetLayer onClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.editor, {borderColor: accent}]}>
           <Text
@@ -824,7 +825,7 @@ function HeightEditor({
           </View>
         </View>
       </View>
-    </Modal>
+    </SheetLayer>
   );
 }
 

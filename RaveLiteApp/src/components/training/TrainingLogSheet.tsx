@@ -52,6 +52,8 @@ import type {ElementId} from '../../theme/elements';
 import {gradeForRun, formatPace} from '../../domain/training/grading';
 import {NumberPad} from './NumberPad';
 import {CalendarPicker} from './CalendarPicker';
+import {useBackStack} from '../BackStack';
+import {SheetLayer, SheetLayerHost, useInSheet} from '../SheetLayer';
 import {METERS_PER_MILE, MS_PER_DAY} from '../../lib/constants';
 import {showsGrades} from '../../domain/profile/repository';
 import {TEST_ONLY_KINDS} from '../../domain/training/builtinMetrics';
@@ -78,6 +80,8 @@ export function TrainingLogSheet({
   defaultKindId,
 }: Props) {
   const {width, height} = useWindowDimensions();
+  const inSheet = useInSheet();
+  const backStack = useBackStack();
   const accent = useElementAccent();
   // Use 2-column layout whenever width > height (phone landscape too).
   const isLandscape = width > height;
@@ -274,294 +278,321 @@ export function TrainingLogSheet({
     [runDistance, valueSec],
   );
 
+  // Back: a dialog inside first (Manage, a new exercise, the calendar),
+  // then an open info card, then the sheet.
+  const back = () =>
+    backStack.back() ||
+    (info.card ? (info.depth > 1 ? info.back() : info.close()) : onClose());
+
+  const body = (
+    <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <backStack.Provider>
+        <SheetLayerHost>
+          {info.card ? (
+            <InfoCardView
+              card={info.card}
+              canGoBack={info.depth > 1}
+              onOpen={info.open}
+              onBack={info.back}
+              onClose={info.close}
+            />
+          ) : (
+            <>
+              {/* Compact header with inline save/cancel */}
+              <View style={styles.header}>
+                <Text accessibilityRole="header" style={styles.title}>
+                  {editing ? 'Edit Entry' : 'New Training Log'}
+                </Text>
+                {isLandscape && livePace ? (
+                  <View style={styles.headerGrade}>
+                    {liveGrade ? (
+                      <Text style={[styles.headerGradeText, {color: accent}]}>
+                        {liveGrade.grade}
+                      </Text>
+                    ) : null}
+                    <Text style={styles.headerPaceText}>{livePace}</Text>
+                  </View>
+                ) : null}
+                <View style={styles.headerActions}>
+                  {editing ? (
+                    <Pressable
+                      onPress={handleDelete}
+                      style={[styles.btn, styles.btnDanger]}>
+                      <Text style={[styles.btnText, {color: palette.danger}]}>
+                        Delete
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  <Pressable
+                    onPress={onClose}
+                    style={[styles.btn, styles.btnGhost]}>
+                    <Text style={styles.btnText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleSave}
+                    disabled={!canSave}
+                    style={[
+                      styles.btn,
+                      styles.btnPrimary,
+                      {backgroundColor: accent},
+                      !canSave && styles.btnDisabled,
+                    ]}>
+                    <Text style={[styles.btnText, styles.btnTextPrimary]}>
+                      {editing ? 'Save' : 'Log Entry'}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Body: two-column in landscape, stacked otherwise */}
+              <View
+                style={
+                  isLandscape ? styles.bodyLandscape : styles.bodyPortrait
+                }>
+                {/* Left column: exercise picker */}
+                <View
+                  style={[
+                    isLandscape ? styles.leftCol : styles.leftColPortrait,
+                    isCompactLand && styles.leftColCompact,
+                  ]}>
+                  <View style={styles.colHeader}>
+                    <Text
+                      accessibilityRole="header"
+                      style={styles.sectionTitle}>
+                      Exercises
+                    </Text>
+                    {/* What's being logged, even when the list is scrolled away from it. */}
+                    {selectedKind ? (
+                      <Pressable
+                        testID="log-selected-kind"
+                        onPress={() =>
+                          info.open({kind: 'metric', id: selectedKind.id})
+                        }
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${selectedKind.label}. What is this?`}>
+                        <Text
+                          style={[styles.selectedKind, {color: accent}]}
+                          numberOfLines={1}>
+                          {selectedKind.label} ⓘ
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                    {/* Opened for one test (from Goals, inside Daily Sets),
+                      Manage would be a fourth sheet deep. It lives on
+                      + Log instead. */}
+                    {defaultKindId ? null : (
+                      <Pressable
+                        testID="log-manage"
+                        onPress={() => setShowManage(true)}
+                        hitSlop={8}>
+                        <Text style={[styles.sectionAction, {color: accent}]}>
+                          Manage
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+                  <ScrollView
+                    style={styles.exerciseScroll}
+                    showsVerticalScrollIndicator={false}>
+                    <FlatMetricList
+                      metrics={metrics}
+                      selectedId={selectedKindId}
+                      onSelect={setSelectedKindId}
+                      accent={accent}
+                    />
+                  </ScrollView>
+                </View>
+
+                {/* Right column: value column + (when + notes) column */}
+                <RightCol
+                  isLandscape={isLandscape}
+                  isCompactLand={isCompactLand}>
+                  {(() => {
+                    const whenSection = (
+                      <View style={styles.section}>
+                        <Text
+                          accessibilityRole="header"
+                          style={styles.sectionTitle}>
+                          When
+                        </Text>
+                        <View style={styles.dateRow}>
+                          {[0, 1, 2, 3].map(i => {
+                            const day = startOfDay(Date.now()) - i * MS_PER_DAY;
+                            const isSel = startOfDay(atEpoch) === day;
+                            return (
+                              <Pressable
+                                key={i}
+                                onPress={() => setAtEpoch(day)}
+                                style={[
+                                  styles.chip,
+                                  isSel && styles.chipSel,
+                                  isSel && {
+                                    backgroundColor: accent,
+                                    borderColor: accent,
+                                  },
+                                ]}>
+                                <Text
+                                  style={[
+                                    styles.chipText,
+                                    isSel && styles.chipTextSel,
+                                  ]}>
+                                  {dayLabel(day, i)}
+                                </Text>
+                              </Pressable>
+                            );
+                          })}
+                          <Pressable
+                            testID="log-pick-date"
+                            onPress={() => setShowCalendar(true)}
+                            style={[
+                              styles.chip,
+                              !isWithinQuickRange(atEpoch) && styles.chipSel,
+                              !isWithinQuickRange(atEpoch) && {
+                                backgroundColor: accent,
+                                borderColor: accent,
+                              },
+                            ]}>
+                            <Text
+                              style={[
+                                styles.chipText,
+                                !isWithinQuickRange(atEpoch) &&
+                                  styles.chipTextSel,
+                              ]}>
+                              {isWithinQuickRange(atEpoch)
+                                ? '📅 Pick…'
+                                : `📅 ${formatPickedDate(atEpoch)}`}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      </View>
+                    );
+
+                    return (
+                      <>
+                        {/* Portrait: When sits above Value + Notes column. */}
+                        {!isLandscape && whenSection}
+
+                        {/* Value + (When+Notes) side-by-side in landscape */}
+                        <View
+                          style={
+                            isLandscape
+                              ? styles.valueNotesRowLand
+                              : styles.valueNotesColPort
+                          }>
+                          {selectedKind ? (
+                            <View
+                              style={[
+                                isLandscape
+                                  ? styles.valueColLand
+                                  : styles.valueColPort,
+                                isCompactLand && styles.valueColCompact,
+                              ]}>
+                              <Text
+                                accessibilityRole="header"
+                                style={styles.sectionTitle}>
+                                {inputLabel(selectedKind)}
+                              </Text>
+                              <ValueInput
+                                kind={selectedKind}
+                                valueSec={valueSec}
+                                valueReps={valueReps}
+                                distanceCenti={distanceCenti}
+                                onSec={setValueSec}
+                                onReps={setValueReps}
+                                onDistance={setDistanceCenti}
+                                accent={accent}
+                              />
+                            </View>
+                          ) : null}
+
+                          <View
+                            style={
+                              isLandscape
+                                ? styles.notesColLand
+                                : styles.notesColPort
+                            }>
+                            {/* Landscape: When sits above Notes in this column. */}
+                            {isLandscape && whenSection}
+                            <Text
+                              accessibilityRole="header"
+                              style={styles.sectionTitle}>
+                              Notes
+                            </Text>
+                            <TextInput
+                              value={notes}
+                              onChangeText={setNotes}
+                              placeholder="How it felt, route, weather…"
+                              placeholderTextColor={palette.textFaint}
+                              style={[
+                                styles.notesInput,
+                                isLandscape && styles.notesInputLand,
+                              ]}
+                              multiline
+                            />
+                            {!isLandscape && livePace ? (
+                              <View style={styles.portraitGradeRow}>
+                                <View style={styles.headerGrade}>
+                                  {liveGrade ? (
+                                    <Text
+                                      style={[
+                                        styles.headerGradeText,
+                                        {color: accent},
+                                      ]}>
+                                      {liveGrade.grade}
+                                    </Text>
+                                  ) : null}
+                                  <Text style={styles.headerPaceText}>
+                                    {livePace}
+                                  </Text>
+                                </View>
+                              </View>
+                            ) : null}
+                          </View>
+                        </View>
+                      </>
+                    );
+                  })()}
+                </RightCol>
+              </View>
+
+              <ManageMetricsSheet
+                visible={showManage}
+                metrics={metrics}
+                onClose={closeManage}
+                onChange={refresh}
+                accent={accent}
+                defaultElement={defaultElement}
+              />
+
+              <CalendarPicker
+                visible={showCalendar}
+                selected={atEpoch}
+                onPick={setAtEpoch}
+                onClose={closeCalendar}
+                accent={accent}
+              />
+            </>
+          )}
+        </SheetLayerHost>
+      </backStack.Provider>
+    </SafeAreaView>
+  );
+
+  // Opened from inside another sheet (Goals, in Daily Sets), it is drawn
+  // in that sheet's window: a Modal over a Modal loses Back on the phone.
+  if (inSheet) {
+    return visible ? <SheetLayer onClose={back}>{body}</SheetLayer> : null;
+  }
   return (
     <Modal
       visible={visible}
       animationType="slide"
-      onRequestClose={() =>
-        info.card ? (info.depth > 1 ? info.back() : info.close()) : onClose()
-      }
+      onRequestClose={back}
       transparent={false}
       statusBarTranslucent>
       {/* The window runs under the status bar: keep the header below it. */}
-      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-        {info.card ? (
-          <InfoCardView
-            card={info.card}
-            canGoBack={info.depth > 1}
-            onOpen={info.open}
-            onBack={info.back}
-            onClose={info.close}
-          />
-        ) : (
-          <>
-            {/* Compact header with inline save/cancel */}
-            <View style={styles.header}>
-              <Text accessibilityRole="header" style={styles.title}>
-                {editing ? 'Edit Entry' : 'New Training Log'}
-              </Text>
-              {isLandscape && livePace ? (
-                <View style={styles.headerGrade}>
-                  {liveGrade ? (
-                    <Text style={[styles.headerGradeText, {color: accent}]}>
-                      {liveGrade.grade}
-                    </Text>
-                  ) : null}
-                  <Text style={styles.headerPaceText}>{livePace}</Text>
-                </View>
-              ) : null}
-              <View style={styles.headerActions}>
-                {editing ? (
-                  <Pressable
-                    onPress={handleDelete}
-                    style={[styles.btn, styles.btnDanger]}>
-                    <Text style={[styles.btnText, {color: palette.danger}]}>
-                      Delete
-                    </Text>
-                  </Pressable>
-                ) : null}
-                <Pressable
-                  onPress={onClose}
-                  style={[styles.btn, styles.btnGhost]}>
-                  <Text style={styles.btnText}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  onPress={handleSave}
-                  disabled={!canSave}
-                  style={[
-                    styles.btn,
-                    styles.btnPrimary,
-                    {backgroundColor: accent},
-                    !canSave && styles.btnDisabled,
-                  ]}>
-                  <Text style={[styles.btnText, styles.btnTextPrimary]}>
-                    {editing ? 'Save' : 'Log Entry'}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-
-            {/* Body: two-column in landscape, stacked otherwise */}
-            <View
-              style={isLandscape ? styles.bodyLandscape : styles.bodyPortrait}>
-              {/* Left column: exercise picker */}
-              <View
-                style={[
-                  isLandscape ? styles.leftCol : styles.leftColPortrait,
-                  isCompactLand && styles.leftColCompact,
-                ]}>
-                <View style={styles.colHeader}>
-                  <Text accessibilityRole="header" style={styles.sectionTitle}>
-                    Exercises
-                  </Text>
-                  {/* What's being logged, even when the list is scrolled away from it. */}
-                  {selectedKind ? (
-                    <Pressable
-                      testID="log-selected-kind"
-                      onPress={() =>
-                        info.open({kind: 'metric', id: selectedKind.id})
-                      }
-                      hitSlop={8}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${selectedKind.label}. What is this?`}>
-                      <Text
-                        style={[styles.selectedKind, {color: accent}]}
-                        numberOfLines={1}>
-                        {selectedKind.label} ⓘ
-                      </Text>
-                    </Pressable>
-                  ) : null}
-                  {/* Opened for one test (from Goals, inside Daily Sets),
-                      Manage would be a fourth sheet deep. It lives on
-                      + Log instead. */}
-                  {defaultKindId ? null : (
-                    <Pressable onPress={() => setShowManage(true)} hitSlop={8}>
-                      <Text style={[styles.sectionAction, {color: accent}]}>
-                        Manage
-                      </Text>
-                    </Pressable>
-                  )}
-                </View>
-                <ScrollView
-                  style={styles.exerciseScroll}
-                  showsVerticalScrollIndicator={false}>
-                  <FlatMetricList
-                    metrics={metrics}
-                    selectedId={selectedKindId}
-                    onSelect={setSelectedKindId}
-                    accent={accent}
-                  />
-                </ScrollView>
-              </View>
-
-              {/* Right column: value column + (when + notes) column */}
-              <RightCol isLandscape={isLandscape} isCompactLand={isCompactLand}>
-                {(() => {
-                  const whenSection = (
-                    <View style={styles.section}>
-                      <Text
-                        accessibilityRole="header"
-                        style={styles.sectionTitle}>
-                        When
-                      </Text>
-                      <View style={styles.dateRow}>
-                        {[0, 1, 2, 3].map(i => {
-                          const day = startOfDay(Date.now()) - i * MS_PER_DAY;
-                          const isSel = startOfDay(atEpoch) === day;
-                          return (
-                            <Pressable
-                              key={i}
-                              onPress={() => setAtEpoch(day)}
-                              style={[
-                                styles.chip,
-                                isSel && styles.chipSel,
-                                isSel && {
-                                  backgroundColor: accent,
-                                  borderColor: accent,
-                                },
-                              ]}>
-                              <Text
-                                style={[
-                                  styles.chipText,
-                                  isSel && styles.chipTextSel,
-                                ]}>
-                                {dayLabel(day, i)}
-                              </Text>
-                            </Pressable>
-                          );
-                        })}
-                        <Pressable
-                          onPress={() => setShowCalendar(true)}
-                          style={[
-                            styles.chip,
-                            !isWithinQuickRange(atEpoch) && styles.chipSel,
-                            !isWithinQuickRange(atEpoch) && {
-                              backgroundColor: accent,
-                              borderColor: accent,
-                            },
-                          ]}>
-                          <Text
-                            style={[
-                              styles.chipText,
-                              !isWithinQuickRange(atEpoch) &&
-                                styles.chipTextSel,
-                            ]}>
-                            {isWithinQuickRange(atEpoch)
-                              ? '📅 Pick…'
-                              : `📅 ${formatPickedDate(atEpoch)}`}
-                          </Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  );
-
-                  return (
-                    <>
-                      {/* Portrait: When sits above Value + Notes column. */}
-                      {!isLandscape && whenSection}
-
-                      {/* Value + (When+Notes) side-by-side in landscape */}
-                      <View
-                        style={
-                          isLandscape
-                            ? styles.valueNotesRowLand
-                            : styles.valueNotesColPort
-                        }>
-                        {selectedKind ? (
-                          <View
-                            style={[
-                              isLandscape
-                                ? styles.valueColLand
-                                : styles.valueColPort,
-                              isCompactLand && styles.valueColCompact,
-                            ]}>
-                            <Text
-                              accessibilityRole="header"
-                              style={styles.sectionTitle}>
-                              {inputLabel(selectedKind)}
-                            </Text>
-                            <ValueInput
-                              kind={selectedKind}
-                              valueSec={valueSec}
-                              valueReps={valueReps}
-                              distanceCenti={distanceCenti}
-                              onSec={setValueSec}
-                              onReps={setValueReps}
-                              onDistance={setDistanceCenti}
-                              accent={accent}
-                            />
-                          </View>
-                        ) : null}
-
-                        <View
-                          style={
-                            isLandscape
-                              ? styles.notesColLand
-                              : styles.notesColPort
-                          }>
-                          {/* Landscape: When sits above Notes in this column. */}
-                          {isLandscape && whenSection}
-                          <Text
-                            accessibilityRole="header"
-                            style={styles.sectionTitle}>
-                            Notes
-                          </Text>
-                          <TextInput
-                            value={notes}
-                            onChangeText={setNotes}
-                            placeholder="How it felt, route, weather…"
-                            placeholderTextColor={palette.textFaint}
-                            style={[
-                              styles.notesInput,
-                              isLandscape && styles.notesInputLand,
-                            ]}
-                            multiline
-                          />
-                          {!isLandscape && livePace ? (
-                            <View style={styles.portraitGradeRow}>
-                              <View style={styles.headerGrade}>
-                                {liveGrade ? (
-                                  <Text
-                                    style={[
-                                      styles.headerGradeText,
-                                      {color: accent},
-                                    ]}>
-                                    {liveGrade.grade}
-                                  </Text>
-                                ) : null}
-                                <Text style={styles.headerPaceText}>
-                                  {livePace}
-                                </Text>
-                              </View>
-                            </View>
-                          ) : null}
-                        </View>
-                      </View>
-                    </>
-                  );
-                })()}
-              </RightCol>
-            </View>
-
-            <ManageMetricsSheet
-              visible={showManage}
-              metrics={metrics}
-              onClose={closeManage}
-              onChange={refresh}
-              accent={accent}
-              defaultElement={defaultElement}
-            />
-
-            <CalendarPicker
-              visible={showCalendar}
-              selected={atEpoch}
-              onPick={setAtEpoch}
-              onClose={closeCalendar}
-              accent={accent}
-            />
-          </>
-        )}
-      </SafeAreaView>
+      {body}
     </Modal>
   );
 }
@@ -757,12 +788,8 @@ function ManageMetricsSheet({
   defaultElement?: ElementId;
 }) {
   const [showAdd, setShowAdd] = useState(false);
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent={false}>
+  return visible ? (
+    <SheetLayer onClose={onClose}>
       <View style={styles.root}>
         <View style={styles.header}>
           <Text accessibilityRole="header" style={styles.title}>
@@ -780,6 +807,7 @@ function ManageMetricsSheet({
             paddingBottom: spacing.xxl,
           }}>
           <Pressable
+            testID="manage-add"
             onPress={() => setShowAdd(true)}
             style={[
               styles.btn,
@@ -828,8 +856,8 @@ function ManageMetricsSheet({
           }}
         />
       </View>
-    </Modal>
-  );
+    </SheetLayer>
+  ) : null;
 }
 
 function ArchivedList({onChange}: {onChange: () => void}) {
@@ -900,12 +928,8 @@ function AddCustomMetricSheet({
     onClose();
   }
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent={false}>
+  return visible ? (
+    <SheetLayer onClose={onClose}>
       <View style={styles.root}>
         <View style={styles.header}>
           <Text accessibilityRole="header" style={styles.title}>
@@ -997,8 +1021,8 @@ function AddCustomMetricSheet({
           </View>
         </ScrollView>
       </View>
-    </Modal>
-  );
+    </SheetLayer>
+  ) : null;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────

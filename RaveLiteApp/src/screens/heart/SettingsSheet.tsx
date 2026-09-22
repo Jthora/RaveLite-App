@@ -14,7 +14,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {formatHM} from '../../components/ambient/format';
 import {Tap} from '../../components/Tap';
-import {MyDaySheet} from '../../components/today/MyDaySheet';
+import {MyDayEditor} from '../../components/today/MyDaySheet';
 import {getActiveHours, readPauseUntil} from '../../domain/ambient/activeHours';
 import {setPause, type PauseDurationKey} from '../../domain/ambient/pause';
 import {
@@ -90,21 +90,27 @@ type Page =
   | 'program'
   | 'app'
   | 'weather'
-  | 'plan';
+  | 'plan'
+  | 'myday';
 
 /**
  * Pages that open from another page, and the page Back returns to.
- * Weather and the plan used to be sheets over this one — the pattern that
- * loses Back on the phone.
+ * Weather, the plan and My day used to be sheets over this one — the
+ * pattern that loses Back on the phone.
  */
-const PARENT: Partial<Record<Page, Page>> = {weather: 'day', plan: 'day'};
+const PARENT: Partial<Record<Page, Page>> = {
+  weather: 'day',
+  plan: 'day',
+  myday: 'day',
+};
 const SUB_TITLE: Partial<Record<Page, string>> = {
   weather: 'Weather',
   plan: 'Plan',
+  myday: 'My day',
 };
 
 const GROUPS: readonly {
-  id: Exclude<Page, 'index' | 'weather' | 'plan'>;
+  id: Exclude<Page, 'index' | 'weather' | 'plan' | 'myday'>;
   title: string;
   holds: string;
   symbol: SymbolName;
@@ -157,7 +163,6 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
   }, [visible]);
   const [plan, setPlan] = useState(loadPlan);
   const place = getPlace();
-  const [myDayOpen, setMyDayOpen] = useState(false);
   const [, setVersion] = useState(0);
   const myDay = getActiveHours();
   const pauseUntil = readPauseUntil();
@@ -458,6 +463,17 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
             </>
           ) : null}
 
+          {page === 'myday' ? (
+            <MyDayEditor
+              value={myDay}
+              onCancel={() => setPage('day')}
+              onSave={value => {
+                moveMyDay(value);
+                setPage('day');
+              }}
+            />
+          ) : null}
+
           {page === 'day' ? (
             <>
               <View style={styles.row}>
@@ -472,7 +488,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                   testID="myday-edit"
                   variant="ghost"
                   color={palette.textDim}
-                  onPress={() => setMyDayOpen(true)}
+                  onPress={() => setPage('myday')}
                   accessibilityRole="button"
                   accessibilityLabel="Edit My day"
                   style={styles.rowBtn}>
@@ -550,6 +566,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                   </Text>
                 </View>
                 <Tap
+                  testID="plan-open"
                   variant="ghost"
                   color={palette.textDim}
                   onPress={() => setPage('plan')}
@@ -612,16 +629,6 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
             </>
           ) : null}
         </ScrollView>
-
-        <MyDaySheet
-          visible={myDayOpen}
-          value={myDay}
-          onClose={() => setMyDayOpen(false)}
-          onSave={value => {
-            moveMyDay(value);
-            setMyDayOpen(false);
-          }}
-        />
       </SafeAreaView>
     </Modal>
   );

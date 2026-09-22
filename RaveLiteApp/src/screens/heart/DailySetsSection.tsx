@@ -16,11 +16,12 @@
  * the journal; the sets scheduler picks them up.
  */
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Modal, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 
 import {ElementGlyph} from '../../components/icons/ElementGlyph';
 
 import {MoveIcon} from '../../components/icons/MoveIcon';
+import {SheetLayer} from '../../components/SheetLayer';
 import {Tap} from '../../components/Tap';
 import {NumberPad} from '../../components/training/NumberPad';
 
@@ -505,7 +506,7 @@ function MaxTestSheet({
   }
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+    <SheetLayer onClose={onClose}>
       <View style={styles.scrim}>
         <View style={[styles.sheet, {borderColor: el.color}]}>
           <Text
@@ -546,7 +547,7 @@ function MaxTestSheet({
           </View>
         </View>
       </View>
-    </Modal>
+    </SheetLayer>
   );
 }
 
