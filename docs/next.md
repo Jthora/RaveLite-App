@@ -127,7 +127,7 @@ belongs in public copy. The answer turned out not to be a dial setting.
 PLURL is near the top of the README because it explains the app's values
 and needs no other knowledge to land. The Earth Intelligence Network
 appears once, in the author's own account of using the app — as the job
-he is doing while it chimes at him, not as a claim the app makes. That
+they are doing while it chimes at them, not as a claim the app makes. That
 is the right register for all of it: **provenance arrives through use,
 not through an org chart.**
 

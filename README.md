@@ -151,7 +151,7 @@ cues and the element language — not in the verbs.
 
 Working and in daily use by its author. Everything above is real. What it
 is **not**, yet: usable by someone without a mat, a yard and a porch edge
-to hang from — the program leans hard on the author's kit and his day.
+to hang from — the program leans hard on the author's kit and their day.
 Fixing that is the whole of [docs/public-beta.md](docs/public-beta.md),
 which is the plan this repo is currently following.
 
@@ -257,7 +257,7 @@ and forking it is always a fine answer.
 
 ## Where this comes from
 
-RaveLite was built by the author as his own Raver Super Hero training —
+RaveLite was built by the author as their own Raver Super Hero training —
 every drill fits a real mat, a real backyard, a real porch, and a body
 that had to be talked out of a chair. It is opened up because the thing
 that worked for one person may work for others, not because it was ever

@@ -414,7 +414,7 @@ in every element.
 | A flat-dweller gets a push-only program | the substitution ladders in §5 — the highest-value work in this plan |
 | The ramp stalls on short days | density scaling in §6 |
 | Strangers hurt themselves | conservative defaults, disclaimer, "stop if it hurts" in cues, no archetype that starts hard |
-| The author's app changes under him | the golden test in §11 |
+| The author's app changes under them | the golden test in §11 |
 | A signing-key change orphans an installed app | export/restore shipped before the first signed build; the restore is exact, not a merge |
 | Maintenance load on one person | CONTRIBUTING sets expectations; "beta, no support promised" |
 | Content quality drifts as packs arrive | the library guards stay: every drill needs purpose, cues, dose, venues, a pictogram and an attribute mapping |
