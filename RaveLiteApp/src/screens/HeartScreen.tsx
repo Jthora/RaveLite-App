@@ -1,18 +1,23 @@
 /**
  * Heart screen — home, one page: Today.
  *
- * It asks for notification permission on the first visit, so the prompt
- * arrives in context rather than at cold start, and owns the circuit
+ * It asks for notification permission once setup is done, so the prompt
+ * arrives in context rather than over setup, and owns the circuit
  * chamber, so a circuit started from Today's Practice sheet runs full
  * screen.
  */
 import React, {useCallback, useEffect, useState} from 'react';
+import {AppState} from 'react-native';
 
 import {CircuitChamber} from '../components/CircuitChamber';
 import {ScreenScaffold} from '../components/ScreenScaffold';
 import {Guard} from '../components/Guard';
 import type {CircuitLeg} from '../domain/circuit/circuit';
-import {requestNotificationPermission} from '../domain/reminders/notifeeScheduler';
+import {
+  notificationsAllowed,
+  requestNotificationPermission,
+} from '../domain/reminders/notifeeScheduler';
+import {needsSetup, subscribeProfile} from '../domain/profile/repository';
 import type {ElementScreenProps} from '../shell/ElementShell';
 import {ELEMENTS} from '../theme/elements';
 import {TodayPanel} from './heart/TodayPanel';
@@ -25,9 +30,34 @@ const HeartScreen: React.FC<ElementScreenProps> = ({onElementChange}) => {
   const [chamberLegs, setChamberLegs] = useState<CircuitLeg[] | undefined>();
 
   useEffect(() => {
-    requestNotificationPermission().then(ok =>
-      setPermission(ok ? 'granted' : 'denied'),
-    );
+    let asked = false;
+    const ask = () => {
+      // Not while setup is on screen: the prompt used to land on top of
+      // the disclaimer, and again when setup closed. Once, after it.
+      if (asked || needsSetup()) {
+        return;
+      }
+      asked = true;
+      requestNotificationPermission().then(ok =>
+        setPermission(ok ? 'granted' : 'denied'),
+      );
+    };
+    ask();
+    const offProfile = subscribeProfile(ask);
+    // Turned on in Android's settings and back again: pick it up.
+    const sub = AppState.addEventListener('change', next => {
+      if (next === 'active' && asked) {
+        notificationsAllowed().then(ok => {
+          if (ok !== null) {
+            setPermission(ok ? 'granted' : 'denied');
+          }
+        });
+      }
+    });
+    return () => {
+      offProfile();
+      sub?.remove();
+    };
   }, []);
 
   const engageLegs = useCallback((legs: CircuitLeg[]) => {

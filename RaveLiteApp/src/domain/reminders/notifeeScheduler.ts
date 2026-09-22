@@ -169,6 +169,16 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return settings.authorizationStatus > 0;
 }
 
+/** Whether notifications are allowed now, without asking. Null if unknown. */
+export async function notificationsAllowed(): Promise<boolean | null> {
+  try {
+    const settings = await notifee.getNotificationSettings();
+    return settings.authorizationStatus > 0;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Translate a raw notifee event into a `NotificationAction`, or
  * `undefined` if it isn't a pulse button press. Shared by the foreground

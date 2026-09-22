@@ -36,6 +36,7 @@ import {
 import {TutorialCoach} from '../../components/today/TutorialCoach';
 import {ModeChip} from '../../components/today/ModeChip';
 import {StorageWarning} from '../../components/today/StorageWarning';
+import {NotificationsOff} from '../../components/today/NotificationsOff';
 import {SessionBanner, SessionSheet} from '../../components/today/SessionSheet';
 import {SetsMeters} from '../../components/today/SetsMeters';
 import {WaterCounter} from '../../components/today/WaterCounter';
@@ -236,6 +237,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         />
         {/* These render nothing at all unless they are wanted. */}
         <StorageWarning />
+        <NotificationsOff permission={permission} />
         <TutorialCoach
           visible={teaching}
           onDone={() => {
