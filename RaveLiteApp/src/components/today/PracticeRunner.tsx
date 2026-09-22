@@ -18,6 +18,7 @@ import {
   type CountUnit,
 } from '../../domain/activity/practice';
 import type {Exercise} from '../../domain/exercises/types';
+import {CHART_BY_ID, type ChartId} from '../../domain/program/charts';
 import {moveForExercise} from '../../domain/exercises/moves';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
@@ -30,16 +31,26 @@ const clock = (seconds: number) =>
 
 export function PracticeRunner({
   exercise,
+  chart,
+  dose = exercise.dose,
   onDone,
   onCancel,
 }: {
   exercise: Exercise;
+  /** A curriculum move's chart, and the dose it asks for at it. */
+  chart?: ChartId;
+  dose?: string;
   /** Logged: the count and how long it took. */
   onDone: (summary: string) => void;
   onCancel: () => void;
 }) {
   const el = ELEMENTS[exercise.element];
-  const unit: CountUnit = useMemo(() => unitFor(exercise), [exercise]);
+  // Counted in whatever this chart's dose is counted in: Beginner's
+  // "1 min each side" is a clock even when Standard is reps.
+  const unit: CountUnit = useMemo(
+    () => unitFor({...exercise, dose}),
+    [exercise, dose],
+  );
   const step = unit === 'eights' ? 1 : unit === 'sec' ? 15 : 1;
   const [count, setCount] = useState(0);
   const [startedAt, setStartedAt] = useState<number | undefined>();
@@ -72,8 +83,10 @@ export function PracticeRunner({
       amount,
       unit,
       seconds: Math.max(elapsed, unit === 'sec' ? amount : 1),
+      chart,
     });
-    onDone(`${exercise.name} · ${formatCount(amount, unit)}`);
+    const at = chart ? ` · ${CHART_BY_ID.get(chart)?.name}` : '';
+    onDone(`${exercise.name}${at} · ${formatCount(amount, unit)}`);
   };
 
   return (
@@ -93,7 +106,16 @@ export function PracticeRunner({
             <Text style={[styles.title, {color: el.color}]} numberOfLines={2}>
               {exercise.name}
             </Text>
-            <Text style={styles.caption}>{exercise.dose}</Text>
+            {chart ? (
+              <Text
+                style={[
+                  styles.chart,
+                  {color: CHART_BY_ID.get(chart)?.color ?? el.color},
+                ]}>
+                {CHART_BY_ID.get(chart)?.name.toUpperCase()}
+              </Text>
+            ) : null}
+            <Text style={styles.caption}>{dose}</Text>
           </View>
         </View>
 
@@ -199,6 +221,11 @@ export function PracticeRunner({
 }
 
 const styles = StyleSheet.create({
+  chart: {
+    ...t.caption,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+  },
   root: {
     flex: 1,
   },

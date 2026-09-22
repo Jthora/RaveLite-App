@@ -22,7 +22,7 @@
  *   Hot (caution): stay out, easy pace, drink first.
  *   Cold: warm up inside first.
  */
-import {EXERCISE_LIBRARY} from '../exercises/library';
+import {EXERCISE_LIBRARY, isCurriculum} from '../exercises/library';
 import {moveForExercise, type MoveId} from '../exercises/moves';
 import {canDo} from '../profile/kit';
 import {loadFacts} from '../profile/repository';
@@ -135,6 +135,7 @@ export function indoorAlternative(
         !o.targets.includes('Hydration') &&
         !o.targets.includes('Fuel') &&
         !o.targets.includes('Test') &&
+        !isCurriculum(o) &&
         canGoInside(o) &&
         canDo(o, loadFacts()),
     );

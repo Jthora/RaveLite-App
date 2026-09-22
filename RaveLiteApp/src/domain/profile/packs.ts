@@ -23,11 +23,17 @@
  * not do.
  */
 import {EXERCISE_LIBRARY} from '../exercises/library';
+import {
+  DISCIPLINES,
+  disciplineById,
+  type DisciplineId,
+} from '../exercises/disciplines';
 import type {Exercise} from '../exercises/types';
 import type {TrackId} from '../program/types';
 
 export type PackId =
   | 'dance'
+  | 'dance-combat'
   | 'martial'
   | 'staff'
   | 'yoga-taichi'
@@ -39,6 +45,8 @@ export type PackId =
 export interface PackGroup {
   title: string;
   ids: readonly string[];
+  /** A whole discipline's path — Practice shows it as one card. */
+  discipline?: DisciplineId;
 }
 
 export interface Pack {
@@ -57,30 +65,32 @@ export interface Pack {
   extras?: readonly string[];
 }
 
+/** A discipline's path, in order. */
+const pathOf = (id: Parameters<typeof disciplineById>[0]): readonly string[] =>
+  disciplineById(id)?.ids ?? [];
+
 export const PACKS: readonly Pack[] = [
   {
     id: 'dance',
     name: 'Dance',
     detail: 'Steps, waves and grooves. The floor is the point.',
     groups: [
+      {title: 'Dance', ids: pathOf('dance'), discipline: 'dance'},
+      {title: 'On film', ids: ['heart.film-and-watch']},
+    ],
+  },
+  {
+    id: 'dance-combat',
+    name: 'Dance combat',
+    detail:
+      'Fighting as dance, to music: capoeira, combos on the beat, tricking, the staff.',
+    groups: [
       {
-        title: 'Dance',
-        ids: [
-          'water.body-isolations',
-          'water.body-wave',
-          'water.arm-wave',
-          'water.two-step',
-          'water.grapevine',
-          'water.toprock',
-          'water.house-jack',
-          'water.spin-spotting',
-          'water.freeze-hold',
-          'water.beat-step',
-          'water.groove-combo',
-          'water.mirror-groove-check',
-          'heart.film-and-watch',
-        ],
+        title: 'Dance combat',
+        ids: pathOf('danceCombat'),
+        discipline: 'danceCombat',
       },
+      {title: 'On film', ids: ['heart.film-and-watch']},
     ],
   },
   {
@@ -120,13 +130,6 @@ export const PACKS: readonly Pack[] = [
           'heart.film-and-watch',
         ],
       },
-      {
-        // Fighting with a staff lives here, not in Flow arts: a staff is a
-        // flow prop first, and somebody who spins one for the joy of it
-        // should never be handed strikes and blocks for having it.
-        title: 'With a staff',
-        ids: ['water.sword-form-slow', 'water.staff-combat-rounds'],
-      },
     ],
   },
   {
@@ -136,69 +139,14 @@ export const PACKS: readonly Pack[] = [
     name: 'Flow arts',
     detail:
       'Staff, poi, hoop and the rest: spins, weaves and flow. No fighting.',
+    // One group per prop, each the prop's whole path; Practice shows only
+    // the props you have.
     groups: [
-      {
-        title: 'Staff',
-        ids: ['water.figure-8', 'water.beat-locks', 'water.album-no-drop'],
-      },
-      {
-        title: 'Double staff',
-        ids: ['water.double-staff-windmill', 'water.double-staff-weave'],
-      },
-      {
-        title: 'Poi',
-        ids: ['water.poi-weave', 'water.poi-butterfly', 'water.poi-flowers'],
-      },
-      {
-        title: 'Hoop',
-        ids: [
-          'water.hoop-waist',
-          'water.hoop-isolation',
-          'water.hoop-flow-round',
-        ],
-      },
-      {title: 'Fans', ids: ['water.fan-reels', 'water.fan-isolations']},
-      {
-        title: 'Levitation wand',
-        ids: ['water.wand-float', 'water.wand-orbit'],
-      },
-      {
-        title: 'Rope dart',
-        ids: ['water.rope-dart-wheel', 'water.rope-dart-wraps'],
-      },
-      {
-        title: 'Contact ball',
-        ids: [
-          'water.contact-palm-spin',
-          'water.contact-isolation',
-          'water.contact-butterfly',
-        ],
-      },
-      {
-        title: 'Buugeng',
-        ids: ['water.buugeng-flips', 'water.buugeng-isolations'],
-      },
-      {
-        title: 'Dragon staff',
-        ids: ['water.dragon-staff-rolls', 'water.dragon-staff-pass'],
-      },
-      {title: 'Flags', ids: ['water.flag-spins', 'water.flag-weave']},
-      {
-        title: 'Light gloves',
-        ids: [
-          'water.gloving-finger-rolls',
-          'water.gloving-tracing',
-          'water.gloving-tutting',
-        ],
-      },
-      {
-        title: 'Juggling',
-        ids: ['water.juggling-cascade', 'water.juggling-two-in-one'],
-      },
-      {
-        title: 'Devil sticks',
-        ids: ['water.devil-stick-idle', 'water.devil-stick-flip'],
-      },
+      ...DISCIPLINES.filter(d => d.pack === 'staff').map(d => ({
+        title: d.name,
+        ids: d.ids,
+        discipline: d.id,
+      })),
       {
         title: 'Any prop',
         ids: [

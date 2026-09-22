@@ -1,5 +1,5 @@
 import {ELEMENTS, ElementId} from '../../theme/elements';
-import {EXERCISE_LIBRARY} from '../exercises/library';
+import {EXERCISE_LIBRARY, isCurriculum} from '../exercises/library';
 import {canDo} from '../profile/kit';
 import {loadFacts} from '../profile/repository';
 import {Exercise} from '../exercises/types';
@@ -78,8 +78,9 @@ function candidatesForSlot(slot: CadenceSlot): Exercise[] {
     if (!canDo(ex, facts)) {
       return false;
     }
-    // A test belongs to its Saturday, never a random pick.
-    if (ex.targets.includes('Test')) {
+    // A test belongs to its Saturday, never a random pick; a curriculum
+    // move belongs to Practice.
+    if (ex.targets.includes('Test') || isCurriculum(ex)) {
       return false;
     }
     if (slot.maxSeconds && ex.approxSeconds > slot.maxSeconds) {

@@ -7,6 +7,7 @@
  */
 import type {TrackId} from '../program/types';
 import type {MetricKind} from '../training/types';
+import {CURRICULUM_MOVES} from './curricula';
 
 export const MOVE_IDS = [
   'push',
@@ -411,7 +412,7 @@ const BY_TRACK: Readonly<Record<TrackId, MoveId>> = {
 };
 
 export function moveForExercise(id: string | undefined): MoveId | undefined {
-  return id ? BY_EXERCISE[id] : undefined;
+  return id ? BY_EXERCISE[id] ?? CURRICULUM_MOVES[id] : undefined;
 }
 
 export function moveForTrack(id: string | undefined): MoveId | undefined {

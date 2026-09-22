@@ -94,7 +94,7 @@ it('the author has everything, and everything is reachable', () => {
 it('the curriculum follows the packs you carry', () => {
   expect(groupsFor([]).length).toBe(0);
   const titles = groupsFor(['martial']).map(g => g.title);
-  expect(titles).toEqual(['Kicks', 'Strikes and blocks', 'With a staff']);
+  expect(titles).toEqual(['Kicks', 'Strikes and blocks']);
   expect(groupsFor(ALL_PACKS).length).toBeGreaterThan(titles.length);
 });
 
@@ -143,7 +143,8 @@ describe('through the profile', () => {
 
     setPacks(['dance']);
     const only = skillGroupsFor(loadFacts(), loadPacks());
-    expect(only.map(g => g.title)).toEqual(['Dance']);
+    // Filming a round is Dance's too — the camera as a mirror.
+    expect(only.map(g => g.title)).toEqual(['Dance', 'On film']);
 
     setPacks([]);
     expect(skillGroupsFor(loadFacts(), loadPacks())).toEqual([]);
@@ -152,13 +153,15 @@ describe('through the profile', () => {
 
 it('keeps fighting out of Flow arts', () => {
   // Plenty of people who spin a staff never want to fight with it. The
-  // staff's combat drills belong to Martial basics, so a raver carrying
-  // Flow arts and not Martial is never handed strikes and blocks.
+  // staff's combat drills belong to Dance combat, so a raver carrying
+  // Flow arts and not Dance combat is never handed strikes and blocks.
   const flow = PACKS.find(p => p.id === 'staff')!;
   const ids = flow.groups.flatMap(g => [...g.ids]);
   expect(ids).not.toContain('water.staff-combat-rounds');
   expect(ids).not.toContain('water.sword-form-slow');
   expect(inScope('water.staff-combat-rounds', ['staff', 'dance'])).toBe(false);
-  expect(inScope('water.staff-combat-rounds', ['martial'])).toBe(true);
+  // It is dance combat — fighting as dance — which is its own pack.
+  expect(inScope('water.staff-combat-rounds', ['martial'])).toBe(false);
+  expect(inScope('water.staff-combat-rounds', ['dance-combat'])).toBe(true);
   expect(inScope('water.poi-weave', ['staff'])).toBe(true);
 });

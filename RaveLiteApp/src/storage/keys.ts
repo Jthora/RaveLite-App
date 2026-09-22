@@ -64,6 +64,10 @@ export const KEYS = {
   profile: 'profile.state',
   /** 'metric' | 'imperial'; absent means never chosen. */
   units: 'settings.units',
+  /** `{drillId: ChartId[]}` — the charts each curriculum move was cleared at. */
+  practiceClears: 'practice.clears',
+  /** `{disciplineId: {tier, chart}}` — where each path was left open. */
+  practiceLevels: 'practice.levels',
   /** The last 50 things that went wrong (see `domain/diagnostics`). */
   errorLog: 'diagnostics.errors',
 

@@ -135,6 +135,8 @@ const SYMBOLS = {
   deskRebel: [Armchair, 'desk'],
   comeback: [Sprout, 'success'],
   flowArtist: [Sparkles, 'staff'],
+  superHero: [Zap, 'dance'],
+  danceCombat: [Swords, 'martial'],
   nightShift: [Moon, 'rest'],
   parent: [House, 'weekend'],
   festivalSix: [Tent, 'festival'],

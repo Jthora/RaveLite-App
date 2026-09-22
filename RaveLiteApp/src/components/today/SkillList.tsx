@@ -9,6 +9,8 @@ import {MoveIcon} from '../icons/MoveIcon';
 import {Tap} from '../Tap';
 import {activityInRange} from '../../domain/activity/activity';
 import {
+  allClears,
+  levelFor,
   formatCount,
   skillDrill,
   skillGroupsFor,
@@ -18,6 +20,15 @@ import {
 import {loadFacts} from '../../domain/profile/repository';
 import type {Exercise} from '../../domain/exercises/types';
 import {moveForExercise} from '../../domain/exercises/moves';
+import {
+  TIERS,
+  disciplineById,
+  type Discipline,
+  type DisciplineId,
+} from '../../domain/exercises/disciplines';
+import {CHART_BY_ID} from '../../domain/program/charts';
+import {Symbol, hueOf} from '../icons/Symbol';
+import {disciplineSymbol} from './DisciplineView';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -25,9 +36,12 @@ const WEEK_DAYS = 7;
 
 export function SkillList({
   onPick,
+  onOpenDiscipline,
   version = 0,
 }: {
   onPick: (exercise: Exercise) => void;
+  /** A flow prop, dance or dance combat: its whole path, on a page. */
+  onOpenDiscipline?: (id: DisciplineId) => void;
   /** Bumped after a practice is logged, to re-read the week. */
   version?: number;
 }) {
@@ -45,55 +59,115 @@ export function SkillList({
         Drill one and count it. The count is the record; the minutes are what
         the attributes hear about.
       </Text>
-      {skillGroupsFor(loadFacts()).map(group => (
-        <View key={group.title} style={styles.group}>
-          <Text style={styles.groupTitle}>{group.title.toUpperCase()}</Text>
-          {group.ids.map(id => {
-            const drill = skillDrill(id);
-            if (!drill) {
-              return null;
-            }
-            const el = ELEMENTS[drill.element];
-            const week = tally.get(id);
-            return (
-              <Tap
-                key={id}
-                testID={`skill-${id}`}
-                variant="plain"
-                onPress={() => onPick(drill)}
-                accessibilityRole="button"
-                accessibilityLabel={`Drill ${drill.name}`}
-                style={styles.row}>
-                <View style={styles.rowInner}>
-                  <View
-                    style={[styles.tile, {backgroundColor: `${el.color}29`}]}>
-                    <MoveIcon
-                      move={moveForExercise(id) ?? 'activity'}
-                      color={el.color}
-                      size={18}
-                    />
+      {skillGroupsFor(loadFacts()).map(group => {
+        const path = group.discipline
+          ? disciplineById(group.discipline)
+          : undefined;
+        if (path && onOpenDiscipline) {
+          return (
+            <DisciplineCard
+              key={group.title}
+              discipline={path}
+              version={version}
+              onOpen={() => onOpenDiscipline(path.id)}
+            />
+          );
+        }
+        return (
+          <View key={group.title} style={styles.group}>
+            <Text style={styles.groupTitle}>{group.title.toUpperCase()}</Text>
+            {group.ids.map(id => {
+              const drill = skillDrill(id);
+              if (!drill) {
+                return null;
+              }
+              const el = ELEMENTS[drill.element];
+              const week = tally.get(id);
+              return (
+                <Tap
+                  key={id}
+                  testID={`skill-${id}`}
+                  variant="plain"
+                  onPress={() => onPick(drill)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Drill ${drill.name}`}
+                  style={styles.row}>
+                  <View style={styles.rowInner}>
+                    <View
+                      style={[styles.tile, {backgroundColor: `${el.color}29`}]}>
+                      <MoveIcon
+                        move={moveForExercise(id) ?? 'activity'}
+                        color={el.color}
+                        size={18}
+                      />
+                    </View>
+                    <View style={styles.body}>
+                      <Text style={[styles.name, {color: el.color}]}>
+                        {drill.name}
+                      </Text>
+                      <Text style={styles.caption}>
+                        {week
+                          ? `${formatCount(
+                              week.amount,
+                              unitFor(drill),
+                            )} this week · ${week.times}×`
+                          : drill.dose}
+                      </Text>
+                    </View>
+                    <Text style={[styles.chevron, {color: el.color}]}>›</Text>
                   </View>
-                  <View style={styles.body}>
-                    <Text style={[styles.name, {color: el.color}]}>
-                      {drill.name}
-                    </Text>
-                    <Text style={styles.caption}>
-                      {week
-                        ? `${formatCount(
-                            week.amount,
-                            unitFor(drill),
-                          )} this week · ${week.times}×`
-                        : drill.dose}
-                    </Text>
-                  </View>
-                  <Text style={[styles.chevron, {color: el.color}]}>›</Text>
-                </View>
-              </Tap>
-            );
-          })}
-        </View>
-      ))}
+                </Tap>
+              );
+            })}
+          </View>
+        );
+      })}
     </View>
+  );
+}
+
+/** A path as one row: its name, how far it goes, how much is cleared. */
+function DisciplineCard({
+  discipline,
+  version,
+  onOpen,
+}: {
+  discipline: Discipline;
+  version: number;
+  onOpen: () => void;
+}) {
+  const cleared = useMemo(() => {
+    const clears = allClears();
+    return discipline.ids.filter(id => (clears[id] ?? []).length > 0).length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [discipline, version]);
+  const level = levelFor(discipline.id);
+  const chart = CHART_BY_ID.get(level.chart);
+  return (
+    <Tap
+      testID={`discipline-${discipline.id}`}
+      variant="plain"
+      onPress={onOpen}
+      accessibilityRole="button"
+      accessibilityLabel={`${discipline.name}: ${discipline.ids.length} moves`}
+      style={[styles.row, styles.card]}>
+      <View style={styles.rowInner}>
+        <Symbol name={disciplineSymbol(discipline)} size={22} />
+        <View style={styles.body}>
+          <Text
+            style={[styles.name, {color: hueOf(disciplineSymbol(discipline))}]}>
+            {discipline.name}
+          </Text>
+          <Text style={styles.caption}>
+            {discipline.ids.length} moves in three tiers · {cleared} cleared
+          </Text>
+          <Text style={[styles.caption, {color: chart?.color}]}>
+            {TIERS.find(tr => tr.id === level.tier)?.name} · {chart?.name}
+          </Text>
+        </View>
+        <Text style={styles.chevron}>›</Text>
+      </View>
+    </Tap>
   );
 }
 
@@ -151,5 +225,10 @@ const styles = StyleSheet.create({
   },
   chevron: {
     ...t.subtitle,
+    color: palette.textDim,
+  },
+  card: {
+    marginTop: spacing.sm,
+    minHeight: 64,
   },
 });

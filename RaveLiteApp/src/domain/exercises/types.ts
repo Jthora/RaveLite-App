@@ -34,6 +34,13 @@ export type Venue =
   | 'house' // Indoors beyond the desk: stairs, a chair, a counter, a hallway
   | 'neighborhood'; // Out the door: streets, a hill, a curb line, the block
 
+/**
+ * How far into a discipline a move is — the "song" in DDR terms. How hard
+ * you play it is the chart (see `program/charts.ts`), and every move can
+ * be played at every chart.
+ */
+export type Tier = 'basic' | 'intermediate' | 'advanced';
+
 export interface Exercise {
   id: string;
   element: ElementId;
@@ -51,4 +58,10 @@ export interface Exercise {
    * micro-drills that fit a given window.
    */
   approxSeconds: number;
+  /**
+   * Where the move sits in its discipline's curriculum, for the flow
+   * props, dance and dance combat. Absent on everything else — a push-up
+   * has a ladder, not a tier.
+   */
+  tier?: Tier;
 }

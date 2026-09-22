@@ -23,6 +23,7 @@ import {palette, radius, spacing, type as t} from '../../theme';
 /** Each curriculum has a colour and a picture, used wherever it appears. */
 export const PACK_SYMBOL: Record<PackId, SymbolName> = {
   dance: 'dance',
+  'dance-combat': 'danceCombat',
   martial: 'martial',
   staff: 'staff',
   'yoga-taichi': 'yoga',

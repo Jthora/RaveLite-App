@@ -161,7 +161,8 @@ function App(): React.JSX.Element {
     };
     void Linking.getInitialURL().then(apply);
     const sub = Linking.addEventListener('url', ({url}) => apply(url));
-    return () => sub.remove();
+    // The test environment's Linking mock returns no subscription.
+    return () => sub?.remove();
   }, []);
 
   return (

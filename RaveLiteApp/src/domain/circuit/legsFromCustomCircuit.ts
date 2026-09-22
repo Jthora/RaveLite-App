@@ -8,7 +8,7 @@
  * exact requested durationSec — no clamping. The editor enforces
  * bounds at write-time so persisted values are already in range.
  */
-import {EXERCISE_LIBRARY} from '../exercises/library';
+import {EXERCISE_LIBRARY, isCurriculum} from '../exercises/library';
 import type {CircuitLeg} from './circuit';
 import type {CustomCircuit} from './customTypes';
 
@@ -37,5 +37,7 @@ export function legsFromCustomCircuit(c: CustomCircuit): CircuitLeg[] {
 export function exercisesForElement(
   element: import('../../theme/elements').ElementId,
 ) {
-  return EXERCISE_LIBRARY.filter(e => e.element === element);
+  return EXERCISE_LIBRARY.filter(
+    e => e.element === element && !isCurriculum(e),
+  );
 }

@@ -5,6 +5,12 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {CardGrid} from '../CardGrid';
 import {PracticeRunner} from './PracticeRunner';
 import {SkillList} from './SkillList';
+import {DisciplineView} from './DisciplineView';
+import {
+  disciplineById,
+  type DisciplineId,
+} from '../../domain/exercises/disciplines';
+import type {ChartId} from '../../domain/program/charts';
 import {ExerciseRow} from '../ExerciseRow';
 import {Tap} from '../Tap';
 import type {CircuitLeg} from '../../domain/circuit/circuit';
@@ -30,7 +36,11 @@ interface Props {
  */
 export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
   const accent = ELEMENTS.heart.accent;
-  const [drilling, setDrilling] = useState<Exercise | undefined>();
+  const [drilling, setDrilling] = useState<
+    {exercise: Exercise; chart?: ChartId; dose?: string} | undefined
+  >();
+  /** A path open on its own page, inside this sheet. */
+  const [path, setPath] = useState<DisciplineId | undefined>();
   const [logged, setLogged] = useState<string | undefined>();
   const [version, setVersion] = useState(0);
 
@@ -38,6 +48,7 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
   useEffect(() => {
     if (!visible) {
       setDrilling(undefined);
+      setPath(undefined);
       setLogged(undefined);
     }
   }, [visible]);
@@ -46,7 +57,13 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
     <Modal
       visible={visible}
       animationType="slide"
-      onRequestClose={() => (drilling ? setDrilling(undefined) : onClose())}>
+      onRequestClose={() =>
+        drilling
+          ? setDrilling(undefined)
+          : path
+          ? setPath(undefined)
+          : onClose()
+      }>
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <Text style={[styles.title, {color: accent}]}>
@@ -62,7 +79,9 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
         </View>
         {drilling ? (
           <PracticeRunner
-            exercise={drilling}
+            exercise={drilling.exercise}
+            chart={drilling.chart}
+            dose={drilling.dose}
             onDone={summary => {
               setLogged(summary);
               setVersion(v => v + 1);
@@ -70,6 +89,25 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
             }}
             onCancel={() => setDrilling(undefined)}
           />
+        ) : path && disciplineById(path) ? (
+          <View style={styles.path}>
+            {logged ? (
+              <Text testID="practice-logged" style={styles.logged}>
+                Logged: {logged}
+              </Text>
+            ) : null}
+            <DisciplineView
+              discipline={disciplineById(path)!}
+              version={version}
+              onPick={(exercise, chart, dose) =>
+                setDrilling({exercise, chart, dose})
+              }
+              onBack={() => {
+                setPath(undefined);
+                setLogged(undefined);
+              }}
+            />
+          </View>
         ) : (
           <CircuitsPanel
             onEngageLegs={onEngageLegs}
@@ -80,7 +118,14 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
                     Logged: {logged}
                   </Text>
                 ) : null}
-                <SkillList version={version} onPick={setDrilling} />
+                <SkillList
+                  version={version}
+                  onPick={exercise => setDrilling({exercise})}
+                  onOpenDiscipline={id => {
+                    setLogged(undefined);
+                    setPath(id);
+                  }}
+                />
               </View>
             }
             footer={
@@ -110,6 +155,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: palette.bg,
+  },
+  path: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',

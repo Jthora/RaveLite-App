@@ -2,6 +2,7 @@ import {EXERCISE_LIBRARY} from '../exercises/library';
 import {inScope, type PackId} from './packs';
 import type {Exercise, Venue} from '../exercises/types';
 import {moveForExercise, type MoveId} from '../exercises/moves';
+import {DISCIPLINES} from '../exercises/disciplines';
 
 /**
  * Where you train, what is there, what you carry, and how loud you can be.
@@ -812,6 +813,20 @@ const NEEDS: Readonly<Record<string, readonly Need[]>> = {
   'water.devil-stick-idle': ['devilSticks'],
   'water.devil-stick-flip': ['devilSticks'],
 
+  // Dance combat has no prop of its own: the staff work needs a staff,
+  // and anything that lands you on the ground needs somewhere soft.
+  'water.staff-dance-combat-guards': ['staff'],
+  'water.staff-dance-combat-spin-strike': ['staff'],
+  'water.staff-dance-combat-back-pass': ['staff'],
+  'water.staff-dance-combat-freestyle': ['staff'],
+  'water.capoeira-negativa-role': [SOFT_GROUND],
+  'water.capoeira-au': [SOFT_GROUND],
+  'fire.capoeira-meia-lua-de-compasso': [SOFT_GROUND],
+  'fire.tricking-tornado-kick': [SOFT_GROUND],
+  'fire.tricking-pop-360': [SOFT_GROUND],
+  'fire.tricking-butterfly-kick': [SOFT_GROUND],
+  'fire.tricking-540-kick': [SOFT_GROUND],
+
   // Seeing yourself move (kit/mirror.ts)
   'air.mirror-posture-check': ['mirror'],
   'earth.mirror-squat-check': ['mirror'],
@@ -962,7 +977,7 @@ function spotsOf(facts: Facts): readonly Spot[] {
 }
 
 function needsMet(id: string, kit: ReadonlySet<KitItem>): boolean {
-  return (NEEDS[id] ?? []).every(need =>
+  return needsFor(id).every(need =>
     typeof need === 'string' ? kit.has(need) : need.some(k => kit.has(k)),
   );
 }
@@ -991,8 +1006,19 @@ export const neededDrillIds = (): string[] => Object.keys(NEEDS);
 
 /** What a drill needs beyond a place to stand. */
 export function needsFor(id: string): readonly Need[] {
-  return NEEDS[id] ?? [];
+  return NEEDS[id] ?? PATH_NEEDS.get(id) ?? [];
 }
+
+/**
+ * Every move on a prop's path needs the prop, so the curricula need no
+ * list of their own here — the path says which prop. Anything a move needs
+ * beyond it (soft ground for an aerial) is in `NEEDS`, which wins.
+ */
+const PATH_NEEDS: ReadonlyMap<string, readonly Need[]> = new Map(
+  DISCIPLINES.flatMap(d =>
+    d.prop ? d.ids.map(id => [id, [d.prop!]] as const) : [],
+  ),
+);
 
 /**
  * What stands between this person and a drill, in words: "A resistance

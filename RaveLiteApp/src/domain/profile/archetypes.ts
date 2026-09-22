@@ -24,6 +24,7 @@ export type ArchetypeId =
   | 'desk-rebel'
   | 'comeback'
   | 'flow-artist'
+  | 'super-hero'
   | 'night-shift'
   | 'parent'
   | 'festival-six';
@@ -89,6 +90,7 @@ export const ARCHETYPES: readonly Archetype[] = [
     leadsWith: 'Everything, and the marks to prove it',
     packs: [
       'dance',
+      'dance-combat',
       'martial',
       'staff',
       'yoga-taichi',
@@ -123,9 +125,18 @@ export const ARCHETYPES: readonly Archetype[] = [
   {
     id: 'flow-artist',
     name: 'The Flow Artist',
-    forWhom: 'spins a staff, and wants both hands to know it',
+    forWhom: 'spins a prop, and wants both hands to know it',
     leadsWith: 'Dexterity, off-hand parity, presence',
     packs: ['staff', 'dance', 'yoga-taichi'],
+    shape: 'desk',
+    pushupGoal: 100,
+  },
+  {
+    id: 'super-hero',
+    name: 'The Super Hero',
+    forWhom: 'fights the way they dance, and dances the way they fight',
+    leadsWith: 'Dance combat, flow, kicks, power',
+    packs: ['dance-combat', 'dance', 'staff', 'martial', 'jumps', 'runs'],
     shape: 'desk',
     pushupGoal: 100,
   },

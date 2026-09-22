@@ -3,6 +3,7 @@ import {CARRIED_DRILLS} from './kit/carried';
 import {FLOW_DRILLS} from './kit/flow';
 import {MORE_FLOW_DRILLS} from './kit/flowMore';
 import {MIRROR_DRILLS} from './kit/mirror';
+import {CURRICULUM_DRILLS} from './curricula';
 import {PLACE_DRILLS} from './kit/places';
 
 /**
@@ -3227,7 +3228,16 @@ export const EXERCISE_LIBRARY: Exercise[] = [
   ...FLOW_DRILLS,
   ...MORE_FLOW_DRILLS,
   ...MIRROR_DRILLS,
+  ...CURRICULUM_DRILLS,
 ];
 
+/**
+ * A move written for a curriculum — the flow props, dance, dance combat.
+ * Those are practised on purpose, from Practice, at a chosen tier and
+ * chart; a random chime or a weather swap never reaches into them.
+ */
+export const isCurriculum = (e: Exercise): boolean => e.tier !== undefined;
+
+/** An element's drills, outside the curricula: the Library, "try this now". */
 export const exercisesFor = (element: Exercise['element']): Exercise[] =>
-  EXERCISE_LIBRARY.filter(e => e.element === element);
+  EXERCISE_LIBRARY.filter(e => e.element === element && !isCurriculum(e));

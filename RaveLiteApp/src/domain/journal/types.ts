@@ -1,3 +1,4 @@
+import type {ChartId} from '../program/charts';
 import {ElementId} from '../../theme/elements';
 
 /**
@@ -79,6 +80,8 @@ export interface CompletionEntry extends BaseEntry {
   partnerSec?: number;
   /** A glass of water rode along with this chime. */
   water?: boolean;
+  /** A curriculum move: the chart it was played at (see program/charts). */
+  chart?: ChartId;
 }
 
 export interface ReminderFiredEntry extends BaseEntry {
