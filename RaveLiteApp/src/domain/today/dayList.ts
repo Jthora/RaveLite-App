@@ -80,6 +80,8 @@ export interface DayListInput {
   from?: number;
   /** When the app was not running (`ambient/heartbeat.ts`). */
   closed?: readonly {from: number; to: number}[];
+  /** Chimes the OS held a backup for: they sounded even with the app closed. */
+  backedUp?: ReadonlySet<string>;
 }
 
 /** Why a chime did not sound, as the row says it. */
@@ -135,8 +137,17 @@ function doneRow(items: ActivityItem[]): DayRow {
 }
 
 export function buildDayList(input: DayListInput): DayRow[] {
-  const {now, activity, journal, scheduled, active, queuedAt, from, closed} =
-    input;
+  const {
+    now,
+    activity,
+    journal,
+    scheduled,
+    active,
+    queuedAt,
+    from,
+    closed,
+    backedUp,
+  } = input;
   const rows: DayRow[] = [];
 
   const records = new Map<string, ActivityItem[]>();
@@ -177,7 +188,9 @@ export function buildDayList(input: DayListInput): DayRow[] {
     }
     const why =
       unsounded.get(chime.id) ??
-      (!sounded.has(chime.id) && closed?.some(g => at > g.from && at < g.to)
+      (!sounded.has(chime.id) &&
+      !backedUp?.has(chime.id) &&
+      closed?.some(g => at > g.from && at < g.to)
         ? 'app-closed'
         : undefined);
     const status: DayRowStatus =

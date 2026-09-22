@@ -7,8 +7,10 @@ import {KEYS} from '../../storage/keys';
  * The chime runtime beats about once a minute while it runs. When it
  * starts again after a long silence — Android closed the app, the phone
  * froze it, it was restarted — the silence is written down as a gap.
- * Chimes due inside a gap never sounded: Today shows them as such, not as
- * missed, their sets are not held against the day, and Stay alive says
+ * A chime due inside a gap sounded only if the OS held a backup for it
+ * (`backupScheduler`), and those do fire with the app closed. So a chime
+ * with a backup is an ordinary chime — answered or missed — and only one
+ * without is shown as never sounded, with its sets let go. Stay alive says
  * what happened instead of "all set".
  */
 
@@ -79,6 +81,49 @@ export function beat(now: number = Date.now()): void {
       console.warn('[heartbeat] gap listener threw', e);
     }
   }
+}
+
+const BACKUP_KEEP_MS = 2 * 86_400_000;
+
+function loadBackups(): Record<string, number> {
+  const raw = store.getString(KEYS.ambientBackups);
+  if (!raw) {
+    return {};
+  }
+  try {
+    return JSON.parse(raw) as Record<string, number>;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Remember the backups the OS holds. Kept for two days, and added to
+ * rather than replaced: after a gap, the backups that fired inside it are
+ * gone from the OS, and this is the only record they existed.
+ */
+export function rememberBackups(
+  held: ReadonlyMap<string, number>,
+  now: number = Date.now(),
+): void {
+  const before = loadBackups();
+  const next: Record<string, number> = {};
+  for (const [id, at] of Object.entries(before)) {
+    if (at > now - BACKUP_KEEP_MS) {
+      next[id] = at;
+    }
+  }
+  for (const [id, at] of held) {
+    next[id] = at;
+  }
+  if (JSON.stringify(next) !== JSON.stringify(before)) {
+    store.set(KEYS.ambientBackups, JSON.stringify(next));
+  }
+}
+
+/** Chimes the OS held a backup for: they could sound with the app closed. */
+export function backedUpIds(): ReadonlySet<string> {
+  return new Set(Object.keys(loadBackups()));
 }
 
 /** Only for tests. */

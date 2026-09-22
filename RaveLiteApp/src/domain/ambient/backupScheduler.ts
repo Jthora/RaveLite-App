@@ -33,6 +33,7 @@ import {
 import {pulsePayload} from './pulsePayload';
 import {queuedPulses} from './pulseRuntime';
 import {absorbedWaterCalls, setsToday} from './setScheduler';
+import {rememberBackups} from './heartbeat';
 
 export const BACKUP_RECONCILE_MS = 60_000;
 
@@ -132,6 +133,16 @@ async function run(now: number): Promise<void> {
       console.warn('[backupScheduler] schedule failed', spec.pulseId, err),
     );
   }
+  // Remembered, so a gap in the heartbeat can tell a chime that sounded
+  // as a backup from one that did not sound at all.
+  const held = new Map(existing);
+  for (const id of cancel) {
+    held.delete(id);
+  }
+  for (const spec of create) {
+    held.set(spec.pulseId, spec.triggerAt);
+  }
+  rememberBackups(held, now);
 }
 
 let inFlight: Promise<void> | null = null;

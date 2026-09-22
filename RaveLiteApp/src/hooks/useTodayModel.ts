@@ -40,7 +40,7 @@ import {
   subscribe as subscribeRuntime,
 } from '../domain/ambient/pulseRuntime';
 import {setUpToday, setsToday} from '../domain/ambient/setScheduler';
-import {gapsBetween} from '../domain/ambient/heartbeat';
+import {backedUpIds, gapsBetween} from '../domain/ambient/heartbeat';
 import type {ActiveHours, ActivePulseSummary} from '../domain/ambient/types';
 import {partsOf} from '../domain/info/info';
 import {moveForExercise, moveForTrack} from '../domain/exercises/moves';
@@ -215,6 +215,7 @@ export function buildTodayModel(
     queuedAt: new Map(queuedPulses().map(p => [p.id, p.fireAt])),
     from: setUpToday(now),
     closed: gapsBetween(midnight.getTime(), now),
+    backedUp: backedUpIds(),
   });
 
   const done = doneOnDay(date);

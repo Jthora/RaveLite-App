@@ -125,7 +125,7 @@ export function summarizeHealth(input: HealthInputs): {
     detail: gap
       ? `Android closed RaveLite from ${when(gap.from, gap.to)} to ${hm(
           gap.to,
-        )}. Chimes did not sound then.`
+        )}. Only backup chimes could sound then.`
       : 'No gaps in My day in the last 24 hours.',
     fix: gap
       ? input.powerManagerAvailable

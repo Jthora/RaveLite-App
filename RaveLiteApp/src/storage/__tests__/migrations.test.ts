@@ -329,6 +329,17 @@ describe('v11', () => {
   });
 });
 
+describe('v13', () => {
+  it('forgets gaps judged without knowing the backups', () => {
+    store.set(KEYS.schemaVersion, 12);
+    store.set(KEYS.ambientGaps, JSON.stringify([{from: 1, to: NOW}]));
+    store.set(KEYS.programExcused, JSON.stringify({'2026-09-22': {push: 40}}));
+    runMigrations(NOW);
+    expect(store.getString(KEYS.ambientGaps)).toBeUndefined();
+    expect(store.getString(KEYS.programExcused)).toBeUndefined();
+  });
+});
+
 describe('v12', () => {
   it('forgets a gap read from the stale key, and what it excused', () => {
     store.set(KEYS.schemaVersion, 11);

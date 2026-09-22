@@ -11,7 +11,14 @@ import {entriesForDay} from '../../journal/journal';
 import {buildTodayModel} from '../../../hooks/useTodayModel';
 import {lastGapInMyDay, summarizeHealth} from '../healthChecks';
 import {KEYS} from '../../../storage/keys';
-import {GAP_MS, __resetHeartbeat, beat, loadGaps, onGap} from '../heartbeat';
+import {
+  GAP_MS,
+  __resetHeartbeat,
+  beat,
+  loadGaps,
+  onGap,
+  rememberBackups,
+} from '../heartbeat';
 import {
   STALE_AFTER_MS,
   enqueue as queueEnqueue,
@@ -111,7 +118,7 @@ it('says so in Stay alive instead of "all set"', () => {
     id: 'kept-running',
     status: 'warn',
     detail:
-      'Android closed RaveLite from 13:10 to 15:40. Chimes did not sound then.',
+      'Android closed RaveLite from 13:10 to 15:40. Only backup chimes could sound then.',
   });
 });
 
@@ -153,6 +160,24 @@ it('reports only the last day of a long silence, and says yesterday', () => {
     lastGap: gap,
   });
   expect(checks[0].detail).toBe(
-    'Android closed RaveLite from yesterday 09:00 to 09:00. Chimes did not sound then.',
+    'Android closed RaveLite from yesterday 09:00 to 09:00. Only backup chimes could sound then.',
   );
+});
+
+it('reads a chime the OS held a backup for as sounded, not as never sounded', () => {
+  beat(at(9));
+  // A plan chime: a round that never fired leaves the list altogether.
+  const firstInGap = buildTodayModel(at(9, 1)).rows.find(
+    r =>
+      r.id.startsWith('plan:') &&
+      r.at > at(9) &&
+      r.at < at(12, 30) &&
+      r.status !== 'done',
+  )!;
+  rememberBackups(new Map([[firstInGap.id, firstInGap.at + 90_000]]), at(9));
+  beat(at(12, 30));
+  const row = buildTodayModel(at(12, 30)).rows.find(
+    r => r.id === firstInGap.id,
+  )!;
+  expect(row.status).toBe('missed');
 });

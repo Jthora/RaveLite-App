@@ -63,7 +63,7 @@ import {
   subscribeActiveHours,
   withinActiveHours,
 } from './activeHours';
-import {gapsBetween, inGap, onGap, type Gap} from './heartbeat';
+import {backedUpIds, gapsBetween, inGap, onGap, type Gap} from './heartbeat';
 import {
   cancelQueued,
   enqueue,
@@ -241,8 +241,9 @@ export function setsToday(now: number = Date.now()): SetsToday {
   );
   // Rounds due while the app was not running never sounded either.
   const gaps = gapsBetween(midnight.getTime(), now);
+  const backedUp = backedUpIds();
   for (const f of fires) {
-    if (!firedIds.has(f.id) && inGap(f.ts, gaps)) {
+    if (!firedIds.has(f.id) && !backedUp.has(f.id) && inGap(f.ts, gaps)) {
       letGo.add(f.id);
     }
   }
@@ -405,8 +406,9 @@ export function excuseRoundsInGap(gap: Gap): void {
         'pulseId' in e && e.pulseId ? [e.pulseId] : [],
       ),
     );
+    const backedUp = backedUpIds();
     const unheard = setsToday(noon).fires.filter(
-      f => !known.has(f.id) && inGap(f.ts, [gap]),
+      f => !known.has(f.id) && !backedUp.has(f.id) && inGap(f.ts, [gap]),
     );
     if (unheard.length > 0) {
       excuseSets(

@@ -74,6 +74,9 @@ export function runMigrations(now: number = Date.now()): void {
   if (from < 12) {
     forgetStaleHeartbeat();
   }
+  if (from < 13) {
+    forgetGapsWithoutBackups();
+  }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
   // The profile is cached in memory, and anything that read it before
@@ -602,6 +605,17 @@ function keepTheChimeRoute(): void {
  */
 function forgetStaleHeartbeat(): void {
   store.delete(KEYS.ambientLastSeenAt);
+  store.delete(KEYS.ambientGaps);
+  store.delete(KEYS.programExcused);
+}
+
+/**
+ * v13 — a gap in the heartbeat was read as "the chimes in it did not
+ * sound", but the OS backup chimes do sound with the app closed. Builds
+ * before this one did not remember which chimes had a backup, so the gaps
+ * they recorded, and the sets those gaps excused, are forgotten here.
+ */
+function forgetGapsWithoutBackups(): void {
   store.delete(KEYS.ambientGaps);
   store.delete(KEYS.programExcused);
 }

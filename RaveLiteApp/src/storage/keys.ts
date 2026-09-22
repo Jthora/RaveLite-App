@@ -30,6 +30,8 @@ export const KEYS = {
   ambientHeartbeat: 'ambient.session.heartbeat',
   /** `{from, to}[]` JSON — recent stretches when the runtime was not running. */
   ambientGaps: 'ambient.session.gaps',
+  /** `{pulseId: triggerAt}` JSON — chimes the OS held a backup for, recently. */
+  ambientBackups: 'ambient.session.backups',
   /** Epoch ms — first-launch onboarding completion stamp. */
   ambientOnboardingCompletedAt: 'ambient.onboarding.completedAt',
   /** 0–100 master volume. */
@@ -113,5 +115,6 @@ export const KEYS = {
  *  11 — chimes follow silent mode and DND by default; a phone already in
  *       use is written down as having chosen the alarm route.
  *  12 — forget a false "app closed" gap read from a stale key.
+ *  13 — forget gaps judged before backups were remembered.
  */
-export const CURRENT_SCHEMA_VERSION = 12;
+export const CURRENT_SCHEMA_VERSION = 13;
