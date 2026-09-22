@@ -25,10 +25,14 @@ import {
 } from '../weather';
 
 const at = (h: number, m = 0) => new Date(2026, 8, 14, h, m).getTime();
+// A town under the running clock: its solar noon is local noon, so these
+// hours mean the same thing whatever timezone the suite runs in. Sunrise
+// and sunset are worked out from the place, not from the phone.
+const LON = -(new Date(2026, 8, 14).getTimezoneOffset() / 60) * 15;
 const place = {
   name: 'Test Town',
   lat: 40.7,
-  lon: -74,
+  lon: LON,
   source: 'typed',
   setAt: 0,
 };
@@ -50,7 +54,7 @@ function saveForecast(
   }));
   store.set(
     KEYS.weatherForecast,
-    JSON.stringify({fetchedAt: at(4), lat: 40.7, lon: -74, hours, days: []}),
+    JSON.stringify({fetchedAt: at(4), lat: place.lat, lon: place.lon, hours, days: []}),
   );
 }
 
@@ -92,7 +96,9 @@ it('fetches the forecast for the rounded place, then keeps it for three hours', 
   expect(await refreshForecast({now: at(5), fetchImpl: asFetch})).toBe(
     'updated',
   );
-  expect(fetchImpl.mock.calls[0][0]).toContain('latitude=40.7&longitude=-74');
+  expect(fetchImpl.mock.calls[0][0]).toContain(
+    `latitude=${place.lat}&longitude=${place.lon}`,
+  );
   expect(getForecast()?.hours).toHaveLength(1);
   expect(await refreshForecast({now: at(7), fetchImpl: asFetch})).toBe('fresh');
 

@@ -37,3 +37,11 @@ jobs:
 
       - name: test
         run: npx jest --ci
+
+      # Again on the other side of the world. Local days are the app's
+      # spine, and a test that quietly depends on the machine's clock
+      # passes at home and fails for somebody else.
+      - name: test (another timezone)
+        run: npx jest --ci
+        env:
+          TZ: Australia/Lord_Howe
