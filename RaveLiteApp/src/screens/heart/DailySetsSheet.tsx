@@ -13,6 +13,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {InfoCardView, useInfoStack} from '../../components/info/InfoSheet';
 import {Tap} from '../../components/Tap';
+import {UndoBar} from '../../components/UndoBar';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, spacing, type as t} from '../../theme';
 import {CharacterSheet} from './CharacterSheet';
@@ -129,6 +130,7 @@ export function DailySetsSheet({visible, onClose}: Props) {
             )}
           </>
         )}
+        <UndoBar />
       </SafeAreaView>
     </Modal>
   );

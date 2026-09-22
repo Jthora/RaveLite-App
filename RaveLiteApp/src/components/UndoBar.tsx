@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useReducer} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from './Tap';
@@ -14,32 +14,51 @@ import {palette, radius, spacing, type as t} from '../theme';
 /** How long a notice offers Undo. */
 export const UNDO_MS = 8000;
 
+// One notice for every bar. A sheet is its own window, drawn over the
+// page's bar, so each sheet that can log carries a bar too; only the
+// newest bar (the top sheet's) shows it, and Undo in one clears them all.
+let current: UndoNotice | undefined;
+let timer: ReturnType<typeof setTimeout> | undefined;
+let undoOff: (() => void) | undefined;
+/** Mounted bars, oldest first. */
+const bars: Array<() => void> = [];
+
+function show(next: UndoNotice | undefined): void {
+  current = next;
+  if (timer) {
+    clearTimeout(timer);
+  }
+  timer = next ? setTimeout(() => show(undefined), UNDO_MS) : undefined;
+  bars.forEach(redraw => redraw());
+}
+
 /**
  * A quiet bar along the bottom of every page after something is logged or
  * removed: "Logged Push-ups · Undo". It leaves on its own after a few
  * seconds, or as soon as Undo is tapped.
  */
 export function UndoBar() {
-  const [notice, setNotice] = useState<UndoNotice | undefined>();
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const [, redraw] = useReducer((n: number) => n + 1, 0);
 
   useEffect(() => {
-    const off = subscribeUndo(next => {
-      setNotice(next);
-      if (timer.current) {
-        clearTimeout(timer.current);
-      }
-      timer.current = setTimeout(() => setNotice(undefined), UNDO_MS);
-    });
+    bars.push(redraw);
+    if (!undoOff) {
+      undoOff = subscribeUndo(show);
+    }
+    bars.forEach(r => r());
     return () => {
-      off();
-      if (timer.current) {
-        clearTimeout(timer.current);
+      bars.splice(bars.indexOf(redraw), 1);
+      if (bars.length === 0) {
+        undoOff?.();
+        undoOff = undefined;
+        show(undefined);
       }
+      bars.forEach(r => r());
     };
   }, []);
 
-  if (!notice) {
+  const notice = current;
+  if (!notice || bars[bars.length - 1] !== redraw) {
     return null;
   }
 
@@ -51,10 +70,7 @@ export function UndoBar() {
     } else {
       bringBack(notice.entry);
     }
-    if (timer.current) {
-      clearTimeout(timer.current);
-    }
-    setNotice(undefined);
+    show(undefined);
   };
 
   return (

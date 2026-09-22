@@ -8,6 +8,7 @@ import {CardGrid} from '../CardGrid';
 import {ExerciseRow} from '../ExerciseRow';
 import {Tap} from '../Tap';
 import {TargetFilterStrip} from '../TargetFilterStrip';
+import {UndoBar} from '../UndoBar';
 import {exercisesFor} from '../../domain/exercises/library';
 import {canDo, whyNot} from '../../domain/profile/kit';
 import {baseFacts, loadFacts} from '../../domain/profile/repository';
@@ -114,6 +115,7 @@ export function LibrarySheet({
             </>
           )}
         </ScrollView>
+        <UndoBar />
       </SafeAreaView>
     </Modal>
   );

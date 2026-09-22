@@ -13,6 +13,7 @@ import {
 import type {ChartId} from '../../domain/program/charts';
 import {ExerciseRow} from '../ExerciseRow';
 import {Tap} from '../Tap';
+import {UndoBar} from '../UndoBar';
 import type {CircuitLeg} from '../../domain/circuit/circuit';
 import type {Exercise} from '../../domain/exercises/types';
 import {exercisesFor} from '../../domain/exercises/library';
@@ -149,6 +150,7 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
               }
             />
           )}
+          <UndoBar />
         </SafeAreaView>
       </backStack.Provider>
     </Modal>
