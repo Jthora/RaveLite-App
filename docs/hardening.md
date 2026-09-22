@@ -73,7 +73,7 @@ something is lost, stay quiet where something is handled.**
 
 ---
 
-### Pass 2 — Property tests where the shapes meet
+### Pass 2 — Property tests where the shapes meet ✅ *(22 Sep 2026)*
 
 **Problem:** the seam bugs above were all one writer disagreeing with one
 reader. Example-based tests confirm the examples.
@@ -94,6 +94,20 @@ reader. Example-based tests confirm the examples.
   path, only as steps.
 
 *Done when:* the invariants are stated as tests rather than as comments.
+
+**What it found** (e025613 and the invariants test). Every repository
+reads back what it writes, numbers still numbers. The migrations run as
+paths: a phone at any version from v0 comes out at v13 with a profile, a
+plan, a program and a day it can build — twice over, and after an
+interrupted run. Every archetype, in every day shape, with and without a
+mode, asks only for sets it can do: none twice in a round, all numbered
+from one, none at all only when the mode says so.
+
+The journal chain found a live one: a completion whose element was not
+one of the five — an older build, a hand-edited export, the bad write
+that once crashed Today — went straight into the totals and turned the
+day's points into NaN, which shows as a blank Today. It is counted under
+Core now, and said once in the error log.
 
 ---
 
