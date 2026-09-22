@@ -29,8 +29,8 @@ import {reconcileSetsNow, setsToday} from '../../domain/ambient/setScheduler';
 import {subscribe as subscribePulseRuntime} from '../../domain/ambient/pulseRuntime';
 import {EXERCISE_LIBRARY} from '../../domain/exercises/library';
 import {moveForTrack} from '../../domain/exercises/moves';
-import {append, entriesForDay} from '../../domain/journal/journal';
-import {doneByTrack, formatSetAmount} from '../../domain/program/progress';
+import {append} from '../../domain/journal/journal';
+import {doneOnDay, formatSetAmount} from '../../domain/program/progress';
 import {movesOf} from '../../domain/program/rounds';
 import {
   currentRung,
@@ -101,7 +101,7 @@ export function DailySetsSection({
       phase: phaseForWeek(week),
       myDay: getActiveHours(),
       today: setsToday(now),
-      done: doneByTrack(entriesForDay(date)),
+      done: doneOnDay(date),
       // Today and the six days after it, for the focus wheel.
       focusDays: Array.from({length: 7}, (_, i) => {
         const day = new Date(date);

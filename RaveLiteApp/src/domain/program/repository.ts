@@ -1,7 +1,7 @@
 import {store} from '../../storage';
 import {quarantine} from '../diagnostics/quarantine';
 import {KEYS} from '../../storage/keys';
-import {append, entriesForDay} from '../journal/journal';
+import {append} from '../journal/journal';
 import {localDayKey} from '../training/grading';
 import {TRACKS, trackById} from './tracks';
 import {WINDOW_DAYS, reviewTrack, type DayWork} from './adapt';
@@ -14,7 +14,7 @@ import {
   programWeek,
   trainsOn,
 } from './progression';
-import {doneByTrack} from './progress';
+import {doneOnDay} from './progress';
 import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
 import {
   dayDensity,
@@ -339,7 +339,7 @@ export function reviewProgram(now: number = Date.now()): ProgramState {
   if (setUpAt !== undefined) {
     rest.add(localDayKey(setUpAt));
   }
-  const done = window.map(day => doneByTrack(entriesForDay(day)));
+  const done = window.map(day => doneOnDay(day));
   const deload =
     phaseForWeek(programWeek(program.startDay, yesterday)) === 'deload';
   const today = localDayKey(now);

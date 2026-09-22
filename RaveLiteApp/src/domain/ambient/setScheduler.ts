@@ -30,7 +30,7 @@ import {
 } from '../reminders/expandPlan';
 import {loadPlan, subscribePlan} from '../reminders/repository';
 import type {Plan} from '../reminders/types';
-import {doneByTrack, firedSetIds} from '../program/progress';
+import {doneOnDay, firedSetIds} from '../program/progress';
 import {
   excuseSets,
   loadProgram,
@@ -253,7 +253,7 @@ export function setsToday(now: number = Date.now()): SetsToday {
   const {keep, drop} = selectUpcomingRounds({
     fires,
     prescriptions,
-    doneByTrack: doneByTrack(entries),
+    doneByTrack: doneOnDay(date),
     released,
     firedIds,
     now,

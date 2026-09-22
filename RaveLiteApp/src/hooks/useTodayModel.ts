@@ -46,7 +46,7 @@ import {partsOf} from '../domain/info/info';
 import {moveForExercise, moveForTrack} from '../domain/exercises/moves';
 import {entriesForDay, handledPulseIds} from '../domain/journal/journal';
 import {dailyPar} from '../domain/profile/repository';
-import {doneByTrack} from '../domain/program/progress';
+import {doneOnDay} from '../domain/program/progress';
 import {focusFor, subscribeProgram} from '../domain/program/repository';
 import {movesOf} from '../domain/program/rounds';
 import {summarizeSets, type SetsSummary} from '../domain/program/setsSummary';
@@ -217,7 +217,7 @@ export function buildTodayModel(
     closed: gapsBetween(midnight.getTime(), now),
   });
 
-  const done = doneByTrack(journal);
+  const done = doneOnDay(date);
   const points = pointsByElement(activity);
   const pauseUntil = readPauseUntil();
   return {
