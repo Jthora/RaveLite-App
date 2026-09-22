@@ -11,27 +11,40 @@ import {StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../Tap';
 import {modeLabel, type Mode} from '../../domain/profile/mode';
+import type {Region} from '../../domain/profile/kit';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
 export function ModeChip({
   mode,
+  injured,
   now,
   onClear,
 }: {
   mode: Mode | undefined;
+  /** An injury, which stays on under the mode. */
+  injured?: Region;
   now: number;
+  /** Ends the mode if there is one, otherwise the injury. */
   onClear: () => void;
 }) {
-  if (!mode) {
+  // A hurt mode stored before injuries stacked is shown as the injury.
+  const shown = mode?.id === 'injured' ? undefined : mode;
+  if (!shown && !injured) {
     return null;
   }
   const accent = ELEMENTS.heart.accent;
+  const label = [
+    shown ? modeLabel(shown, now) : undefined,
+    injured ? `Hurt · ${injured}` : undefined,
+  ]
+    .filter(Boolean)
+    .join(' · ');
   return (
     <View style={styles.root}>
       <View style={[styles.chip, {borderColor: accent}]}>
         <Text testID="mode-chip" style={[styles.text, {color: accent}]}>
-          {modeLabel(mode, now)}
+          {label}
         </Text>
       </View>
       <Tap
@@ -40,7 +53,7 @@ export function ModeChip({
         color={palette.textDim}
         onPress={onClear}
         accessibilityRole="button"
-        accessibilityLabel="End this mode"
+        accessibilityLabel={shown ? 'End this mode' : 'End hurt mode'}
         style={styles.btn}>
         <Text style={styles.btnText}>End</Text>
       </Tap>

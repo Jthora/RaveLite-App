@@ -1,3 +1,4 @@
+import type {Region} from '../profile/kit';
 import {ElementId} from '../../theme/elements';
 
 /** Posture/condition tags used for filtering and reminder targeting. */
@@ -64,4 +65,10 @@ export interface Exercise {
    * has a ladder, not a tier.
    */
   tier?: Tier;
+  /**
+   * Parts of the body this drill loads, for hurt mode, when the drill
+   * knows better than `profile/loads.ts` can work out. Adds to what that
+   * file reads from the move, the discipline, the kit and the stop lines.
+   */
+  loads?: readonly Region[];
 }

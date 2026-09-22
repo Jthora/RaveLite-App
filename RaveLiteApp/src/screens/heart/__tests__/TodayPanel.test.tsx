@@ -19,6 +19,7 @@ import {
   loadMode,
   needsTutorial,
   clearMode,
+  setInjury,
   setMode,
 } from '../../../domain/profile/repository';
 import {SettingsSheet} from '../SettingsSheet';
@@ -288,6 +289,21 @@ it('says so on Today while a mode is running, and ends it in one tap', () => {
   });
   expect(loadMode()).toBeUndefined();
   expect(byTestId(tree, 'mode-chip')).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('keeps an injury on Today after a day off ends', () => {
+  setInjury('knee');
+  setMode('rest', {}, TEN_AM.getTime());
+  const tree = renderToday();
+  expect(byTestId(tree, 'mode-chip').props.children).toBe(
+    'Taking the day off · today · Hurt · knee',
+  );
+  act(() => {
+    byTestId(tree, 'mode-chip-clear').props.onPress();
+  });
+  expect(loadMode()).toBeUndefined();
+  expect(byTestId(tree, 'mode-chip').props.children).toBe('Hurt · knee');
   act(() => tree.unmount());
 });
 

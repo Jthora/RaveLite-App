@@ -27,8 +27,10 @@ import {LateLogSheet} from '../../components/today/LateLogSheet';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
 import {PracticeSheet} from '../../components/today/PracticeSheet';
 import {
+  clearInjury,
   clearMode,
   finishTutorial,
+  loadInjured,
   loadMode,
   needsTutorial,
 } from '../../domain/profile/repository';
@@ -85,6 +87,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [weatherOpen, setWeatherOpen] = useState(false);
   /** Re-read whenever Settings closes, since that is where one is picked. */
   const [mode, setMode] = useState(() => loadMode());
+  const [injured, setInjured] = useState(() => loadInjured());
   /** First run only; ends the moment a chime is answered unaided. */
   const [teaching, setTeaching] = useState(needsTutorial);
   /** A missed or skipped chime being logged after the fact. */
@@ -237,10 +240,17 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         />
         <ModeChip
           mode={mode}
+          injured={injured}
           now={model.now}
           onClear={() => {
-            clearMode();
-            setMode(undefined);
+            // The mode first; an injury stays until it is ended itself.
+            if (mode && mode.id !== 'injured') {
+              clearMode();
+            } else {
+              clearInjury();
+            }
+            setMode(loadMode());
+            setInjured(loadInjured());
           }}
         />
         <SessionBanner onPress={() => setSessionOpen(true)} />
@@ -377,6 +387,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
             // Settings is where a mode is picked; pick the chip up on the
             // way out rather than polling for it.
             setMode(loadMode());
+            setInjured(loadInjured());
           }}
         />
         <DailySetsSheet visible={setsOpen} onClose={() => setSetsOpen(false)} />

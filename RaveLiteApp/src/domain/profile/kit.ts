@@ -3,6 +3,7 @@ import {inScope, type PackId} from './packs';
 import type {Exercise, Venue} from '../exercises/types';
 import {moveForExercise, type MoveId} from '../exercises/moves';
 import {DISCIPLINES} from '../exercises/disciplines';
+import {regionsOf} from './loads';
 
 /**
  * Where you train, what is there, what you carry, and how loud you can be.
@@ -302,6 +303,7 @@ export type Noise = 'quiet' | 'normal' | 'free';
 
 /** A part of the body a mode says not to load. */
 export const REGIONS = [
+  'neck',
   'shoulder',
   'elbow',
   'wrist',
@@ -901,20 +903,9 @@ export function isLoud(drill: Exercise): boolean {
   return LOUD_IDS.has(drill.id) || (move !== undefined && LOUD.has(move));
 }
 
-/** Body parts a drill loads, for Injured mode. */
-const LOADS: Readonly<Record<Region, readonly MoveId[]>> = {
-  shoulder: ['push', 'pull', 'row', 'hang', 'plank', 'chestopener'],
-  elbow: ['push', 'pull', 'row', 'hang'],
-  wrist: ['push', 'plank'],
-  back: ['row', 'pull', 'bridge', 'carry', 'crunch', 'legraise'],
-  hip: ['squat', 'lunge', 'kick', 'hipopener', 'bridge'],
-  knee: ['squat', 'lunge', 'jump', 'kick', 'run', 'wallsit'],
-  ankle: ['jump', 'run', 'walk', 'balance', 'footwork', 'kick'],
-};
-
+/** Whether a drill loads a part of the body. See `loads.ts`. */
 export function loadsRegion(drill: Exercise, region: Region): boolean {
-  const move = moveForExercise(drill.id);
-  return move !== undefined && LOADS[region].includes(move);
+  return regionsOf(drill, needsFor(drill.id)).has(region);
 }
 
 // ─── Spots: a place as the checks see it ────────────────────────────────

@@ -10,7 +10,10 @@
  *
  * So modes expire by themselves. There is exactly one at a time, it says
  * when it ends when it starts, and nothing here is a setting anyone has to
- * remember to undo.
+ * remember to undo. An injury is the exception: it is kept apart from the
+ * mode (`Profile.injured`) and lasts until it is ended by hand, so a day
+ * off sits on top of it rather than switching the protection off. The
+ * 'injured' mode below is how it is offered, and how older phones stored it.
  */
 import {DEFAULT_FACTS, type Facts, type KitItem, type Region} from './kit';
 
@@ -65,7 +68,7 @@ export const MODES: readonly ModeSpec[] = [
   {
     id: 'injured',
     name: 'hurt somewhere',
-    detail: 'Skips drills that load it. Progress pauses until you clear it.',
+    detail: 'Skips drills that load it. Stays on under other modes.',
     density: 1,
     trains: true,
     pausesRamp: true,

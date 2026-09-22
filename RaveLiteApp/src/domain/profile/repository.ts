@@ -39,7 +39,12 @@ import {
 export interface Profile {
   version: 1;
   facts: Facts;
-  /** A temporary override: an injury that must not be loaded. */
+  /**
+   * A part of the body that must not be loaded, until cleared by hand.
+   * Kept apart from `mode`, so a day off or a festival sits on top of an
+   * injury instead of ending it. (Before 22 Sep 2026 an injury was a mode;
+   * a stored one still counts — see `loadInjured`.)
+   */
   injured?: Region;
   /** Set once setup has been answered, so it is never shown twice. */
   setUpAt?: number;
@@ -134,15 +139,48 @@ export function setMode(
   opts: {region?: Region; kit?: KitItem[]} = {},
   now: number = Date.now(),
 ): void {
+  if (id === 'injured') {
+    if (opts.region) {
+      setInjury(opts.region);
+    }
+    return;
+  }
   const mode = buildMode(id, now, opts);
   if (mode) {
-    saveProfile({...loadProfile(), mode});
+    const profile = loadProfile();
+    // A hurt mode from before injuries stacked is carried over, not lost.
+    const injured = profile.injured ?? injuredRegion(profile.mode);
+    saveProfile({...profile, mode, ...(injured ? {injured} : {})});
   }
 }
 
+/** End the mode. An injury stays until it is cleared on its own. */
 export function clearMode(): void {
   const profile = loadProfile();
   saveProfile({...profile, mode: undefined});
+}
+
+/** A hurt mode stored before injuries stacked, read as the injury. */
+const withoutOldHurtMode = (mode: Mode | undefined) =>
+  mode?.id === 'injured' ? undefined : mode;
+
+/** Protect a part of the body until it is cleared by hand. */
+export function setInjury(region: Region): void {
+  const profile = loadProfile();
+  saveProfile({
+    ...profile,
+    injured: region,
+    mode: withoutOldHurtMode(profile.mode),
+  });
+}
+
+export function clearInjury(): void {
+  const profile = loadProfile();
+  saveProfile({
+    ...profile,
+    injured: undefined,
+    mode: withoutOldHurtMode(profile.mode),
+  });
 }
 
 /**
@@ -152,7 +190,11 @@ export function clearMode(): void {
  */
 export function loadFacts(now: number = Date.now()): Facts {
   const profile = loadProfile();
-  return factsUnder({...profile.facts, packs: loadPacks()}, loadMode(now));
+  const injured = loadInjured(now);
+  return factsUnder(
+    {...profile.facts, packs: loadPacks(), ...(injured ? {injured} : {})},
+    loadMode(now),
+  );
 }
 
 /**
@@ -253,7 +295,7 @@ export function baseFacts(): Facts {
 
 /** A part of the body nothing may load today. */
 export function loadInjured(now: number = Date.now()): Region | undefined {
-  return injuredRegion(loadMode(now)) ?? loadProfile().injured;
+  return loadProfile().injured ?? injuredRegion(loadMode(now));
 }
 
 /** Whether Daily Sets ask for anything today. */
@@ -263,7 +305,7 @@ export function trainsToday(now: number = Date.now()): boolean {
 
 /** Whether the ramp should stop reading today as a verdict. */
 export function rampIsPaused(now: number = Date.now()): boolean {
-  return rampPaused(loadMode(now));
+  return rampPaused(loadMode(now)) || loadInjured(now) !== undefined;
 }
 
 export function setFacts(facts: Facts): void {
