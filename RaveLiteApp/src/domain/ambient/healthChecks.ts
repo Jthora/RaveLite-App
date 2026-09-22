@@ -123,10 +123,10 @@ export function summarizeHealth(input: HealthInputs): {
     title: 'Chimes kept running',
     status: gap ? 'warn' : 'ok',
     detail: gap
-      ? `Android closed RaveLite from ${hm(gap.from)} to ${hm(
+      ? `Android closed RaveLite from ${when(gap.from, gap.to)} to ${hm(
           gap.to,
         )}. Chimes did not sound then.`
-      : 'RaveLite ran through My day for the last 24 hours.',
+      : 'No gaps in My day in the last 24 hours.',
     fix: gap
       ? input.powerManagerAvailable
         ? 'power-manager'
@@ -192,6 +192,12 @@ const hm = (at: number): string => {
   ).padStart(2, '0')}`;
 };
 
+/** "13:10", or "yesterday 22:40" when it was not the same day as `to`. */
+const when = (at: number, to: number): string =>
+  new Date(at).toDateString() === new Date(to).toDateString()
+    ? hm(at)
+    : `yesterday ${hm(at)}`;
+
 const DAY_MS = 86_400_000;
 const STEP_MS = 5 * 60_000;
 
@@ -200,16 +206,21 @@ export function lastGapInMyDay(
   now: number = Date.now(),
 ): {from: number; to: number} | undefined {
   const hours = getActiveHours();
-  return gapsBetween(now - DAY_MS, now)
-    .filter(g => {
-      for (let t = g.from; t <= g.to; t += STEP_MS) {
-        if (withinActiveHours(new Date(t), hours)) {
-          return true;
+  return (
+    gapsBetween(now - DAY_MS, now)
+      // Only the part in the last day: a phone left off for a week is not
+      // news about today.
+      .map(g => ({from: Math.max(g.from, now - DAY_MS), to: g.to}))
+      .filter(g => {
+        for (let t = g.from; t <= g.to; t += STEP_MS) {
+          if (withinActiveHours(new Date(t), hours)) {
+            return true;
+          }
         }
-      }
-      return false;
-    })
-    .pop();
+        return false;
+      })
+      .pop()
+  );
 }
 
 // ── OS probes ────────────────────────────────────────────────────────

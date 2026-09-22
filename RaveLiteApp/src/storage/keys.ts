@@ -24,8 +24,10 @@ export const KEYS = {
   activeHours: 'ambient.activeHours',
   /** Epoch ms; pulses suppress while now < value. Cleared when reached. */
   manualPauseUntil: 'ambient.manualPauseUntil',
-  /** Epoch ms of the runtime's last heartbeat (see `ambient/heartbeat.ts`). */
+  /** Epoch ms, written by a screen removed in P3b. Deleted by migration v12. */
   ambientLastSeenAt: 'ambient.session.lastSeenAt',
+  /** Epoch ms of the runtime's last heartbeat (see `ambient/heartbeat.ts`). */
+  ambientHeartbeat: 'ambient.session.heartbeat',
   /** `{from, to}[]` JSON — recent stretches when the runtime was not running. */
   ambientGaps: 'ambient.session.gaps',
   /** Epoch ms — first-launch onboarding completion stamp. */
@@ -110,5 +112,6 @@ export const KEYS = {
  *       yard, a porch, the streets…, with its limits on the room.
  *  11 — chimes follow silent mode and DND by default; a phone already in
  *       use is written down as having chosen the alarm route.
+ *  12 — forget a false "app closed" gap read from a stale key.
  */
-export const CURRENT_SCHEMA_VERSION = 11;
+export const CURRENT_SCHEMA_VERSION = 12;

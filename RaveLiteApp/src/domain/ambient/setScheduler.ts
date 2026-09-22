@@ -396,7 +396,9 @@ export function startSetScheduler(): void {
  * to what the journal says.
  */
 export function excuseRoundsInGap(gap: Gap): void {
-  for (const day of new Set([localDayKey(gap.from), localDayKey(gap.to)])) {
+  // Today and yesterday at most: a longer silence is a phone left off.
+  const from = Math.max(gap.from, gap.to - 86_400_000);
+  for (const day of new Set([localDayKey(from), localDayKey(gap.to)])) {
     const noon = new Date(`${day}T12:00:00`).getTime();
     const known = new Set(
       entriesForDay(new Date(noon)).flatMap(e =>

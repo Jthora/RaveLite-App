@@ -329,6 +329,19 @@ describe('v11', () => {
   });
 });
 
+describe('v12', () => {
+  it('forgets a gap read from the stale key, and what it excused', () => {
+    store.set(KEYS.schemaVersion, 11);
+    store.set(KEYS.ambientLastSeenAt, NOW - 20 * 86_400_000);
+    store.set(KEYS.ambientGaps, JSON.stringify([{from: 1, to: NOW}]));
+    store.set(KEYS.programExcused, JSON.stringify({'2026-09-21': {push: 40}}));
+    runMigrations(NOW);
+    expect(store.getNumber(KEYS.ambientLastSeenAt)).toBeUndefined();
+    expect(store.getString(KEYS.ambientGaps)).toBeUndefined();
+    expect(store.getString(KEYS.programExcused)).toBeUndefined();
+  });
+});
+
 it('does not leave the old profile cached once it has migrated it', () => {
   // Read before migrating — as a background notification handler can —
   // and the session used to keep the flat kit, and an unknown hangPoint,

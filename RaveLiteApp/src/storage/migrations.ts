@@ -71,6 +71,9 @@ export function runMigrations(now: number = Date.now()): void {
   if (from < 11) {
     keepTheChimeRoute();
   }
+  if (from < 12) {
+    forgetStaleHeartbeat();
+  }
 
   store.set(KEYS.schemaVersion, CURRENT_SCHEMA_VERSION);
   // The profile is cached in memory, and anything that read it before
@@ -587,4 +590,18 @@ function keepTheChimeRoute(): void {
   if (store.getString(KEYS.profile) || hasAnyHistory()) {
     setRespectDnd(false);
   }
+}
+
+/**
+ * v12 — the first heartbeat build read its last beat from
+ * `ambient.session.lastSeenAt`, a key a removed screen had last written
+ * weeks before. It took that as the app being closed ever since, marked
+ * the day's missed chimes as never sounded and excused their sets. Both
+ * logs are forgotten here; neither existed before that build, so nothing
+ * real is lost. The heartbeat has its own key now.
+ */
+function forgetStaleHeartbeat(): void {
+  store.delete(KEYS.ambientLastSeenAt);
+  store.delete(KEYS.ambientGaps);
+  store.delete(KEYS.programExcused);
 }

@@ -9,7 +9,8 @@ import {summarizeSets} from '../../program/setsSummary';
 import {doneByTrack} from '../../program/progress';
 import {entriesForDay} from '../../journal/journal';
 import {buildTodayModel} from '../../../hooks/useTodayModel';
-import {summarizeHealth} from '../healthChecks';
+import {lastGapInMyDay, summarizeHealth} from '../healthChecks';
+import {KEYS} from '../../../storage/keys';
 import {GAP_MS, __resetHeartbeat, beat, loadGaps, onGap} from '../heartbeat';
 import {
   STALE_AFTER_MS,
@@ -128,4 +129,30 @@ it('leaves a chime the journal saw sound to the journal', () => {
   });
   const again = buildTodayModel(at(12, 30)).rows.find(r => r.id === first.id)!;
   expect(again.status).toBe('missed');
+});
+
+it('does not read a stale key from a removed screen as a gap', () => {
+  store.set(KEYS.ambientLastSeenAt, at(14, 7) - 20 * 86_400_000);
+  beat(at(23, 10));
+  expect(loadGaps()).toEqual([]);
+});
+
+it('reports only the last day of a long silence, and says yesterday', () => {
+  beat(at(9) - 3 * 86_400_000);
+  beat(at(9));
+  const gap = lastGapInMyDay(at(9))!;
+  expect(gap.from).toBe(at(9) - 86_400_000);
+  const {checks} = summarizeHealth({
+    notificationsAuthorized: true,
+    exactAlarms: 'enabled',
+    batteryOptimized: false,
+    powerManagerAvailable: false,
+    alarmVolume: {current: 5, max: 15},
+    cuePlayerAvailable: true,
+    confirmed: {autostart: true, lockedInRecents: true, onCharger: true},
+    lastGap: gap,
+  });
+  expect(checks[0].detail).toBe(
+    'Android closed RaveLite from yesterday 09:00 to 09:00. Chimes did not sound then.',
+  );
 });

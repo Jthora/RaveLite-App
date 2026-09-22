@@ -62,8 +62,8 @@ export function beat(now: number = Date.now()): void {
     return;
   }
   lastWritten = now;
-  const last = store.getNumber(KEYS.ambientLastSeenAt);
-  store.set(KEYS.ambientLastSeenAt, now);
+  const last = store.getNumber(KEYS.ambientHeartbeat);
+  store.set(KEYS.ambientHeartbeat, now);
   if (typeof last !== 'number' || now - last <= GAP_MS) {
     return;
   }
