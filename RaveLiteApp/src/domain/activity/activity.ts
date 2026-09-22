@@ -1,4 +1,4 @@
-import type {ElementId} from '../../theme/elements';
+import {ELEMENT_ORDER, type ElementId} from '../../theme/elements';
 import {EXERCISE_LIBRARY} from '../exercises/library';
 import {
   moveForExercise,
@@ -27,6 +27,7 @@ import {
   subscribeTrainingLog,
 } from '../training/repository';
 import type {MetricKind, TrainingLogEntry} from '../training/types';
+import {logError} from '../diagnostics/errorLog';
 import {POINTS} from './par';
 import {formatCount} from './practice';
 import {
@@ -202,6 +203,29 @@ export function trainElement(
   }
 }
 
+/**
+ * An element nothing knows — from an older build, a hand-edited export or
+ * a bad write — used to flow straight into the day's totals and turn them
+ * into NaN, which showed as a blank Today. It is counted under Core
+ * instead, and said out loud once so it can be found.
+ */
+const reported = new Set<string>();
+
+function knownElement(
+  element: ElementId | undefined,
+  fallback: ElementId = 'heart',
+): ElementId {
+  if (element !== undefined && ELEMENT_ORDER.includes(element)) {
+    return element;
+  }
+  const seen = String(element);
+  if (!reported.has(seen)) {
+    reported.add(seen);
+    logError('activity', `an entry says its element is "${seen}"`);
+  }
+  return fallback;
+}
+
 function completionItems(
   e: CompletionEntry,
   exerciseFor: (id: string) => Exercise | undefined,
@@ -227,7 +251,7 @@ function completionItems(
       items.push({
         ...base,
         id: moves.length === 1 ? e.id : `${e.id}:${m.trackId}`,
-        element: track?.element ?? e.element,
+        element: track?.element ?? knownElement(e.element),
         label: single?.name ?? track?.name ?? 'Set',
         detail: track
           ? formatSetAmount(m.amount, track.unit)
@@ -249,7 +273,7 @@ function completionItems(
     items.push({
       ...base,
       id: e.id,
-      element: e.element,
+      element: knownElement(e.element),
       label: ex?.name ?? (e.exerciseId === 'retro' ? 'Logged later' : 'Drill'),
       detail: counted ?? ex?.dose,
       amount: typeof e.amount === 'number' ? e.amount : undefined,
@@ -316,7 +340,7 @@ function testItem(e: ProgramTestEntry): ActivityItem {
   return {
     id: e.id,
     at: e.at,
-    element: e.element,
+    element: track?.element ?? knownElement(e.element),
     source: 'test',
     label: `${track?.name ?? 'Max'} test`,
     detail: `max ${track ? formatSetAmount(e.max, track.unit) : e.max}`,
