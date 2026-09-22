@@ -224,6 +224,8 @@ export const PACKS: readonly Pack[] = [
     detail: 'USAF, USSF and USMC fitness tests, scored on the official tables.',
     groups: [],
     extras: [
+      'fire.pushups',
+      'fire.situps',
       'earth.plank-test',
       'earth.cft-brick-lifts',
       'fire.pullup-test',

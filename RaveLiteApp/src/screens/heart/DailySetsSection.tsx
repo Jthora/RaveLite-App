@@ -63,6 +63,7 @@ import {blockPieces, runFor, blockTitle} from '../../domain/program/morning';
 
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {STOP_LINE} from '../../domain/exercises/safety';
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const REFRESH_MS = 30_000;
@@ -452,6 +453,7 @@ function MaxTestSheet({
           <Text style={[styles.sheetTitle, {color: el.color}]}>
             Max test · {rung.label}
           </Text>
+          <Text style={styles.sheetStop}>{STOP_LINE}.</Text>
           <Text style={styles.sheetBody}>
             {seconds
               ? 'Warm up, then hold until your form breaks. Log the time.'
@@ -720,6 +722,13 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     ...t.title,
+  },
+  sheetStop: {
+    ...t.body,
+    color: palette.text,
+    fontWeight: '700',
+    marginTop: spacing.xs,
+    lineHeight: 21,
   },
   sheetBody: {
     ...t.body,

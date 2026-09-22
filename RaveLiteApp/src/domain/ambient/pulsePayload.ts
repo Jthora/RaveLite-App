@@ -10,6 +10,7 @@ import type {
 } from '../program/types';
 import type {ReminderPayload} from '../reminders/types';
 import {ELEMENTS, type ElementId} from '../../theme/elements';
+import {safetyFirst} from '../exercises/safety';
 
 /**
  * The notification content for a pulse — shared by the live runtime and
@@ -38,7 +39,8 @@ export function pulsePayload(input: {
     ? EXERCISE_LIBRARY.find(e => e.id === input.exerciseId)
     : undefined;
   const rx = input.prescription;
-  const cue = drill?.cues?.[0];
+  // One line fits: a safety line if the drill has one.
+  const cue = safetyFirst(drill?.cues ?? [])[0];
   return {
     element: input.element,
     color: el.color,

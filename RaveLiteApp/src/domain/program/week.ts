@@ -18,7 +18,9 @@ import type {TrackId, TrackPartner} from './types';
  * balance, a presence drill).
  *
  * Saturdays rotate with the 4-week block: the Air Force test, the Marine
- * PFT, the Marine combat fitness test, then max tests in the deload week.
+ * PFT, the Marine combat fitness test, then max tests in the deload week —
+ * but only for somebody carrying the Military tests pack. Everybody else
+ * gets strides and an easy run.
  */
 
 export {
@@ -225,11 +227,20 @@ export interface DayFocus {
   test?: SaturdayTest;
 }
 
-/** The focus, morning block and any test for `date` in program `week`. */
-export function dayFocus(date: Date, week: number): DayFocus {
+/**
+ * The focus, morning block and any test for `date` in program `week`.
+ * Without `tests`, Saturday is strides and an easy run instead — see
+ * `saturdayTests` in the program repository for who gets tested.
+ */
+export function dayFocus(
+  date: Date,
+  week: number,
+  opts: {tests?: boolean} = {tests: true},
+): DayFocus {
   const weekday = date.getDay();
   const day = FOCUS_WHEEL[weekday];
-  const test = weekday === 6 ? SATURDAY_TESTS[testForWeek(week)] : undefined;
+  const test =
+    weekday === 6 && opts.tests ? SATURDAY_TESTS[testForWeek(week)] : undefined;
   return {
     weekday,
     focus: day.focus,

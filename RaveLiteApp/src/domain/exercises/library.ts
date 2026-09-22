@@ -1,4 +1,5 @@
 import {Exercise} from './types';
+import {STOP_LINE} from './safety';
 import {CARRIED_DRILLS} from './kit/carried';
 import {FLOW_DRILLS} from './kit/flow';
 import {MORE_FLOW_DRILLS} from './kit/flowMore';
@@ -828,6 +829,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The Marine test plank: hold it as long as your form is good.',
     dose: '1 hold for time',
     cues: [
+      STOP_LINE,
       'Warm up with an easy 20-second plank, then rest a minute',
       'Forearms under the shoulders, body in one line, glutes tight',
       'Stop the clock when your hips drop or rise',
@@ -844,10 +846,10 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The combat fitness test lift, with a bag of bricks as the can.',
     dose: '2 min, most lifts',
     cues: [
+      STOP_LINE,
       'About 6 bricks in a strong bag make roughly 30 lb',
       'Do this outside; indoor ceilings are too low',
-      'Start at the shoulders, press to straight arms overhead',
-      'Ribs down and glutes tight so the lower back does not arch',
+      'Press from the shoulders to straight arms; ribs down, glutes tight',
       'Log the count in Goals',
     ],
     targets: ['Test', 'Strength', 'Conditioning'],
@@ -1272,6 +1274,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'USSF PFT event: as many push-ups as you can in 1 minute.',
     dose: '1 min AMRAP',
     cues: [
+      STOP_LINE,
       'Hands shoulder-width, body in one line, ribs down',
       'Chest down to fist height, then arms fully straight',
       'Keep a smooth pace; do not rush reps and lose form',
@@ -1287,6 +1290,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'USSF PFT: most sit-ups in 1 minute, without gripping your belly.',
     dose: '1 min AMRAP',
     cues: [
+      STOP_LINE,
       'Breathe out on the way up; do not suck in your belly',
       'Hands crossed on your chest; elbows touch your thighs',
       'Keep your heels on the floor',
@@ -1302,6 +1306,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The USSF PFT run. Build endurance before you push the pace.',
     dose: '1.5 mi for time',
     cues: [
+      STOP_LINE,
       'Warm up first: 5 min easy and 4 strides',
       'Run an even pace; the first half should feel comfortable',
       'Nose breathing in zone 2; mouth and nose at tempo pace',
@@ -1661,10 +1666,10 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The Marine test pull-ups: most strict reps from a dead hang.',
     dose: '1 set, most reps',
     cues: [
+      STOP_LINE,
       'Test the hang point first',
       'Warm up with scap pulls and 2 easy pull-ups, then rest 2 min',
-      'Start each rep from straight arms; pull your chin over the edge',
-      'Do not swing or kip',
+      'From straight arms, pull your chin over the edge; no swing or kip',
       'Log the count in Goals',
     ],
     targets: ['Test', 'Strength', 'Grip'],
@@ -1678,6 +1683,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The Air Force and Space Force run: two miles for time.',
     dose: '2 mi for time',
     cues: [
+      STOP_LINE,
       'Warm up: 5 min easy jog and 4 strides',
       'Hold an even pace: the first mile should feel controlled',
       'Log the time in Goals when you get back',
@@ -1693,6 +1699,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The Marine run: three miles for time.',
     dose: '3 mi for time',
     cues: [
+      STOP_LINE,
       'Warm up: 5 min easy jog and 4 strides',
       'Start at goal pace, not faster: 7:00 a mile is a 21:00 finish',
       'A loop a little over 3 miles also works; it counts at the same pace',
@@ -1709,6 +1716,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The first combat fitness test event: half a mile for time.',
     dose: '880 yd (805 m) for time',
     cues: [
+      STOP_LINE,
       'Mark out a half-mile course first',
       'Warm up: 5 min easy jog and 3 strides',
       'Run fast but even; do not slow down in the second half',
@@ -1725,6 +1733,7 @@ export const AUTHOR_LIBRARY: Exercise[] = [
     purpose: 'The combat fitness test shuttle course over 25-yard lengths.',
     dose: '1 course for time',
     cues: [
+      STOP_LINE,
       'Mark out a 25-yard lane',
       'Sprint, crawl, drag and carry, then push-ups and a final sprint',
       'With no partner, drag and carry a backpack of bricks',

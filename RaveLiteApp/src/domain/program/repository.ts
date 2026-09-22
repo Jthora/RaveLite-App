@@ -18,6 +18,8 @@ import type {DayPrescription, ProgramState, TrackId, TrackState} from './types';
 import {
   dayDensity,
   loadFacts,
+  loadPacks,
+  loadProfile,
   loadStarting,
   rampIsPaused,
   trainsToday,
@@ -162,7 +164,26 @@ export function prescriptionsFor(
 /** `date`'s focus, morning block and any Saturday test, in its program week. */
 export function focusFor(date: Date = new Date()): DayFocus {
   const program = loadProgram(date);
-  return dayFocus(date, programWeek(program.startDay, date));
+  const week = programWeek(program.startDay, date);
+  return dayFocus(date, week, {tests: saturdayTests(week)});
+}
+
+/** The first week anyone set up since 22 Sep 2026 is tested: block two. */
+export const FIRST_TEST_WEEK = 5;
+
+/**
+ * Whether Saturdays are max-effort tests.
+ *
+ * Only with the Military tests pack: a flat-out test is a choice, not a
+ * default. And not in the first four weeks for anybody who went through
+ * setup, so the first test comes after a block of training rather than
+ * on day six. An install from before setup keeps its rotation.
+ */
+export function saturdayTests(week: number): boolean {
+  if (!loadPacks().includes('military-tests')) {
+    return false;
+  }
+  return loadProfile().startedSetupAt === undefined || week >= FIRST_TEST_WEEK;
 }
 
 /** Days of asks kept for the daily review. */

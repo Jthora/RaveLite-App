@@ -61,7 +61,7 @@ it('with every pack off, there is still a whole program', () => {
 
   // And the base movements specifically: nothing here is a specialism.
   for (const id of [
-    'fire.pushups',
+    'fire.pushup-groove',
     'earth.squat',
     'earth.plank',
     'air.chin-tuck',

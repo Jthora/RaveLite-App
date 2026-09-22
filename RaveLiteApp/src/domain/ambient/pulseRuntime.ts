@@ -38,6 +38,7 @@ import {
 import {pagingAllowedAt} from './activeHours';
 import {doneFields, pulsePayload} from './pulsePayload';
 import {chooseCueRoute, cueSettingsFor} from './cueVolume';
+import {safetyFirst} from '../exercises/safety';
 import {
   getInterruptionFilter,
   getRingerMode,
@@ -110,7 +111,7 @@ export function getActivePulseSummary(): ActivePulseSummary | undefined {
     drillId: drill?.id ?? active.exerciseId ?? 'unknown',
     drillName: active.prescription?.label ?? drill?.name ?? 'Pulse',
     durationSec: drill?.approxSeconds ?? 60,
-    cuesShort: drill?.cues?.slice(0, 4) ?? [],
+    cuesShort: safetyFirst(drill?.cues ?? []).slice(0, 4),
     prescription: active.prescription,
     note: active.note,
   };
