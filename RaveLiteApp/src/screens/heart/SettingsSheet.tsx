@@ -15,17 +15,15 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {formatHM} from '../../components/ambient/format';
 import {Tap} from '../../components/Tap';
 import {MyDaySheet} from '../../components/today/MyDaySheet';
-import {
-  getActiveHours,
-  readPauseUntil,
-  setActiveHours,
-} from '../../domain/ambient/activeHours';
+import {getActiveHours, readPauseUntil} from '../../domain/ambient/activeHours';
 import {setPause, type PauseDurationKey} from '../../domain/ambient/pause';
 import {
   loadPlan,
   savePlan,
   subscribePlan,
 } from '../../domain/reminders/repository';
+import {hasMealChecks} from '../../domain/reminders/defaultPlan';
+import {moveMyDay, setMealChecks} from '../../domain/reminders/moveDay';
 import {getPlace} from '../../domain/conditions/weather';
 import type {Plan} from '../../domain/reminders/types';
 import {store} from '../../storage';
@@ -505,6 +503,30 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                 </Tap>
               </View>
 
+              <View style={styles.row}>
+                <View style={styles.rowText}>
+                  <Text style={styles.rowTitle}>Meal check-ins</Text>
+                  <Text style={styles.rowValue}>
+                    {hasMealChecks(plan)
+                      ? 'On: one before lunch and one before dinner.'
+                      : 'Off. Turn on for a check-in before lunch and dinner.'}
+                  </Text>
+                </View>
+                <Tap
+                  testID="meals-toggle"
+                  variant="ghost"
+                  color={palette.textDim}
+                  onPress={() => setMealChecks(!hasMealChecks(plan))}
+                  accessibilityRole="switch"
+                  accessibilityState={{checked: hasMealChecks(plan)}}
+                  accessibilityLabel="Meal check-ins"
+                  style={styles.rowBtn}>
+                  <Text style={styles.rowBtnText}>
+                    {hasMealChecks(plan) ? 'Turn off' : 'Turn on'}
+                  </Text>
+                </Tap>
+              </View>
+
               {replacedAt !== undefined ? (
                 <View style={styles.row}>
                   <View style={styles.rowText}>
@@ -543,7 +565,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
           value={myDay}
           onClose={() => setMyDayOpen(false)}
           onSave={value => {
-            setActiveHours(value);
+            moveMyDay(value);
             setMyDayOpen(false);
           }}
         />

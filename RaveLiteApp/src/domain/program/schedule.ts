@@ -20,6 +20,11 @@ import type {DayPrescription, SetFire, TrackId} from './types';
  *     queues up behind a water call.
  *   - A round that can't be placed within SPILL_MS after dayEnd is dropped
  *     rather than chiming late at night.
+ *
+ * A day that ends past midnight (22:00 → 06:00) still belongs to calendar
+ * days, because streaks, the ramp and the log all count those. Its
+ * calendar day has two parts — 00:00 to the end, then the start to
+ * midnight — and the rounds spread across both, in time order.
  */
 
 export const MIN_GAP_MS = 8 * 60_000;
@@ -58,30 +63,31 @@ export function placeRounds(input: PlaceInput): SetFire[] {
     rounds,
     blockedTs = [],
   } = input;
-  const start = atLocal(date, dayStart);
-  const end = atLocal(date, dayEnd) - endMarginMs;
-  if (end <= start || rounds.length === 0) {
+  const parts = dayParts(date, dayStart, dayEnd, endMarginMs);
+  const span = parts.reduce((sum, p) => sum + (p.end - p.start), 0);
+  if (span <= 0 || rounds.length === 0) {
     return [];
   }
-  const span = end - start;
   const count = rounds.length;
-  const day = localDayKey(start);
+  const midnight = new Date(date);
+  midnight.setHours(0, 0, 0, 0);
+  const day = localDayKey(midnight.getTime());
 
   const placed: SetFire[] = [];
   let last = -Infinity;
   for (const round of rounds) {
-    const ideal = start + ((round.index - 0.5) * span) / count;
-    let ts = Math.max(start, Math.round(ideal / MINUTE) * MINUTE);
+    const {part, ideal} = locate(parts, ((round.index - 0.5) * span) / count);
+    let ts = Math.max(part.start, Math.round(ideal / MINUTE) * MINUTE);
     while (
       ts - last < MIN_GAP_MS ||
       blockedTs.some(b => Math.abs(b - ts) < CLEARANCE_MS)
     ) {
       ts += MINUTE;
-      if (ts > end + SPILL_MS) {
+      if (ts > part.limit) {
         break;
       }
     }
-    if (ts > end + SPILL_MS) {
+    if (ts > part.limit) {
       continue;
     }
     const lead = round.moves[0];
@@ -100,6 +106,62 @@ export function placeRounds(input: PlaceInput): SetFire[] {
     last = ts;
   }
   return placed;
+}
+
+interface DayPart {
+  start: number;
+  /** Where rounds stop being spread. */
+  end: number;
+  /** The latest a round pushed along by its neighbours may still land. */
+  limit: number;
+}
+
+/** The parts of one calendar day that My day covers, in time order. */
+function dayParts(
+  date: Date,
+  dayStart: string,
+  dayEnd: string,
+  endMarginMs: number,
+): DayPart[] {
+  const start = atLocal(date, dayStart);
+  const end = atLocal(date, dayEnd);
+  if (end > start) {
+    const stop = end - endMarginMs;
+    return stop > start ? [{start, end: stop, limit: stop + SPILL_MS}] : [];
+  }
+  if (end === start) {
+    return [];
+  }
+  const midnight = atLocal(date, '00:00');
+  const nextMidnight = new Date(midnight);
+  nextMidnight.setDate(nextMidnight.getDate() + 1);
+  const early = end - endMarginMs;
+  const parts: DayPart[] = [];
+  if (early > midnight) {
+    parts.push({start: midnight, end: early, limit: early + SPILL_MS});
+  }
+  // The late part runs to midnight and stops there: a round after it
+  // would be tomorrow's.
+  const late = nextMidnight.getTime();
+  parts.push({start, end: late, limit: late - MINUTE});
+  return parts;
+}
+
+/** Which part an offset into the spread lands in, and where. */
+function locate(
+  parts: readonly DayPart[],
+  offset: number,
+): {part: DayPart; ideal: number} {
+  let rest = offset;
+  for (const part of parts) {
+    const length = part.end - part.start;
+    if (rest < length) {
+      return {part, ideal: part.start + rest};
+    }
+    rest -= length;
+  }
+  const lastPart = parts[parts.length - 1];
+  return {part: lastPart, ideal: lastPart.end};
 }
 
 export interface SelectInput {

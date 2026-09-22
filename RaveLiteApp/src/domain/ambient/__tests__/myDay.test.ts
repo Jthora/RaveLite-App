@@ -1,7 +1,11 @@
 import {store} from '../../../storage';
 import {DEFAULT_PLAN} from '../../reminders/defaultPlan';
 import {expandPlanToFires, planPulseId} from '../../reminders/expandPlan';
-import {setActiveHours, subscribeActiveHours} from '../activeHours';
+import {
+  setActiveHours,
+  subscribeActiveHours,
+  withinActiveHours,
+} from '../activeHours';
 import {reconcilePlan} from '../planScheduler';
 import * as runtime from '../pulseRuntime';
 import {
@@ -62,6 +66,18 @@ describe('My day', () => {
     expect(fires[fires.length - 1].ts).toBeLessThanOrEqual(
       at(20) - ROUND_END_MARGIN_MS + SPILL_MS,
     );
+  });
+});
+
+describe('My day past midnight', () => {
+  it('still gives a night shift its rounds, inside its hours', () => {
+    const night = {start: '22:00', end: '06:00', daysMask: 0b1111111};
+    setActiveHours(night);
+    const {fires} = setsToday(at(0, 1));
+    expect(fires.length).toBeGreaterThan(0);
+    for (const f of fires) {
+      expect(withinActiveHours(new Date(f.ts), night)).toBe(true);
+    }
   });
 });
 

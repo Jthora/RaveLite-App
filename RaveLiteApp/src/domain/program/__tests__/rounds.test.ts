@@ -141,6 +141,47 @@ describe('placeRounds', () => {
   });
 });
 
+describe('placeRounds past midnight', () => {
+  const rounds = groupIntoRounds(monday);
+  // A night shift: 18:00 to 06:00 the next morning.
+  const fires = placeRounds({
+    date: MONDAY,
+    dayStart: '18:00',
+    dayEnd: '06:00',
+    endMarginMs: 30 * 60_000,
+    rounds,
+  });
+  const next = new Date(2026, 8, 15).getTime();
+
+  it('places every round inside this calendar day', () => {
+    expect(fires).toHaveLength(rounds.length);
+    for (const f of fires) {
+      expect(f.ts).toBeGreaterThanOrEqual(MONDAY.getTime());
+      expect(f.ts).toBeLessThan(next);
+      expect(f.id.startsWith('sets:2026-09-14:')).toBe(true);
+    }
+  });
+
+  it('uses both parts of the day, and none of the gap between', () => {
+    const hours = fires.map(f => new Date(f.ts).getHours());
+    expect(hours.some(h => h < 6)).toBe(true);
+    expect(hours.some(h => h >= 18)).toBe(true);
+    expect(hours.every(h => h < 6 || h >= 18)).toBe(true);
+    // The early part stops before the margin, like an evening would.
+    const early = fires.filter(f => new Date(f.ts).getHours() < 6);
+    const lastEarly = early[early.length - 1].ts;
+    expect(lastEarly).toBeLessThanOrEqual(
+      new Date(2026, 8, 14, 5, 30).getTime(),
+    );
+  });
+
+  it('keeps them in order and apart', () => {
+    for (let i = 1; i < fires.length; i++) {
+      expect(fires[i].ts - fires[i - 1].ts).toBeGreaterThanOrEqual(MIN_GAP_MS);
+    }
+  });
+});
+
 describe('selectUpcomingRounds', () => {
   const rounds = groupIntoRounds(monday);
   const fires = placeRounds({

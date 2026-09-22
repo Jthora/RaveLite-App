@@ -32,7 +32,16 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
     setDraft(d => ({...d, [edge]: shiftHHMM(d[edge], minutes)}));
   const toggleDay = (i: number) =>
     setDraft(d => ({...d, daysMask: d.daysMask ^ (1 << i)}));
-  const valid = draft.end > draft.start && draft.daysMask !== 0;
+  const length = dayLength(draft);
+  const valid = length >= MIN_DAY_MIN && draft.daysMask !== 0;
+  const note =
+    length < MIN_DAY_MIN
+      ? 'My day must be at least 4 hours.'
+      : draft.daysMask === 0
+      ? 'Pick at least one day.'
+      : draft.end < draft.start
+      ? `Ends the next day at ${draft.end}.`
+      : null;
 
   return (
     <Modal
@@ -45,7 +54,7 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
           <Text style={[styles.title, {color: accent}]}>My day</Text>
           <Text style={styles.body}>
             Chimes sound inside My day, rounds spread across it, and the screen
-            dims outside it.
+            dims outside it. It can end after midnight.
           </Text>
           <View style={styles.steppers}>
             <Stepper
@@ -59,6 +68,7 @@ export function MyDaySheet({visible, value, onClose, onSave}: Props) {
               onShift={m => shift('end', m)}
             />
           </View>
+          {note ? <Text style={styles.note}>{note}</Text> : null}
           <View style={styles.days}>
             {DAY_LETTERS.map((letter, i) => {
               const on = (draft.daysMask & (1 << i)) !== 0;
@@ -140,10 +150,23 @@ function Stepper({
   );
 }
 
-/** Shift "HH:MM" by minutes, kept within 05:00–23:30. */
-function shiftHHMM(hhmm: string, minutes: number): string {
+const DAY_MIN = 24 * 60;
+/** Shorter than this and there is no room to spread the rounds. */
+const MIN_DAY_MIN = 4 * 60;
+
+const minutesOf = (hhmm: string) => {
   const [h, m] = hhmm.split(':').map(Number);
-  const total = Math.max(5 * 60, Math.min(23 * 60 + 30, h * 60 + m + minutes));
+  return h * 60 + m;
+};
+
+/** Minutes from start to end. An end before the start is the next day. */
+function dayLength(hours: Pick<ActiveHours, 'start' | 'end'>): number {
+  return (minutesOf(hours.end) - minutesOf(hours.start) + DAY_MIN) % DAY_MIN;
+}
+
+/** Shift "HH:MM" by minutes, round the clock. */
+function shiftHHMM(hhmm: string, minutes: number): string {
+  const total = (((minutesOf(hhmm) + minutes) % DAY_MIN) + DAY_MIN) % DAY_MIN;
   const hh = String(Math.floor(total / 60)).padStart(2, '0');
   const mm = String(total % 60).padStart(2, '0');
   return `${hh}:${mm}`;
@@ -213,6 +236,11 @@ const styles = StyleSheet.create({
     ...t.title,
     color: palette.text,
     fontVariant: ['tabular-nums'],
+  },
+  note: {
+    ...t.caption,
+    color: palette.textDim,
+    marginTop: spacing.sm,
   },
   days: {
     flexDirection: 'row',
