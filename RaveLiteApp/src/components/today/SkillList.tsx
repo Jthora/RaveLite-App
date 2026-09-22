@@ -129,7 +129,7 @@ export function SkillList({
 }
 
 /** A path as one row: its name, how far it goes, how much is cleared. */
-function DisciplineCard({
+export function DisciplineCard({
   discipline,
   version,
   onOpen,

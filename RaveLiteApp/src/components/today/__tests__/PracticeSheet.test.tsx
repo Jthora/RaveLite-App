@@ -72,3 +72,23 @@ it('Back in the circuit editor goes back to Practice, and saves no Untitled circ
   expect(onClose).toHaveBeenCalled();
   act(() => tree.unmount());
 });
+
+it('opens on the path it was asked for', () => {
+  let tree: renderer.ReactTestRenderer | undefined;
+  act(() => {
+    tree = renderer.create(
+      <PracticeSheet
+        visible
+        openOn="dance"
+        onClose={() => {}}
+        onEngageLegs={() => {}}
+      />,
+    );
+  });
+  expect(
+    tree!.root.findAll(
+      (node: ReactTestInstance) => node.props.testID === 'discipline-back',
+    ),
+  ).not.toHaveLength(0);
+  act(() => tree!.unmount());
+});

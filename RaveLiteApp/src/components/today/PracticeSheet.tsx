@@ -26,6 +26,8 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onEngageLegs: (legs: CircuitLeg[]) => void;
+  /** Open on this path, e.g. from the Water page. */
+  openOn?: DisciplineId;
 }
 
 /**
@@ -36,7 +38,7 @@ interface Props {
  * Android, Back stops reaching a sheet opened over another once it has
  * been touched.
  */
-export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
+export function PracticeSheet({visible, onClose, onEngageLegs, openOn}: Props) {
   const accent = ELEMENTS.heart.accent;
   const [drilling, setDrilling] = useState<
     {exercise: Exercise; chart?: ChartId; dose?: string} | undefined
@@ -47,14 +49,16 @@ export function PracticeSheet({visible, onClose, onEngageLegs}: Props) {
   const [version, setVersion] = useState(0);
   const backStack = useBackStack();
 
-  // Every opening starts on the list.
+  // Every opening starts on the list, or on the path it was opened for.
   useEffect(() => {
     if (!visible) {
       setDrilling(undefined);
       setPath(undefined);
       setLogged(undefined);
+    } else if (openOn) {
+      setPath(openOn);
     }
-  }, [visible]);
+  }, [visible, openOn]);
 
   return (
     <Modal

@@ -4,7 +4,8 @@
  *
  * Under the element's name: the day in numbers and the best result of the
  * last 30 days. Then a drill to try now (Done logs it, Swap offers the
- * next, Library opens the rest), the last 14 days as a ribbon to pick a
+ * next, Library opens the rest), on Water the prop, dance and dance
+ * combat paths (they open in Practice), the last 14 days as a ribbon to pick a
  * day, and that day's log from every source — chimes and rounds, drill
  * taps, circuit legs, Train entries and max tests. Train entries open for
  * edit; + Log adds one.
@@ -22,10 +23,13 @@ import {Tap} from '../../components/Tap';
 import {DayList} from '../../components/today/DayList';
 import {LoggedSheet} from '../../components/today/LoggedSheet';
 import {MissingSheet} from '../../components/today/MissingSheet';
+import {DisciplineCard} from '../../components/today/SkillList';
 import {CalendarPicker} from '../../components/training/CalendarPicker';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {subscribeActivity} from '../../domain/activity/activity';
 import {takeBack} from '../../domain/activity/corrections';
+import {skillGroupsFor} from '../../domain/activity/practice';
+import {disciplineById} from '../../domain/exercises/disciplines';
 import {
   buildDayRibbon,
   elementActivityInRange,
@@ -34,7 +38,11 @@ import {
 import {streakDays, windowStart} from '../../domain/activity/stats';
 import type {Target} from '../../domain/exercises/types';
 import {entriesForDay} from '../../domain/journal/journal';
-import {dailyPar, showsGrades} from '../../domain/profile/repository';
+import {
+  dailyPar,
+  loadFacts,
+  showsGrades,
+} from '../../domain/profile/repository';
 import {
   getElementPrefs,
   setElementPrefs,
@@ -48,6 +56,7 @@ import {
 } from '../../domain/training/repository';
 import type {TrainingLogEntry} from '../../domain/training/types';
 import {MS_PER_DAY} from '../../lib/constants';
+import {requestPractice} from '../../shell/practiceRequest';
 import type {ElementIdentity} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -120,6 +129,21 @@ export function ElementPage({element, onBack}: Props) {
     // `version` is the rebuild trigger; the reads go to storage directly.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day, element.id, version]);
+
+  // Water is flow: its page points at the prop, dance and dance combat
+  // paths, which live in Practice — the same ones Practice lists.
+  const paths = useMemo(
+    () =>
+      element.id !== 'water'
+        ? []
+        : skillGroupsFor(loadFacts()).flatMap(group => {
+            const path = group.discipline
+              ? disciplineById(group.discipline)
+              : undefined;
+            return path ? [path] : [];
+          }),
+    [element.id],
+  );
 
   const changeFocus = useCallback(
     (next: Target[]) => {
@@ -236,6 +260,25 @@ export function ElementPage({element, onBack}: Props) {
         version={version}
         onOpenLibrary={() => setLibraryOpen(true)}
       />
+
+      {paths.length > 0 ? (
+        <View testID="water-paths" style={styles.paths}>
+          <Text accessibilityRole="header" style={styles.eyebrow}>
+            PATHS IN PRACTICE
+          </Text>
+          {paths.map(path => (
+            <DisciplineCard
+              key={path.id}
+              discipline={path}
+              version={version}
+              onOpen={() => {
+                requestPractice(path.id);
+                onBack?.();
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
 
       <DayRibbon
         days={view.ribbon}
@@ -367,6 +410,14 @@ const styles = StyleSheet.create({
   },
   logText: {
     ...t.subtitle,
+  },
+  paths: {
+    gap: spacing.sm,
+  },
+  eyebrow: {
+    ...t.caption,
+    color: palette.textFaint,
+    letterSpacing: 1.5,
   },
   dayRow: {
     flexDirection: 'row',

@@ -8,7 +8,7 @@
  * Settings, Daily Sets in full, logging a session and practice open as
  * sheets, so the page itself stays a glance.
  */
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {Tap} from '../../components/Tap';
@@ -67,6 +67,8 @@ import {palette, radius, spacing, type as t} from '../../theme';
 import {DailySetsSheet} from './DailySetsSheet';
 import {SettingsSheet} from './SettingsSheet';
 import {WeatherSheet} from './WeatherSheet';
+import {subscribePracticeRequest} from '../../shell/practiceRequest';
+import type {DisciplineId} from '../../domain/exercises/disciplines';
 import {DoorMark} from '../../components/icons/DoorMark';
 import {DOOR_COLOR, type DoorId} from '../../components/icons/doorMarks';
 
@@ -85,6 +87,16 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
   const [logOpen, setLogOpen] = useState(false);
   const [editing, setEditing] = useState<TrainingLogEntry | undefined>();
   const [practiceOpen, setPracticeOpen] = useState(false);
+  /** The path Practice opens on, when a page asked for one. */
+  const [practicePath, setPracticePath] = useState<DisciplineId | undefined>();
+  useEffect(
+    () =>
+      subscribePracticeRequest(path => {
+        setPracticePath(path);
+        setPracticeOpen(true);
+      }),
+    [],
+  );
   const [sessionOpen, setSessionOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [setsOpen, setSetsOpen] = useState(false);
@@ -402,9 +414,14 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
         />
         <PracticeSheet
           visible={practiceOpen}
-          onClose={() => setPracticeOpen(false)}
+          openOn={practicePath}
+          onClose={() => {
+            setPracticeOpen(false);
+            setPracticePath(undefined);
+          }}
           onEngageLegs={legs => {
             setPracticeOpen(false);
+            setPracticePath(undefined);
             onEngageLegs(legs);
           }}
         />

@@ -11,6 +11,7 @@ import {addEntry} from '../../../domain/training/repository';
 import {store} from '../../../storage';
 import {ELEMENTS, type ElementId} from '../../../theme/elements';
 import {ElementPage} from '../ElementPage';
+import {subscribePracticeRequest} from '../../../shell/practiceRequest';
 
 const DAY = 86_400_000;
 
@@ -135,4 +136,27 @@ it('a tap on the ribbon shows the day under the finger', () => {
   });
   expect(trainRows(tree)).not.toHaveLength(0);
   act(() => tree.unmount());
+});
+
+it('points the Water page at the paths in Practice', () => {
+  const asked: Array<string | undefined> = [];
+  const off = subscribePracticeRequest(path => asked.push(path));
+  const onBack = jest.fn();
+  let tree: renderer.ReactTestRenderer | undefined;
+  act(() => {
+    tree = renderer.create(
+      <ElementPage element={ELEMENTS.water} onBack={onBack} />,
+    );
+  });
+  expect(byTestId(tree!, 'water-paths')).toBeDefined();
+  act(() => byTestId(tree!, 'discipline-dance').props.onPress());
+  // Practice belongs to Today: the page asks for it and goes back.
+  expect(asked).toEqual(['dance']);
+  expect(onBack).toHaveBeenCalled();
+  off();
+  act(() => tree!.unmount());
+  // Only Water carries them.
+  const fire = renderPage('fire');
+  expect(byTestId(fire, 'water-paths')).toBeUndefined();
+  act(() => fire.unmount());
 });
