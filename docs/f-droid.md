@@ -45,11 +45,11 @@ runs `yarn` before Gradle. Roughly:
 Categories:
   - Sports & Health
 License: Apache-2.0
-SourceCode: https://github.com/<you>/RaveLite-App
-IssueTracker: https://github.com/<you>/RaveLite-App/issues
+SourceCode: https://github.com/Jthora/RaveLite-App
+IssueTracker: https://github.com/Jthora/RaveLite-App/issues
 
 RepoType: git
-Repo: https://github.com/<you>/RaveLite-App.git
+Repo: https://github.com/Jthora/RaveLite-App.git
 
 Builds:
   - versionName: 1.0.0

@@ -164,7 +164,7 @@ The beta goes out through Firebase App Distribution — ask for an invite
 and install without a store account. Or build it yourself:
 
 ```sh
-git clone https://github.com/JordanTrana/RaveLite-App
+git clone https://github.com/Jthora/RaveLite-App
 cd RaveLite-App/RaveLiteApp
 yarn install
 yarn android          # a connected Android device or an emulator
