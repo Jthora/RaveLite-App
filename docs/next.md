@@ -1,50 +1,133 @@
 # What happens next
 
-Written 21 Sep 2026, after Phases 0–4 of [public-beta.md](public-beta.md)
-closed. That plan was about making a one-person app usable by strangers.
-It worked, and it is done. This one is about getting it in front of them.
+Rewritten 23 Sep 2026, for the open beta. The app is built; the work now
+is getting it onto other people's phones, finding out what it does there,
+and keeping the runtime under it from going stale.
 
 Four things are true and shape everything below:
 
-- **The app is ready and nobody has it.** 948 tests, no typecheck errors
-  anywhere (tests included, since 22 Sep), every phase verified on
-  hardware — and about 190 commits that exist only on one laptop.
+- **The app is ready and nobody has it.** 962 tests, no typecheck errors
+  anywhere, six audit phases and five hardening passes done — and about
+  200 commits that exist only on one laptop.
 - **Release builds are still debug-signed.** Fixing that costs an
-  uninstall, which is why export/restore exists.
-- **The positioning is now decided**: lead with the rave identity
-  everywhere, keep the name.
+  uninstall, which is why export and restore exist.
+- **It has run on one phone.** A Redmi A3: low-end, 32-bit, Android 16,
+  and one of the two most aggressive battery managers there is. Half of
+  all Android phones are on versions it has never seen. See
+  [devices.md](devices.md).
 - **The remaining blockers are accounts, not code.**
+
+Three tracks. A is yours and gates everything; B and C are mine and run
+alongside it.
 
 ---
 
-## Now — getting it out (a day, mostly yours)
+## Track A — into someone else's hands (yours, about a day)
 
-Nothing here needs more building. It needs somebody with the passwords.
+Nothing here needs building. It needs somebody with the passwords.
 
-1. **Push.** About 190 commits, and the public repo currently shows stale
-   `main`. `git push origin today-home:main`, or open a PR first. The
-   checks that run on arrival — typecheck, lint, tests, tests again in
-   another timezone — all pass here first; two of them would have failed
-   before 22 Sep.
+1. **Push.** About 200 commits, and the public repo still shows stale
+   `main`. `git push origin today-home:main`, or open a PR first. This is
+   also the first time CI has ever run — typecheck, lint, tests, then
+   tests again in another timezone. All four pass here.
 2. **Set the repo description and topics.** Command in
    [releasing.md](releasing.md).
-3. **Make the signing key.** `scripts/make-keystore.sh`. Export your data
-   first — the first signed build cannot install over the one on your
-   phone.
-4. **Take the screenshots.** `scripts/screenshots.py` does it from demo
-   mode, so nothing of yours is photographed. Drop the good ones into
-   `RaveLiteApp/fastlane/metadata/android/en-US/images/phoneScreenshots/`
-   and the README.
-5. **Firebase, if you want testers before F-Droid.** Steps in
-   [releasing.md](releasing.md); the scripts handle the rest.
+3. **Make the signing key** — `scripts/make-keystore.sh`. **Export your
+   own data first.** The first signed build cannot install over the
+   debug-signed one on your phone: it is export, uninstall, install,
+   restore, in that order, and it is the one irreversible step in this
+   document.
+4. **Take the screenshots.** `scripts/screenshots.py` runs the app in
+   demo mode, so nothing of yours is photographed. The good ones go in
+   `fastlane/metadata/android/en-US/images/phoneScreenshots/` and the
+   README.
+5. **Invite the first testers** through Firebase App Distribution; the
+   scripts handle the build and the upload.
 
 **Done when:** somebody who is not you has it on their phone.
 
 ---
 
-## Next — what the first testers will hit
+## Track B — knowing it works on phones we do not have (mine)
 
-In the order they will hit it, not the order it is fun to build.
+The beta's real risk is not a crash. It is chimes that quietly stop on a
+phone nobody here owns, on an Android version nobody here has run.
+
+6. **The version pass: Android 12, 13, 14 and 15 on emulators.** Half of
+   all phones are there and none of it has ever been run. On each: a
+   chime fires with its buttons, an exact alarm lands, the app comes back
+   after a reboot, and Stay alive tells the truth. Needs the emulator and
+   about 2 GB per system image on this laptop — **say the word and I will
+   set it up**.
+7. **The small-screen and large-text pass.** 320 dp and 1.35× text, on a
+   throwaway install running demo data so no screenshot is of your
+   training. `wm size` and `wm density` make the same phone both.
+8. **A first-24-hours checklist** a tester can actually run: does a chime
+   land, does it survive a night, does it come back after a reboot, does
+   Stay alive say anything. Short enough that people do it.
+9. **A Test Lab run per release**, for real Samsung, Oppo and vivo
+   hardware. The Firebase project already exists.
+
+**Done when:** a chime has landed on every Android version from 12 to 17,
+and on hardware from more than one maker.
+
+---
+
+## Track C — the stack's clock (starts during the beta)
+
+None of this is urgent this week. All of it is overdue by next year.
+
+10. **React Native 0.73.5 → 0.81.** It is 22 months past security
+    end-of-life, and every native library it ships is 4 KB aligned, so on
+    a Pixel 8/9-class phone Android shows a "16 KB backcompat mode" dialog
+    at launch. 0.81 fixes both and is the last version before the New
+    Architecture becomes mandatory. Keep `targetSdk 34` through it; that
+    is a separate change.
+11. **Decide about notifee.** Archived April 2026, last release December
+    2024, and chimes are what this app *is*. It works today and there is
+    no upgrade that keeps things as they are — so this is a decision to
+    make deliberately, after the beta has said how much the chime layer
+    still needs to change.
+12. **`targetSdk` 35 or 36 — only if Play.** Outside Play there is no
+    floor. Raising it forces edge-to-edge (React Native 0.73 does not
+    apply window insets) and predictive back (which breaks the Back
+    handling every sheet relies on). Two real projects, neither needed
+    for F-Droid or direct APKs.
+
+---
+
+## What the beta has to answer
+
+Worth writing down before it starts, so the reports get read for the
+right things:
+
+- **Does the service survive a night on a phone that is not a Redmi?**
+  Samsung sleeps unused apps after three days; Transsion stops foreground
+  services outright. Stay alive records the gaps; the gaps are the answer.
+- **Do the maker instructions work?** They are written from documentation
+  and crowd reports, not from those phones. If a Samsung tester follows
+  them and still loses chimes, the instructions are wrong.
+- **Does the first run make sense to somebody who is not the author?**
+  Setup asks five questions and then the day starts chiming.
+- **Is the ramp right for a body that is not this one?** Everything about
+  the program was tuned on one person.
+- **What does an old Android do?** 12 and 13 are a quarter of phones
+  between them.
+
+## Choosing the first ten testers
+
+Aim the invitations at phones, not just people. In order of what is
+missing: **a Samsung** (most Android phones in the UK and US, and a
+sleeping-apps list nobody here has seen), **a Pixel or a Motorola**
+(stock Android, and the US tail), **an entry-tier phone on Android 13 or
+14**, and — if the reach exists — **a Tecno or Infinix**. Everything
+else is a bonus.
+
+---
+
+## After the beta — the feature backlog
+
+Kept for the reasoning, and for whatever the beta says is missing.
 
 **Built 21 Sep 2026: all three.** The disclaimer, the feedback route and
 flaws are done; what follows is the plan they came from, kept for the
@@ -148,5 +231,5 @@ which point it is a feature rather than a lineage.
 - **A second UI for anything.** Setup is the settings panels. Packs own
   the curriculum. Every time two things have described one thing in this
   codebase, they have drifted.
-- **More archetypes or packs before anyone uses the ten and seven that
-  exist.** There is no evidence yet about which ones people pick.
+- **More archetypes or packs before anyone uses the eleven and eight
+  that exist.** There is no evidence yet about which ones people pick.
