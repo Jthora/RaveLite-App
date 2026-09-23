@@ -128,6 +128,15 @@ android {
                 storePassword project.property('RAVELITE_STORE_PASSWORD')
                 keyAlias project.property('RAVELITE_KEY_ALIAS')
                 keyPassword project.property('RAVELITE_KEY_PASSWORD')
+                // v1 carries Android 5 and 6, v2 everything from 7. Both
+                // are on by default; v3 is not, and v3 is the one that
+                // allows the signing key to be *rotated* later. If this
+                // key ever leaks, without v3 the only answer is to
+                // abandon the app's identity and make everybody install
+                // a new one by hand.
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
             }
         }
     }
