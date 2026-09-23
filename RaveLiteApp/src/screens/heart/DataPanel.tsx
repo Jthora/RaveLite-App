@@ -336,7 +336,7 @@ export function DataPanel() {
         accessibilityRole="button"
         accessibilityState={{expanded: showing}}
         accessibilityLabel="App status and recent problems"
-        style={styles.row}>
+        style={styles.rowTap}>
         <View style={styles.rowInner}>
           <View
             style={[styles.badge, {backgroundColor: tint(hueOf('measure'))}]}>
@@ -440,6 +440,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    backgroundColor: palette.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  /**
+   * The same row, for the one that is itself a button.
+   *
+   * Tap puts its children inside a `flex: 0` view so Android can clip
+   * the ripple. Lay the row out *here* and that wrapper becomes a
+   * row item sized to its own content, leaving `rowInner`'s
+   * `width: '100%'` nothing definite to measure against: it collapses,
+   * the text gets a sliver of width, and the summary wraps a word to a
+   * line until the row is taller than the screen. So this container
+   * only paints — direction, alignment and gap belong to `rowInner`,
+   * which is inside the wrapper and can fill it.
+   */
+  rowTap: {
     backgroundColor: palette.surface,
     borderRadius: radius.md,
     padding: spacing.md,
