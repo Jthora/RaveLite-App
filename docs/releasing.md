@@ -7,6 +7,31 @@ Read the first section before doing anything else in this file.
 
 ---
 
+## Start here: the whole thing, in order
+
+Each step is explained in full further down. Done in this order, nothing
+is lost and nothing has to be undone.
+
+| # | Step | Where |
+|---|---|---|
+| 1 | **Export your data.** Settings → The app → Your data → Export. Save it off the phone. | the phone |
+| 2 | `git push -u origin today-home` — 200 commits, and CI has never run | §1 |
+| 3 | `gh repo edit …` — description and topics | §1 |
+| 4 | `scripts/make-keystore.sh` — asks for a password twice | §2 |
+| 5 | **Back up** `~/.ravelite/release.keystore` and `~/.gradle/gradle.properties` off this laptop | §2 |
+| 6 | `scripts/build-release.sh` — prints which key signed it | §2 |
+| 7 | `adb uninstall com.raveliteapp` — this is where step 1 earns its keep | §0 |
+| 8 | `adb install …/app-armeabi-v7a-release.apk` — the Redmi A3 is 32-bit | §0 |
+| 9 | Settings → The app → Your data → **Restore**, pick the file | the phone |
+| 10 | Firebase project, app id, `firebase login`, tester group | §3 |
+| 11 | `scripts/distribute.sh "what changed"` | §3 |
+
+Steps 1–9 are one sitting, maybe forty minutes. Step 10 is a separate
+job and needs a Google account. Nothing before step 4 is irreversible;
+step 7 is the one that bites if step 1 was skipped.
+
+---
+
 ## 0. The one irreversible thing
 
 Release builds are **debug-signed** today. The debug key is a public key
@@ -19,13 +44,13 @@ through is uninstall, which deletes everything RaveLite knows about you.
 
 So the order is fixed:
 
-1. Open RaveLite → Settings → **Your data** → **Export**, and save the
-   file somewhere that is not the phone.
+1. Open RaveLite → Settings → **The app** → **Your data** → **Export**,
+   and save the file somewhere that is not the phone.
 2. `scripts/make-keystore.sh`
 3. `scripts/build-release.sh`
 4. `adb uninstall com.raveliteapp`
 5. Install the new APK.
-6. Settings → **Your data** → **Restore**, pick the file.
+6. Settings → **The app** → **Your data** → **Restore**, pick the file.
 
 Do step 1 even if you plan to stop after step 2. Especially then.
 
@@ -38,7 +63,7 @@ The repo is already public at **github.com/Jthora/RaveLite-App**, and
 
 Two things are out of date:
 
-- **About 190 commits are unpushed.** Everything from the public-beta
+- **200 commits are unpushed.** Everything from the public-beta
   work, the audit and the hardening passes is local only. Anyone who
   finds the repo today sees old code.
 - **The description is stale.** The public copy was revised on 21 Sep
@@ -150,7 +175,8 @@ description above. If one changes, they all change.
 
 See [f-droid.md](f-droid.md). It needs the repo public with tags,
 screenshots, and a GitLab account for the merge request. The audit is
-done and the app is clean; what remains is submission.
+done, the app is clean, and four screenshots are in place; what remains
+is tags and submission.
 
 ---
 

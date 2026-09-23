@@ -77,7 +77,7 @@ echo
 echo "Your next release build will be signed with this key. It cannot"
 echo "install over the debug-signed app already on your phone:"
 echo
-echo "  1. Open RaveLite, Settings -> Your data -> Export, and keep the file."
+echo "  1. Open RaveLite, Settings -> The app -> Your data -> Export, and keep the file."
 echo "  2. adb uninstall com.raveliteapp"
 echo "  3. Build and install the signed APK."
-echo "  4. Settings -> Your data -> Restore, and pick the file."
+echo "  4. Settings -> The app -> Your data -> Restore, and pick the file."

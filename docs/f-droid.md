@@ -26,10 +26,20 @@ to publish something of yours.
 
 1. **A public git remote with version tags.** F-Droid builds a tag, so
    releases need tagging (`v1.0.0`) and `versionCode` incrementing.
-2. **Screenshots.** They go in
-   `fastlane/metadata/android/en-US/images/phoneScreenshots/`. Every
-   screenshot of this app shows real training data, so these are yours to
-   take and yours to approve.
+2. **Screenshots.** Four are in
+   `fastlane/metadata/android/en-US/images/phoneScreenshots/`: Today,
+   Daily Sets, Practice and Settings. They were taken by
+   `scripts/screenshots.py`, which puts a fictional eleven-week history
+   in front of the real one first, so none of them is anybody's training.
+   Retake them whenever the screens change.
+
+   The deeper screens — the character sheet, Goals, archetypes, packs,
+   Your data — are still missing, because no injected tap reaches a sheet
+   once it is open on the reference phone. Those want photographing by
+   hand, in demo mode: `adb shell am start -a android.intent.action.VIEW
+   -d ravelite://demo/on`, walk to the screen, and `…/demo/off`
+   afterwards. Demo mode never writes, so the real data is safe either
+   way.
 3. **A launcher icon and feature graphic** in `images/` — the launcher
    icon already exists in the app; F-Droid wants a copy here.
 4. **The merge request** to
