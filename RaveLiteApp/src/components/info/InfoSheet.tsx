@@ -13,7 +13,7 @@
  * on Android, Back stops reaching a sheet opened over another once it has
  * been touched.
  */
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
@@ -50,14 +50,23 @@ export function useInfoStack(): InfoStack {
       setStack(s => [...s, card]);
     }
   }, []);
-  return {
-    card: stack[stack.length - 1],
-    depth: stack.length,
-    show,
-    open,
-    back: useCallback(() => setStack(s => s.slice(0, -1)), []),
-    close: useCallback(() => setStack([]), []),
-  };
+  const back = useCallback(() => setStack(s => s.slice(0, -1)), []);
+  const close = useCallback(() => setStack([]), []);
+  // One object while the stack is unchanged. It used to be a new one on
+  // every render, which quietly made every handler that closes a card —
+  // and so every list holding such a handler — new as well, and the
+  // memoised parts of Today redrew for nothing.
+  return useMemo(
+    () => ({
+      card: stack[stack.length - 1],
+      depth: stack.length,
+      show,
+      open,
+      back,
+      close,
+    }),
+    [stack, show, open, back, close],
+  );
 }
 
 /** The pictogram on a soft square of its element's colour. */
