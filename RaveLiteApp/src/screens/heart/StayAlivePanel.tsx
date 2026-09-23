@@ -19,6 +19,8 @@ import {
   type HealthInputs,
   type HealthStatus,
 } from '../../domain/ambient/healthChecks';
+import {NOT_OURS, keepAliveSteps} from '../../domain/ambient/keepAlive';
+import {deviceFacts} from '../../native/deviceFacts';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -73,6 +75,7 @@ export function StayAlivePanel() {
   }
 
   const {checks, warnings} = summarizeHealth(inputs);
+  const keepAlive = keepAliveSteps(deviceFacts().manufacturer);
 
   return (
     <View style={styles.panel}>
@@ -156,6 +159,23 @@ export function StayAlivePanel() {
           </View>
         );
       })}
+
+      {/* What this phone's maker does on top of Android, which no app can
+          read — so it is named rather than checked, and only once
+          something has actually gone wrong. */}
+      {warnings > 0 ? (
+        <View testID="stay-alive-maker" style={styles.maker}>
+          <Text accessibilityRole="header" style={styles.title}>
+            {`What ${keepAlive.maker} phones need`}
+          </Text>
+          {keepAlive.steps.map(step => (
+            <Text key={step} style={styles.detail}>
+              {`• ${step}`}
+            </Text>
+          ))}
+          <Text style={styles.detail}>{NOT_OURS}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -177,6 +197,13 @@ const styles = StyleSheet.create({
     ...t.body,
     color: palette.textDim,
     lineHeight: 21,
+  },
+  maker: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: palette.border,
+    gap: 4,
   },
   row: {
     flexDirection: 'row',
