@@ -79,20 +79,46 @@ const byTestId = (tree: renderer.ReactTestRenderer, id: string) =>
 const textOf = (tree: renderer.ReactTestRenderer) =>
   JSON.stringify(tree.toJSON());
 
-it('says the dangerous part before anything else', () => {
-  // First card, not last: somebody who taps Skip on the opening screen
-  // has still had it in front of them.
+/**
+ * Past the welcome card, standing on the warning — where setup used to
+ * open. Tests about the questions start here, so their step counts mean
+ * the same thing they meant before the welcome card existed.
+ */
+function renderPastWelcome(onDone = jest.fn()) {
+  const r = renderFlow(onDone);
+  act(() => byTestId(r.tree, 'setup-next').props.onPress());
+  return r;
+}
+
+it('opens by saying what the app is, not by warning about chest pain', () => {
   const {tree} = renderFlow();
-  expect(byTestId(tree, 'disclaimer')).toBeDefined();
+  expect(byTestId(tree, 'welcome')).toBeDefined();
+  const said = textOf(tree);
+  expect(said).toContain('chimes through the day');
+  expect(said).toContain('Six questions, then your day');
+  // The warning is one tap away, not on top of the welcome.
+  expect(byTestId(tree, 'disclaimer')).toBeUndefined();
+  act(() => tree.unmount());
+});
+
+it('cannot be skipped past the dangerous part', () => {
+  // Being first and being unskippable are different things, and only the
+  // second one protects anybody: there is no Skip until the warning has
+  // been on screen.
+  const {tree} = renderFlow();
+  expect(byTestId(tree, 'setup-skip')).toBeUndefined();
+
+  act(() => byTestId(tree, 'setup-next').props.onPress());
   const said = textOf(tree);
   expect(said).toContain('not a medical device');
   expect(said).toContain('Stop if it hurts');
   expect(said).toContain('Talk to a doctor');
+  expect(byTestId(tree, 'setup-skip')).toBeDefined();
   act(() => tree.unmount());
 });
 
 it('walks the questions, and every one is a panel Settings also uses', () => {
-  const {tree} = renderFlow();
+  const {tree} = renderPastWelcome();
   act(() => byTestId(tree, 'setup-next').props.onPress());
 
   expect(textOf(tree)).toContain('What are you training for?');
@@ -117,7 +143,7 @@ it('walks the questions, and every one is a panel Settings also uses', () => {
 });
 
 it('shows a real day at the end, and Start closes it for good', () => {
-  const {tree, onDone} = renderFlow();
+  const {tree, onDone} = renderPastWelcome();
   for (let i = 0; i < 7; i += 1) {
     act(() => byTestId(tree, 'setup-next').props.onPress());
   }
@@ -132,7 +158,7 @@ it('shows a real day at the end, and Start closes it for good', () => {
 });
 
 it('asks where you are starting, and seeds the maxes from the answer', () => {
-  const {tree} = renderFlow();
+  const {tree} = renderPastWelcome();
   for (let i = 0; i < 5; i += 1) {
     act(() => byTestId(tree, 'setup-next').props.onPress());
   }
@@ -145,7 +171,7 @@ it('asks where you are starting, and seeds the maxes from the answer', () => {
 });
 
 it('the preview is the program, not a promise about it', () => {
-  const {tree} = renderFlow();
+  const {tree} = renderPastWelcome();
   const line = () => byTestId(tree, 'setup-preview').props.children as string;
   expect(line()).toMatch(/^\d+ chimes a day · \d+ drills$/);
 
@@ -160,7 +186,7 @@ it('the preview is the program, not a promise about it', () => {
 });
 
 it('can be skipped, and skipping leaves a gentle start', () => {
-  const {tree, onDone} = renderFlow();
+  const {tree, onDone} = renderPastWelcome();
   act(() => byTestId(tree, 'setup-skip').props.onPress());
 
   expect(onDone).toHaveBeenCalled();
@@ -177,7 +203,7 @@ it('can be skipped, and skipping leaves a gentle start', () => {
 });
 
 it('steps back on Android Back instead of skipping', () => {
-  const {tree, onDone} = renderFlow();
+  const {tree, onDone} = renderPastWelcome();
   act(() => byTestId(tree, 'setup-next').props.onPress());
   act(() => byTestId(tree, 'setup-next').props.onPress());
   expect(byTestId(tree, 'kit-mat')).toBeDefined();
@@ -192,7 +218,7 @@ it('steps back on Android Back instead of skipping', () => {
 });
 
 it('takes an archetype on the first tap during setup', () => {
-  const {tree} = renderFlow();
+  const {tree} = renderPastWelcome();
   act(() => byTestId(tree, 'setup-next').props.onPress());
   act(() => byTestId(tree, 'archetype-monk').props.onPress());
   __resetProfileCache();
@@ -201,7 +227,7 @@ it('takes an archetype on the first tap during setup', () => {
 });
 
 it('comes back if the app was closed part way through', () => {
-  const {tree} = renderFlow();
+  const {tree} = renderPastWelcome();
   act(() => byTestId(tree, 'setup-next').props.onPress());
   act(() => byTestId(tree, 'setup-next').props.onPress());
   act(() => byTestId(tree, 'kit-mat').props.onPress());

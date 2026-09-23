@@ -49,7 +49,14 @@ adb_ shell am start -n $PKG/.MainActivity >/dev/null 2>&1
 sleep 14
 # Skip setup: it lands on the base program at a beginner's level, and
 # unlike demo mode it is written to disk — which the reboot check needs.
-adb_ shell input tap 655 114
+#
+# Two taps, not one. Setup opens on a welcome card that deliberately has
+# no Skip in its corner, so that the warning after it cannot be jumped
+# over; Next first, then Skip appears. A single tap here silently left
+# every version pass sitting on the welcome card, unconfigured.
+adb_ shell input tap 360 1450   # Next, off the welcome card
+sleep 3
+adb_ shell input tap 655 114    # Skip, now that the warning has been shown
 sleep 10
 
 say "opens" "$(adb_ shell dumpsys activity activities | grep -c "topResumedActivity.*$PKG")"

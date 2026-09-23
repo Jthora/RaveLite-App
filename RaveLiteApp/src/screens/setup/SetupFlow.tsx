@@ -39,6 +39,7 @@ import {ShapePanel} from '../heart/ShapePanel';
 import {DisclaimerCard} from './DisclaimerCard';
 import {MyDayPanel} from './MyDayPanel';
 import {StartingPanel} from './StartingPanel';
+import {WelcomeCard} from './WelcomeCard';
 import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
 import {tint} from '../../theme/hues';
 import {ELEMENT_ORDER, ELEMENTS} from '../../theme/elements';
@@ -65,10 +66,17 @@ interface Step {
 
 const STEPS: readonly Step[] = [
   {
+    key: 'welcome',
+    symbol: 'star',
+    title: 'RaveLite',
+    why: 'This takes about 30 seconds.',
+    panel: WelcomeCard,
+  },
+  {
     key: 'disclaimer',
     symbol: 'warning',
     title: 'Before you start',
-    why: 'This takes about 30 seconds.',
+    why: 'Read this once. It is the only page like it.',
     panel: DisclaimerCard,
   },
   {
@@ -177,15 +185,24 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
             style={[styles.title, {color: accent}]}>
             {last ? "Here's your day" : step.title}
           </Text>
-          <Tap
-            testID="setup-skip"
-            variant="plain"
-            onPress={done}
-            accessibilityRole="button"
-            accessibilityLabel="Skip setup and use the defaults"
-            style={styles.close}>
-            <Text style={styles.closeText}>{last ? '' : 'Skip'}</Text>
-          </Tap>
+          {/* No Skip on the welcome card: the next tap is the warning,
+              and skipping past it is the one shortcut this flow does not
+              offer. From there on it is always available. */}
+          {at > 0 && !last ? (
+            <Tap
+              testID="setup-skip"
+              variant="plain"
+              onPress={done}
+              accessibilityRole="button"
+              accessibilityLabel="Skip setup and use the defaults"
+              style={styles.close}>
+              <Text style={styles.closeText}>Skip</Text>
+            </Tap>
+          ) : (
+            // Holds the corner open, so the header does not change height
+            // between the welcome card and the one after it.
+            <View style={styles.close} />
+          )}
         </View>
 
         <View style={styles.progress}>

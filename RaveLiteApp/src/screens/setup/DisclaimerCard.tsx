@@ -5,10 +5,16 @@
  * has never met them, in rooms it cannot see. That deserves a plain
  * sentence at the start rather than a line in a licence nobody opens.
  *
- * It is the first card in setup rather than the last, so that somebody
- * who taps Skip on the very first screen has still had it in front of
- * them. A disclaimer only shown to people patient enough to finish is a
+ * It comes second, after the card that says what the app is, and Skip
+ * does not exist until this page has been on screen — so nobody reaches
+ * the end of setup, or short-circuits it, without having been shown
+ * this. A disclaimer only shown to people patient enough to finish is a
  * disclaimer shown to the wrong people.
+ *
+ * It opened the flow until 23 Sep 2026, which meant a stranger's first
+ * impression of RaveLite was a warning about chest pain. Being first and
+ * being unskippable turned out to be different things; only the second
+ * one was load-bearing.
  */
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
@@ -41,25 +47,6 @@ export function DisclaimerCard() {
           Talk to a doctor before you start if you are pregnant, are recovering
           from injury or surgery, have a heart or blood-pressure condition, or
           have not been active for a long time.
-        </Text>
-      </View>
-      <View style={[styles.card, {borderColor: palette.border}]}>
-        <View style={styles.head}>
-          <Symbol name="idea" size={18} />
-          <Text
-            accessibilityRole="header"
-            style={[styles.title, {color: hueOf('idea')}]}>
-            How this goes
-          </Text>
-        </View>
-        <Text style={styles.body}>
-          Six questions, then your day. You can skip any of them. You can change
-          every answer later in Settings. If you skip, you get the base program
-          at a beginner's level.
-        </Text>
-        <Text style={styles.body}>
-          Everything you log stays on this phone. There is no account. Nothing
-          is sent anywhere.
         </Text>
       </View>
     </View>
