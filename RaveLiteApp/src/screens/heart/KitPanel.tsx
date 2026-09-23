@@ -141,6 +141,34 @@ export function KitPanel() {
     [counting],
   );
   const best = useMemo(() => bestNext(counting), [counting]);
+  // "+N drills" and "costs N drills" each walk the library. Thirty tiles
+  // and a few limits did that on every render of this page, including
+  // every tap on it. They only change when the kit does.
+  const counts = useMemo(() => {
+    const cache = new Map<string, number>();
+    return {
+      unlock: (item: KitItem, placeId?: string) => {
+        const key = `u:${item}:${placeId ?? ''}`;
+        const known = cache.get(key);
+        if (known !== undefined) {
+          return known;
+        }
+        const n = unlockCount(item, counting, placeId);
+        cache.set(key, n);
+        return n;
+      },
+      cost: (limit: LimitId, placeId?: string) => {
+        const key = `l:${limit}:${placeId ?? ''}`;
+        const known = cache.get(key);
+        if (known !== undefined) {
+          return known;
+        }
+        const n = limitCost(limit, counting, placeId);
+        cache.set(key, n);
+        return n;
+      },
+    };
+  }, [counting]);
 
   const save = (next: Facts) => {
     setFacts(next);
@@ -261,9 +289,7 @@ export function KitPanel() {
                 tile(
                   item,
                   place.kit.includes(item),
-                  place.kit.includes(item)
-                    ? 0
-                    : unlockCount(item, counting, place.id),
+                  place.kit.includes(item) ? 0 : counts.unlock(item, place.id),
                   () => toggleItem(item, place.id),
                 ),
               )}
@@ -319,7 +345,7 @@ export function KitPanel() {
         <View style={styles.tiles}>
           {LIMITS.map(limit => {
             const on = place.limits.includes(limit.id);
-            const costs = limitCost(limit.id, counting, place.id);
+            const costs = counts.cost(limit.id, place.id);
             return (
               <Tap
                 key={limit.id}
@@ -547,11 +573,8 @@ export function KitPanel() {
           <View style={styles.tiles}>
             {group.items.map(item => {
               const has = facts.kit.includes(item);
-              return tile(
-                item,
-                has,
-                has ? 0 : unlockCount(item, counting),
-                () => toggleItem(item),
+              return tile(item, has, has ? 0 : counts.unlock(item), () =>
+                toggleItem(item),
               );
             })}
           </View>
