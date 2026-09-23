@@ -152,6 +152,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
    *
    * Closing everything first costs a line and removes the whole class.
    */
+  const openSets = useCallback(() => setSetsOpen(true), []);
   const onRowPress = useCallback(
     (row: DayRow) => {
       info.close();
@@ -330,11 +331,7 @@ export function TodayPanel({permission, onElementPress, onEngageLegs}: Props) {
           reason={model.waterReason}
           onAdd={() => logWaterGlass()}
         />
-        <SetsMeters
-          sets={model.sets}
-          onPress={() => setSetsOpen(true)}
-          focus={model.focus}
-        />
+        <SetsMeters sets={model.sets} onPress={openSets} focus={model.focus} />
 
         <View style={styles.sectionRow}>
           <Text

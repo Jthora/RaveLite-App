@@ -167,8 +167,18 @@ function ActiveCard({
     [phase, budget],
   );
 
+  // The countdown's second hand lives here, not in Today's model: ticking
+  // the whole page once a second re-rendered every row of the day list,
+  // and every tap then waited its turn behind that.
+  const [tick, setTick] = useState(now);
+  useEffect(() => {
+    setTick(Math.max(now, Date.now()));
+    const id = setInterval(() => setTick(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [now]);
+
   const windowMs = Math.max(1, active.expiresAt - active.fireAt);
-  const left = Math.max(0, Math.min(1, (active.expiresAt - now) / windowMs));
+  const left = Math.max(0, Math.min(1, (active.expiresAt - tick) / windowMs));
   const title = moves
     ? rx?.roundIndex && rx.rounds
       ? `Round ${rx.roundIndex} of ${rx.rounds}`

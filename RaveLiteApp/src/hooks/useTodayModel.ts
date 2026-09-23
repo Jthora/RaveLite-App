@@ -301,14 +301,9 @@ export function useTodayModel(): TodayModel {
     [activityVersion, day],
   );
 
-  const sounding = model.active !== undefined;
-  useEffect(() => {
-    if (!sounding) {
-      return;
-    }
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, [sounding]);
+  // No second hand here. The chime card keeps its own, because a tick
+  // that re-rendered all of Today — the day list is the whole day — made
+  // every tap wait for the next frame's worth of work.
 
   return {...model, ...history, now};
 }

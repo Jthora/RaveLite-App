@@ -36,7 +36,7 @@ function focusParts(focus: DayFocus): FocusPart[] {
  * meter per track (amount done against the day's quota) in its element's
  * color. Tap for tracks, max tests, level ups and Goals.
  */
-export function SetsMeters({sets, onPress, focus}: Props) {
+function SetsMetersInner({sets, onPress, focus}: Props) {
   const parts = focus ? focusParts(focus) : [];
   const label = [
     sets.total === 0
@@ -131,6 +131,9 @@ export function SetsMeters({sets, onPress, focus}: Props) {
     </Tap>
   );
 }
+
+/** Memoised: one meter per track, unchanged by a sheet opening. */
+export const SetsMeters = React.memo(SetsMetersInner);
 
 const styles = StyleSheet.create({
   card: {

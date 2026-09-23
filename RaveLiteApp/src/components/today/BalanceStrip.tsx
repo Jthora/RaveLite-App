@@ -26,7 +26,7 @@ interface Props {
  * element, so Fire work lifts the others too. Five tiles and nothing else,
  * so the row stays balanced.
  */
-export function BalanceStrip({
+function BalanceStripInner({
   points,
   par = dailyPar(),
   week,
@@ -113,6 +113,10 @@ export function BalanceStrip({
     </View>
   );
 }
+
+/** Memoised for the same reason as the day list: five cells of glyphs and
+ *  dots that a sheet opening cannot change. */
+export const BalanceStrip = React.memo(BalanceStripInner);
 
 const styles = StyleSheet.create({
   row: {

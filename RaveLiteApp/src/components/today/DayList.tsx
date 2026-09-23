@@ -50,7 +50,7 @@ function spoken(row: DayRow): string {
  * The whole day in one list. Rows take their natural height inside the
  * page's scroll view. Skipped and missed rows are dimmed, never red.
  */
-export function DayList({
+function DayListInner({
   rows,
   onRowPress,
   emptyText = "Nothing on today's list yet.",
@@ -154,6 +154,15 @@ export function DayList({
     </View>
   );
 }
+
+/**
+ * Memoised: the day's list is the biggest thing on the screen — every
+ * chime of the day, sounded or not — and it does not change when a sheet
+ * opens over it. Without this, opening Settings re-rendered every row
+ * before the sheet could appear, which on the phone was over a second of
+ * nothing happening.
+ */
+export const DayList = React.memo(DayListInner);
 
 const styles = StyleSheet.create({
   empty: {
