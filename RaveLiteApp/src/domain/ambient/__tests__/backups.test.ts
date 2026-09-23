@@ -3,7 +3,11 @@ import notifee from '@notifee/react-native';
 import {store} from '../../../storage';
 import {entriesForDay} from '../../journal/journal';
 import {BACKUP_OFFSET_MS} from '../backupPlanner';
-import {backupCandidates, reconcileBackupsNow} from '../backupScheduler';
+import {
+  __resetBackupRebuild,
+  backupCandidates,
+  reconcileBackupsNow,
+} from '../backupScheduler';
 import {
   DETACHED_SNOOZE_MS,
   handleNotificationAction,
@@ -36,6 +40,7 @@ beforeEach(() => {
   createTrigger.mockClear();
   cancelTrigger.mockClear();
   getTriggers.mockReset().mockResolvedValue([]);
+  __resetBackupRebuild();
 });
 
 describe('pulse payload', () => {
@@ -271,5 +276,41 @@ describe('round chimes', () => {
         water: true,
       }),
     ]);
+  });
+});
+
+describe('after a force-stop', () => {
+  /**
+   * A force-stop — including the Stop button in the notification shade —
+   * cancels every alarm the app holds and leaves Notifee's record of them
+   * behind. The record is all the app can read, so on the first reconcile
+   * of a process it must not be believed: the backups it names are the
+   * ones that were meant to survive exactly this.
+   */
+  it('rebuilds the backups it is told exist, once per process', async () => {
+    // One backup that is genuinely still wanted, remembered exactly as
+    // Notifee would remember it.
+    const [first] = backupCandidates(NOW);
+    getTriggers.mockResolvedValue([
+      {
+        notification: {id: first.pulseId, data: {backup: '1'}},
+        trigger: {type: 0, timestamp: first.dueAt + BACKUP_OFFSET_MS},
+      },
+    ]);
+
+    // First reconcile of this process: thrown away rather than trusted,
+    // and built again — which is the half that matters.
+    await reconcileBackupsNow(NOW);
+    expect(cancelTrigger).toHaveBeenCalledWith(first.pulseId);
+    expect(
+      createTrigger.mock.calls.some(
+        ([notification]) => notification.id === first.pulseId,
+      ),
+    ).toBe(true);
+
+    // The next reconcile is this process's own work, so it is kept.
+    cancelTrigger.mockClear();
+    await reconcileBackupsNow(NOW + MIN);
+    expect(cancelTrigger).not.toHaveBeenCalledWith(first.pulseId);
   });
 });

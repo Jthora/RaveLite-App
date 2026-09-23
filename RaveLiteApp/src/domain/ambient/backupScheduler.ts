@@ -109,11 +109,37 @@ export function backupCandidates(
   return out;
 }
 
+/**
+ * Whether this process has rebuilt the OS backups from scratch yet.
+ *
+ * A force-stop — including the Stop button Android 13 put in the
+ * notification shade — cancels every alarm the app holds, but leaves
+ * Notifee's own record of them on disk. So the first thing a restarted
+ * process is told is that backups exist which do not, and it schedules
+ * nothing: the chimes with no app behind them are exactly the ones that
+ * were supposed to survive this. Seen on an Android 13 emulator, 23 Sep
+ * 2026 — 7 remembered, 0 held by the OS, and nothing rescheduled until
+ * the record was cleared by hand.
+ *
+ * There is no way to ask the OS what alarms it holds, so the record
+ * cannot be checked. It is thrown away once per process instead, and
+ * built again.
+ */
+let rebuilt = false;
+
 async function run(now: number): Promise<void> {
-  const [existing, exact] = await Promise.all([
+  const [claimed, exact] = await Promise.all([
     listBackupChimes(),
     exactAlarmsAllowed(),
   ]);
+  const firstOfThisProcess = !rebuilt;
+  rebuilt = true;
+  if (firstOfThisProcess) {
+    for (const id of claimed.keys()) {
+      await cancelBackupChime(id).catch(() => {});
+    }
+  }
+  const existing = firstOfThisProcess ? new Map<string, number>() : claimed;
   const {create, cancel} = planBackups({
     now,
     candidates: backupCandidates(now),
@@ -186,6 +212,11 @@ export function startBackupScheduler(): void {
     subscribeProgram(onChange),
     subscribeActiveHours(onChange),
   ];
+}
+
+/** Only for tests: forget that this process has rebuilt. */
+export function __resetBackupRebuild(): void {
+  rebuilt = false;
 }
 
 export function stopBackupScheduler(): void {
