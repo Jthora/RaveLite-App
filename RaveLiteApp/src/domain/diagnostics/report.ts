@@ -12,6 +12,7 @@ import {KEYS} from '../../storage/keys';
 import {persistenceHealth} from '../../storage/persistence';
 import {getFetchReport, getPlace} from '../conditions/weather';
 import {hasDeviceModule} from '../../native/raveLiteDevice';
+import {deviceFacts, deviceLine, standbyLine} from '../../native/deviceFacts';
 import {loadUnits} from '../settings/units';
 import {
   loadArchetype,
@@ -48,6 +49,8 @@ const when = (at: number | undefined, now: number): string => {
 
 /** Everything worth knowing, in the order somebody would ask. */
 export function diagnostics(now: number = Date.now()): Diagnostic[] {
+  const device = deviceFacts();
+  const standby = standbyLine(device);
   const errors: LoggedError[] = readErrors();
   const recent = errors.filter(e => now - e.at < 7 * 86_400_000).length;
   const fetch = getFetchReport();
@@ -64,6 +67,23 @@ export function diagnostics(now: number = Date.now()): Diagnostic[] {
   const mode = loadMode(now);
 
   return [
+    {
+      label: 'Phone',
+      value: deviceLine(device),
+    },
+    {
+      label: 'Screen',
+      value: device.screen,
+    },
+    ...(standby
+      ? [
+          {
+            label: 'Background',
+            value: standby.value,
+            concern: standby.concern,
+          },
+        ]
+      : []),
     {
       label: 'Problems recorded',
       value:

@@ -43,6 +43,7 @@ import {CURRENT_SCHEMA_VERSION, KEYS} from './src/storage/keys';
 import './src/domain/diagnostics/errorLog';
 import {resetPlanToDefault} from './src/domain/reminders/repository';
 import {capTextScaling} from './src/lib/textScaling';
+import {loadDeviceFacts} from './src/native/deviceFacts';
 import {handleDemoLink} from './src/domain/demo/demo';
 import {guessUnitsOnce} from './src/domain/settings/units';
 import {setWeatherPrefs} from './src/domain/conditions/weather';
@@ -110,6 +111,9 @@ function App(): React.JSX.Element {
         void guessUnitsOnce(fresh, getLocale, units =>
           setWeatherPrefs({units}),
         );
+        // What phone this is, so a bug report says so. Nothing waits on
+        // it; it is read once and kept for the report.
+        void loadDeviceFacts();
         if (fresh) {
           // Before anything reads the profile: Skip must land on these.
           beginSetup();

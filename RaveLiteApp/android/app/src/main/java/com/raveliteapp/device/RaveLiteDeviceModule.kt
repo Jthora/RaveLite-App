@@ -2,6 +2,8 @@ package com.raveliteapp.device
 
 import android.Manifest
 import android.app.Activity
+import android.app.ActivityManager
+import android.app.usage.UsageStatsManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -143,6 +145,71 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     result.putString("country", locale.country)
     promise.resolve(result)
   }
+
+  /**
+   * What phone this is, for a bug report. A beta is spread across phones
+   * that behave differently, and a report that does not name the phone
+   * is a guess. Nothing here identifies a person: make, model, OS, the
+   * maker's own skin version, and how tight the device is.
+   */
+  @ReactMethod
+  fun getDeviceInfo(promise: Promise) {
+    val result = Arguments.createMap()
+    result.putString("manufacturer", Build.MANUFACTURER)
+    result.putString("brand", Build.BRAND)
+    result.putString("model", Build.MODEL)
+    result.putString("release", Build.VERSION.RELEASE)
+    result.putInt("sdk", Build.VERSION.SDK_INT)
+    result.putString("abi", Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown")
+    result.putBoolean("is64Bit", Build.SUPPORTED_64_BIT_ABIS.isNotEmpty())
+    // The maker's own version, where the maker publishes one. Each of
+    // these is a system property that only that maker sets.
+    result.putString(
+        "skin",
+        listOf(
+                "ro.miui.ui.version.name" to "MIUI/HyperOS",
+                "ro.build.version.oneui" to "One UI",
+                "ro.build.version.emui" to "EMUI",
+                "ro.build.version.opporom" to "ColorOS",
+                "ro.vivo.os.version" to "Funtouch/OriginOS",
+                "ro.build.version.realmeui" to "realme UI",
+                "ro.hos.version" to "HiOS",
+            )
+            .firstNotNullOfOrNull { (prop, name) ->
+              systemProperty(prop)?.takeIf { it.isNotBlank() }?.let { "$name $it" }
+            }
+            ?: "")
+    val activityManager =
+        reactContext.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+    result.putBoolean("lowRam", activityManager?.isLowRamDevice ?: false)
+    // The standby bucket decides whether alarms fire at all, and
+    // "restricted" also means no start after a reboot.
+    result.putInt(
+        "standbyBucket",
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+          (reactContext.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager)
+              ?.appStandbyBucket
+              ?: 0
+        } else 0)
+    result.putBoolean(
+        "backgroundRestricted",
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+          activityManager?.isBackgroundRestricted ?: false
+        } else false)
+    promise.resolve(result)
+  }
+
+  /** A system property, or null. Only the maker's own skin version is read. */
+  private fun systemProperty(name: String): String? =
+      try {
+        @Suppress("PrivateApi")
+        val get =
+            Class.forName("android.os.SystemProperties")
+                .getMethod("get", String::class.java)
+        (get.invoke(null, name) as? String)?.takeIf { it.isNotEmpty() }
+      } catch (e: Exception) {
+        null
+      }
 
   /** Resolves `{current, max}` for the alarm stream. */
   @ReactMethod

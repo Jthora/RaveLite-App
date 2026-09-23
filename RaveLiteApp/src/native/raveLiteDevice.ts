@@ -38,6 +38,8 @@ interface RaveLiteDeviceNative {
   shareExport?(filename: string, text: string): Promise<boolean>;
   /** Missing on APKs built before units. */
   getLocale?(): Promise<{language: string; country: string}>;
+  /** Missing on APKs built before the device line in the report. */
+  getDeviceInfo?(): Promise<DeviceInfo>;
 }
 
 const native: RaveLiteDeviceNative | undefined =
@@ -226,6 +228,38 @@ export async function getLocale(): Promise<{
   }
   try {
     return await native.getLocale();
+  } catch {
+    return null;
+  }
+}
+
+export interface DeviceInfo {
+  manufacturer: string;
+  brand: string;
+  model: string;
+  release: string;
+  sdk: number;
+  abi: string;
+  is64Bit: boolean;
+  /** The maker's own skin version, or "" where the maker publishes none. */
+  skin: string;
+  lowRam: boolean;
+  /** UsageStatsManager bucket, or 0 when the OS cannot say. */
+  standbyBucket: number;
+  backgroundRestricted: boolean;
+}
+
+/**
+ * What phone this is, for a bug report. Null on a build without the
+ * module — React Native knows the make and model on its own, so the
+ * report still says something (see `deviceFacts.ts`).
+ */
+export async function getDeviceInfo(): Promise<DeviceInfo | null> {
+  if (!native?.getDeviceInfo) {
+    return null;
+  }
+  try {
+    return await native.getDeviceInfo();
   } catch {
     return null;
   }
