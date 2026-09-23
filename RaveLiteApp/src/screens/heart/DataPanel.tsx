@@ -19,6 +19,7 @@ import {
   type Backup,
 } from '../../domain/data/backup';
 import {
+  copyText,
   readExport,
   restartApp,
   saveExport,
@@ -33,7 +34,7 @@ import {
   errorSummary,
   readErrors,
 } from '../../domain/diagnostics/errorLog';
-import {diagnostics} from '../../domain/diagnostics/report';
+import {diagnostics, diagnosticsText} from '../../domain/diagnostics/report';
 import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -365,6 +366,27 @@ export function DataPanel() {
               </Text>
             </View>
           ))}
+          {/* The one thing a bug report needs, in one tap. It names the
+              phone and what the phone is allowing; it holds nothing that
+              was logged. */}
+          <Tap
+            testID="data-copy-status"
+            variant="ghost"
+            color={palette.textDim}
+            onPress={async () => {
+              const ok = await copyText(diagnosticsText());
+              setNote(
+                ok
+                  ? 'Copied. Paste it into your report.'
+                  : 'This build cannot copy. Read it out instead.',
+              );
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Copy the status report"
+            style={styles.rowBtn}>
+            <Text style={styles.rowBtnText}>Copy</Text>
+          </Tap>
+
           {recent.length > 0 ? (
             <>
               <Text style={styles.readoutLabel}>Most recent problems</Text>

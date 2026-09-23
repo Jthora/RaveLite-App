@@ -14,6 +14,9 @@ jest.mock('../../../native/raveLiteDevice', () => ({
   readExport: jest.fn(),
   restartApp: jest.fn(),
   shareExport: jest.fn(),
+  copyText: jest.fn(),
+  hasDeviceModule: () => true,
+  getDeviceInfo: jest.fn(),
 }));
 
 const saveExport = device.saveExport as jest.MockedFunction<
@@ -28,6 +31,7 @@ const restartApp = device.restartApp as jest.MockedFunction<
 const shareExport = device.shareExport as jest.MockedFunction<
   typeof device.shareExport
 >;
+const copyText = device.copyText as jest.MockedFunction<typeof device.copyText>;
 
 const NOW = new Date(2026, 8, 20, 9, 0).getTime();
 
@@ -225,5 +229,19 @@ it('erases only after a confirm, and says so when it cannot restart', async () =
   await press(tree, 'data-wipe');
   expect(store.getString(KEYS.trainingEntries)).toBeUndefined();
   expect(noteText(tree)).toMatch(/open it again/);
+  act(() => tree.unmount());
+});
+
+it('copies the status report in one tap, for a bug report', async () => {
+  copyText.mockResolvedValue(true);
+  const tree = renderPanel();
+  act(() => byTestId(tree, 'data-diagnostics').props.onPress());
+  await act(async () => {
+    byTestId(tree, 'data-copy-status').props.onPress();
+  });
+  const copied = copyText.mock.calls[0][0];
+  expect(copied).toContain('Phone: ');
+  expect(copied).toContain('Schema: ');
+  expect(JSON.stringify(tree.toJSON())).toContain('Copied');
   act(() => tree.unmount());
 });

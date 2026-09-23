@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.usage.UsageStatsManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -197,6 +199,22 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
           activityManager?.isBackgroundRestricted ?: false
         } else false)
     promise.resolve(result)
+  }
+
+  /**
+   * Put text on the clipboard. For the status report, which is the one
+   * thing a person is asked to paste into a bug report.
+   */
+  @ReactMethod
+  fun copyText(text: String, promise: Promise) {
+    try {
+      val clipboard =
+          reactContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+      clipboard.setPrimaryClip(ClipData.newPlainText("RaveLite", text))
+      promise.resolve(true)
+    } catch (e: Exception) {
+      promise.resolve(false)
+    }
   }
 
   /** A system property, or null. Only the maker's own skin version is read. */

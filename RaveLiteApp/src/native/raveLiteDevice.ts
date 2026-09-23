@@ -40,6 +40,8 @@ interface RaveLiteDeviceNative {
   getLocale?(): Promise<{language: string; country: string}>;
   /** Missing on APKs built before the device line in the report. */
   getDeviceInfo?(): Promise<DeviceInfo>;
+  /** Missing on APKs built before the status report could be copied. */
+  copyText?(text: string): Promise<boolean>;
 }
 
 const native: RaveLiteDeviceNative | undefined =
@@ -262,6 +264,18 @@ export async function getDeviceInfo(): Promise<DeviceInfo | null> {
     return await native.getDeviceInfo();
   } catch {
     return null;
+  }
+}
+
+/** Put text on the clipboard. False when the build cannot. */
+export async function copyText(text: string): Promise<boolean> {
+  if (!native?.copyText) {
+    return false;
+  }
+  try {
+    return await native.copyText(text);
+  } catch {
+    return false;
   }
 }
 

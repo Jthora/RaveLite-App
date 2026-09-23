@@ -9,11 +9,20 @@ body:
       description: What you did, what you expected, what you got.
     validations:
       required: true
-  - type: input
-    id: phone
+  - type: textarea
+    id: state
     attributes:
-      label: Phone and Android version
-      placeholder: Redmi A3, Android 14 (HyperOS)
+      label: App status
+      description: >
+        Settings → The app → **App status** → Copy, then paste it here. It
+        names the phone, the Android version, the screen, and whether the
+        phone is allowing chimes at all. It holds nothing about you and
+        nothing you have logged.
+      placeholder: |
+        Phone: Xiaomi 2312CRNCCL · Android 16 (API 36) · MIUI/HyperOS V816 · armeabi-v7a
+        Screen: 360 × 825 dp @2
+        Background: active
+      render: text
     validations:
       required: true
   - type: dropdown
@@ -37,8 +46,11 @@ body:
     attributes:
       label: If chimes are the problem
       description: >
-        Settings → Stay alive lists what this phone needs. Which items are
-        green, and which are not?
+        Settings → The day → **Stay alive** lists what this phone needs.
+        Which rows are not done? And two things that stop chimes without
+        looking like a bug: did you clear the app from recent apps, or
+        press Stop on it in the notification shade? Either one takes the
+        scheduled chimes with it until the app is opened again.
   - type: textarea
     id: export
     attributes:
