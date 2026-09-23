@@ -51,18 +51,21 @@ it('a track shows its ladder, where you are on it, and what rides along', () => 
     'Push-ups',
   ]);
   // A new program starts on the second rung, so the first is behind it.
-  expect(card.parts?.[0].detail).toBe('Climbed');
-  expect(card.parts?.[1].detail).toContain('Where you are');
+  expect(card.parts?.[0].detail).toBe('Done');
+  expect(card.parts?.[1].detail).toContain('You are here');
+  // A number on a card without its unit says nothing.
+  expect(card.parts?.[1].detail).toContain('reps');
   expect(card.related?.[0].detail).toBe('Done after its sets · 30 sec');
 });
 
-it('an attribute shows its gist, how it grows and its sign', () => {
+it('an attribute shows its gist and how it grows, and no astrology', () => {
   const card = infoFor({kind: 'attribute', id: 'toughness'})!;
   expect(card.title).toBe('Toughness');
-  // Plain words first; the sign is last.
   expect(card.subtitle).toBe('Earth · holding');
   expect(card.what).toBe('Holding load.');
-  expect(card.meta?.[card.meta.length - 1]).toBe('Sign: Taurus');
+  // "Sign: Taurus" used to end this card. It changed nothing and
+  // explained nothing to anyone who did not already hold the frame.
+  expect(JSON.stringify(card.meta)).not.toContain('Sign:');
 });
 
 describe('a round', () => {

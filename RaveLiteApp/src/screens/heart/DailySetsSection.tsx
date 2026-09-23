@@ -455,7 +455,7 @@ function TrackCard({
             <Text
               style={[styles.cardBtnText, {color: el.accent}]}
               numberOfLines={1}>
-              Level up → {nextRungLabel}
+              Move up to {nextRungLabel}
             </Text>
           </Tap>
         ) : null}
@@ -466,10 +466,10 @@ function TrackCard({
           variant="plain"
           onPress={onStepDown}
           accessibilityRole="button"
-          accessibilityLabel={`Too hard? Step down to ${easierRungLabel}`}
+          accessibilityLabel={`Step down to ${easierRungLabel}`}
           style={styles.stepDown}>
           <Text style={styles.stepDownText} numberOfLines={1}>
-            Too hard? Step down → {easierRungLabel}
+            Step down to {easierRungLabel}
           </Text>
         </Tap>
       ) : null}

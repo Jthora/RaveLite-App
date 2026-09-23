@@ -83,10 +83,10 @@ export interface StandardEvent {
 }
 
 export const STANDARDS_NOTE =
-  'Targets are a B+ on every test that uses the event. Grades run evenly from the passing minimum (D−) to the max (A+), from 2025–2026 calculator and news sites and a Space Force chart: the official charts would not load. Close, not final. Tap a target to change it.';
+  'Targets are a B+ on every test that uses the result. Grades run evenly from the pass mark (D−) to the top score (A+). The numbers are unofficial. Tap a target to change it.';
 
 export const MARKS_NOTE =
-  "No official charts for these: the marks are RaveLite's own. D− is a start, A+ is strong, and B+ is the goal. Tap a target to change it.";
+  "These grades are RaveLite's own, not official. D− is the pass mark, B+ is your goal, A+ is the top. Tap a target to change it.";
 
 const both = (value: number): Record<Sex, number> => ({
   male: value,

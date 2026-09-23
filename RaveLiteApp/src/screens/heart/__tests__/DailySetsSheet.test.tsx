@@ -122,7 +122,7 @@ it('a track card opens what the track is, and Back keeps working', () => {
       .props.onPress();
   });
   const json = JSON.stringify(tree!.toJSON());
-  expect(json).toContain('THE LADDER');
+  expect(json).toContain('THE STEPS');
   expect(json).toContain('Push-ups');
   // Back closes the card, not the sheet.
   act(() => back());

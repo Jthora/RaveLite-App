@@ -114,14 +114,14 @@ export async function restoreBackup(text: string): Promise<RestoreResult> {
   if (schema > CURRENT_SCHEMA_VERSION) {
     return {
       ok: false,
-      why: `That export is from schema v${backup.schema}; this app reads up to v${CURRENT_SCHEMA_VERSION}.`,
+      why: 'That export was made by a newer RaveLite. Update the app, then restore it.',
     };
   }
   const entries = Object.entries(backup.entries).filter(
     (e): e is [string, Value] => isValue(e[1]),
   );
   if (entries.length === 0) {
-    return {ok: false, why: 'That export is empty.'};
+    return {ok: false, why: 'That export holds no data. Use a different file.'};
   }
   // An older export runs through the migrations on the next launch.
   const withSchema: [string, Value][] = [

@@ -112,7 +112,9 @@ it('says so when there is nothing to share with', async () => {
 
   await press(tree, 'data-share');
 
-  expect(noteText(tree)).toMatch(/nothing to share it with/);
+  // An error that only describes leaves the person holding nothing.
+  expect(noteText(tree)).toMatch(/No app on this phone can send a file/);
+  expect(noteText(tree)).toMatch(/Use Export instead/);
   act(() => tree.unmount());
 });
 

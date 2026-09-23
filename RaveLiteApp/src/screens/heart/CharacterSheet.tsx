@@ -1,7 +1,10 @@
 /**
  * The character sheet — the fifteen attributes as they are drawn in the
- * design: five elements down, three modalities across. Cardinal starts,
- * fixed holds, mutable changes, so a column says as much as a row.
+ * design: five elements down, three kinds of training across. One column
+ * starts a move, one holds, one changes, so a column says as much as a
+ * row. Those columns were headed Cardinal, Fixed and Mutable until the
+ * plain words replaced them; the ids in `MODALITIES` still carry the old
+ * names, because they are storage keys and not prose.
  *
  * Shown inside the Daily Sets page rather than as a sheet of its own: on
  * Android, Back stops reaching a sheet opened over another once it has
@@ -171,7 +174,7 @@ export function CharacterSheet({
               LEVEL
             </Text>
             <Text style={styles.caption}>
-              {into} / {needs} XP
+              {into} of {needs} points to level {level + 1}
             </Text>
           </View>
           <View style={styles.pentagram}>
@@ -202,15 +205,23 @@ export function CharacterSheet({
         </View>
         <Text style={styles.caption}>
           {harmony
-            ? 'Every element reached its goal today. This is a Harmony day.'
-            : 'Reach the goal in all five elements in one day for a Harmony day. Everything you finish adds XP to the attributes it trains.'}
+            ? 'All five bars above reached their goal today. That is a Harmony day.'
+            : 'Fill all five bars above in one day and it counts as a Harmony day. Anything you log raises the levels it trains.'}
         </Text>
         {bonus > 0 ? (
           <Text style={styles.note}>
-            Focus is adding {bonus}% to every attribute&apos;s XP.
+            Your Focus level is high, so everything you log earns {bonus}% more
+            points.
           </Text>
         ) : null}
       </View>
+
+      <Text style={styles.note}>
+        These 15 levels rise from what you log. Each column is one kind of
+        training: starting a move, holding, changing. Levels run 0 to 100. Doing
+        the work raises one to {PRACTICE_CAP}; past that, only a passed test
+        counts.
+      </Text>
 
       <View style={styles.modeRow}>
         <View style={styles.modeSpacer} />
@@ -246,12 +257,6 @@ export function CharacterSheet({
           />
         ))
       )}
-
-      <Text style={styles.note}>
-        Each column is one kind of training. Cardinal: starting a move. Fixed:
-        holding. Mutable: changing. Practice raises an attribute to{' '}
-        {PRACTICE_CAP}. Above that, a passed test sets the level.
-      </Text>
     </ScrollView>
   );
 }

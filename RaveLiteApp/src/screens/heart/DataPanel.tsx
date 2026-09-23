@@ -40,7 +40,8 @@ import {palette, radius, spacing, type as t} from '../../theme';
 
 type Staged = {backup: Backup; text: string};
 
-const NO_PICKER = 'This phone has no file picker RaveLite can use.';
+const NO_PICKER =
+  'This phone has no file picker RaveLite can use. Use Send instead.';
 const DISARM_MS = 6000;
 const DAY_MS = 86_400_000;
 
@@ -114,7 +115,9 @@ export function DataPanel() {
     } else if (result.why === 'unsupported') {
       setNote(NO_PICKER);
     } else if (result.why !== 'cancelled') {
-      setNote('That file could not be written.');
+      setNote(
+        'That file could not be written. Pick a different folder, or use Send.',
+      );
     }
   };
 
@@ -125,7 +128,7 @@ export function DataPanel() {
     if (sent) {
       exported();
     } else {
-      setNote('This phone has nothing to share it with.');
+      setNote('No app on this phone can send a file. Use Export instead.');
     }
   };
 
@@ -137,7 +140,9 @@ export function DataPanel() {
       if (result.why === 'unsupported') {
         setNote(NO_PICKER);
       } else if (result.why !== 'cancelled') {
-        setNote('That file could not be read.');
+        setNote(
+          'That file could not be read. Pick the file again, or another copy.',
+        );
       }
       return;
     }

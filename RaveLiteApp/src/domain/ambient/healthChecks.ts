@@ -62,6 +62,15 @@ const ALARM_ENABLED = 1;
 
 const STATUS_RANK: Record<HealthStatus, number> = {warn: 0, unknown: 1, ok: 2};
 
+/**
+ * Titles are nouns, not claims.
+ *
+ * They used to be phrased as the passing state — "Notifications
+ * allowed", "Alarm volume up" — so a row that was *failing* still read
+ * as a pass, and only the colour and the glyph said otherwise. A person
+ * scanning the list saw eight reassurances. The status word carries the
+ * verdict now, in text, for everybody and not only for TalkBack.
+ */
 export function summarizeHealth(input: HealthInputs): {
   checks: HealthCheck[];
   warnings: number;
@@ -71,7 +80,7 @@ export function summarizeHealth(input: HealthInputs): {
   const notifications = input.notificationsAuthorized;
   checks.push({
     id: 'notifications',
-    title: 'Notifications allowed',
+    title: 'Notifications',
     status: notifications === null ? 'unknown' : notifications ? 'ok' : 'warn',
     detail:
       notifications === false
@@ -83,7 +92,7 @@ export function summarizeHealth(input: HealthInputs): {
   const alarms = input.exactAlarms;
   checks.push({
     id: 'exact-alarms',
-    title: 'Exact alarms allowed',
+    title: 'Exact alarms',
     status: alarms === null ? 'unknown' : alarms === 'disabled' ? 'warn' : 'ok',
     detail:
       alarms === 'disabled'
@@ -95,7 +104,7 @@ export function summarizeHealth(input: HealthInputs): {
   const battery = input.batteryOptimized;
   checks.push({
     id: 'battery',
-    title: 'Battery: no restrictions',
+    title: 'Battery restrictions',
     status: battery === null ? 'unknown' : battery ? 'warn' : 'ok',
     detail: battery
       ? 'Android may pause RaveLite in the background. Set its battery use to "No restrictions".'
@@ -106,10 +115,10 @@ export function summarizeHealth(input: HealthInputs): {
   if (input.powerManagerAvailable) {
     checks.push({
       id: 'autostart',
-      title: 'Autostart on',
+      title: 'Autostart',
       status: input.confirmed.autostart ? 'ok' : 'warn',
       detail:
-        'On HyperOS, RaveLite needs Autostart to restart and keep its alarms. Turn it on, then tap Mark done.',
+        'This phone will not let RaveLite restart itself unless Autostart is on. Turn it on, then tap Mark done.',
       fix: 'power-manager',
       confirm: 'autostart',
     });
@@ -120,7 +129,7 @@ export function summarizeHealth(input: HealthInputs): {
   const gap = input.lastGap;
   checks.push({
     id: 'kept-running',
-    title: 'Chimes kept running',
+    title: 'Chimes running all day',
     status: gap ? 'warn' : 'ok',
     detail: gap
       ? `Android closed RaveLite from ${when(gap.from, gap.to)} to ${hm(
@@ -137,7 +146,7 @@ export function summarizeHealth(input: HealthInputs): {
   const volume = input.alarmVolume;
   checks.push({
     id: 'alarm-volume',
-    title: 'Alarm volume up',
+    title: 'Alarm volume',
     status:
       !input.cuePlayerAvailable || volume === null
         ? 'unknown'
@@ -147,7 +156,7 @@ export function summarizeHealth(input: HealthInputs): {
     detail: !input.cuePlayerAvailable
       ? "This build can't check it. Chimes play at alarm volume."
       : volume === null
-      ? "Couldn't read alarm volume."
+      ? "Couldn't read the alarm volume. Check it with the phone's volume keys."
       : volume.current > 0
       ? `Alarm volume ${volume.current}/${volume.max}. Chimes play at this level.`
       : 'Alarm volume is 0, so chimes are silent. Turn it up.',
@@ -164,7 +173,7 @@ export function summarizeHealth(input: HealthInputs): {
 
   checks.push({
     id: 'on-charger',
-    title: 'On the charger',
+    title: 'Charger',
     status: input.confirmed.onCharger ? 'ok' : 'warn',
     detail: 'The screen stays on all day, so keep the phone plugged in.',
     confirm: 'onCharger',

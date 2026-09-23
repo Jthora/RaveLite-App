@@ -168,6 +168,11 @@ function drillCard(exercise: Exercise): InfoCard {
   };
 }
 
+/** " reps" or " sec" — a number on a card without one says nothing. */
+function setUnit(track: {unit: string}): string {
+  return track.unit === 'seconds' ? ' sec' : ' reps';
+}
+
 function trackCard(id: TrackId): InfoCard | undefined {
   const track = TRACKS.find(t => t.id === id);
   if (!track) {
@@ -195,7 +200,7 @@ function trackCard(id: TrackId): InfoCard | undefined {
       `Up to ${track.maxSets} sets a day`,
       trains(attributesForDrill(rung?.exerciseId, track.id)),
     ].filter((line): line is string => Boolean(line)),
-    partsTitle: 'The ladder',
+    partsTitle: 'The steps',
     parts: track.ladder.map((step, i) => ({
       ref: {kind: 'drill' as const, id: step.exerciseId},
       label: step.label,
@@ -203,10 +208,12 @@ function trackCard(id: TrackId): InfoCard | undefined {
       move: moveForExercise(step.exerciseId),
       detail:
         state && i === state.rung
-          ? `Where you are · next rung at ${step.graduateAt}`
+          ? `You are here · next step at ${step.graduateAt}${setUnit(track)}`
           : i < (state?.rung ?? 0)
-          ? 'Climbed'
-          : `Unlocks at ${track.ladder[i - 1]?.graduateAt ?? step.graduateAt}`,
+          ? 'Done'
+          : `Opens at ${
+              track.ladder[i - 1]?.graduateAt ?? step.graduateAt
+            }${setUnit(track)}`,
     })),
     relatedTitle: 'Partner drills',
     related: track.partners.map(p => ({
@@ -234,12 +241,12 @@ function attributeCard(id: AttributeId): InfoCard {
     meta.push(
       standing.practice >= 85
         ? `Level ${standing.level} · practice cannot raise it further`
-        : `Level ${standing.level} · practice ${standing.practice}, ${
-            standing.xp
-          } of ${standing.toNext} XP to ${standing.practice + 1}`,
+        : `Level ${standing.level}. ${standing.xp} of ${
+            standing.toNext
+          } points to level ${standing.practice + 1}`,
     );
     if (standing.today > 0) {
-      meta.push(`+${standing.today} XP today`);
+      meta.push(`+${standing.today} points today`);
     }
     if (standing.testedBy && standing.tested !== undefined) {
       meta.push(`${standing.testedBy.name} sets it to ${standing.tested}`);
@@ -255,9 +262,9 @@ function attributeCard(id: AttributeId): InfoCard {
       ? 'No test for this yet. Only practice raises it'
       : 'Passing a test can raise it past 85',
   );
-  // The astrology is the author's frame for the grid; it goes last, and
-  // the plain words for the three columns go first.
-  meta.push(`Sign: ${attribute.sign}`);
+  // No `Sign: Aries` line. It was the author's frame for the grid, it
+  // changed nothing, and it explained nothing to anybody who did not
+  // already hold the frame.
   return {
     title: attribute.name,
     subtitle: `${ELEMENTS[attribute.element].name} · ${

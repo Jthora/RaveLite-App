@@ -104,15 +104,22 @@ export function StayAlivePanel() {
               {STATUS_GLYPH[check.status]}
             </Text>
             <View style={styles.copy}>
-              {/* The title names the goal ("Battery: no restrictions"),
-                  so said alone it sounded like success even when the
-                  check had failed. The state is said first. */}
+              {/* The titles used to name the passing state ("Battery: no
+                  restrictions"), so a failing row still read as a pass and
+                  only the colour said otherwise. They are plain nouns now,
+                  and the verdict is a word on the row — for everybody, not
+                  only for the screen reader that always had it. */}
               <View
                 accessible
                 accessibilityLabel={`${STATUS_WORD[check.status]}: ${
                   check.title
                 }. ${check.detail}`}>
-                <Text style={styles.title}>{check.title}</Text>
+                <Text style={styles.title}>
+                  {check.title}
+                  <Text style={{color: STATUS_COLOR[check.status]}}>
+                    {` — ${STATUS_WORD[check.status].toLowerCase()}`}
+                  </Text>
+                </Text>
                 <Text style={styles.detail}>{check.detail}</Text>
               </View>
               {check.fix || check.confirm ? (

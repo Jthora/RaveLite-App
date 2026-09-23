@@ -142,7 +142,8 @@ export function LegEditor({leg, isNew, onSave, onDelete, onCancel}: Props) {
           })}
           {drills.length === 0 && (
             <Text style={styles.emptyText}>
-              No drills available for this element.
+              No drills for this element with your kit. Pick another element, or
+              add kit in Settings.
             </Text>
           )}
         </View>

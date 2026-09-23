@@ -132,7 +132,7 @@ export const ATTRIBUTES: readonly Attribute[] = [
     element: 'heart',
     modality: 'fixed',
     sign: 'Salt',
-    gist: 'Holding your attention. It also speeds up XP for every attribute.',
+    gist: 'Holding your attention. A high Focus earns more points on everything else.',
     how: 'Still sits, single-point focus, the evening review.',
     events: ['still-sit'],
   },
@@ -215,20 +215,23 @@ export interface ModalityInfo {
 }
 
 export const MODALITIES: readonly ModalityInfo[] = [
+  // The names were Cardinal, Fixed and Mutable — astrology, used as the
+  // column headings of the grid, with the plain words buried in a note
+  // below the thing they explained. The plain words are the names now.
   {
     id: 'cardinal',
-    name: 'Cardinal',
-    gist: 'Starting: the first move, force from stillness',
+    name: 'Starting',
+    gist: 'The first move: force from stillness',
   },
   {
     id: 'fixed',
-    name: 'Fixed',
-    gist: 'Holding: capacity, endurance, stillness',
+    name: 'Holding',
+    gist: 'Capacity, endurance, stillness',
   },
   {
     id: 'mutable',
-    name: 'Mutable',
-    gist: 'Changing: pace, range, direction, restoring',
+    name: 'Changing',
+    gist: 'Pace, range, direction, recovery',
   },
 ];
 
