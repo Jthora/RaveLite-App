@@ -20,6 +20,13 @@
          killed. RaveLite is sideloaded, where USE_EXACT_ALARM is granted at
          install. If it ever ships on Google Play this needs policy review. -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Android 12 and 12L predate USE_EXACT_ALARM (API 33), and want this
+         one instead. Without it those phones get inexact backup chimes,
+         which drift with Doze. Capped at 32 so newer Android uses the
+         permission above, which cannot be revoked. -->
+    <uses-permission
+      android:name="android.permission.SCHEDULE_EXACT_ALARM"
+      android:maxSdkVersion="32" />
     <!-- Start the chime runtime again after a reboot or an update, without
          waiting for somebody to open the app. See boot/BootReceiver.kt. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
