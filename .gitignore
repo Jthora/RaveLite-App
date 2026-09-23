@@ -8,3 +8,4 @@
 !RaveLiteApp/android/app/debug.keystore
 *.jks
 firebase.env
+__pycache__/

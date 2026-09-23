@@ -27,6 +27,8 @@ PACKAGE = "com.raveliteapp"
 ACTIVITY = f"{PACKAGE}/.MainActivity"
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "screenshots"
+# Ours, not the name every other tool on the phone also uses.
+DUMP = "/sdcard/ravelite-ui.xml"
 
 
 def adb(*args: str, serial: str | None = None) -> str:
@@ -65,9 +67,25 @@ class Phone:
         return False
 
     def dump(self) -> str:
-        """The view tree. Racy — always re-read after acting."""
-        self.sh("shell", "uiautomator", "dump", "/sdcard/ui.xml")
-        return self.sh("shell", "cat", "/sdcard/ui.xml")
+        """The view tree, or nothing if the screen would not hold still.
+
+        uiautomator will not dump while a window is animating, and this
+        app animates all the time — the pulse on Today never stops. The
+        refusal is quiet, and the trap is what comes next: the previous
+        dump is still sitting on the card, so `cat` cheerfully returns
+        the *last* screen. Taps then land a page behind, which is what
+        put the Today page in daily-sets.png and Daily Sets in
+        character.png.
+
+        So the old file goes first, and a dump that produced no tree
+        returns nothing rather than the wrong one. `find` already
+        retries, which is what gives the animation time to settle.
+        """
+        self.sh("shell", "rm", "-f", DUMP)
+        if "dumped to" not in self.sh("shell", "uiautomator", "dump", DUMP):
+            return ""
+        xml = self.sh("shell", "cat", DUMP)
+        return xml if "<hierarchy" in xml else ""
 
     def find(self, pattern: str, tries: int = 6) -> tuple[int, int] | None:
         """Centre of the first node matching, retrying past a stale dump."""
@@ -80,6 +98,9 @@ class Phone:
                 x1, y1, x2, y2 = map(int, m.groups())
                 return (x1 + x2) // 2, (y1 + y2) // 2
             time.sleep(0.7)
+        # Silence here is how a walk ends up photographing the page it
+        # started on, which looks like a successful run.
+        print(f"               (never found {pattern})", file=sys.stderr)
         return None
 
     def tap(self, at: tuple[int, int]) -> None:
@@ -130,90 +151,98 @@ def shot_today(p: Phone) -> None:
     pass
 
 
+def open_from_today(p: Phone, pattern: str, marker: str, tries: int = 4) -> bool:
+    """Tap something on Today, and make sure the sheet actually opened.
+
+    A tap that does not register is silent, and the shot that follows is
+    a picture of Today with somebody else's caption under it — which is
+    what daily-sets.png was for two runs. So: tap, look for a word only
+    the new screen has, and tap again if it is not there.
+    """
+    for _ in range(tries):
+        at = p.find(pattern, tries=3)
+        if not at:
+            p.scroll(3)
+            at = p.find(pattern, tries=3)
+        if at:
+            p.tap(at)
+        for _ in range(5):
+            if marker in p.dump():
+                return True
+            time.sleep(0.8)
+        p.scroll(4, up=True)
+    print(f"               (never reached {marker})", file=sys.stderr)
+    return False
+
+
 def shot_daily_sets(p: Phone) -> None:
-    at = p.find(by_id("sets-open"))
-    if not at:
-        p.scroll(3)
-        at = p.find(by_id("sets-open"))
-    if at:
-        p.tap(at)
-
-
-def shot_character(p: Phone) -> None:
-    shot_daily_sets(p)
-    at = p.find(by_id("today-focus"))
-    if at:
-        p.tap(at)
-        time.sleep(1.2)
-
-
-def shot_goals(p: Phone) -> None:
-    shot_daily_sets(p)
-    at = p.find(by_id("goals-open"))
-    if at:
-        p.tap(at)
+    open_from_today(p, by_id("sets-open"), 'text="Daily Sets"')
 
 
 def shot_practice(p: Phone) -> None:
     p.scroll(12)
-    at = p.find(by_desc("Practice")) or p.find(by_text("Practice"))
-    if at:
-        p.tap(at)
+    open_from_today(p, by_desc("Practice"), 'text="Practice"')
 
 
 def shot_settings(p: Phone) -> None:
     p.scroll(12)
-    at = p.find(by_desc("Settings"))
-    if at:
-        p.tap(at)
+    open_from_today(p, by_desc("Settings"), 'text="Settings"')
 
 
-def shot_archetypes(p: Phone) -> None:
-    shot_settings(p)
-    for _ in range(8):
-        if p.find(by_id("archetype-raver"), tries=1):
-            return
-        p.scroll(1)
-
-
-def shot_packs(p: Phone) -> None:
-    shot_settings(p)
-    for _ in range(10):
-        if p.find(by_id("pack-dance"), tries=1):
-            return
-        p.scroll(1)
-
-
-def shot_data(p: Phone) -> None:
-    shot_settings(p)
-    p.scroll(16)
-
-
+# Four shots, and not by choice.
+#
+# Everything deeper — the character sheet, Goals, archetypes, packs, Your
+# data — sits behind a tap *inside* a sheet, and on this ROM nothing
+# injected reaches a sheet once it is open. Not a tap, not a swipe, not
+# even Back: the sheet opens from Today, and from then on `adb shell
+# input` may as well be shouting at it, while `dumpsys` still reports the
+# app resumed and in front. uiautomator is no better — asked for the view
+# tree it keeps handing back the page behind the sheet.
+#
+# Whether a finger does better is not a question automation can answer,
+# and it is worth answering before the beta: open Daily Sets and press
+# Close. Until then the deeper screens are photographed by hand.
 SHOTS = [
     ("today", "Today, the page the app lives on", shot_today),
     ("daily-sets", "Daily Sets: the day's tracks", shot_daily_sets),
-    ("character", "The character sheet", shot_character),
-    ("goals", "Goals and standards", shot_goals),
     ("practice", "Practice: the curriculum", shot_practice),
     ("settings", "Settings", shot_settings),
-    ("archetypes", "What you're training for", shot_archetypes),
-    ("packs", "What you're here to learn", shot_packs),
-    ("your-data", "Export, restore, start over", shot_data),
 ]
 
 
-def verify_demo(p: Phone) -> bool:
+def today_numbers(xml: str) -> tuple[str, ...]:
+    """Every number on Today except the clock, which moves by itself."""
+    found = re.findall(r'text="([^"]*)"', xml)
+    keep = [
+        t
+        for t in found
+        if any(c.isdigit() for c in t)
+        and not re.fullmatch(r"\d{1,2}:\d{2}", t.strip())
+    ]
+    return tuple(sorted(keep))
+
+
+def verify_demo(p: Phone, real: tuple[str, ...] = ()) -> bool:
     """Is a fictional life actually on screen?
 
-    The demo seeds eleven weeks, so Today always shows a streak and sets
-    already done. The real app on a fresh morning shows neither. Checking
-    is cheap; being wrong means publishing somebody's training.
+    Two questions, because either alone can be answered wrongly.
+
+    The demo seeds eleven weeks, so Today shows a streak and sets already
+    done — but so does the real app on any afternoon someone has trained,
+    which is most of them. A marker on its own would have waved through a
+    screenshot of the operator's training.
+
+    So the real page is read first, and demo mode has to have *changed*
+    it. If the link never arrived the numbers are identical and nothing
+    is photographed. The real numbers are held in memory for the length
+    of the run and never written anywhere.
     """
     for _ in range(6):
         xml = p.dump()
-        if re.search(r'text="DAILY SETS [1-9]', xml) or re.search(
+        seeded = re.search(r'text="DAILY SETS [1-9]', xml) or re.search(
             r'text="[1-9]\d* ?/ ?8"', xml
-        ):
+        )
+        if seeded and today_numbers(xml) != real:
             return True
         time.sleep(0.8)
     return False
@@ -264,13 +293,24 @@ def main() -> int:
         return 1
 
     demo = not args.no_demo
+
+    # Read the real page first, so demo mode can be checked against it
+    # rather than against a guess about what real data looks like.
+    real_numbers: tuple[str, ...] = ()
+    if demo:
+        relaunch(p, demo=False)
+        if not p.wait_for_app():
+            print("The app did not come up.")
+            return 1
+        real_numbers = today_numbers(p.dump())
+
     relaunch(p, demo)
     if not p.wait_for_app():
         print("The app did not come up.")
         return 1
 
     if demo:
-        if not verify_demo(p):
+        if not verify_demo(p, real_numbers):
             print("Demo mode did not take. Refusing to photograph real data.")
             return 1
         print("Demo mode on — the real data is untouched behind it.")
@@ -279,7 +319,7 @@ def main() -> int:
         for name, why, walk in wanted:
             relaunch(p, demo)
             p.wait_for_app()
-            if demo and not verify_demo(p):
+            if demo and not verify_demo(p, real_numbers):
                 print(f"  {name:<12} SKIPPED: demo mode was not on.")
                 continue
             walk(p)
