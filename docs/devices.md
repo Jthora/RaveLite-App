@@ -135,6 +135,39 @@ the recovery path works — but only when someone opens the app. Between
 those two moments there are no chimes and nothing says so. Anyone who
 taps "stop" on the app in the notification shade lands exactly there.
 
+### What the version pass found (23 Sep 2026)
+
+Every version below was run on an emulator shaped like the reference
+phone — 720 × 1600 at 320 dpi, which is 360 dp wide — with the same six
+checks each time (`scripts/version-pass.sh`). Android 16 is the phone
+itself.
+
+| | 12 (31) | 13 (33) | 14 (34) | 15 (35) | 16 (36) |
+|---|---|---|---|---|---|
+| Installs, sets up, lays out at 360 dp | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Foreground service runs | ✅ | ✅ | ✅ `specialUse` | ✅ | ✅ |
+| Exact alarms | ✅ `permission` | ✅ `policy` | ✅ `policy` | ✅ `policy` | ✅ |
+| Comes back after a reboot, unopened | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Backups return after a force-stop | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+Three things it found, all now fixed:
+
+- **Backup chimes did not come back after a force-stop.** Notifee's
+  record of them survives while the alarms do not, and that record is all
+  the app can read, so a restarted app believed backups existed and
+  scheduled none. Seen first on Android 13; it applies everywhere.
+- **The phone called the app "RaveLiteApp"** — the template's name, never
+  changed — while every instruction the app gives says RaveLite. Seen in
+  the Android 13 notification prompt.
+- **Android 12 was getting inexact backup chimes**, since
+  `USE_EXACT_ALARM` does not exist before API 33. `exactAllowReason=permission`
+  on Android 12 is that fix, proven.
+
+Worth saying what the pass also confirms: the notification permission is
+asked for at the right moment (after setup, not before), and denying it
+leaves an honest banner — "Notifications are off. Chimes can't show
+outside the app" — with the app still working behind it.
+
 **`targetSdk` is not being forced.** Google Play requires API 36 from 31
 August 2026, but F-Droid and direct APKs have no floor, so **34 is fine
 indefinitely**. That matters, because moving to 35 makes edge-to-edge
@@ -254,10 +287,10 @@ would halve that on a 32 GB phone.
 
 Nobody is buying eight phones. In order of value for money:
 
-1. **Emulators, for Android versions.** Free, and version behaviour is
-   where the app's promises break. One image at a time on an 8 GB Mac —
-   the emulator is not installed here yet. Cover **12, 13, 14, 15, 16**
-   and later 17. On each: the chime fires, its buttons work, an exact
+1. **Emulators, for Android versions.** Done for 12, 13, 14 and 15 on
+   23 Sep (see above); 16 is the phone. `scripts/version-pass.sh` runs the
+   six checks against any of them. One image at a time: each is about
+   4 GB, and this laptop has ~20 GB to spare. Android 17 when it matters. On each: the chime fires, its buttons work, an exact
    alarm lands, the app comes back after a reboot, and Stay alive tells
    the truth.
 2. **The Redmi A3**, for the worst case and anything needing a real
