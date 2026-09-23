@@ -245,6 +245,8 @@ export interface DeviceInfo {
   is64Bit: boolean;
   /** The maker's own skin version, or "" where the maker publishes none. */
   skin: string;
+  /** The ROM build, which on some makers is the only version that says much. */
+  build: string;
   lowRam: boolean;
   /** UsageStatsManager bucket, or 0 when the OS cannot say. */
   standbyBucket: number;

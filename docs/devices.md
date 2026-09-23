@@ -121,7 +121,7 @@ What does apply, by version:
 
 | Version | What it does to this app |
 |---|---|
-| **12 (31–32)** | Exact alarms need `SCHEDULE_EXACT_ALARM`; `USE_EXACT_ALARM` does not exist yet, so **backup chimes here are inexact today** and drift with Doze. One line to fix. |
+| **12 (31–32)** | Exact alarms need `SCHEDULE_EXACT_ALARM`; `USE_EXACT_ALARM` does not exist until API 33. Declared since 23 Sep, capped at API 32, so these phones get exact backup chimes rather than ones that drift with Doze. |
 | **13 (33)** | Notifications are off until asked for — already handled. The **FGS Task Manager** lets anyone stop the app from the notification shade, and that stop is a force-stop (see below). An app in the **"restricted" standby bucket gets no `BOOT_COMPLETED` at all** — the likeliest cause of "it didn't come back after a reboot". |
 | **14 (34)** | Service types became mandatory; ours is declared correctly. The **ongoing notification can now be swiped away** by anyone — the service keeps running, the notice does not. |
 | **15 (35)** | The 6-hour service cap applies to `dataSync`/`mediaProcessing` only, not to us. **Force-stopping an app now cancels every pending intent it holds** — every scheduled alarm — and no `BOOT_COMPLETED` arrives until someone opens the app again. |
@@ -281,30 +281,37 @@ Infinix** if the beta reaches Africa or South Asia, and an
 
 ## 9. What to change before the beta
 
-Ranked by value for effort.
+Ranked by value for effort. Items 1, 2, 4 and 6 were done on 23 Sep 2026
+(commits `5760431`, `6caed75`, `bad70cc`, `7d977aa`).
 
-1. **Put the phone in the diagnostics report.** Today "What state this
+1. ✅ **Put the phone in the diagnostics report.** Today "What state this
    is in" says storage, schema, units, place and forecast — and not one
    word about the phone. In a beta whose whole problem space is device
    variation, a report that doesn't name the phone is nearly useless.
    Add: maker and model, Android version and API level, the skin where it
    can be read, ABI, screen dp and density, font scale, low-RAM flag, and
    the standby bucket. Small, and it turns every tester into a data point.
-2. **Declare `SCHEDULE_EXACT_ALARM` with `maxSdkVersion="32"`.** One
+   Shipped with a **Copy** button on App status, and the bug form now asks
+   for what it copies.
+2. ✅ **Declare `SCHEDULE_EXACT_ALARM` with `maxSdkVersion="32"`.** One
    line, and Android 12 and 12L stop getting inexact backup chimes.
 3. **Say something when the app was force-stopped.** A stop from the
    notification shade wipes every scheduled alarm, silently, until
    someone opens the app — verified on the Redmi. The heartbeat already
    notices the gap afterwards; what is missing is naming this cause,
    since it is the one a person can avoid repeating.
-4. **Give Stay alive the maker's own instructions.** It already detects
+4. ✅ **Give Stay alive the maker's own instructions.** It already detects
    what the standard APIs allow. What it cannot detect is the Xiaomi
    autostart gate, Samsung's sleeping list, and their equivalents — and
    those are exactly what kill it. One screen, chosen by
    `Build.MANUFACTURER`, shown when a gap has actually been recorded.
-5. **Check 320 dp and 1.35× text** with `wm size`/`wm density` before
-   anyone else sees the app.
-6. **Delete the two unused dependencies.** Free.
+5. **Check 320 dp and 1.35× text.** Partly done: at the phone's largest
+   text setting every row still renders, capped at 1.35× as designed. The
+   visual pass — is anything clipped, does anything wrap badly — wants a
+   throwaway install in demo mode, so that screenshots are of nobody's
+   training. `wm size 720x1520` and `wm density 240` make the same phone a
+   320 dp one; `wm size reset` puts it back.
+6. ✅ **Delete the two unused dependencies.** Free.
 7. **Plan the React Native 0.81 upgrade** — not for the beta, but before
    the next Android version lands. It is the security fix and the 16 KB
    fix in one move, and it is the last version that does not force an

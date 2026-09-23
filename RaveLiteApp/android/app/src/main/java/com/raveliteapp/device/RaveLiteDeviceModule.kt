@@ -164,11 +164,15 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     result.putInt("sdk", Build.VERSION.SDK_INT)
     result.putString("abi", Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown")
     result.putBoolean("is64Bit", Build.SUPPORTED_64_BIT_ABIS.isNotEmpty())
+    // The ROM build. On Xiaomi this is the only string that says which
+    // HyperOS build it is; the skin property there still says "V140".
+    result.putString("build", Build.VERSION.INCREMENTAL ?: "")
     // The maker's own version, where the maker publishes one. Each of
     // these is a system property that only that maker sets.
     result.putString(
         "skin",
         listOf(
+                "ro.mi.os.version.name" to "HyperOS",
                 "ro.miui.ui.version.name" to "MIUI/HyperOS",
                 "ro.build.version.oneui" to "One UI",
                 "ro.build.version.emui" to "EMUI",

@@ -25,7 +25,8 @@ const phone = (over: Partial<native.DeviceInfo> = {}): native.DeviceInfo => ({
   sdk: 36,
   abi: 'armeabi-v7a',
   is64Bit: false,
-  skin: 'MIUI/HyperOS V816.0.5.0',
+  skin: 'MIUI/HyperOS V140',
+  build: 'V816.0.5.0.WGRMIXM',
   lowRam: true,
   standbyBucket: 10,
   backgroundRestricted: false,
@@ -49,7 +50,7 @@ it('adds what only the native module knows', async () => {
   jest.spyOn(native, 'getDeviceInfo').mockResolvedValue(phone());
   const facts = await loadDeviceFacts();
   expect(deviceLine(facts)).toBe(
-    'Xiaomi 2312CRNCCL · Android 16 (API 36) · MIUI/HyperOS V816.0.5.0 · armeabi-v7a · low-RAM device',
+    'Xiaomi 2312CRNCCL · Android 16 (API 36) · MIUI/HyperOS V140 (V816.0.5.0.WGRMIXM) · armeabi-v7a · low-RAM device',
   );
   expect(standbyLine(facts)).toEqual({value: 'active', concern: false});
 });

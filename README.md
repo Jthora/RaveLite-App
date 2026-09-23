@@ -170,11 +170,25 @@ yarn install
 yarn android          # a connected Android device or an emulator
 ```
 
-Android 13+ asks for notification permission once setup is finished. On
-MIUI/HyperOS phones you must also turn **Autostart** on by hand, or
-chimes stop when the app is backgrounded; Settings › The day › Stay
-alive lists everything this phone needs, with a button for each.
-(Settings is at the bottom of Today.)
+Android 13+ asks for notification permission once setup is finished.
+
+**Your phone may stop the chimes, and only you can allow them.** Every
+large phone maker adds gates on top of Android — an autostart list on
+Xiaomi, a sleeping-apps list on Samsung, a startup manager on Oppo, App
+launch on Huawei, Phone Master on Tecno — and **no app can read any of
+them**. Settings › The day › **Stay alive** lists what this phone needs,
+names your maker's own screens, and says which of them it could not
+check. Two more that catch everyone: clearing RaveLite from recent apps,
+and pressing Stop on it in the notification shade. Either one takes the
+scheduled chimes with it until you open the app again.
+
+It has run on one phone so far — a Redmi A3, which is a low-end 32-bit
+Android 16 device with one of the most aggressive battery managers there
+is. [docs/devices.md](docs/devices.md) is what we know about everything
+else: which Android versions do what, which makers do what, and what is
+worth testing. **Bug reports are most useful with Settings › The app ›
+App status › Copy pasted in** — it names the phone and nothing about
+you.
 
 ## Chimes, notifications and Daily Sets
 

@@ -30,6 +30,8 @@ export interface DeviceFacts {
   /** The maker's own skin, where the maker publishes one. */
   skin?: string;
   abi?: string;
+  /** The ROM build, shown beside the skin because it names the actual ROM. */
+  build?: string;
   lowRam?: boolean;
   /** UsageStatsManager buckets: 10 active … 45 restricted. */
   standbyBucket?: number;
@@ -86,6 +88,7 @@ export async function loadDeviceFacts(): Promise<DeviceFacts> {
       release: more.release || facts.release,
       sdk: more.sdk || facts.sdk,
       skin: more.skin || undefined,
+      build: more.build || undefined,
       abi: more.abi,
       lowRam: more.lowRam,
       standbyBucket: more.standbyBucket || undefined,
@@ -112,7 +115,7 @@ export function deviceLine(from: DeviceFacts = facts): string {
     `Android ${from.release} (API ${from.sdk})`,
   ];
   if (from.skin) {
-    parts.push(from.skin);
+    parts.push(from.build ? `${from.skin} (${from.build})` : from.skin);
   }
   if (from.abi) {
     parts.push(from.abi);
