@@ -63,6 +63,9 @@ export function ThemePanel(): React.JSX.Element {
         style={[styles.eyebrow, {color: accent}]}>
         ▸ THEME
       </Text>
+      <Text style={styles.description}>
+        The mark and colour RaveLite uses everywhere. Nothing else changes.
+      </Text>
       <View style={styles.row}>
         {HEART_VARIANT_ORDER.map(id => {
           const v = HEART_VARIANTS[id];

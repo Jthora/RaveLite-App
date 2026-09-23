@@ -14,7 +14,7 @@
  *                       so cancel discards it instead of orphaning a
  *                       blank window in the draft list.
  */
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {PlanRibbon} from '../../components/plan/PlanRibbon';
@@ -42,6 +42,9 @@ import {DEFAULT_PLAN} from '../../domain/reminders/defaultPlan';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 
+/** How long an armed destructive action stays armed. Matches DataPanel. */
+const DISARM_MS = 6000;
+
 interface Props {
   /** Hands the saved plan back up to HeartScreen so it can call
    *  notifeeScheduler.applyPlan() — keeps native side effects out of
@@ -56,6 +59,17 @@ export function PlanPanel({onPlanCommitted, scroll = true}: Props) {
   const [draft, setDraft] = useState<Plan>(committed);
   const [editingWindowId, setEditingWindowId] = useState<string | null>(null);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  // An armed reset disarms itself. Left armed it would wait, across
+  // closing Settings, one stray tap from taking the whole plan.
+  useEffect(() => {
+    if (!confirmReset) {
+      return;
+    }
+    const timer = setTimeout(() => setConfirmReset(false), DISARM_MS);
+    return () => clearTimeout(timer);
+  }, [confirmReset]);
 
   const dirty = !plansEqual(draft, committed);
   const accent = ELEMENTS.heart.color;
@@ -73,13 +87,28 @@ export function PlanPanel({onPlanCommitted, scroll = true}: Props) {
     setNewlyAddedId(null);
   }, [committed]);
 
+  /**
+   * Two taps, because this one cannot be undone.
+   *
+   * It used to run on the first tap: `resetPlanToDefault` writes to disk
+   * immediately, so a stray finger on a row labelled "Reset to factory
+   * defaults" destroyed every chime time the person had built, with no
+   * confirmation and nothing to go back to. Every other destructive
+   * action in Settings arms first and names what it takes; this one now
+   * matches them.
+   */
   const onResetDefaults = useCallback(() => {
+    if (!confirmReset) {
+      setConfirmReset(true);
+      return;
+    }
+    setConfirmReset(false);
     const fresh = resetPlanToDefault();
     setCommitted(fresh);
     setDraft(fresh);
     setEditingWindowId(null);
     setNewlyAddedId(null);
-  }, []);
+  }, [confirmReset]);
 
   const onAddWindow = useCallback(() => {
     const fresh = makeWindow();
@@ -218,11 +247,22 @@ export function PlanPanel({onPlanCommitted, scroll = true}: Props) {
 
       {/* Footer — destructive reset */}
       <Tap
+        testID="plan-reset"
         variant="plain"
         color={palette.danger}
         onPress={onResetDefaults}
+        accessibilityRole="button"
+        accessibilityLabel={
+          confirmReset
+            ? 'Tap again to delete every chime time you made'
+            : 'Delete my chime times and use the default ones'
+        }
         style={styles.dangerRow}>
-        <Text style={styles.dangerText}>Reset to factory defaults</Text>
+        <Text style={styles.dangerText}>
+          {confirmReset
+            ? 'Tap to confirm. This deletes every chime time you made.'
+            : 'Delete my chime times and use the default ones'}
+        </Text>
       </Tap>
     </Body>
   );

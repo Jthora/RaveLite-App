@@ -44,7 +44,7 @@ export function pulsePayload(input: {
   return {
     element: input.element,
     color: el.color,
-    title: rx ? prescriptionTitle(rx) : drill?.name ?? `${el.name} pulse`,
+    title: rx ? prescriptionTitle(rx) : drill?.name ?? `${el.name} chime`,
     body: withNote(
       input.note,
       rx
@@ -52,8 +52,8 @@ export function pulsePayload(input: {
         : drill?.targets.includes('Hydration')
         ? `${
             cue ?? 'Drink a glass'
-          } · then ${EYE_BREAK_SECONDS} s eyes far away`
-        : cue ?? `Time for ${el.name}.`,
+          }, then look at something far away for ${EYE_BREAK_SECONDS} s`
+        : cue ?? drill?.dose ?? 'Open RaveLite for this one.',
     ),
     exerciseId: drill?.id ?? 'unknown',
     pulseId: input.pulseId,
@@ -85,9 +85,13 @@ function prescriptionBody(rx: SetPrescription, cue?: string): string {
     parts.push(`then ${rx.partner.seconds} s ${rx.partner.label}`);
   }
   if (rx.water) {
-    parts.push('drink a glass of water, then rest your eyes');
+    parts.push(
+      `drink a glass of water, then look at something far away for ${EYE_BREAK_SECONDS} s`,
+    );
   }
-  return parts.length > 0 ? parts.join(' · ') : 'Back to back, crisp reps.';
+  return parts.length > 0
+    ? parts.join(' · ')
+    : 'One set of each, one after the other.';
 }
 
 function prescriptionData(rx: SetPrescription): Record<string, string> {

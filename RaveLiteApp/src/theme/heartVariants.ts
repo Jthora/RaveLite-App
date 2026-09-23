@@ -101,7 +101,15 @@ export interface HeartVariantDef {
   identity: Omit<ElementIdentity, 'id' | 'color' | 'tint' | 'deep'>;
   /** The color this mark wears until the operator picks one. */
   defaultColor: HeartColorId;
-  /** One line for the picker. */
+  /**
+   * What the mark looks like, for the picker — and nothing else.
+   *
+   * These lines used to say what each symbol *meant*: "the quintessence,
+   * the fifth that holds the four". A picker row has one job, which is
+   * to tell someone what they are choosing between, and a reader who
+   * does not already share the frame learns nothing from it. Describe
+   * the shape. The name carries whatever else it carries.
+   */
   description: string;
 }
 
@@ -120,7 +128,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
   core: {
     id: 'core',
     defaultColor: 'orange',
-    description: 'Circled point — the center, the geometric hub.',
+    description: 'A circle with a dot in the middle.',
     identity: {
       name: 'Core',
       domain: 'Center & Cadence',
@@ -136,7 +144,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
   heart: {
     id: 'heart',
     defaultColor: 'magenta',
-    description: 'Heart — the integrator, where the four meet.',
+    description: 'An outline heart.',
     identity: {
       name: 'Heart',
       domain: 'Integration & Cadence',
@@ -152,8 +160,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
   aether: {
     id: 'aether',
     defaultColor: 'white',
-    description:
-      "A Merkaba in lines — Fire's triangle and Water's, crossing. The quintessence, the fifth that holds the four.",
+    description: 'A six-pointed star, drawn in lines.',
     identity: {
       name: 'Æther',
       domain: 'Spirit & Cadence',
@@ -169,8 +176,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
   star: {
     id: 'star',
     defaultColor: 'white',
-    description:
-      'Five-pointed star in lines — a fixed point to steer the day by.',
+    description: 'A five-pointed star, drawn in lines.',
     identity: {
       name: 'Star',
       domain: 'Aim & Cadence',
@@ -186,8 +192,7 @@ export const HEART_VARIANTS: Record<HeartVariantId, HeartVariantDef> = {
   commander: {
     id: 'commander',
     defaultColor: 'white',
-    description:
-      'Starcom — the star with two chevrons: rank earned one set at a time.',
+    description: 'A star above two chevrons.',
     identity: {
       name: 'Starcom',
       domain: 'Command & Cadence',

@@ -142,15 +142,14 @@ async function ensureChannels(): Promise<void> {
         notifee.createChannel({
           ...shared,
           id: channelId(id),
-          name: `${ELEMENTS[id].name} reminders`,
+          name: `${ELEMENTS[id].name} chimes`,
           sound: CHANNEL_SOUND[id],
         }),
         notifee.createChannel({
           ...shared,
           id: quietChannelId(id),
-          name: `${ELEMENTS[id].name} reminders (in-app cue)`,
-          description:
-            'Used while RaveLite plays the cue itself on the alarm stream.',
+          name: `${ELEMENTS[id].name} chimes (silent)`,
+          description: 'Used when RaveLite plays the sound itself.',
         }),
       ];
     }),

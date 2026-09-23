@@ -56,8 +56,8 @@ export function registerAmbientForegroundService(): void {
 async function ensureChannel(): Promise<void> {
   await notifee.createChannel({
     id: CHANNEL_ID,
-    name: 'RaveLite ambient',
-    description: 'Keeps RaveLite awake during active hours.',
+    name: 'RaveLite running',
+    description: 'Keeps RaveLite running during the hours you chose.',
     importance: AndroidImportance.LOW, // no sound / vibration
     visibility: AndroidVisibility.SECRET,
     vibration: false,
@@ -82,7 +82,7 @@ export async function startAmbientForegroundService(): Promise<void> {
   await notifee.displayNotification({
     id: NOTIFICATION_ID,
     title: 'RaveLite',
-    body: 'Ambient pulses active',
+    body: 'Chimes are on. Tap to open.',
     android: {
       channelId: CHANNEL_ID,
       asForegroundService: true,
