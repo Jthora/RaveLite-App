@@ -2,6 +2,8 @@ import {store} from '../../../storage';
 import {authorProfile, saveProfile} from '../../profile/repository';
 import type {SetPrescription} from '../../program/types';
 import {groupCard, infoFor, partsOf, roundCard} from '../info';
+import {STANDARD_EVENTS} from '../../standards/standards';
+import {BUILTIN_METRICS} from '../../training/builtinMetrics';
 
 beforeEach(() => {
   store.clearAll();
@@ -166,4 +168,43 @@ it('a test event says what it asks and what the marks are', () => {
 it('has nothing to say about a measurement or event it does not know', () => {
   expect(infoFor({kind: 'metric', id: 'custom.nope'})).toBeUndefined();
   expect(infoFor({kind: 'event', id: 'nope'})).toBeUndefined();
+});
+
+/**
+ * `what` is the first line under a card's title and has no heading of
+ * its own (InfoSheet.tsx). So a `what` that repeats the title, or that
+ * talks about something else, leaves the one question the card exists to
+ * answer unanswered — which is exactly what an event card did: its
+ * fallback was `event.name`, printing the title twice.
+ */
+describe('every card answers "what is this?"', () => {
+  const ids = {
+    event: STANDARD_EVENTS.map(e => e.id),
+    metric: BUILTIN_METRICS.map(m => m.id),
+  };
+
+  it('never answers with the title again', () => {
+    for (const kind of ['event', 'metric'] as const) {
+      for (const id of ids[kind]) {
+        const card = infoFor({kind, id});
+        if (!card) {
+          continue;
+        }
+        expect(card.what.trim()).not.toBe(card.title.trim());
+        expect(card.what.length).toBeGreaterThan(card.title.length);
+      }
+    }
+  });
+
+  it('names the thing it is describing', () => {
+    // A fallback that opens "Measured the same way every time" never says
+    // what was measured. Whatever the source, the subject appears.
+    for (const id of ids.metric) {
+      const card = infoFor({kind: 'metric', id});
+      if (!card) {
+        continue;
+      }
+      expect(card.what.length).toBeGreaterThan(12);
+    }
+  });
 });

@@ -57,8 +57,16 @@ const TUTORIAL_DRILL = 'air.chin-tuck';
 interface Step {
   key: string;
   title: string;
-  /** Why this question is being asked, in the second person. */
-  why: string;
+  /**
+   * One line above the panel, when the panel does not already say it.
+   *
+   * Left out on purpose more often than not: these steps reuse the same
+   * panels Settings does, and those panels carry their own caption. When
+   * both spoke, the reader was told the same thing twice on one screen —
+   * on five of the six questions, once word for word — which is how a
+   * short flow comes to feel padded.
+   */
+  why?: string;
   panel: React.ComponentType;
   /** Drawn beside the question, so the page is not four grey headings. */
   symbol: SymbolName;
@@ -69,21 +77,20 @@ const STEPS: readonly Step[] = [
     key: 'welcome',
     symbol: 'star',
     title: 'RaveLite',
-    why: 'This takes about 30 seconds.',
     panel: WelcomeCard,
   },
   {
     key: 'disclaimer',
     symbol: 'warning',
     title: 'Before you start',
-    why: 'Read this once. It is the only page like it.',
+    why: 'Safety. Read it before you train.',
     panel: DisclaimerCard,
   },
   {
     key: 'archetype',
     symbol: 'operator',
     title: 'What are you training for?',
-    why: 'Pick the closest one. It sets the answers that follow. You can change any of them.',
+    why: 'Pick the closest one.',
     panel: ArchetypePanel,
   },
   {
@@ -97,28 +104,25 @@ const STEPS: readonly Step[] = [
     key: 'hours',
     symbol: 'sun',
     title: 'When does your day run?',
-    why: 'Chimes only sound inside these hours.',
+    why: 'My day is the hours chimes can sound in.',
     panel: MyDayPanel,
   },
   {
     key: 'shape',
     symbol: 'desk',
     title: 'What is your day like?',
-    why: 'This sets how many times a day the app asks you to move.',
     panel: ShapePanel,
   },
   {
     key: 'starting',
     symbol: 'new',
     title: 'Where are you starting?',
-    why: 'This sets your first numbers. After that, the app adjusts to what you do.',
     panel: StartingPanel,
   },
   {
     key: 'packs',
     symbol: 'learn',
     title: 'Anything you want to learn?',
-    why: 'These add to the base program. You get the base program either way.',
     panel: PacksPanel,
   },
 ];
@@ -249,7 +253,7 @@ export function SetupFlow({onDone}: {onDone: () => void}) {
             </View>
           ) : (
             <>
-              <Text style={styles.why}>{step.why}</Text>
+              {step.why ? <Text style={styles.why}>{step.why}</Text> : null}
               <View onTouchEnd={() => setVersion(v => v + 1)}>
                 <Panel />
               </View>

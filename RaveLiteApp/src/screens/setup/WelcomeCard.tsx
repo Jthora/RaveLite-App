@@ -36,13 +36,13 @@ export function WelcomeCard() {
           </Text>
         </View>
         <Text style={styles.body}>
-          RaveLite chimes through the day. Each call asks for one small thing:
-          ten push-ups, a minute of breath, a glass of water, a kick you are
-          learning.
+          RaveLite is a training app. It chimes through the day, and each chime
+          asks for one small thing: ten push-ups, a minute of breathing, a glass
+          of water, one drill.
         </Text>
         <Text style={styles.body}>
-          Answer it from the notification and get on with what you were doing.
-          By evening you have trained, without going anywhere to train.
+          Answer it from the notification and carry on with what you were doing.
+          You never go anywhere to train.
         </Text>
       </View>
       <View style={[styles.card, {borderColor: palette.border}]}>
@@ -51,7 +51,7 @@ export function WelcomeCard() {
           <Text
             accessibilityRole="header"
             style={[styles.title, {color: hueOf('idea')}]}>
-            How this goes
+            What setup asks
           </Text>
         </View>
         <Text style={styles.body}>

@@ -300,14 +300,18 @@ function metricCard(id: string): InfoCard | undefined {
     title: metric.label,
     subtitle:
       metric.element === 'any'
-        ? 'Something you measure'
-        : `${ELEMENTS[metric.element].name} · something you measure`,
+        ? 'A logged measurement'
+        : `${ELEMENTS[metric.element].name} · a logged measurement`,
     element: metric.element === 'any' ? 'heart' : metric.element,
     move: moveForMetric(metric),
+    // `what` is the first line under the title and has no heading of
+    // its own, so a fallback that does not name the thing leaves the
+    // card answering a question nobody asked. Name it, then say how.
     what:
       MEASURES[id] ??
       metric.notes ??
-      'Measured the same way every time, so the numbers can be compared.',
+      `${metric.label}: a number you log. Take it the same way every ` +
+        'time so the numbers compare.',
     meta: [ENTRY[metric.inputMode]],
     relatedTitle: 'Counts toward',
     related: event
@@ -355,7 +359,13 @@ function eventCard(id: string): InfoCard | undefined {
     title: event.name,
     subtitle: event.subtitle,
     element: elementOfEvent(event),
-    what: EVENT_WHAT[id] ?? event.name,
+    // Never fall back to `event.name`: that printed the title twice and
+    // told a reader who tapped "what is this?" exactly nothing.
+    what:
+      EVENT_WHAT[id] ??
+      `${event.name}: a test you log a score for.${
+        event.subtitle ? ` ${event.subtitle}` : ''
+      }`,
     metaLines: true,
     meta: [
       ...marks,
