@@ -37,7 +37,12 @@ interface RaveLiteDeviceNative {
   /** Missing on APKs built before sharing. */
   shareExport?(filename: string, text: string): Promise<boolean>;
   /** Missing on APKs built before units. */
-  getLocale?(): Promise<{language: string; country: string}>;
+  getLocale?(): Promise<{
+    language: string;
+    country: string;
+    /** Missing on APKs built before the clock setting. */
+    is24Hour?: boolean;
+  }>;
   /** Missing on APKs built before the device line in the report. */
   getDeviceInfo?(): Promise<DeviceInfo>;
   /** Missing on APKs built before the status report could be copied. */
@@ -224,6 +229,7 @@ export async function restartApp(): Promise<boolean> {
 export async function getLocale(): Promise<{
   language: string;
   country: string;
+  is24Hour?: boolean;
 } | null> {
   if (!native?.getLocale) {
     return null;

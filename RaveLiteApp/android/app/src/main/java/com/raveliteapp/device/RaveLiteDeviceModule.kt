@@ -19,6 +19,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
+import android.text.format.DateFormat
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -145,6 +146,10 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
     val result = Arguments.createMap()
     result.putString("language", locale.language)
     result.putString("country", locale.country)
+    // Whether this person reads 14:30 or 2:30 PM. Android already knows,
+    // because they set it once in the system clock settings; asking again
+    // in our own setup would be a question we could have answered.
+    result.putBoolean("is24Hour", DateFormat.is24HourFormat(reactApplicationContext))
     promise.resolve(result)
   }
 

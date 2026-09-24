@@ -5,6 +5,7 @@ import {KEYS} from '../../storage/keys';
 import {getAlarmVolume, hasDeviceModule} from '../../native/raveLiteDevice';
 import {getActiveHours, withinActiveHours} from './activeHours';
 import {gapsBetween} from './heartbeat';
+import {formatClock} from '../settings/clock';
 
 /**
  * Stay-alive health checks — what keeps chimes firing on this phone.
@@ -194,12 +195,7 @@ export function summarizeHealth(input: HealthInputs): {
   };
 }
 
-const hm = (at: number): string => {
-  const d = new Date(at);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(
-    d.getMinutes(),
-  ).padStart(2, '0')}`;
-};
+const hm = (at: number): string => formatClock(at);
 
 /** "13:10", or "yesterday 22:40" when it was not the same day as `to`. */
 const when = (at: number, to: number): string =>

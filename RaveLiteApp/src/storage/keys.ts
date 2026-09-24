@@ -74,6 +74,8 @@ export const KEYS = {
   profile: 'profile.state',
   /** 'metric' | 'imperial'; absent means never chosen. */
   units: 'settings.units',
+  /** 'auto' | '24' | '12' — how a clock time is drawn. Display only. */
+  clock: 'settings.clock',
   /** When this phone last wrote an export, for "last export: 3 days ago". */
   lastExportAt: 'data.lastExportAt',
   /** `{drillId: ChartId[]}` — the charts each curriculum move was cleared at. */

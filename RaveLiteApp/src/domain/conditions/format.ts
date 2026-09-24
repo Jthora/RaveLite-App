@@ -1,3 +1,5 @@
+import {formatClock} from '../settings/clock';
+
 export type TempUnits = 'C' | 'F';
 
 /** "18°", in the operator's units. */
@@ -8,10 +10,7 @@ export function formatTemp(celsius: number, units: TempUnits = 'C'): string {
 
 /** "06:12", local time. */
 export function clockHM(ms: number): string {
-  const d = new Date(ms);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(
-    d.getMinutes(),
-  ).padStart(2, '0')}`;
+  return formatClock(ms);
 }
 
 /** "11 h 42 min" */

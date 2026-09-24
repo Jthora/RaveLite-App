@@ -69,6 +69,8 @@ import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
 import {STOP_LINE} from '../../domain/exercises/safety';
 import {owedToday} from '../../domain/program/setsSummary';
+import {formatClock} from '../../domain/settings/clock';
+import {formatClockHHMM} from '../../domain/settings/clock';
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const REFRESH_MS = 30_000;
@@ -183,7 +185,8 @@ export function DailySetsSection({
           {phase === 'deload' ? 'EASY WEEK + MAX TESTS' : 'BUILD'}
         </Text>
         <Text style={styles.subtitle}>
-          {setsDone} of {setsTotal} sets · My day {myDay.start}–{myDay.end}
+          {setsDone} of {setsTotal} sets · chimes {formatClockHHMM(myDay.start)}
+          –{formatClockHHMM(myDay.end)}
         </Text>
         {lastWeek !== undefined ? (
           <Text testID="sets-last-week" style={styles.lastWeek}>
@@ -588,12 +591,7 @@ export function reviewLine(review: TrackReview): string {
   }
 }
 
-function formatHHMM(ts: number): string {
-  const d = new Date(ts);
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}:${mm}`;
-}
+const formatHHMM = (ts: number): string => formatClock(ts);
 
 const styles = StyleSheet.create({
   trackTitle: {

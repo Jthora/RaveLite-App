@@ -36,6 +36,7 @@ import {requestSetup} from '../../domain/profile/setupRequest';
 import {loadMode} from '../../domain/profile/repository';
 import {modeLabel} from '../../domain/profile/mode';
 import {AlivePanel} from './AlivePanel';
+import {ClockPanel} from './ClockPanel';
 import {ArchetypePanel} from './ArchetypePanel';
 import {ChimesPanel} from './ChimesPanel';
 import {DataPanel} from './DataPanel';
@@ -50,6 +51,7 @@ import {StayAlivePanel} from './StayAlivePanel';
 import {ThemePanel} from './ThemePanel';
 import {WeatherPanel} from './WeatherSheet';
 import {exitDemo, isDemo, subscribeDemo} from '../../domain/demo/demo';
+import {formatClockHHMM} from '../../domain/settings/clock';
 
 const WARN = '#FFD60A';
 
@@ -136,7 +138,7 @@ const GROUPS: readonly {
   {
     id: 'app',
     title: 'The app',
-    holds: 'Theme, motion, and your data',
+    holds: 'Clock, theme, screen pulse, and your data',
     symbol: 'pack',
   },
 ];
@@ -457,6 +459,7 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
 
           {page === 'app' ? (
             <>
+              <ClockPanel />
               <AlivePanel />
               <ThemePanel />
               <DataPanel />
@@ -480,8 +483,8 @@ export function SettingsSheet({visible, onClose, permission}: Props) {
                 <View style={styles.rowText}>
                   <Text style={styles.rowTitle}>My day</Text>
                   <Text style={styles.rowValue}>
-                    {myDay.start}–{myDay.end} · {daysLabel(myDay.daysMask)} ·
-                    chimes and a bright screen
+                    {formatClockHHMM(myDay.start)}–{formatClockHHMM(myDay.end)}{' '}
+                    · {daysLabel(myDay.daysMask)} · chimes and a bright screen
                   </Text>
                 </View>
                 <Tap

@@ -46,6 +46,7 @@ import {capTextScaling} from './src/lib/textScaling';
 import {loadDeviceFacts} from './src/native/deviceFacts';
 import {handleDemoLink} from './src/domain/demo/demo';
 import {guessUnitsOnce} from './src/domain/settings/units';
+import {loadPhoneClockOnce} from './src/domain/settings/clock';
 import {setWeatherPrefs} from './src/domain/conditions/weather';
 import {getLocale} from './src/native/raveLiteDevice';
 import {NightVeil} from './src/components/alive/NightVeil';
@@ -111,6 +112,9 @@ function App(): React.JSX.Element {
         void guessUnitsOnce(fresh, getLocale, units =>
           setWeatherPrefs({units}),
         );
+        // 14:30 or 2:30 PM — the phone already knows which this person
+        // reads, so the app follows it unless they say otherwise.
+        void loadPhoneClockOnce(getLocale);
         // What phone this is, so a bug report says so. Nothing waits on
         // it; it is read once and kept for the report.
         void loadDeviceFacts();

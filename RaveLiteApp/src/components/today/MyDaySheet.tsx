@@ -5,6 +5,7 @@ import {Tap} from '../Tap';
 import type {ActiveHours} from '../../domain/ambient/types';
 import {ELEMENTS} from '../../theme/elements';
 import {palette, radius, spacing, type as t} from '../../theme';
+import {formatClockHHMM} from '../../domain/settings/clock';
 
 /** Bit order matches `ActiveHours.daysMask`: bit 0 = Monday. */
 const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -115,7 +116,9 @@ export function MyDayFields({
     onChange({...value, daysMask: value.daysMask ^ (1 << i)});
   const note =
     myDayProblem(value) ??
-    (value.end < value.start ? `Ends the next day at ${value.end}.` : null);
+    (value.end < value.start
+      ? `Ends the next day at ${formatClockHHMM(value.end)}.`
+      : null);
 
   return (
     <>
@@ -173,7 +176,7 @@ function Stepper({
       <Text style={styles.stepperLabel}>{label}</Text>
       {/* The time on its own line: beside two 48 dp buttons it ran past
           the card on a phone. */}
-      <Text style={styles.stepperValue}>{value}</Text>
+      <Text style={styles.stepperValue}>{formatClockHHMM(value)}</Text>
       <View style={styles.stepperRow}>
         <Tap
           variant="ghost"

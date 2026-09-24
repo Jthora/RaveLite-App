@@ -3,6 +3,7 @@
  *
  * Pure, no React, no RN imports — easy to unit-test if we ever need to.
  */
+import {formatClock} from '../../domain/settings/clock';
 
 /** "12m 40s" / "1h 4m" / "0s". `ms` may be negative — clamped to 0. */
 export function formatDuration(ms: number): string {
@@ -37,10 +38,8 @@ export function formatEta(ms: number): string {
   return `+${sec}s`;
 }
 
-/** "HH:MM" in local time. */
+/** A clock reading in local time: "14:30", or "2:30 PM" if that is how
+ *  this person's phone is set. See domain/settings/clock. */
 export function formatHM(epochMs: number): string {
-  const d = new Date(epochMs);
-  const h = d.getHours().toString().padStart(2, '0');
-  const m = d.getMinutes().toString().padStart(2, '0');
-  return `${h}:${m}`;
+  return formatClock(epochMs);
 }
