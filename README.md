@@ -33,6 +33,12 @@ has gone hard and cold.
 Android. No account, no server, no analytics, no ads. One person's app,
 opened up: **beta, no support promised.**
 
+### ⬇ [Download RaveLite 1.0](https://github.com/Jthora/RaveLite-App/releases/latest)
+
+Free, no store and no sign-up. Take **`app-universal-release.apk`** if
+you are not sure — it runs on every phone. Full instructions in
+[Install it](#install-it) below.
+
 Because there is no account, there is nothing to recover from: your
 training lives on your phone and nowhere else. Settings › The app ›
 Your data writes the whole thing to a file you choose, and reads one
@@ -158,19 +164,58 @@ which is the plan this repo is currently following.
 There is no beat-detection visualiser, no light show and no social
 anything, whatever older versions of this README promised.
 
-## Try it
+**Open beta since 23 September 2026.** Anyone can download and install
+it — see [Install it](#install-it). No invite, no store, no account. It
+has had one long-term user, so expect to be the first person to meet
+whatever you meet.
 
-The beta goes out through Firebase App Distribution — ask for an invite
-and install without a store account. Or build it yourself:
+## Install it
 
-```sh
-git clone https://github.com/Jthora/RaveLite-App
-cd RaveLite-App/RaveLiteApp
-yarn install
-yarn android          # a connected Android device or an emulator
-```
+No store, no account, nothing to pay. Android 5.0 or newer. Tested on
+Android 12, 13, 14, 15 and 16.
 
-Android 13+ asks for notification permission once setup is finished.
+### From your phone, in four steps
+
+1. **Open [the latest release](https://github.com/Jthora/RaveLite-App/releases/latest)** on the phone you want it on.
+2. **Download `app-universal-release.apk`.** It runs on every phone. (If
+   you know your phone is 64-bit and want a smaller file, take
+   `app-arm64-v8a-release.apk` instead; for older or budget phones,
+   `app-armeabi-v7a-release.apk`.)
+3. **Open the file.** Android will say it came from outside the Play
+   Store and ask whether to allow it. That prompt names whichever app you
+   downloaded with — your browser or your file manager — and you allow
+   that app once. Nothing here can install itself; you tap Install.
+4. **Open RaveLite.** Setup is six questions and you can skip any of
+   them. Android 13 and newer will ask to allow notifications once you
+   finish — say yes, or the chimes have no way to reach you.
+
+Updating later is the same four steps. A newer build installs over the
+old one and keeps everything, as long as it came from this page.
+
+### Which file is which
+
+| File | For | Size |
+|---|---|---|
+| `app-universal-release.apk` | any phone — **take this one if unsure** | 22 MB |
+| `app-arm64-v8a-release.apk` | most phones from the last few years | 10 MB |
+| `app-armeabi-v7a-release.apk` | 32-bit phones, including many budget ones | 9 MB |
+| `app-x86_64-release.apk` | emulators | 10 MB |
+
+### Is it safe to install something this way?
+
+It is the same question you should ask of anything you sideload, so:
+this repo is the source code for the file you are downloading, the APK
+is signed with a key only the author holds, and the app asks for no
+account and sends nothing anywhere. You can check the last part yourself
+— there is no network code in it beyond an optional weather lookup you
+have to turn on.
+
+What you cannot do is verify the APK was built from this source, because
+it is built on a laptop rather than by a build server. If that matters to
+you, build it yourself — the instructions are below and it is four
+commands.
+
+### First things worth knowing
 
 **Your phone may stop the chimes, and only you can allow them.** Every
 large phone maker adds gates on top of Android — an autostart list on
@@ -182,13 +227,29 @@ check. Two more that catch everyone: clearing RaveLite from recent apps,
 and pressing Stop on it in the notification shade. Either one takes the
 scheduled chimes with it until you open the app again.
 
-It has run on one phone so far — a Redmi A3, which is a low-end 32-bit
-Android 16 device with one of the most aggressive battery managers there
-is. [docs/devices.md](docs/devices.md) is what we know about everything
-else: which Android versions do what, which makers do what, and what is
-worth testing. **Bug reports are most useful with Settings › The app ›
-App status › Copy pasted in** — it names the phone and nothing about
+**Export your data now and then.** Settings › The app › Your data ›
+Export writes everything to a file you choose. There is no account, so
+that file is the only copy that survives losing the phone.
+
+**Bug reports are most useful with Settings › The app › App status ›
+Copy pasted in.** It names the build and the phone, and nothing about
 you.
+
+### Build it yourself
+
+```sh
+git clone https://github.com/Jthora/RaveLite-App
+cd RaveLite-App/RaveLiteApp
+yarn install
+yarn android          # a connected Android device or an emulator
+```
+
+It has run on one phone as its daily driver — a Redmi A3, a low-end
+32-bit Android 16 device with one of the most aggressive battery managers
+there is — and been checked on emulators for Android 12 through 15.
+[docs/devices.md](docs/devices.md) is what we know about everything else:
+which Android versions do what, which makers do what, and what is worth
+testing.
 
 ## Chimes, notifications and Daily Sets
 
