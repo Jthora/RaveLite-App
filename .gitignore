@@ -9,3 +9,8 @@
 *.jks
 firebase.env
 __pycache__/
+
+# Firebase App Distribution uploads a finished APK; it links nothing into
+# the app, so google-services.json is never needed here and must never be
+# committed. The README's "nothing is sent anywhere" depends on it.
+google-services*.json
