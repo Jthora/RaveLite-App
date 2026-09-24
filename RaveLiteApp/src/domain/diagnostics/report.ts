@@ -67,6 +67,12 @@ export function diagnostics(now: number = Date.now()): Diagnostic[] {
   const mode = loadMode(now);
 
   return [
+    // First, because a beta ships many builds and a report that does not
+    // say which one it is about cannot be acted on.
+    {
+      label: 'App',
+      value: device.app ?? 'unknown build',
+    },
     {
       label: 'Phone',
       value: deviceLine(device),
@@ -111,7 +117,7 @@ export function diagnostics(now: number = Date.now()): Diagnostic[] {
       concern: saving.readFailed || saving.failures > 0,
     },
     {
-      label: 'Schema',
+      label: 'Data version',
       value: `v${store.getNumber(KEYS.schemaVersion) ?? '?'}`,
     },
     {

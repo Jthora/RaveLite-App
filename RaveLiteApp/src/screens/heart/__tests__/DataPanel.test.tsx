@@ -243,7 +243,7 @@ it('copies the status report in one tap, for a bug report', async () => {
   });
   const copied = copyText.mock.calls[0][0];
   expect(copied).toContain('Phone: ');
-  expect(copied).toContain('Schema: ');
+  expect(copied).toContain('Data version: ');
   expect(JSON.stringify(tree.toJSON())).toContain('Copied');
   act(() => tree.unmount());
 });

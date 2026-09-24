@@ -19,6 +19,8 @@ import {Dimensions, PixelRatio, Platform} from 'react-native';
 import {getDeviceInfo, type DeviceInfo} from './raveLiteDevice';
 
 export interface DeviceFacts {
+  /** Which build of RaveLite this is: "1.0 (1)". */
+  app?: string;
   manufacturer: string;
   model: string;
   /** Android version as people say it: "16". */
@@ -83,6 +85,9 @@ export async function loadDeviceFacts(): Promise<DeviceFacts> {
   if (more) {
     facts = {
       ...facts,
+      app: more.appVersion
+        ? `${more.appVersion} (${more.appBuild ?? '?'})`
+        : undefined,
       manufacturer: more.manufacturer || facts.manufacturer,
       model: more.model || facts.model,
       release: more.release || facts.release,

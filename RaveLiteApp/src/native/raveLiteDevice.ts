@@ -242,6 +242,10 @@ export async function getLocale(): Promise<{
 }
 
 export interface DeviceInfo {
+  /** RaveLite's own versionName, or "" on an APK built before this. */
+  appVersion?: string;
+  /** RaveLite's versionCode: which build, when the name has not moved. */
+  appBuild?: number;
   manufacturer: string;
   brand: string;
   model: string;

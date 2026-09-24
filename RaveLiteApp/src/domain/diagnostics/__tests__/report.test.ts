@@ -30,9 +30,12 @@ afterEach(() => jest.restoreAllMocks());
 it('says something about every question worth asking', () => {
   const labels = diagnostics(NOW).map(d => d.label);
   for (const wanted of [
+    // First on the list on purpose: a beta ships many builds, and a
+    // report that does not say which one it is about cannot be acted on.
+    'App',
     'Problems recorded',
     'Storage',
-    'Schema',
+    'Data version',
     'Program',
     'Place',
     'Last forecast',
@@ -79,5 +82,5 @@ it('notices a place once there is one', () => {
 it('can be pasted into an issue', () => {
   const text = diagnosticsText(NOW);
   expect(text.split('\n').length).toBe(diagnostics(NOW).length);
-  expect(text).toContain('Schema:');
+  expect(text).toContain('Data version:');
 });

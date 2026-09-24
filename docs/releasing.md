@@ -19,7 +19,7 @@ is lost and nothing has to be undone.
 | 3 | `gh repo edit …` — description and topics | §1 |
 | 4 | `scripts/make-keystore.sh` — asks for a password twice | §2 |
 | 5 | **Back up** `~/.ravelite/release.keystore` and `~/.gradle/gradle.properties` off this laptop | §2 |
-| 6 | `scripts/build-release.sh` — prints which key signed it | §2 |
+| 6 | **Bump `versionCode`** in android/app/build.gradle, then `scripts/build-release.sh` | §2a |
 | 7 | `adb uninstall com.raveliteapp` — this is where step 1 earns its keep | §0 |
 | 8 | `adb install …/app-armeabi-v7a-release.apk` — the Redmi A3 is 32-bit | §0 |
 | 9 | Settings → The app → Your data → **Restore**, pick the file | the phone |
@@ -103,6 +103,23 @@ never update anyone who installed a signed build: not a bug you can fix,
 not a support request you can answer, just a dead end.
 
 ---
+
+## 2a. Bump the version, every single build
+
+`android/app/build.gradle` holds `versionCode` and `versionName`, and
+nothing bumps them automatically. **Raise `versionCode` by one before
+every build you give to anybody.**
+
+It is not paperwork. A beta ships many builds, and `versionCode` is the
+only thing that tells them apart: Android refuses to install an older
+one over a newer one, App Distribution uses it to decide what a tester
+is offered, and F-Droid will not accept a tag whose code has not moved.
+Ship two different APKs as "1.0 (1)" and no bug report can be tied to
+the code that caused it.
+
+`versionName` is what a person reads ("1.0", "1.1"); `versionCode` is
+the integer that must only ever go up. Settings → The app → App status
+reports both, so a tester's Copy says exactly which build they are on.
 
 ## 3. Firebase App Distribution
 

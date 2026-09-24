@@ -162,6 +162,21 @@ class RaveLiteDeviceModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun getDeviceInfo(promise: Promise) {
     val result = Arguments.createMap()
+    // Which build of RaveLite this is. Without it a beta bug report
+    // cannot say which one it is about, and a beta ships many.
+    try {
+      val pkg = reactApplicationContext.packageManager
+        .getPackageInfo(reactApplicationContext.packageName, 0)
+      result.putString("appVersion", pkg.versionName ?: "")
+      result.putInt(
+        "appBuild",
+        if (Build.VERSION.SDK_INT >= 28) pkg.longVersionCode.toInt()
+        else @Suppress("DEPRECATION") pkg.versionCode,
+      )
+    } catch (e: Exception) {
+      result.putString("appVersion", "")
+      result.putInt("appBuild", 0)
+    }
     result.putString("manufacturer", Build.MANUFACTURER)
     result.putString("brand", Build.BRAND)
     result.putString("model", Build.MODEL)
