@@ -86,7 +86,9 @@ android {
         }
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        // Raise this before every build anybody else receives; see
+        // docs/releasing.md §2a. Build 1 never left this laptop.
+        versionCode 2
         versionName "1.0"
     }
     // One APK per architecture, each about half the size of one carrying
