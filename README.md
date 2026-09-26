@@ -1,19 +1,55 @@
-# RaveLite
+<div align="center">
 
-> ### For Ravers and Super Heroes
->
-> Fit for the floor, all night. Ready for intensive dancing. Able to
-> defend yourself. Of balanced and positively energised spirit.
+# ⬢ RaveLite
 
-**A five-element altar that lives in your pocket.** It chimes through the
-day, and each call asks for one small thing — ten push-ups, a minute of
-breath, a glass of water, a kick you are learning. Answer it in three
-seconds from the notification and get on with your life. By evening you
-have trained, without ever having *gone* to train.
+### For Ravers and Super Heroes
+
+**A training app that chimes through the day.** Each chime asks for one
+small thing — ten push-ups, a minute of breathing, a glass of water, one
+drill. Answer it from the notification and carry on with what you were
+doing. By evening you have trained, without ever going anywhere to train.
+
+<br />
+
+## ⬇ &nbsp; [**DOWNLOAD RAVELITE 1.0**](https://github.com/Jthora/RaveLite-App/releases/latest) &nbsp; ⬇
+
+### 📱 Free &nbsp;·&nbsp; 🚫 No account &nbsp;·&nbsp; 🔒 Nothing leaves your phone &nbsp;·&nbsp; 🤖 Android 5.0+
+
+**Take `app-universal-release.apk`** — it runs on every phone.
+Never sideloaded before? [Four steps, with pictures of what Android will ask.](#install-it)
+
+[![Download](https://img.shields.io/github/v/release/Jthora/RaveLite-App?style=for-the-badge&label=latest&color=C6FF00)](https://github.com/Jthora/RaveLite-App/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Jthora/RaveLite-App/total?style=for-the-badge&label=downloads&color=00B0FF)](https://github.com/Jthora/RaveLite-App/releases)
+[![License](https://img.shields.io/badge/license-see%20LICENSE-blueviolet?style=for-the-badge)](LICENSE)
+![Android](https://img.shields.io/badge/Android-5.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+
+<br />
+
+| | | |
+|:-:|:-:|:-:|
+| <img src="docs/images/today.png" width="240" alt="The Today page: a chime asking for a Water Call, the five element tiles, a water counter and the day's Daily Sets." /> | <img src="docs/images/fire.png" width="240" alt="The Fire page: today's count and streak, a Try This Now card, a fourteen-day bar chart and the day's log." /> | <img src="docs/images/daily-sets.png" width="240" alt="The Daily Sets sheet: the week, today's focus, and per-track cards with progress bars." /> |
+| **It chimes. You answer.** | **Five kinds of training** | **Ten push-ups, sixteen times** |
+| <img src="docs/images/practice.png" width="240" alt="The Practice sheet: dance and poi skill paths in tiers, a filmed round, yoga and tai chi." /> | <img src="docs/images/water.png" width="240" alt="The Water page: a Water Call, skill paths, and the day's flow and mobility log." /> | <img src="docs/images/air.png" width="240" alt="The Air page: breath work, a Try This Now card, and the fourteen-day chart." /> |
+| **Skills, not just reps** | **Notices your actual day** | **Breath counts too** |
+
+### 🔎 [Take a look around](docs/tour.md) &nbsp;·&nbsp; 📖 [The full guide](docs/guide.md)
+
+*Example data, not anybody's real training.*
+
+</div>
+
+---
+
+## What it is
+
+**A five-element altar that lives in your pocket.** There is no session
+to start and no workout to get through. A notification arrives, asks for
+one small thing, and you do it where you are standing. **Done** logs it,
+**+5** pushes it back, **Skip** drops it — three seconds, without opening
+the app.
 
 It keeps a character sheet of what all of it has made of you: fifteen
-attributes that grow from what you actually did, not from what you
-planned.
+levels that grow from what you actually did, not from what you planned.
 
 RaveLite is **not** a fitness app, a habit tracker, or a notification
 scheduler. Those are surface mechanics. The intent is older and more
@@ -32,12 +68,6 @@ has gone hard and cold.
 
 Android. No account, no server, no analytics, no ads. One person's app,
 opened up: **beta, no support promised.**
-
-### ⬇ [Download RaveLite 1.0](https://github.com/Jthora/RaveLite-App/releases/latest)
-
-Free, no store and no sign-up. Take **`app-universal-release.apk`** if
-you are not sure — it runs on every phone. Full instructions in
-[Install it](#install-it) below.
 
 Because there is no account, there is nothing to recover from: your
 training lives on your phone and nowhere else. Settings › The app ›
@@ -191,6 +221,11 @@ Android 12, 13, 14, 15 and 16.
 
 Updating later is the same four steps. A newer build installs over the
 old one and keeps everything, as long as it came from this page.
+
+**Once it is on:** 📖 **[the full guide](docs/guide.md)** covers the first
+hour, why chimes stop on some phones, and how the program decides what to
+ask for. The one section worth reading before anything goes wrong is
+[when chimes stop](docs/guide.md#3-when-chimes-stop--read-this-one).
 
 ### Which file is which
 

@@ -189,6 +189,23 @@ def shot_settings(p: Phone) -> None:
     open_from_today(p, by_desc("Settings"), 'text="Settings"')
 
 
+def element_shot(rail: str, marker: str):
+    """An element page, reached from the strip on Today.
+
+    These are pages in the same activity, not sheets, so a tap reaches
+    them — which is why the strip is as deep as automation gets.
+    """
+
+    def walk(p: Phone) -> None:
+        open_from_today(p, by_id(f"strip-{rail}"), marker)
+
+    return walk
+
+
+def shot_chime_info(p: Phone) -> None:
+    open_from_today(p, by_id("chime-info"), 'text="What is this?"')
+
+
 # Four shots, and not by choice.
 #
 # Everything deeper — the character sheet, Goals, archetypes, packs, Your
@@ -207,6 +224,10 @@ SHOTS = [
     ("daily-sets", "Daily Sets: the day's tracks", shot_daily_sets),
     ("practice", "Practice: the curriculum", shot_practice),
     ("settings", "Settings", shot_settings),
+    ("fire", "Fire: capacity and output", element_shot("fire", 'text="Fire"')),
+    ("water", "Water: flow and fascia", element_shot("water", 'text="Water"')),
+    ("air", "Air: breath and the open chest", element_shot("air", 'text="Air"')),
+    ("earth", "Earth: core and pelvis", element_shot("earth", 'text="Earth"')),
 ]
 
 
