@@ -58,7 +58,9 @@ yarn install
 yarn android            # a connected device or emulator
 ```
 
-Checks, which CI and review both expect to pass:
+Checks. **Run these yourself** — CI on this repo is billing locked and
+may never start, so a pull request arrives exactly as checked as you
+left it:
 
 ```sh
 npx jest --maxWorkers=2     # the whole suite

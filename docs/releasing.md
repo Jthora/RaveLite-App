@@ -7,28 +7,38 @@ Read the first section before doing anything else in this file.
 
 ---
 
-## Start here: the whole thing, in order
+## Start here
 
-Each step is explained in full further down. Done in this order, nothing
-is lost and nothing has to be undone.
+Each step is explained in full further down. Most of the one-time work is
+done; what follows is what is left, and what comes round again.
+
+### Done, once, and not again
+
+Signing key made and backed up · repo public and current · description
+and topics set · screenshots taken · v1.0.0 published · the author's
+phone moved onto a signed build.
+
+### Every release, in this order
 
 | # | Step | Where |
 |---|---|---|
-| 1 | **Export your data.** Settings → The app → Your data → Export. Save it off the phone. | the phone |
-| 2 | `git push -u origin today-home` — 200 commits, and CI has never run | §1 |
-| 3 | `gh repo edit …` — description and topics | §1 |
-| 4 | `scripts/make-keystore.sh` — asks for a password twice | §2 |
-| 5 | **Back up** `~/.ravelite/release.keystore` and `~/.gradle/gradle.properties` off this laptop | §2 |
-| 6 | **Bump `versionCode`** in android/app/build.gradle, then `scripts/build-release.sh` | §2a |
-| 7 | `adb uninstall com.raveliteapp` — this is where step 1 earns its keep | §0 |
-| 8 | `adb install …/app-armeabi-v7a-release.apk` — the Redmi A3 is 32-bit | §0 |
-| 9 | Settings → The app → Your data → **Restore**, pick the file | the phone |
-| 10 | Firebase project, app id, `firebase login`, tester group | §3 |
-| 11 | `scripts/distribute.sh "what changed"` | §3 |
+| 1 | **Bump `versionCode`** in `android/app/build.gradle` | §2a |
+| 2 | `scripts/build-release.sh` | §2a |
+| 3 | `gh release create` — draft first, then publish | §3b |
+| 4 | Check it downloads anonymously and the SHA matches | §3b |
+| 5 | `scripts/distribute.sh "what changed"` — only if using Firebase | §3 |
 
-Steps 1–9 are one sitting, maybe forty minutes. Step 10 is a separate
-job and needs a Google account. Nothing before step 4 is irreversible;
-step 7 is the one that bites if step 1 was skipped.
+### Still outstanding
+
+| Step | Where |
+|---|---|
+| **Restore the author's data** onto the phone from the export | the phone |
+| Add tester emails to the Firebase `testers` group | §3 |
+| A 512×512 `icon.png` for the fastlane metadata | §4 |
+| Submit to IzzyOnDroid, then F-Droid | §4 |
+
+Nothing here is irreversible except the signing key, which is already
+made — keep the backup and this whole document stays cheap.
 
 ---
 
@@ -56,34 +66,39 @@ Do step 1 even if you plan to stop after step 2. Especially then.
 
 ---
 
-## 1. GitHub — done, but stale
+## 1. GitHub — done
 
-The repo is already public at **github.com/Jthora/RaveLite-App**, and
-`gh` is logged in as `Jthora`.
+Public at **github.com/Jthora/RaveLite-App**, `main` current, `gh`
+logged in as `Jthora`. Description and topics set 23 Sep 2026.
 
-Two things are out of date:
+A large first push can fail with `RPC failed; HTTP 400` — that is a
+buffer limit, not a rejection. Retry with
+`git -c http.postBuffer=524288000 push`, then check `origin/main`
+actually moved rather than trusting the exit code.
 
-- **200 commits are unpushed.** Everything from the public-beta
-  work, the audit and the hardening passes is local only. Anyone who
-  finds the repo today sees old code.
-- **The description is stale.** The public copy was revised on 21 Sep
-  2026 to lead with the identity everywhere — see "What it says it is"
-  below — and the repo description has not caught up.
+### CI: there isn't any
 
-Both are one command each, and both are in your hands because pushing to
-a public repo is not something to do on someone's behalf. See
-"Ready to run" at the bottom.
+GitHub Actions on this account is billing locked. Jobs are refused before
+they start, so nothing here is checked by a machine — run the three
+commands in [CONTRIBUTING.md](../CONTRIBUTING.md) yourself.
 
-### CI, once pushed
+`.github/workflows/checks.yml` is kept anyway, on pull requests only. It
+costs nothing and starts working by itself the day the billing changes.
+It used to run on pushes to `main` too, which painted a red mark on the
+repo's front page every time, for work that never happened.
 
-`.github/workflows/checks.yml` runs typecheck, lint and tests on every
-pull request. Nothing to set up — it starts working when the workflow
-file reaches `main`.
+`release.yml` is **deleted**. It attached a *debug-signed* APK to any
+`v*` tag — which, sitting in a release beside four properly signed ones,
+is a trap: Android refuses to replace an app signed with one key by a
+build signed with another, so anyone who took the wrong file would have
+to uninstall, and lose their training log, to get back on the real
+builds. Releases are published by hand (§3b) and that is the safer
+arrangement regardless of billing.
 
-`.github/workflows/release.yml` attaches an APK to any `v*` tag. That APK
-is debug-signed by CI, because the signing key never leaves your machine.
-It exists so a tag has an inspectable artifact, not as how people get the
-app.
+Downloads are not affected by any of this. **Releases are file hosting,
+not compute** — free and unmetered on a public repo, and verified working:
+an anonymous download of the v1.0.0 universal APK returns the whole file
+with a SHA-256 matching the local build.
 
 ---
 
@@ -188,6 +203,49 @@ Surfaces kept in step: `README.md`, `CONTRIBUTING.md`, the fastlane
 `short_description` / `full_description` / changelog, and the GitHub
 description above. If one changes, they all change.
 
+## 3b. Publishing a GitHub release — how people actually get it
+
+This is the open beta: free, no store, no account, no invite. A public
+repo's releases are file hosting rather than compute, so the Actions
+billing lock does not touch them.
+
+1. **Bump `versionCode`** (§2a) and build:
+
+   ```sh
+   scripts/build-release.sh
+   ```
+
+2. **Tag and publish**, attaching all four APKs:
+
+   ```sh
+   gh release create v1.0.1 \
+     RaveLiteApp/android/app/build/outputs/apk/release/app-universal-release.apk \
+     RaveLiteApp/android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk \
+     RaveLiteApp/android/app/build/outputs/apk/release/app-arm64-v8a-release.apk \
+     RaveLiteApp/android/app/build/outputs/apk/release/app-x86_64-release.apk \
+     --title "RaveLite 1.0.1" --notes-file notes.md --draft
+   ```
+
+   Use `--draft` first. Assets upload one at a time and a failure halfway
+   leaves a half-published release that people can already see. Check
+   them, then `gh release edit v1.0.1 --draft=false --latest`.
+
+3. **Verify it from outside**, which is the only check that means
+   anything:
+
+   ```sh
+   curl -sSL -o /tmp/x.apk -w '%{http_code} %{size_download}\n' \
+     https://github.com/Jthora/RaveLite-App/releases/download/v1.0.1/app-universal-release.apk
+   shasum -a 256 /tmp/x.apk
+   ```
+
+   Expect `200`, the full byte count, and a SHA-256 matching the local
+   file. No auth header: that is the point.
+
+The README's download button points at `/releases/latest`, so it follows
+each new release without editing. The version and download-count badges
+follow too.
+
 ## 4. F-Droid
 
 See [f-droid.md](f-droid.md). It needs the repo public with tags,
@@ -197,16 +255,22 @@ is tags and submission.
 
 ---
 
-## Ready to run
+## The commands, in one place
 
-These are written and tested but **not run**, because each one changes
-something public or irreversible.
+Everything below has been run at least once and works. The first three
+are the release loop; the rest are occasional.
 
 | What | Command |
 |---|---|
-| Publish the work so far | `git push -u origin today-home` then open a PR, or `git push origin today-home:main` to go straight in |
-| Fix the repo description | `gh repo edit Jthora/RaveLite-App --description "For Ravers and Super Heroes: a five-element altar that trains you all day." --add-topic android --add-topic react-native --add-topic fitness --add-topic bodyweight --add-topic rave --add-topic privacy-friendly` |
-| Make the signing key | `scripts/make-keystore.sh` |
 | Build | `scripts/build-release.sh` |
-| Send to testers | `scripts/distribute.sh "notes"` |
-| Tag a release | `git tag v1.0.0 && git push origin v1.0.0` |
+| Publish a release | `gh release create vX.Y.Z <the four APKs> --title "RaveLite X.Y.Z" --notes-file notes.md --draft` |
+| Prove it downloads | `curl -sSL -o /tmp/x.apk -w '%{http_code}' <the release URL>` then `shasum -a 256 /tmp/x.apk` |
+| Send to Firebase testers | `scripts/distribute.sh "notes"` |
+| Re-take the screenshots | `scripts/screenshots.py` — demo mode, never touches real data |
+| Check an Android version | `scripts/version-pass.sh <serial> <apk>` |
+| Push, when the pack is large | `git -c http.postBuffer=524288000 push origin today-home:main` |
+
+**The one that cannot be undone** is `scripts/make-keystore.sh`, and it
+has already been run. The key is at `~/.ravelite/release.keystore` with a
+copy on the Desktop; lose both and nobody who installed a signed build
+can ever be updated again.

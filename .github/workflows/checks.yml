@@ -3,11 +3,20 @@
 #
 # No Android build here on purpose: it needs the SDK, takes minutes, and
 # these three catch what review cannot see at a glance.
+#
+# **This may not run at all.** GitHub Actions on this account is billing
+# locked, so jobs are refused before they start. The workflow is kept
+# because it costs nothing to keep and starts working by itself the day
+# that changes — but do not wait on it, and do not read a red mark here
+# as a verdict on your patch. Run the three commands in CONTRIBUTING.md
+# yourself; that is what the maintainer does.
+#
+# It no longer runs on push, only on pull requests: a refused job on
+# every push painted a failure on the repo's front page for work that
+# never happened.
 name: checks
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 jobs:
