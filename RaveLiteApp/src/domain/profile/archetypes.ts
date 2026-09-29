@@ -154,7 +154,14 @@ export const ARCHETYPES: readonly Archetype[] = [
     // and who may have to get themselves or someone else out of trouble.
     // Flow arts because that is the work itself — lights on a dark field.
     // No dance pack by default; add it in Settings if you perform.
-    packs: ['martial', 'military-tests', 'runs', 'staff', 'jumps', 'yoga-taichi'],
+    packs: [
+      'martial',
+      'military-tests',
+      'runs',
+      'staff',
+      'jumps',
+      'yoga-taichi',
+    ],
     shape: 'desk',
     pushupGoal: 200,
   },
