@@ -88,8 +88,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Raise this before every build anybody else receives; see
         // docs/releasing.md §2a. Build 1 never left this laptop.
-        versionCode 2
-        versionName "1.0"
+        versionCode 3
+        versionName "1.1"
     }
     // One APK per architecture, each about half the size of one carrying
     // them all, plus that universal one (all four ABIs) for anyone unsure
