@@ -21,6 +21,9 @@ import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SheetLayer} from '../../components/SheetLayer';
 import {Tap} from '../../components/Tap';
 import type {InfoRef} from '../../domain/info/info';
+import {readinessFor, standardFor} from '../../domain/standards/readiness';
+import {loadArchetype} from '../../domain/profile/repository';
+import {StandardCard} from './StandardCard';
 import {NumberPad} from '../../components/training/NumberPad';
 import {TrainingLogSheet} from '../../components/training/TrainingLogSheet';
 import {activeMinutes} from '../../domain/activity/active';
@@ -205,6 +208,19 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
     const graded = showsGrades();
     const askTable = needsTable();
     const height = getHeightInches();
+    // A standard only exists for an archetype that carries one, which
+    // is most often none at all.
+    const standard = standardFor(loadArchetype());
+    const readiness = standard
+      ? readinessFor(standard, {
+          entries,
+          metricFor: getMetric,
+          sex,
+          heightInches: height,
+          now,
+        })
+      : undefined;
+
     const rows: GoalRow[] = STANDARD_EVENTS.map(event => {
       const target = targetFor(event);
       // The one goal without a Train kind is measured from Daily Sets.
@@ -235,6 +251,7 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
     const today = activityForDay(date);
     return {
       sex,
+      readiness,
       graded,
       askTable,
       activeGoal: activeGoal(),
@@ -285,6 +302,14 @@ export function Goals({onInfo}: {onInfo?: (ref: InfoRef) => void} = {}) {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
+        {view.readiness ? (
+          <StandardCard
+            readiness={view.readiness}
+            sex={view.sex}
+            onInfo={onInfo}
+          />
+        ) : null}
+
         <View style={styles.card}>
           <Text accessibilityRole="header" style={styles.eyebrow}>
             PUSH-UPS TODAY

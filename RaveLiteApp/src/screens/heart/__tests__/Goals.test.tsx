@@ -6,7 +6,7 @@ import {setHeightInches} from '../../../domain/standards/standards';
 import {addEntry} from '../../../domain/training/repository';
 import {ELEMENTS} from '../../../theme/elements';
 import {Goals} from '../Goals';
-import {beginSetup} from '../../../domain/profile/setup';
+import {applyArchetype, beginSetup} from '../../../domain/profile/setup';
 import {
   __resetProfileCache,
   setPacks,
@@ -163,4 +163,34 @@ it("keeps the men's charts on the author's install without asking", () => {
   );
   expect(showsGrades()).toBe(true);
   act(() => tree.unmount());
+});
+
+/**
+ * The standard is a duty, not a feature: it appears for the archetype
+ * that carries one and for nobody else. Showing it to a Desk Rebel would
+ * be telling somebody they are not ready for something they never
+ * signed up to.
+ */
+describe('the standard', () => {
+  const textOf = (tree: renderer.ReactTestRenderer) =>
+    JSON.stringify(tree.toJSON());
+
+  it('is not shown for an archetype that carries none', () => {
+    applyArchetype('operator');
+    const tree = render();
+    expect(textOf(tree)).not.toContain('KNIGHT STANDARD');
+    act(() => tree.unmount());
+  });
+
+  it('is shown for the Archangel Knight, and says what is not held', () => {
+    applyArchetype('archangel-knight');
+    const tree = render();
+    const said = textOf(tree);
+    expect(said).toContain('KNIGHT STANDARD');
+    // Nothing logged yet, so every requirement is outstanding and the
+    // verdict says so rather than claiming readiness by default.
+    expect(said).toContain('6 TO DO');
+    expect(said).not.toContain('READY');
+    act(() => tree.unmount());
+  });
 });

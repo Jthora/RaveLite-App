@@ -79,6 +79,20 @@ export const KNIGHT_STANDARD: Standard = {
 
 export const STANDARDS: readonly Standard[] = [KNIGHT_STANDARD];
 
+/**
+ * The standard an archetype carries, if it carries one. Keyed by the
+ * archetype's own id, so a preset and its duty cannot drift apart.
+ * Most archetypes have none, and that is the normal case: a standard is
+ * for somebody who has to be ready for other people.
+ */
+export function standardFor(
+  archetype: string | undefined,
+): Standard | undefined {
+  return archetype === undefined
+    ? undefined
+    : STANDARDS.find(s => s.id === archetype);
+}
+
 export type RequirementState =
   /** Tested inside the window, at the mark or better. */
   | 'met'
