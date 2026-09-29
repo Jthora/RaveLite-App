@@ -25,6 +25,7 @@ export type ArchetypeId =
   | 'comeback'
   | 'flow-artist'
   | 'super-hero'
+  | 'archangel-knight'
   | 'night-shift'
   | 'parent'
   | 'festival-six';
@@ -142,6 +143,20 @@ export const ARCHETYPES: readonly Archetype[] = [
     packs: ['dance-combat', 'dance', 'staff', 'martial', 'jumps', 'runs'],
     shape: 'desk',
     pushupGoal: 100,
+  },
+  {
+    id: 'archangel-knight',
+    name: 'The Archangel Knight',
+    forWhom: 'works long nights looking after other people',
+    leadsWith: 'Self-defence, endurance, flow, tests',
+    // Self-defence and a tested standard are the point: this is training
+    // for somebody who will be on their feet all night among strangers,
+    // and who may have to get themselves or someone else out of trouble.
+    // Flow arts because that is the work itself — lights on a dark field.
+    // No dance pack by default; add it in Settings if you perform.
+    packs: ['martial', 'military-tests', 'runs', 'staff', 'jumps', 'yoga-taichi'],
+    shape: 'desk',
+    pushupGoal: 200,
   },
   {
     id: 'night-shift',

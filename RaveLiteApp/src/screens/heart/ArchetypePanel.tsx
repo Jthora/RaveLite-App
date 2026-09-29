@@ -80,6 +80,7 @@ export const ARCHETYPE_SYMBOL: Record<ArchetypeId, SymbolName> = {
   comeback: 'comeback',
   'flow-artist': 'flowArtist',
   'super-hero': 'superHero',
+  'archangel-knight': 'archangelKnight',
   'night-shift': 'nightShift',
   parent: 'parent',
   'festival-six': 'festivalSix',

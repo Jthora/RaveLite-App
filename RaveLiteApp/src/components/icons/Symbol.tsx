@@ -74,6 +74,7 @@ import {
   Ruler,
   Shell,
   Shield,
+  ShieldCheck,
   Ship,
   Sofa,
   Sparkles,
@@ -136,6 +137,9 @@ const SYMBOLS = {
   comeback: [Sprout, 'success'],
   flowArtist: [Sparkles, 'staff'],
   superHero: [Zap, 'dance'],
+  // A shield with a check: protection held to a standard, which is what
+  // separates this from the Guardian's plain shield.
+  archangelKnight: [ShieldCheck, 'idea'],
   danceCombat: [Swords, 'martial'],
   nightShift: [Moon, 'rest'],
   parent: [House, 'weekend'],
