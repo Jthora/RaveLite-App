@@ -1,0 +1,13 @@
+Times can read 2:30 PM — Settings › The app › Clock follows your phone.
+
+A new archetype, The Archangel Knight, for someone who works long nights
+looking after other people.
+
+Standards you hold rather than targets you chase: an archetype can carry
+a set of marks with a clock on them, and Goals says whether you are
+ready, what is short, and what has gone out of date.
+
+Plainer writing throughout, after an audit of every line in the app.
+
+Fixed: App status no longer runs off the screen, and resetting your chime
+plan now asks first instead of deleting it on one tap.
