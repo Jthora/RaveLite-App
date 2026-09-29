@@ -139,7 +139,7 @@ const SYMBOLS = {
   superHero: [Zap, 'dance'],
   // A shield with a check: protection held to a standard, which is what
   // separates this from the Guardian's plain shield.
-  archangelKnight: [ShieldCheck, 'idea'],
+  archangelKnight: [ShieldCheck, 'knight'],
   danceCombat: [Swords, 'martial'],
   nightShift: [Moon, 'rest'],
   parent: [House, 'weekend'],

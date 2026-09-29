@@ -85,6 +85,8 @@ export const hues = {
   jumps: '#FFD166',
   running: '#4ECDC4',
   tests: '#7A8B4A',
+  /** The Archangel Knight: lights in the night. */
+  knight: '#5EE7FF',
 } as const;
 
 export type HueName = keyof typeof hues;

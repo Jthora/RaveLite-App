@@ -11,6 +11,7 @@ import {
   loadShape,
 } from '../../../domain/profile/repository';
 import {store} from '../../../storage';
+import {MARKS} from '../../../components/icons/elementMarks';
 
 beforeEach(() => {
   store.clearAll();
@@ -74,4 +75,28 @@ it('a second archetype replaces the first cleanly', () => {
   __resetProfileCache();
   expect(loadPacks()).toContain('martial');
   expect(loadPacks()).not.toContain('dance');
+});
+
+/**
+ * The Knight wears the Starcom mark, not a stock shape. Lucide has no
+ * wing, and the Starcom mark already exists in this app — so this row is
+ * the one place the archetype list draws an element mark instead of an
+ * icon, and it is worth holding: a silent fallback to the shield would
+ * look deliberate and be wrong.
+ */
+it('draws the Archangel Knight with the Starcom mark, in cyan', () => {
+  const tree = renderPanel();
+  const row = tree.root
+    .findAll((n: ReactTestInstance) => n.props.testID === 'archetype-archangel-knight')[0];
+  expect(row).toBeDefined();
+
+  const drawn = JSON.stringify(tree.toJSON());
+
+  // The colour alone proves nothing: the badge tint behind the icon is
+  // the same hue, so a silent fall back to the shield would still paint
+  // this row cyan. The mark is identified by its own path data.
+  for (const shape of MARKS.commander) {
+    expect(drawn).toContain(shape.d);
+  }
+  act(() => tree.unmount());
 });

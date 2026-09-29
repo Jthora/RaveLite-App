@@ -37,6 +37,8 @@ import {
 } from '../../domain/profile/repository';
 import {applyArchetype} from '../../domain/profile/setup';
 import {Symbol, hueOf, type SymbolName} from '../../components/icons/Symbol';
+import {ElementGlyph} from '../../components/icons/ElementGlyph';
+import type {GlyphIconId} from '../../theme/elements';
 import {tint} from '../../theme/hues';
 import {palette, radius, spacing, type as t} from '../../theme';
 
@@ -71,6 +73,20 @@ function preview(id: ArchetypeId): string {
 }
 
 /** A picture and a colour for each way of training. */
+/**
+ * Archetypes drawn with an element mark instead of a Lucide icon.
+ *
+ * The Starcom mark is already in the app — traced from the CommanderIcon
+ * reference, and the Æther theme wears it — so the Knight gets its own
+ * mark rather than the nearest stock shape. Lucide has no wing.
+ *
+ * The colour still comes from ARCHETYPE_SYMBOL below, so the badge tint
+ * and the selected name stay in step with every other row.
+ */
+const ARCHETYPE_MARK: Partial<Record<ArchetypeId, GlyphIconId>> = {
+  'archangel-knight': 'commander',
+};
+
 export const ARCHETYPE_SYMBOL: Record<ArchetypeId, SymbolName> = {
   raver: 'raver',
   guardian: 'guardian',
@@ -149,7 +165,18 @@ export function ArchetypePanel() {
                     ),
                   },
                 ]}>
-                <Symbol name={ARCHETYPE_SYMBOL[archetype.id]} size={20} />
+                {ARCHETYPE_MARK[archetype.id] ? (
+                  <ElementGlyph
+                    element={{
+                      glyph: '★',
+                      icon: ARCHETYPE_MARK[archetype.id],
+                      color: hueOf(ARCHETYPE_SYMBOL[archetype.id]),
+                    }}
+                    size={20}
+                  />
+                ) : (
+                  <Symbol name={ARCHETYPE_SYMBOL[archetype.id]} size={20} />
+                )}
               </View>
               <View style={styles.rowText}>
                 <Text
