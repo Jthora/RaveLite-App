@@ -48,6 +48,40 @@ export const MOVE_IDS = [
 export type MoveId = (typeof MOVE_IDS)[number];
 
 const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
+  // The gap drills: footwork, legs, mobility and presence. A move is
+  // what gives a drill its picture and, through loads.ts, the regions it
+  // works — so hurt mode knows to skip it. A drill without one is a hole
+  // in both, which is why the library tests insist.
+  'fire.high-knees': 'run',
+  'fire.butt-kicks': 'run',
+  'fire.skater-hops': 'jump',
+  'fire.lateral-bounds': 'jump',
+  'fire.line-hops': 'jump',
+  'fire.jumping-jacks': 'jump',
+  'fire.star-jumps': 'jump',
+  'fire.squat-thrusts': 'squat',
+  'fire.sprawls': 'squat',
+  'fire.sit-outs': 'plank',
+  'fire.inchworms': 'plank',
+  'fire.pike-pushups': 'push',
+  'fire.wall-handstand': 'push',
+  'earth.forward-lunge': 'lunge',
+  'earth.reverse-lunge': 'lunge',
+  'earth.walking-lunge': 'lunge',
+  // Calf work is ankles and balance, not a squat pattern.
+  'earth.calf-raises': 'balance',
+  'earth.single-leg-calf-raise': 'balance',
+  'earth.glute-bridge-march': 'bridge',
+  'earth.nordic-negative': 'hamstring',
+  'water.cat-cow': 'stretch',
+  'water.ninety-ninety': 'hipopener',
+  'water.ankle-rocks': 'footwork',
+  'water.open-book': 'chestopener',
+  'water.thread-the-needle': 'chestopener',
+  'air.prone-y-raise': 'posture',
+  'heart.posture-reset': 'posture',
+  'heart.name-the-room': 'presence',
+  'heart.hands-off': 'presence',
   // Stand-ins for a room with no hang point
   'fire.isometric-door-pull': 'pull',
   'fire.towel-door-row': 'row',
