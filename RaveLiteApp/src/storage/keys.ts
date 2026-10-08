@@ -91,6 +91,8 @@ export const KEYS = {
 
   // ── Weather: sunrise, the forecast, conditions ────────────────────
   /** `Place` JSON — the operator's town, rounded to about 10 km. */
+  /** Drills already offered, so the same handful stop recurring. */
+  drillsShown: 'exercises.shown',
   weatherPlace: 'weather.place',
   /** `Forecast` JSON — the last Open-Meteo forecast for that place. */
   weatherForecast: 'weather.forecast',

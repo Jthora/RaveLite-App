@@ -9,6 +9,11 @@ import {recordDrillTap} from '../../domain/activity/record';
 import {moveForExercise} from '../../domain/exercises/moves';
 import {loadFacts} from '../../domain/profile/repository';
 import {rankDrillsFor, type DrillContext} from '../../domain/exercises/scoring';
+import {
+  noteShown,
+  noteSwapped,
+  shownPenalties,
+} from '../../domain/exercises/shown';
 import type {Target} from '../../domain/exercises/types';
 import {completionsTodayEntriesForElement} from '../../domain/journal/stats';
 import {pulseHaptic} from '../../lib/elementHaptics';
@@ -34,7 +39,8 @@ function contextFor(
     hour: new Date().getHours(),
     loggedTodayIds: new Set(today.map(e => e.exerciseId)),
     preferredTargets: [...focus],
-    recentPickIds: today.slice(0, 5).map(e => e.exerciseId),
+    recentlyCompletedIds: today.slice(0, 5).map(e => e.exerciseId),
+    shownPenalties: shownPenalties(),
     facts: loadFacts(),
   };
 }
@@ -62,11 +68,24 @@ export function DrillCard({element, focus, version, onOpenLibrary}: Props) {
   const total = ranked.length;
   const pick = ranked.find(ex => !passed.includes(ex.id)) ?? ranked[0];
 
+  // Remember what was put in front of somebody, so it sinks for a while
+  // and the rest of the library gets a turn. Deliberately not part of
+  // the memo above: the pick must not change while it is being read.
+  const shownId = pick?.id;
+  useEffect(() => {
+    if (shownId) {
+      noteShown(shownId);
+    }
+  }, [shownId]);
+
   if (!pick) {
     return null;
   }
 
   const swap = () => {
+    // A swap is the clearest signal there is: not this one, not now.
+    // It sinks the drill further than merely having been seen.
+    noteSwapped(pick.id);
     setPassed(p => (p.length + 1 >= total ? [] : [...p, pick.id]));
     setOpen(false);
   };

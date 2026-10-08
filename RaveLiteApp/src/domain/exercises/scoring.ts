@@ -29,8 +29,19 @@ export interface DrillContext {
   hour: number;
   /** Operator's focus targets for this element (from prefs). */
   preferredTargets: ReadonlyArray<Target>;
-  /** Recent picks to apply variety pressure. Most-recent-first. */
-  recentPickIds?: ReadonlyArray<string>;
+  /**
+   * Drills *completed* recently, most-recent-first. Named for what it is:
+   * it was called `recentPickIds` while holding completions, which read
+   * as though being shown a drill counted — and nothing counted being
+   * shown until `shown.ts`.
+   */
+  recentlyCompletedIds?: ReadonlyArray<string>;
+  /**
+   * Penalty per drill for having been offered lately — see `shown.ts`.
+   * Passed in rather than read here so ranking stays a pure function of
+   * its context, and so a test can set it.
+   */
+  shownPenalties?: ReadonlyMap<string, number>;
   /**
    * What this person can do where they train. Given, nothing outside it
    * is ranked at all — "try this now" must never be a band drill for
@@ -145,11 +156,11 @@ const circadianFit: Scorer = (ex, ctx) => {
 /** Variety: -1 per occurrence in the last 5 picks. Stops the engine
  *  from getting stuck on a single high-scoring drill. */
 const varietyPressure: Scorer = (ex, ctx) => {
-  if (!ctx.recentPickIds?.length) {
+  if (!ctx.recentlyCompletedIds?.length) {
     return 0;
   }
   let hits = 0;
-  for (const id of ctx.recentPickIds.slice(0, 5)) {
+  for (const id of ctx.recentlyCompletedIds.slice(0, 5)) {
     if (id === ex.id) {
       hits++;
     }
@@ -168,7 +179,16 @@ const dryAfterMorning: Scorer = (ex, ctx) =>
 /** A test has its Saturday; it never comes up as "try this now". */
 const notATest: Scorer = ex => (ex.targets.includes('Test') ? -10 : 0);
 
+/**
+ * Already offered lately — the one that keeps the long tail moving.
+ * Without it the ranking is deterministic and the same handful win for
+ * ever, however large the library grows.
+ */
+const notRecentlyShown: Scorer = (ex, ctx) =>
+  -(ctx.shownPenalties?.get(ex.id) ?? 0);
+
 const SCORERS: ReadonlyArray<Scorer> = [
+  notRecentlyShown,
   fitsTimeWindow,
   matchesPreferredTargets,
   notYetLoggedToday,
