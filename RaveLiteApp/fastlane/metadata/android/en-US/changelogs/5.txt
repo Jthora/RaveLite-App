@@ -1,0 +1,9 @@
+Twenty-nine new drills: footwork and agility, three kinds of lunge, calf
+work, and the mobility the library was missing.
+
+The app stops offering the same handful. It now remembers which drills it
+has already put in front of you and rests them for a fortnight, so a pick
+a day touches twelve to fourteen drills instead of one. Swapping past a
+drill rests it for longer.
+
+The Archangel Knight wears the Starcom mark, in cyan.
