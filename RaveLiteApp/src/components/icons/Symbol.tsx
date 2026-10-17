@@ -73,6 +73,7 @@ import {
   Route,
   Ruler,
   Shell,
+  Droplets,
   Shield,
   ShieldCheck,
   Ship,
@@ -140,6 +141,7 @@ const SYMBOLS = {
   // A shield with a check: protection held to a standard, which is what
   // separates this from the Guardian's plain shield.
   archangelKnight: [ShieldCheck, 'knight'],
+  looks: [Droplets, 'glass'],
   danceCombat: [Swords, 'martial'],
   nightShift: [Moon, 'rest'],
   parent: [House, 'weekend'],

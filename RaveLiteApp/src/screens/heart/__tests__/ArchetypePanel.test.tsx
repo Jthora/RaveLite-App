@@ -86,8 +86,9 @@ it('a second archetype replaces the first cleanly', () => {
  */
 it('draws the Archangel Knight with the Starcom mark, in cyan', () => {
   const tree = renderPanel();
-  const row = tree.root
-    .findAll((n: ReactTestInstance) => n.props.testID === 'archetype-archangel-knight')[0];
+  const row = tree.root.findAll(
+    (n: ReactTestInstance) => n.props.testID === 'archetype-archangel-knight',
+  )[0];
   expect(row).toBeDefined();
 
   const drawn = JSON.stringify(tree.toJSON());

@@ -161,6 +161,9 @@ export const ARCHETYPES: readonly Archetype[] = [
       'staff',
       'jumps',
       'yoga-taichi',
+      // Looking the part is part of the part. One tap to drop in
+      // Settings for anyone who disagrees.
+      'looks',
     ],
     shape: 'desk',
     pushupGoal: 200,

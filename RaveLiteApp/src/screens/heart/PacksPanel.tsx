@@ -31,6 +31,7 @@ export const PACK_SYMBOL: Record<PackId, SymbolName> = {
   jumps: 'jumps',
   runs: 'running',
   'military-tests': 'militaryTests',
+  looks: 'looks',
 };
 
 export function PacksPanel() {

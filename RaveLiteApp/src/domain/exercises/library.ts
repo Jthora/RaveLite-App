@@ -3601,6 +3601,219 @@ const GAP_DRILLS: Exercise[] = [
   },
 ];
 
+/**
+ * Looks — fluid, skin, sleep and sun.
+ *
+ * A real training goal, and one the app had nothing for. Written to the
+ * same rule as the rest of the library and one more besides: **say what
+ * lasts**. Most of what is sold here works for an afternoon, and an app
+ * that lets somebody believe otherwise has lied to them.
+ *
+ * So the drainage drills say *hours, not weeks*. The jaw drill says it
+ * will not reshape a jaw. The scalp drill does not claim hair. And the
+ * two with the largest effect by a distance — sunscreen and enough
+ * protein — are grouped together and labelled as such, because they are
+ * dull and everything else is more fun to do.
+ *
+ * Deliberately absent: jawline exercises, tongue posture, dry brushing,
+ * face yoga. The evidence for changing an adult face that way is thin to
+ * none, and a drill in this app is a claim that it works.
+ */
+const LOOK_DRILLS: Exercise[] = [
+  {
+    id: 'water.neck-drainage',
+    element: 'water',
+    name: 'Neck Drainage',
+    purpose: 'Clears the route the face drains into. Do this one first.',
+    dose: '10 slow strokes each side',
+    cues: [
+      'Flat fingers, barely any pressure — skin moves, muscle does not',
+      'Stroke down the side of the neck toward the collarbone',
+      'Slow. Pressing harder does not move more fluid',
+    ],
+    targets: ['Appearance', 'NoFloor'],
+    venues: ['desk', 'standing', 'house'],
+    approxSeconds: 60,
+    loads: ['neck'],
+  },
+  {
+    id: 'water.face-drainage',
+    element: 'water',
+    name: 'Face Drainage',
+    purpose:
+      'Moves fluid that pooled overnight, so the face looks less puffy. Real, and temporary — hours, not weeks.',
+    dose: '10 strokes each area',
+    cues: [
+      'Do the neck first or the fluid has nowhere to go',
+      'From the middle of the face outward, then down in front of the ear',
+      'Lightest touch you can manage; this is not a massage',
+    ],
+    targets: ['Appearance', 'NoFloor'],
+    venues: ['desk', 'standing', 'house'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'water.under-eye-press',
+    element: 'water',
+    name: 'Under-Eye Press',
+    purpose: 'Eases morning puffiness under the eyes.',
+    dose: '3 passes each side',
+    cues: [
+      'Ring fingers only — they press the least',
+      'Tap or glide from the inner corner outward along the bone',
+      'Never drag the skin; if it moves with your finger, ease off',
+    ],
+    targets: ['Appearance', 'NoFloor'],
+    venues: ['desk', 'standing', 'house'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'water.jaw-release',
+    element: 'water',
+    name: 'Jaw Release',
+    purpose:
+      'Eases a jaw that clenches. It softens how the jaw sits; it does not change its shape.',
+    dose: '60 sec each side',
+    cues: [
+      'Find the muscle a finger-width in front of the ear and bite to feel it',
+      'Unclench, then press small slow circles into it',
+      'Let the teeth stay apart and the tongue rest down the whole time',
+    ],
+    targets: ['Appearance', 'Mobility', 'NoFloor'],
+    venues: ['desk', 'standing', 'house'],
+    approxSeconds: 120,
+    loads: ['neck'],
+  },
+  {
+    id: 'water.gua-sha',
+    element: 'water',
+    name: 'Gua Sha',
+    purpose:
+      'The drainage drill done slowly with a tool. Same job, more thorough; the same hours of effect.',
+    dose: '3 passes each area',
+    cues: [
+      'A stone if you have one, the flat of your knuckles if not',
+      'Slick skin first — dry dragging marks the face and does nothing',
+      'Hold the tool almost flat and sweep outward, then down the neck',
+    ],
+    targets: ['Appearance', 'NoFloor'],
+    venues: ['desk', 'house'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'water.scalp-massage',
+    element: 'water',
+    name: 'Scalp Massage',
+    purpose:
+      'Loosens a scalp that tightens under stress, and eases the headache that comes with it. No effect on hair.',
+    dose: '2 min',
+    cues: [
+      'Fingertips flat, move the scalp over the skull rather than sliding the hair',
+      'Work from the hairline back, and spend longest at the temples',
+      'Jaw loose, shoulders down',
+    ],
+    targets: ['Appearance', 'Presence', 'NoFloor'],
+    venues: ['desk', 'standing', 'house'],
+    approxSeconds: 120,
+  },
+  {
+    id: 'water.cold-face-rinse',
+    element: 'water',
+    name: 'Cold Face Rinse',
+    purpose:
+      'Cold tightens and de-puffs the face for an hour or two. Good before you go out, useless as a routine.',
+    dose: '30 sec',
+    cues: [
+      'Cold tap water, cupped hands, over the whole face',
+      'Longest around the eyes and the jawline',
+      'Pat dry; rubbing undoes the point of it',
+    ],
+    targets: ['Appearance', 'NoFloor'],
+    venues: ['house'],
+    approxSeconds: 30,
+  },
+  {
+    id: 'water.calf-pumps',
+    element: 'water',
+    name: 'Calf Pumps',
+    purpose:
+      'Pumps fluid back out of the ankles after a long day upright. The calf is the pump; nothing else does this job.',
+    dose: '2 × 20',
+    cues: [
+      'Sitting or standing, rise onto the toes and lower slowly',
+      'Full range both ways, unhurried',
+      'Better still, do it with the legs up the wall afterwards',
+    ],
+    targets: ['Appearance', 'Mobility', 'NoFloor'],
+    venues: ['desk', 'standing', 'house'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'heart.sunscreen',
+    element: 'heart',
+    name: 'Sunscreen',
+    purpose:
+      'Most visible facial ageing is sun damage. Of everything on this list, this is the one with the largest effect — by a distance.',
+    dose: 'Once, in the morning',
+    cues: [
+      'Face, ears and the back of the neck',
+      'Daylight is enough; it does not have to be sunny',
+      'If you only ever do one thing here, do this one',
+    ],
+    targets: ['Appearance', 'NoFloor'],
+    venues: ['desk', 'house', 'standing'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'heart.protein-check',
+    element: 'heart',
+    name: 'Protein Check',
+    purpose:
+      'Losing weight without enough protein takes muscle with it, and a face that has lost muscle reads older, not leaner.',
+    dose: 'Once a day',
+    cues: [
+      'A palm of protein at each main meal is the rough target',
+      'Count the day you have had, not the day you meant to have',
+      'Short? The next meal is the fix, not tomorrow',
+    ],
+    targets: ['Appearance', 'Fuel', 'NoFloor'],
+    venues: ['desk', 'house', 'standing'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'heart.screens-down',
+    element: 'heart',
+    name: 'Screens Down',
+    purpose:
+      'Short sleep shows in the face faster than missed training does: eyes, colour, the lot.',
+    dose: '30 min before bed',
+    cues: [
+      'Phone out of the room, not face down beside you',
+      'Lights low from here on',
+      'If you are going to break this, break it on purpose rather than by drifting',
+    ],
+    targets: ['Appearance', 'Presence', 'NoFloor'],
+    venues: ['house'],
+    approxSeconds: 60,
+  },
+  {
+    id: 'heart.sleep-time',
+    element: 'heart',
+    name: 'Set a Sleep Time',
+    purpose:
+      'The same bedtime most nights does more for how you look than any single late night ruins.',
+    dose: 'Once, in the evening',
+    cues: [
+      'Pick the hour you are actually going to be in bed',
+      'Work back thirty minutes and put Screens Down there',
+      'A night off does not reset it; the average is what shows',
+    ],
+    targets: ['Appearance', 'Presence', 'NoFloor'],
+    venues: ['house', 'desk'],
+    approxSeconds: 45,
+  },
+];
+
 export const EXERCISE_LIBRARY: Exercise[] = [
   ...AUTHOR_LIBRARY,
   ...CARRIED_DRILLS,
@@ -3610,6 +3823,7 @@ export const EXERCISE_LIBRARY: Exercise[] = [
   ...MIRROR_DRILLS,
   ...CURRICULUM_DRILLS,
   ...GAP_DRILLS,
+  ...LOOK_DRILLS,
 ];
 
 /**

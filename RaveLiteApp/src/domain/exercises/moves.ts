@@ -48,6 +48,21 @@ export const MOVE_IDS = [
 export type MoveId = (typeof MOVE_IDS)[number];
 
 const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
+  // Looks. These ask nothing of a joint, so they take a still move and
+  // loads.ts leaves them alone — except the two that work on the neck,
+  // which say so on the drill.
+  'water.neck-drainage': 'pulse',
+  'water.face-drainage': 'pulse',
+  'water.under-eye-press': 'pulse',
+  'water.jaw-release': 'pulse',
+  'water.gua-sha': 'pulse',
+  'water.scalp-massage': 'pulse',
+  'water.cold-face-rinse': 'pulse',
+  'water.calf-pumps': 'balance',
+  'heart.sunscreen': 'pulse',
+  'heart.protein-check': 'fuel',
+  'heart.screens-down': 'evening',
+  'heart.sleep-time': 'evening',
   // The gap drills: footwork, legs, mobility and presence. A move is
   // what gives a drill its picture and, through loads.ts, the regions it
   // works — so hurt mode knows to skip it. A drill without one is a hole

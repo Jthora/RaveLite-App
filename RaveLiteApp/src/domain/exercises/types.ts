@@ -21,6 +21,7 @@ export type Target =
   | 'Presence'
   | 'Hydration' // Water calls — drink on the chime
   | 'Fuel' // Meal check-ins — hand portions, no counting
+  | 'Appearance' // How you look: fluid, skin, sleep, sun
   | 'NoFloor' // Suitable when no clean floor / mat is available
   | 'Test'; // A fitness-test event: Saturday's morning block, never a random pick
 

@@ -39,7 +39,8 @@ export type PackId =
   | 'yoga-taichi'
   | 'jumps'
   | 'military-tests'
-  | 'runs';
+  | 'runs'
+  | 'looks';
 
 /** A named section of a pack's curriculum, as Practice lists it. */
 export interface PackGroup {
@@ -196,6 +197,34 @@ export const PACKS: readonly Pack[] = [
           'fire.vertical-jump',
           'fire.jump-squat',
         ],
+      },
+    ],
+  },
+  {
+    id: 'looks',
+    name: 'Face and skin',
+    detail:
+      'Puffiness, skin and sleep. Short, honest about what it can and cannot do.',
+    groups: [
+      {
+        title: 'Face and neck',
+        ids: [
+          'water.neck-drainage',
+          'water.face-drainage',
+          'water.under-eye-press',
+          'water.jaw-release',
+          'water.gua-sha',
+          'water.scalp-massage',
+          'water.cold-face-rinse',
+        ],
+      },
+      {
+        title: 'Fluid and sleep',
+        ids: ['water.calf-pumps', 'heart.screens-down', 'heart.sleep-time'],
+      },
+      {
+        title: 'The two that matter most',
+        ids: ['heart.sunscreen', 'heart.protein-check'],
       },
     ],
   },

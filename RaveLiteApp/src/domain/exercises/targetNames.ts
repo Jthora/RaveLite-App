@@ -25,6 +25,7 @@ export const TARGET_NAMES: Readonly<Record<Target, string>> = {
   Presence: 'Presence',
   Hydration: 'Water',
   Fuel: 'Meals',
+  Appearance: 'Looks',
   NoFloor: 'No floor needed',
   Test: 'Test',
 };
