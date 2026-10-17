@@ -219,8 +219,20 @@ export const PACKS: readonly Pack[] = [
         ],
       },
       {
-        title: 'Fluid and sleep',
-        ids: ['water.calf-pumps', 'heart.screens-down', 'heart.sleep-time'],
+        // It is not fat, it is fluid: a pound of fat is three and a half
+        // thousand calories, a pound of water is a salty dinner.
+        title: 'Fluid, not fat',
+        ids: [
+          'water.calf-pumps',
+          'water.legs-up-pump',
+          'water.contrast-rinse',
+          'water.salt-check',
+          'heart.read-the-trend',
+        ],
+      },
+      {
+        title: 'Sleep',
+        ids: ['heart.screens-down', 'heart.sleep-time'],
       },
       {
         title: 'The two that matter most',

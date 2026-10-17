@@ -3814,6 +3814,92 @@ const LOOK_DRILLS: Exercise[] = [
   },
 ];
 
+/**
+ * Fluid, not fat.
+ *
+ * A pound of fat is about three and a half thousand calories. A pound of
+ * water can arrive overnight from a salty dinner, a hard session, a bad
+ * night or a hot day — and leave as fast. So the puffy morning, the
+ * waist that moved half an inch since Tuesday and the face that looks
+ * softer than it did are almost never fat. They are water, and water
+ * answers to different things than fat does.
+ *
+ * Which matters because the usual response to that morning is to eat
+ * less and train harder, and under-eating raises cortisol, holds more
+ * water, and makes the next morning worse. Knowing it is fluid is the
+ * difference between waiting two days and starting a spiral.
+ *
+ * These are the levers that actually move water: movement and elevation
+ * for the legs, salt and potassium for overnight, and reading a trend
+ * instead of a morning.
+ */
+const FLUID_DRILLS: Exercise[] = [
+  {
+    id: 'water.legs-up-pump',
+    element: 'water',
+    name: 'Legs Up, Pump',
+    purpose:
+      'Clears fluid out of the legs faster than elevation alone: gravity brings it back, the calf pushes it.',
+    dose: '3 min',
+    cues: [
+      'Lie with the legs up a wall, backside close to the skirting',
+      'Point and flex the ankles slowly the whole time',
+      'Breathe out longer than you breathe in; the belly pump helps too',
+    ],
+    targets: ['Appearance', 'Mobility'],
+    venues: ['mat', 'wall'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'water.salt-check',
+    element: 'water',
+    name: 'Salt Check',
+    purpose:
+      'A salty evening shows up as a puffy morning. Naming it stops you blaming fat for water.',
+    dose: 'Once, in the morning',
+    cues: [
+      'Puffy? Think back to last night: takeaway, sauces, crisps, cured meat',
+      'Drink normally today — cutting water makes the body hold more, not less',
+      'Fruit and veg bring potassium, which is what balances it back out',
+    ],
+    targets: ['Appearance', 'Fuel', 'NoFloor'],
+    venues: ['desk', 'house', 'standing'],
+    approxSeconds: 45,
+  },
+  {
+    id: 'water.contrast-rinse',
+    element: 'water',
+    name: 'Contrast Rinse',
+    purpose:
+      'Hot then cold on the legs squeezes and releases the vessels, which shifts fluid out of the ankles.',
+    dose: '3 rounds',
+    cues: [
+      'End of a shower: warm for thirty seconds, cold for thirty, on the legs',
+      'Always finish on cold',
+      'Hop or rise on the toes while the cold is running',
+    ],
+    targets: ['Appearance', 'Conditioning'],
+    venues: ['house'],
+    approxSeconds: 180,
+  },
+  {
+    id: 'heart.read-the-trend',
+    element: 'heart',
+    name: 'Read the Trend',
+    purpose:
+      'A pound of fat takes a week of work. A pound of water takes a salty dinner. One morning tells you nothing; a fortnight tells you everything.',
+    dose: 'Once a week',
+    cues: [
+      'Open Goals and look at the line, not the newest number',
+      'Measure the same way: same time, before eating, after the loo',
+      'Up this morning and down on the fortnight means it is working',
+    ],
+    targets: ['Appearance', 'Presence', 'NoFloor'],
+    venues: ['desk', 'house', 'standing'],
+    approxSeconds: 60,
+  },
+];
+
 export const EXERCISE_LIBRARY: Exercise[] = [
   ...AUTHOR_LIBRARY,
   ...CARRIED_DRILLS,
@@ -3824,6 +3910,7 @@ export const EXERCISE_LIBRARY: Exercise[] = [
   ...CURRICULUM_DRILLS,
   ...GAP_DRILLS,
   ...LOOK_DRILLS,
+  ...FLUID_DRILLS,
 ];
 
 /**

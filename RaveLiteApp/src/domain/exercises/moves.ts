@@ -48,6 +48,11 @@ export const MOVE_IDS = [
 export type MoveId = (typeof MOVE_IDS)[number];
 
 const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
+  // Fluid, not fat.
+  'water.legs-up-pump': 'balance',
+  'water.salt-check': 'fuel',
+  'water.contrast-rinse': 'pulse',
+  'heart.read-the-trend': 'pulse',
   // Looks. These ask nothing of a joint, so they take a still move and
   // loads.ts leaves them alone — except the two that work on the neck,
   // which say so on the drill.

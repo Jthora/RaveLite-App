@@ -456,7 +456,7 @@ export const BUILTIN_METRICS: MetricKind[] = [
     builtIn: true,
     element: 'earth',
     notes:
-      'Measure around the navel, relaxed, after a normal breath out. Goals shows it as waist-to-height.',
+      'Measure around the navel, relaxed, after a normal breath out. Same time of day, before eating. Day to day this moves with fluid, not fat — read the fortnight, not the morning. Goals shows it as waist-to-height.',
   },
 ];
 
