@@ -204,7 +204,7 @@ export const PACKS: readonly Pack[] = [
     id: 'looks',
     name: 'Face and skin',
     detail:
-      'Puffiness, skin and sleep. Short, honest about what it can and cannot do.',
+      'Puffiness and the face. Short, and honest about what it can and cannot do.',
     groups: [
       {
         title: 'Face and neck',
@@ -230,14 +230,14 @@ export const PACKS: readonly Pack[] = [
           'heart.read-the-trend',
         ],
       },
-      {
-        title: 'Sleep',
-        ids: ['heart.screens-down', 'heart.sleep-time'],
-      },
-      {
-        title: 'The two that matter most',
-        ids: ['heart.sunscreen', 'heart.protein-check'],
-      },
+      // Sunscreen, sleep and protein are NOT here on purpose. They are
+      // the highest-value things in this whole area and they are good
+      // for everybody — the Monk, the Parent, somebody six weeks back
+      // from an injury. A drill owned by a pack is a drill only that
+      // pack's owners ever see, so putting them here would have hidden
+      // the dull effective ones behind an opt-in about appearance and
+      // left the face massage on show. They are unowned, which in this
+      // library means everyone gets them.
     ],
   },
   {
