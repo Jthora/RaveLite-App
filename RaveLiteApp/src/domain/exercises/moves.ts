@@ -48,6 +48,12 @@ export const MOVE_IDS = [
 export type MoveId = (typeof MOVE_IDS)[number];
 
 const BY_EXERCISE: Readonly<Record<string, MoveId>> = {
+  // The waist, as opposed to the abs.
+  'earth.stomach-vacuum': 'breath',
+  'earth.ribs-down': 'breath',
+  'earth.towel-rollout': 'plank',
+  'earth.pallof-press': 'plank',
+  'earth.side-plank-reach': 'sideplank',
   // Fluid, not fat.
   'water.legs-up-pump': 'balance',
   'water.salt-check': 'fuel',

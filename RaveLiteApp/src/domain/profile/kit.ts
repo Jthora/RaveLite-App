@@ -733,6 +733,8 @@ const NEEDS: Readonly<Record<string, readonly Need[]>> = {
   // What you carry (kit/carried.ts)
   'air.band-pull-apart': ['band'],
   'air.band-face-pull': ['band', ANCHOR_POINT],
+  // Band and something to tie it to, or it is not a Pallof press.
+  'earth.pallof-press': ['band', ANCHOR_POINT],
   'air.band-dislocate': [['band', 'staff']],
   'earth.banded-glute-bridge': ['band'],
   'earth.band-clamshell': ['band'],

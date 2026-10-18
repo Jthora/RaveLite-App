@@ -3900,6 +3900,116 @@ const FLUID_DRILLS: Exercise[] = [
   },
 ];
 
+/**
+ * The waist, as opposed to the abs.
+ *
+ * The library already trains the core hard: hollow holds and rocks,
+ * long-lever planks, dragon flag negatives, V-ups, windshield wipers,
+ * an L-sit, a suitcase carry. What it had nothing for is the narrower
+ * question — the shape of the waist rather than the strength of the
+ * abs, which are not the same job.
+ *
+ * The honest order of what makes a midsection look lean:
+ *
+ *   1. Body fat. Nothing here competes with it, and no amount of core
+ *      work substitutes. A trained core under fat is a trained core
+ *      under fat.
+ *   2. The transverse abdominis — the deep layer that wraps the waist
+ *      like a belt. It answers to vacuums and to anti-extension work,
+ *      and it is the one thing on this list that changes the *width*.
+ *   3. Where the ribs sit over the pelvis. A flared rib and a tipped
+ *      pelvis both read as a thicker middle, at any body fat.
+ *   4. Fluid, which is the fastest-moving of the four and the one
+ *      people mistake for the first.
+ *
+ * And one thing to avoid: heavy loaded side bends and weighted
+ * rotation build the obliques, which makes a waist wider. People
+ * chasing a narrow middle often train precisely for the opposite.
+ */
+const WAIST_DRILLS: Exercise[] = [
+  {
+    id: 'earth.stomach-vacuum',
+    element: 'earth',
+    name: 'Stomach Vacuum',
+    purpose:
+      'Trains the deep layer that wraps the waist like a belt. The one drill here that changes the width rather than the strength — though what makes a core visible is body fat, not this.',
+    dose: '4 × 15 sec',
+    cues: [
+      'Breathe all the way out, then a little more',
+      'Without breathing in, pull the navel back toward the spine and up under the ribs',
+      'Hold, release, breathe normally for a few seconds before the next one',
+    ],
+    targets: ['Core', 'Appearance', 'Hourglass', 'NoFloor'],
+    venues: ['desk', 'standing', 'house', 'mat'],
+    approxSeconds: 90,
+  },
+  {
+    id: 'earth.ribs-down',
+    element: 'earth',
+    name: 'Ribs Down',
+    purpose:
+      'Stacks the ribs over the pelvis. A flared rib reads as a thicker middle at any body fat, and this is what a hollow hold is teaching you to hold all day.',
+    dose: '5 slow breaths',
+    cues: [
+      'Lie down, knees bent, and feel the lower ribs flare up away from the floor',
+      'Breathe out long and let the ribs settle down and together',
+      'Keep them there through the next breath in — that position is the point',
+    ],
+    targets: ['Core', 'APT', 'Hourglass', 'Breath'],
+    venues: ['mat'],
+    approxSeconds: 90,
+    loads: ['back'],
+  },
+  {
+    id: 'earth.towel-rollout',
+    element: 'earth',
+    name: 'Towel Rollout',
+    purpose:
+      'The hardest anti-extension drill you can do without a wheel: the core stops the back arching as the arms travel away.',
+    dose: '3 × 6',
+    cues: [
+      'Kneel on a mat with both hands on a towel, on a floor it will slide on',
+      'Ribs down and tail tucked before you move, and keep them there',
+      'Slide out only as far as you can hold that shape, then pull back',
+    ],
+    targets: ['Core', 'Strength', 'APT'],
+    venues: ['mat', 'house'],
+    approxSeconds: 110,
+  },
+  {
+    id: 'earth.pallof-press',
+    element: 'earth',
+    name: 'Pallof Press',
+    purpose:
+      'Trains the core to resist a twist, which is most of what it does in life. Builds a strong middle without the loaded rotation that thickens a waist.',
+    dose: '3 × 8 each side',
+    cues: [
+      'Anchor a band at chest height and stand side-on, feet planted',
+      'Hold the band at the chest and press it straight out in front',
+      'The band wants to turn you; nothing above the hips moves. Slowly back in',
+    ],
+    targets: ['Core', 'Strength', 'NoFloor'],
+    venues: ['standing', 'house', 'yard'],
+    approxSeconds: 110,
+  },
+  {
+    id: 'earth.side-plank-reach',
+    element: 'earth',
+    name: 'Side Plank Reach-Through',
+    purpose:
+      'Works the obliques through their range with nothing but bodyweight, which is how you want them trained if a narrow waist is the aim.',
+    dose: '3 × 8 each side',
+    cues: [
+      'Side plank on the forearm, hips stacked and lifted',
+      'Reach the top arm under and through the gap, turning the ribs',
+      'Open it back to the ceiling without letting the hip drop',
+    ],
+    targets: ['Core', 'Appearance', 'Mobility'],
+    venues: ['mat'],
+    approxSeconds: 110,
+  },
+];
+
 export const EXERCISE_LIBRARY: Exercise[] = [
   ...AUTHOR_LIBRARY,
   ...CARRIED_DRILLS,
@@ -3911,6 +4021,7 @@ export const EXERCISE_LIBRARY: Exercise[] = [
   ...GAP_DRILLS,
   ...LOOK_DRILLS,
   ...FLUID_DRILLS,
+  ...WAIST_DRILLS,
 ];
 
 /**
